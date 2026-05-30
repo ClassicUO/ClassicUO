@@ -126,13 +126,19 @@ Plugins are composed in `src/ClassicUO.Ecs/Boot.cs` (`CuoPlugin.Build`).
 
 ## UO Gump Behaviour Contract
 
-Every UO gump window (server-pushed paperdoll, container, status bar, custom mod gump rendering through `UOCustomRender`) MUST share these behaviours. They are not reimplemented per gump — they fall out of the shared infra in `WindowDragPlugin.cs` + `UOGumpBundle` + `UiHitTest`.
+Every UO gump window (server-pushed paperdoll, container, status bar, custom mod gump rendering through `UOCustomRender`) MUST share these behaviours. They are not reimplemented per gump — they fall out of the shared infra in `WindowDragPlugin.cs` + `UOGumpBundle` + `UiPick` (which wraps `UiHitTest`).
+
+**`UiPick` (`src/ClassicUO.Ecs/UI/UiPick.cs`) is THE hit-test. Do NOT hand-roll another loop.** Every gesture — drag, right-click-close, top-bar yield, container pickup, hover selection — asks the same two questions and must use the same answers:
+- `UiPick.Topmost(pos, assets, rendered)` — the topmost rendered, pixel-hit, *visible* element. It scans ALL rendered elements (`ComputedNode + UiCustom + Node`), not just movable roots, so an opaque child sprite (a container item, a paperdoll body/equipment overlay) over a window's transparent interior is the real hit. Ranks by `ComputedNode.PaintOrder` (Clay's z-then-tree order — z is folded in; **never tiebreak on `ClayId`**, an entity-id hash that flips on despawn/respawn).
+- `UiPick.MovableRoot(entity, movables, parents)` — walks the `Parent` chain to the owning `UIMovable` window root. The hit is usually a child; the gesture targets its window.
+
+Every recurring gump bug (overlapping windows picking the wrong one, right-click closing the window behind, the top bar swallowing clicks under a gump, the paperdoll only dragging from its frame) was a hand-rolled loop diverging from this. Tests: `tests/ClassicUO.Ecs.Tests/UiPickTests.cs`.
 
 | Behaviour | How |
 |-----------|-----|
-| **Right-click closes** | Tag the window root with `UIMovable`. `WindowDragPlugin.CloseOnRightClick` (Stage.PreUpdate) consumes the right-click and despawns the subtree (or routes container windows through `ContainerClosedEvent`). |
-| **Drag to move** | Same `UIMovable` tag. `WindowDragPlugin.Drag` (Stage.Update) latches on press-once, writes `Node.Left/Top`. Continuous-held pattern; one-frame Interaction lag avoided. |
-| **Pixel-perfect hit-test** | `UiHitTest.PixelHit(assets, custom, bb, pos)` — bounding box reject + per-kind alpha check against the source gump/art mask. A click on a transparent pixel passes through. This is used by every hit path: drag latch, right-click close, click-capture. |
+| **Right-click closes** | Tag the window root with `UIMovable`. `WindowDragPlugin.CloseOnRightClick` (Stage.PreUpdate) resolves the window via `UiPick` (topmost element → `MovableRoot`), consumes the right-click and despawns the subtree (or routes container windows through `ContainerClosedEvent`). Closes the topmost window, not one behind it. |
+| **Drag to move** | Same `UIMovable` tag. `WindowDragPlugin.Drag` (Stage.Update) latches on press-once via `UiPick` (so a press on any opaque child — paperdoll body/arch, container bg — drags the window), yields to `ContainerItemUI`/`PaperdollEquipUI` (pickup owns those), writes `Node.Left/Top`. Continuous-held pattern; one-frame Interaction lag avoided. |
+| **Pixel-perfect hit-test** | `UiHitTest.PixelHit(assets, custom, bb, pos)` — bounding box reject + per-kind alpha check against the source gump/art mask; a click on a transparent pixel passes through. `UiPick.Topmost` calls it per candidate. Reach for `UiPick`, not `PixelHit` directly, unless you only need a single-element alpha test. |
 | **Stack on interact (topmost on top)** | Only the window ROOT carries `GlobalZIndex`; `LayoutSystem` threads that z down to every descendant float automatically. On click latch, bump the root via `UiZCounter.Bump()` — the whole window lifts in one assignment. **Do NOT add per-child GlobalZIndex.** |
 | **Click-capture to game world** | `WindowDragPlugin.ClaimSelectedFromMovable` (Stage.Last) claims `SelectedEntity` at `float.MaxValue` so world/pickup/use systems bail when the cursor is over a window. |
 
@@ -142,7 +148,7 @@ Every UO gump window (server-pushed paperdoll, container, status bar, custom mod
 
 Container windows have an extra item-aware selection path in `ContainerGumpPlugin.UpdateSelectedFromContainerUI`; the generic `ClaimSelectedFromMovable` filters them out via `Without<ContainerWindow>`. Mirror this filter if you add another item-aware claim.
 
-**Buttons fire on release.** Click handlers use `On<UiClick>` (press+release inside same element; drag-off cancels). `On<UiPointerDown>` for drag latch / focus capture only. `On<UiPointerUp>` only when off-target release matters.
+**Buttons fire on release.** Click handlers use `On<UiClick>` (press+release inside same element; drag-off cancels). `On<UiPointerUp>` only when off-target release matters. (Window drag/close do NOT use pointer events — Clay only fires them on `Interaction`-bearing elements, and gump children are deliberately non-interactive so pickup's own scan owns them; the gestures use `UiPick` over the raw mouse press instead.)
 
 ---
 

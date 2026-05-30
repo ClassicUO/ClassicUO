@@ -170,64 +170,42 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         Res<MouseContext> mouse,
         Res<SelectedEntity> selected,
         Res<AssetsServer> assets,
+        Query<Data<ComputedNode, Node, UiCustom>, Filter<Optional<UiCustom>>> rendered,
+        Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movables,
+        Query<Data<TinyEcs.Parent>> parents,
         Query<Data<ContainerItemUI, ComputedNode, UiCustom, Node, GlobalZIndex>> itemQuery,
         Query<Data<ContainerWindow, ComputedNode, UiCustom, GlobalZIndex>> windowQuery)
     {
         var pos = mouse.Value.Position;
 
-        // Find topmost window under cursor first — items below it must NOT
-        // be hit even if their sprites peek out. Z-propagation system keeps
-        // each item's GlobalZIndex aligned with its owning window, so the
-        // z-filter below is enough to reject pass-through hits.
-        int topWindowZ = int.MinValue;
-        int topWindowOrder = int.MinValue;
-        ulong topWindow = 0;
-        foreach (var (ent, _, computed, custom, z) in windowQuery)
+        // One shared pick: the topmost rendered element under the cursor. If it
+        // is a container item -> that's the hover/selection target; otherwise
+        // resolve its owning window and claim the window only if it's a
+        // container. Occlusion (an item behind a front window, a container
+        // behind a paperdoll) falls out of "topmost by paint order" for free —
+        // no per-item z-gate needed.
+        var hit = UiPick.Topmost(pos, assets.Value, rendered);
+        ulong topItem = 0, topWindow = 0;
+        if (hit.Found)
         {
-            var bb = computed.Ref;
-            if (!UiHitTest.PixelHit(assets.Value, custom.Ref.Render(), bb, pos)) continue;
-            if (z.Ref.Value > topWindowZ || (z.Ref.Value == topWindowZ && bb.PaintOrder >= topWindowOrder))
+            if (itemQuery.Contains(hit.Entity))
+                topItem = hit.Entity;
+            else
             {
-                topWindowZ = z.Ref.Value;
-                topWindowOrder = bb.PaintOrder;
-                topWindow = ent.Ref;
-            }
-        }
-
-        ulong topEnt = 0;
-        int topZ = int.MinValue;
-        int topOrder = int.MinValue;
-
-        foreach (var (ent, _, computed, custom, node, z) in itemQuery)
-        {
-            if (node.Ref.Display == Display.None) continue;
-            if (topWindow != 0 && z.Ref.Value < topWindowZ) continue;
-            var bb = computed.Ref;
-            if (!UiHitTest.PixelHit(assets.Value, custom.Ref.Render(), bb, pos)) continue;
-            // Tiebreak overlapping items by paint order (topmost-drawn wins),
-            // NOT ClayId. ClayId is an entity-id hash — unrelated to draw order
-            // and flips across despawn/respawn (stack/equip churn), so it picks
-            // an arbitrary (often occluded) item. PaintOrder = render-command
-            // index = painter order, matching PickupPlugin/WindowDragPlugin.
-            if (z.Ref.Value > topZ || (z.Ref.Value == topZ && bb.PaintOrder >= topOrder))
-            {
-                topZ = z.Ref.Value;
-                topOrder = bb.PaintOrder;
-                topEnt = ent.Ref;
+                var owner = UiPick.MovableRoot(hit.Entity, movables, parents);
+                if (owner != 0 && windowQuery.Contains(owner))
+                    topWindow = owner;
             }
         }
 
         // Apply hover hue (0x0035, legacy ItemGump.Draw) to the winner only —
-        // every other item restores its cached Original. Done in the same pass
-        // as the hit-test so we don't need a second iteration or extra state.
+        // every other item restores its cached Original.
         foreach (var (ent, link, _, render, _, _) in itemQuery)
         {
-            render.Ref.Render().Hue = ent.Ref == topEnt ? link.Ref.HoverHue : link.Ref.OriginalHue;
+            render.Ref.Render().Hue = ent.Ref == topItem ? link.Ref.HoverHue : link.Ref.OriginalHue;
         }
 
-        if (topEnt == 0)
-            topEnt = topWindow;
-
+        var topEnt = topItem != 0 ? topItem : topWindow;
         if (topEnt == 0) return;
 
         // float.MaxValue beats any world-tile/static/body depth so the UI hover

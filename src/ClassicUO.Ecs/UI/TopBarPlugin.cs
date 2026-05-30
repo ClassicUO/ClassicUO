@@ -271,7 +271,7 @@ internal readonly struct TopBarPlugin : IPlugin
         Local<DragAnchor> anchor,
         Query<Data<ComputedNode, Node>, Filter<With<TopBarButton>>> buttonsQ,
         Query<Data<ComputedNode, Node>, Filter<With<TopBarDragHandle>>> handlesQ,
-        Query<Data<ComputedNode, UiCustom>, Filter<With<UIMovable>>> movablesQ,
+        Query<Data<ComputedNode, Node, UiCustom>, Filter<Optional<UiCustom>>> allRenderedQ,
         Query<Data<Node>, Filter<With<IsTopBar>>> rootQ)
     {
         bool held = mouse.Value.IsPressed(MouseButtonType.Left)
@@ -299,20 +299,27 @@ internal readonly struct TopBarPlugin : IPlugin
             // gesture so WindowDragPlugin / pickup don't grab a gump beneath the
             // bar (the bar is on top). Buttons still fire their UiClick.
             bool overBar = false;
-            int barOrder = int.MinValue;
+            int barTop = int.MinValue;
             foreach (var (_, bb, node) in handlesQ)
             {
                 if (node.Ref.Display == Display.None) continue;
-                if (Inside(bb.Ref, pos)) { overBar = true; barOrder = bb.Ref.PaintOrder; break; }
+                if (bb.Ref.PaintOrder > barTop) barTop = bb.Ref.PaintOrder;
+                if (Inside(bb.Ref, pos)) overBar = true;
             }
             if (!overBar) return;
+            // Buttons paint above the bg handle; fold them into the threshold so
+            // the bar's own controls aren't mistaken for a gump stacked above.
+            foreach (var (_, bb, node) in buttonsQ)
+            {
+                if (node.Ref.Display == Display.None) continue;
+                if (bb.Ref.PaintOrder > barTop) barTop = bb.Ref.PaintOrder;
+            }
 
-            // A draggable gump window painted above the bar at this pixel owns
-            // the gesture — bail WITHOUT claiming the gate so WindowDragPlugin
-            // (Stage.Update) can latch the gump. Bbox-over-bar is not enough:
-            // gumps stack above the bar (z=1, bumped from 1 up) and a press
-            // there must reach the gump, not get swallowed by the bar.
-            if (GumpAbove(assets.Value, pos, barOrder, movablesQ)) return;
+            // A gump painted above the bar at this pixel owns the gesture — bail
+            // WITHOUT claiming the gate so WindowDragPlugin (Stage.Update) can
+            // latch the gump. Bbox-over-bar is not enough: gumps stack above the
+            // bar (z=1, bumped up) and a press there must reach the gump.
+            if (GumpAbove(assets.Value, pos, barTop, allRenderedQ)) return;
 
             gate.Value.Mode = ActiveDrag.UIWindow;
             anchor.Value.Claimed = true;
@@ -357,22 +364,29 @@ internal readonly struct TopBarPlugin : IPlugin
         Res<MouseContext> mouse,
         Res<AssetsServer> assets,
         Query<Data<ComputedNode, Node>, Filter<With<TopBarDragHandle>>> handlesQ,
-        Query<Data<ComputedNode, UiCustom>, Filter<With<UIMovable>>> movablesQ,
+        Query<Data<ComputedNode, Node>, Filter<With<TopBarButton>>> buttonsQ,
+        Query<Data<ComputedNode, Node, UiCustom>, Filter<Optional<UiCustom>>> allRenderedQ,
         Query<Data<Node>, Filter<With<IsTopBar>>> rootQ)
     {
         var pos = mouse.Value.Position;
         bool over = false;
-        int barOrder = int.MinValue;
+        int barTop = int.MinValue;
         foreach (var (_, bb, node) in handlesQ)
         {
             if (node.Ref.Display == Display.None) continue;
-            if (Inside(bb.Ref, pos)) { over = true; barOrder = bb.Ref.PaintOrder; break; }
+            if (bb.Ref.PaintOrder > barTop) barTop = bb.Ref.PaintOrder;
+            if (Inside(bb.Ref, pos)) over = true;
         }
         if (!over) return;
+        foreach (var (_, bb, node) in buttonsQ)
+        {
+            if (node.Ref.Display == Display.None) continue;
+            if (bb.Ref.PaintOrder > barTop) barTop = bb.Ref.PaintOrder;
+        }
 
         // Gump painted above the bar here owns the right-click (close-on-right
         // click) — don't consume it for the bar reset.
-        if (GumpAbove(assets.Value, pos, barOrder, movablesQ)) return;
+        if (GumpAbove(assets.Value, pos, barTop, allRenderedQ)) return;
 
         mouse.Value.Consume(MouseButtonType.Right);
         foreach (var (_, node) in rootQ)
@@ -386,21 +400,23 @@ internal readonly struct TopBarPlugin : IPlugin
         => p.X >= bb.Position.X && p.Y >= bb.Position.Y
         && p.X < bb.Position.X + bb.Size.X && p.Y < bb.Position.Y + bb.Size.Y;
 
-    // True when a draggable gump window is painted above the bar at `pos`
-    // (higher PaintOrder = drawn later = on top), with a pixel-perfect check so
-    // a transparent gump pixel over the bar still passes through to the bar.
+    // True when ANY UO element is painted above the bar at `pos` — including a
+    // gump window's CHILD sprites (container items, paperdoll body/equipment),
+    // not just movable roots. Container/paperdoll roots have a transparent
+    // interior, so checking only the root bg let an opaque item/body sitting
+    // over the bar fall through and the bar swallowed the click. `barTopOrder`
+    // is the bar's OWN topmost paint order, so the bar's buttons/bg don't count
+    // as "above". Pixel-perfect: a transparent gump pixel still passes through.
     private static bool GumpAbove(
         AssetsServer assets,
         Vector2 pos,
-        int barOrder,
-        Query<Data<ComputedNode, UiCustom>, Filter<With<UIMovable>>> movablesQ)
+        int barTopOrder,
+        Query<Data<ComputedNode, Node, UiCustom>, Filter<Optional<UiCustom>>> allRenderedQ)
     {
-        foreach (var (_, bb, custom) in movablesQ)
-        {
-            if (bb.Ref.PaintOrder <= barOrder) continue;
-            if (UiHitTest.PixelHit(assets, custom.Ref.Render(), bb.Ref, pos)) return true;
-        }
-        return false;
+        // Topmost element overall sits above the bar's own topmost element ->
+        // a gump is stacked above the bar here. Same pick everything else uses.
+        var hit = UiPick.Topmost(pos, assets, allRenderedQ);
+        return hit.Found && hit.PaintOrder > barTopOrder;
     }
 
     private static void WireButton(EntityCommands btn, Buttons id)

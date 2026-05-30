@@ -104,7 +104,9 @@ internal readonly struct WindowDragPlugin : IPlugin
         Res<MouseContext> mouse,
         Res<AssetsServer> assets,
         Local<ulong> pressTarget,
-        Query<Data<ComputedNode, UiCustom>, Filter<With<UIMovable>>> movableQuery,
+        Query<Data<ComputedNode, Node, UiCustom>, Filter<Optional<UiCustom>>> allRenderedQ,
+        Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movablesQ,
+        Query<Data<TinyEcs.Parent>> parentsQ,
         Query<Data<ContainerWindow>> containerQuery,
         Query<Data<ServerGump>> serverGumpQuery,
         Query<Data<TinyEcs.Children>> childrenQ,
@@ -124,7 +126,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         // consume so the world / movement systems don't see the right press.
         if (once)
         {
-            pressTarget.Value = TopmostMovable(mouse.Value.Position, assets.Value, movableQuery);
+            pressTarget.Value = TopmostMovable(mouse.Value.Position, assets.Value, allRenderedQ, movablesQ, parentsQ);
             if (pressTarget.Value != 0)
                 mouse.Value.Consume(MouseButtonType.Right);
             return;
@@ -148,7 +150,7 @@ internal readonly struct WindowDragPlugin : IPlugin
 
             mouse.Value.Consume(MouseButtonType.Right);
 
-            if (TopmostMovable(mouse.Value.Position, assets.Value, movableQuery) != target)
+            if (TopmostMovable(mouse.Value.Position, assets.Value, allRenderedQ, movablesQ, parentsQ) != target)
                 return; // dragged off — cancel, like UiClick
 
             if (containerQuery.Contains(target))
@@ -172,27 +174,17 @@ internal readonly struct WindowDragPlugin : IPlugin
         }
     }
 
-    // Topmost UIMovable whose bg sprite is opaque under `pos` (0 if none).
-    // Pixel-perfect so a click on a transparent bg pixel passes through.
+    // The movable window root under the cursor (0 if none): topmost rendered
+    // element resolved to its owning UIMovable root. See UiPick. Without the
+    // walk-to-root a right-click on window A's content fell through to window B
+    // behind it (A's root bg is transparent over its interior) and closed B.
     private static ulong TopmostMovable(
         Vector2 pos,
         AssetsServer assets,
-        Query<Data<ComputedNode, UiCustom>, Filter<With<UIMovable>>> movableQuery)
-    {
-        ulong top = 0;
-        int topOrder = int.MinValue;
-        foreach (var (ent, computed, custom) in movableQuery)
-        {
-            var bb = computed.Ref;
-            if (!UiHitTest.PixelHit(assets, custom.Ref.Render(), bb, pos)) continue;
-            if (bb.PaintOrder >= topOrder)
-            {
-                topOrder = bb.PaintOrder;
-                top = ent.Ref;
-            }
-        }
-        return top;
-    }
+        Query<Data<ComputedNode, Node, UiCustom>, Filter<Optional<UiCustom>>> allRenderedQ,
+        Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movablesQ,
+        Query<Data<TinyEcs.Parent>> parentsQ)
+        => UiPick.MovableRoot(UiPick.Topmost(pos, assets, allRenderedQ).Entity, movablesQ, parentsQ);
 
     private static void DespawnSubtree(
         Commands commands,
@@ -224,8 +216,11 @@ internal readonly struct WindowDragPlugin : IPlugin
         Res<DragGate> gate,
         Res<AssetsServer> assets,
         Local<DragAnchor> anchor,
-        Query<Data<Node, Interaction, ComputedNode, GlobalZIndex, UiCustom>, Filter<With<UIMovable>>> q,
-        Query<Data<ContainerItemUI, ComputedNode, Node, GlobalZIndex, UiCustom>> itemsQ)
+        Query<Data<ComputedNode, Node, UiCustom>, Filter<Optional<UiCustom>>> rendered,
+        Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movables,
+        Query<Data<TinyEcs.Parent>> parents,
+        Query<Data<ContainerItemUI>> itemsQ,
+        Query<Data<PaperdollEquipUI>> equipQ)
     {
         // IsPressed is false on the press-once frame (oldState=Released), so
         // include IsPressedOnce in the "held" check or the latch attempt
@@ -242,10 +237,9 @@ internal readonly struct WindowDragPlugin : IPlugin
         }
 
         // Skip latching a window while an item is held by the cursor.
-        // Otherwise dragging the held item over a container window flips that
-        // window's Interaction to Pressed and the continuous-held pattern
-        // grabs it for window drag — the container ends up following the
-        // cursor instead of receiving the drop.
+        // Otherwise dragging the held item over a container window grabs it for
+        // window drag and the container follows the cursor instead of receiving
+        // the drop.
         if (grabbed.Value.Serial != 0)
         {
             anchor.Value.Active = false;
@@ -253,58 +247,34 @@ internal readonly struct WindowDragPlugin : IPlugin
             return;
         }
 
-        // Latch on press-once via direct bbox hit-test (ComputedNode) so the
-        // gesture begins on the entity actually under the cursor at click
-        // time. Pick topmost by (GlobalZIndex desc, ClayId desc) to mirror
-        // Clay's float stacking. Avoids both the continuous-held wander bug
-        // and the press-once Interaction-staleness problem.
         if (mouse.Value.IsPressedOnce(MouseButtonType.Left))
         {
             if (gate.Value.Mode != ActiveDrag.None) return; // another drag owns the gesture
             var pos = mouse.Value.Position;
 
-            ulong topId = 0;
-            int topZ = int.MinValue;
-            int topOrder = int.MinValue;
-            foreach (var (ent, _, _, computed, z, custom) in q)
-            {
-                var bb = computed.Ref;
-                // Pixel-perfect: clicking a transparent bg pixel (e.g. the
-                // paperdoll arch corners) misses the window so the drag never
-                // latches there.
-                if (!UiHitTest.PixelHit(assets.Value, custom.Ref.Render(), bb, pos)) continue;
-                if (z.Ref.Value > topZ || (z.Ref.Value == topZ && bb.PaintOrder >= topOrder))
-                {
-                    topZ = z.Ref.Value;
-                    topOrder = bb.PaintOrder;
-                    topId = ent.Ref;
-                }
-            }
-            if (topId == 0) return;
+            // Topmost element under the cursor. Checking ALL rendered elements
+            // (not just movable roots) is what lets the drag start on a window's
+            // opaque child where its own bg is transparent — the paperdoll body
+            // and arch interior, a container's slot art, etc.
+            var hit = UiPick.Topmost(pos, assets.Value, rendered);
+            if (!hit.Found) return;
 
-            // If a container item belonging to the FRONT window (z >= topZ)
-            // sits under the cursor, the pickup system owns the gesture — don't
-            // latch the window or the item drags the whole container. Items in
-            // windows BELOW the front one (z < topZ) are occluded and must NOT
-            // block the drag; the old z-blind bbox scan let a back container's
-            // item veto dragging the window stacked on top of it. Pixel-perfect
-            // so a transparent item pixel still drags the bg behind it.
-            foreach (var (_, _, computed, itemNode, iz, icustom) in itemsQ)
-            {
-                if (itemNode.Ref.Display == Display.None) continue;
-                if (iz.Ref.Value < topZ) continue;
-                if (!UiHitTest.PixelHit(assets.Value, icustom.Ref.Render(), computed.Ref, pos)) continue;
-                return;
-            }
+            // Pickup owns the gesture when the topmost hit is a liftable thing
+            // (container item / equipped item) — clicking those lifts them, it
+            // doesn't drag the window they sit in.
+            if (itemsQ.Contains(hit.Entity) || equipQ.Contains(hit.Entity)) return;
 
-            var (_, node, _, _, _, _) = q.Get(topId);
+            var owner = UiPick.MovableRoot(hit.Entity, movables, parents);
+            if (owner == 0) return;
+
+            var (_, node, _) = movables.Get(owner);
             float ox = node.Ref.Left.Type == ValType.Px ? node.Ref.Left.Value : 0f;
             float oy = node.Ref.Top.Type == ValType.Px ? node.Ref.Top.Value : 0f;
 
             anchor.Value = new DragAnchor
             {
                 Active = true,
-                Owner = topId,
+                Owner = owner,
                 Mouse = pos,
                 OriginX = ox,
                 OriginY = oy,
@@ -313,18 +283,14 @@ internal readonly struct WindowDragPlugin : IPlugin
 
             // Bring window to front on focus. Only the root carries a z;
             // LayoutSystem threads it down to every descendant float at layout
-            // time, so a single in-place bump lifts the whole window — no
-            // subtree walk, no one-frame child-lag flicker. Bevy.UI maps
-            // GlobalZIndex to Clay's Floating.ZIndex (signed 16-bit); a
-            // monotonic counter suffices until ~32k focus clicks per session.
-            var newZ = zCounter.Value.Bump();
-            var (_, _, _, _, rootZ, _) = q.Get(topId);
-            rootZ.Ref.Value = newZ;
+            // time, so a single in-place bump lifts the whole window.
+            var (_, _, rootZ) = movables.Get(owner);
+            rootZ.Ref.Value = zCounter.Value.Bump();
         }
 
         if (!anchor.Value.Active) return;
 
-        if (!q.Contains(anchor.Value.Owner))
+        if (!movables.Contains(anchor.Value.Owner))
         {
             anchor.Value.Active = false;
             anchor.Value.Owner = 0;
@@ -332,7 +298,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         }
 
         var delta = mouse.Value.Position - anchor.Value.Mouse;
-        var (_, ownerNode, _, _, _, _) = q.Get(anchor.Value.Owner);
+        var (_, ownerNode, _) = movables.Get(anchor.Value.Owner);
         ownerNode.Ref.PositionType = PositionType.Absolute;
         ownerNode.Ref.Left = Val.Px(anchor.Value.OriginX + delta.X);
         ownerNode.Ref.Top = Val.Px(anchor.Value.OriginY + delta.Y);

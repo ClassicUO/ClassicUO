@@ -38,11 +38,13 @@ internal readonly struct PickupPlugin : IPlugin
                 Res<Camera> camera,
                 Res<AssetsServer> assets,
                 ResMut<LeftPressLatch> latch,
-                Query<Data<ContainerItemUI, ComputedNode, Node, GlobalZIndex, UiCustom>> uiItemsQ,
-                Query<Data<ContainerWindow, ComputedNode, GlobalZIndex, UiCustom>> windowsQ,
-                Query<Data<PaperdollEquipUI, ComputedNode, Node, UiCustom>> equipUiQ,
-                Query<Data<PaperdollWindow, ComputedNode, GlobalZIndex, UiCustom>> pdWindowsQ,
-                Query<Data<GlobalZIndex>> zLookupQ) =>
+                Query<Data<ComputedNode, Node, UiCustom>, Filter<Optional<UiCustom>>> rendered,
+                Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movables,
+                Query<Data<TinyEcs.Parent>> parents,
+                Query<Data<ContainerItemUI>> itemsQ,
+                Query<Data<PaperdollEquipUI>> equipQ,
+                Query<Data<ContainerWindow>> containerWinQ,
+                Query<Data<PaperdollWindow>> pdWinQ) =>
             {
                 // Clear on release edge. NOTE: don't rely on `!IsPressed` to
                 // detect "not held" — IsPressed returns false on the press-
@@ -59,81 +61,26 @@ internal readonly struct PickupPlugin : IPlugin
 
                 var pos = m.Value.Position;
 
-                // Find the topmost container window OR paperdoll window
-                // under the cursor first; its z bounds which item-level UIs
-                // (container items, equipment overlays) are eligible.
-                // Items inherit their owning window's GlobalZIndex via the
-                // shared propagation, so any item with z < topWindowZ sits
-                // behind the front window and must NOT be hit.
-                int topWindowZ = int.MinValue;
-                int topWindowOrder = int.MinValue;
-                ulong topWindow = 0;
-                foreach (var (ent, _, computed, z, custom) in windowsQ)
-                {
-                    var bb = computed.Ref;
-                    if (!UiHitTest.PixelHit(assets.Value, custom.Ref.Render(), bb, pos)) continue;
-                    if (z.Ref.Value > topWindowZ || (z.Ref.Value == topWindowZ && bb.PaintOrder >= topWindowOrder))
-                    {
-                        topWindowZ = z.Ref.Value;
-                        topWindowOrder = bb.PaintOrder;
-                        topWindow = ent.Ref;
-                    }
-                }
-                foreach (var (ent, _, computed, z, custom) in pdWindowsQ)
-                {
-                    var bb = computed.Ref;
-                    if (!UiHitTest.PixelHit(assets.Value, custom.Ref.Render(), bb, pos)) continue;
-                    if (z.Ref.Value > topWindowZ || (z.Ref.Value == topWindowZ && bb.PaintOrder >= topWindowOrder))
-                    {
-                        topWindowZ = z.Ref.Value;
-                        topWindowOrder = bb.PaintOrder;
-                        topWindow = ent.Ref;
-                    }
-                }
-
+                // One shared topmost pick (UiPick). A container item or
+                // paperdoll equipment directly under the cursor IS the pickup
+                // target; otherwise resolve the owning window and latch it only
+                // if it's a container/paperdoll (drop targeting + the
+                // world-claim bail rely on a UI entity in the latch). Occlusion
+                // — an item sitting behind a front window — falls out of
+                // topmost-by-paint-order, so the old per-item z-gate is gone.
+                var hit = UiPick.Topmost(pos, assets.Value, rendered);
                 ulong topUi = 0;
-                int topItemOrder = int.MinValue;
-                int topItemZ = int.MinValue;
-
-                foreach (var (ent, _, computed, node, z, custom) in uiItemsQ)
+                if (hit.Found)
                 {
-                    if (node.Ref.Display == Display.None) continue;
-                    if (topWindow != 0 && z.Ref.Value < topWindowZ) continue;
-                    var bb = computed.Ref;
-                    if (!UiHitTest.PixelHit(assets.Value, custom.Ref.Render(), bb, pos)) continue;
-                    // Tiebreak among overlapping items by paint order (topmost-
-                    // drawn wins), not ClayId — ClayId is an entity-id hash and
-                    // flips across despawn/respawn (e.g. re-equipping over a
-                    // shirt would otherwise pick the shirt instead of the robe).
-                    if (z.Ref.Value > topItemZ || (z.Ref.Value == topItemZ && bb.PaintOrder >= topItemOrder))
+                    if (itemsQ.Contains(hit.Entity) || equipQ.Contains(hit.Entity))
+                        topUi = hit.Entity;
+                    else
                     {
-                        topItemZ = z.Ref.Value;
-                        topItemOrder = bb.PaintOrder;
-                        topUi = ent.Ref;
+                        var owner = UiPick.MovableRoot(hit.Entity, movables, parents);
+                        if (owner != 0 && (containerWinQ.Contains(owner) || pdWinQ.Contains(owner)))
+                            topUi = owner;
                     }
                 }
-                foreach (var (ent, link, computed, node, custom) in equipUiQ)
-                {
-                    if (node.Ref.Display == Display.None) continue;
-                    // Equip overlays carry no GlobalZIndex of their own (paperdoll
-                    // uses root-only z + layout inheritance); their effective z is
-                    // their owning window's. Resolve it via WindowEntity.
-                    int z = zLookupQ.Contains(link.Ref.WindowEntity)
-                        ? GetZ(zLookupQ, link.Ref.WindowEntity)
-                        : 0;
-                    if (topWindow != 0 && z < topWindowZ) continue;
-                    var bb = computed.Ref;
-                    if (!UiHitTest.PixelHit(assets.Value, custom.Ref.Render(), bb, pos)) continue;
-                    if (z > topItemZ || (z == topItemZ && bb.PaintOrder >= topItemOrder))
-                    {
-                        topItemZ = z;
-                        topItemOrder = bb.PaintOrder;
-                        topUi = ent.Ref;
-                    }
-                }
-
-                if (topUi == 0)
-                    topUi = topWindow;
 
                 if (topUi != 0)
                 {
