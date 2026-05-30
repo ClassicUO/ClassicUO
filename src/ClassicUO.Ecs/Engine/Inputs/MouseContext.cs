@@ -4,11 +4,13 @@ using Microsoft.Xna.Framework.Input;
 
 namespace ClassicUO.Ecs;
 
-internal sealed class MouseContext : InputContext<MouseButtonType>
+internal class MouseContext : InputContext<MouseButtonType>
 {
     private static float DCLICK_DELTA = 300;
 
-    private MouseState _oldState, _newState;
+    // protected so a headless test double (see ClassicUO.Ecs.Tests) can inject
+    // a frame's raw state without an OS mouse or FNA Game.
+    protected MouseState _oldState, _newState;
     private float _lastClickTime, _currentTime;
     private readonly MouseButtonType?[] _lastClickButtons = new MouseButtonType?[2];
     private Vector2 _lastMouseClickPosition;
@@ -43,6 +45,20 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
 #endif
 
     internal MouseContext(Microsoft.Xna.Framework.Game game) : base(game) { }
+
+    // Window-focus gate for the press-edge checks. Real input only counts while
+    // the FNA window is focused; a headless subclass overrides this to stay
+    // "focused" with no Game.
+    protected virtual bool IsActiveWindow => _game?.IsActive ?? false;
+
+    // Reset per-frame consume flags. Called at the top of Update; exposed so a
+    // headless frame-injector can reproduce the same per-frame reset.
+    protected void ClearConsumed()
+    {
+        for (int i = 0; i < _consumed.Length; i++)
+            _consumed[i] = false;
+        WheelConsumed = false;
+    }
 
 
     // All public positions return LOGICAL pixels (post-DpiScale). Mirrors
@@ -133,9 +149,7 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
 
     public override void Update(float deltaTime)
     {
-        for (int i = 0; i < _consumed.Length; i++)
-            _consumed[i] = false;
-        WheelConsumed = false;
+        ClearConsumed();
 
         // Advance state FIRST so press-edge detection below uses the same
         // (_oldState, _newState) pair that downstream systems will see this
@@ -200,9 +214,9 @@ internal sealed class MouseContext : InputContext<MouseButtonType>
 
     private bool VerifyCondition(MouseButtonType button, ButtonState stateNew, ButtonState stateOld)
 #if AGENT_BUILD
-        => (_agentSynthEnabled || _game.IsActive) && button switch
+        => (_agentSynthEnabled || IsActiveWindow) && button switch
 #else
-        => _game.IsActive && button switch
+        => IsActiveWindow && button switch
 #endif
         {
             MouseButtonType.Left => _newState.LeftButton == stateNew && _oldState.LeftButton == stateOld,

@@ -13,6 +13,14 @@ internal sealed class AssetsServer
         Gumps = new Renderer.Gumps.Gump(fileManager.Gumps, device);
     }
 
+    // Test-only: an assets server with no loaders (loaders need UO files + a
+    // GraphicsDevice, both absent headless). UiHitTest.PixelHit / UiPick only
+    // reach the loaders for real sprite kinds; for UOCustomKind.None or a null
+    // custom payload they answer from the bounding box alone — which is what
+    // headless gump-gesture tests drive. Touching a real sprite mask through
+    // this instance would NRE, by design.
+    internal AssetsServer() { }
+
 
     public Renderer.Arts.Art Arts { get; }
     public Renderer.Animations.Animations Animations { get; }

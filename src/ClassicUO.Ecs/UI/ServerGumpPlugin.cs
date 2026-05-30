@@ -894,7 +894,7 @@ internal readonly struct ServerGumpPlugin : IPlugin
     // text. Untagged segments render in this colour; <basefont>/<a> tags
     // override per-segment. Mirrors the exact branch logic so the Help menu's
     // body text comes out black on the 0x2486 parchment instead of white.
-    private static uint HtmlStartColor(int hue, bool hasBg, bool hasScroll)
+    internal static uint HtmlStartColor(int hue, bool hasBg, bool hasScroll)
     {
         if (hue > 0)
         {
@@ -1030,19 +1030,19 @@ internal readonly struct ServerGumpPlugin : IPlugin
     }
 
 
-    private static bool Eq(string a, string b)
+    internal static bool Eq(string a, string b)
         => string.Equals(a, b, StringComparison.InvariantCultureIgnoreCase);
 
-    private static int SafeInt(string s)
+    internal static int SafeInt(string s)
         => int.TryParse(s, out var v) ? v : 0;
 
-    private static string SafeLine(string[] lines, int idx)
+    internal static string SafeLine(string[] lines, int idx)
         => (idx >= 0 && idx < lines.Length) ? (lines[idx] ?? string.Empty) : string.Empty;
 
-    private static int ParseClilocId(string s)
+    internal static int ParseClilocId(string s)
         => int.TryParse((s ?? string.Empty).Replace("#", string.Empty), out var v) ? v : 0;
 
-    private static ushort ParseHueArg(List<string> gp, int startIdx)
+    internal static ushort ParseHueArg(List<string> gp, int startIdx)
     {
         for (var i = startIdx; i < gp.Count; i++)
         {
@@ -1053,13 +1053,13 @@ internal readonly struct ServerGumpPlugin : IPlugin
         return 0;
     }
 
-    private static Vector3 ToShaderHue(ushort hue)
+    internal static Vector3 ToShaderHue(ushort hue)
         => hue == 0 ? Vector3.UnitZ : new Vector3(hue, 1f, 1f);
 
     // Server text often contains HTML-ish markup (<basefont>, <br>, etc.).
     // Bevy.UI Text doesn't parse markup so strip tags to keep the label
     // readable. Real HTML rendering is a separate plugin.
-    private static string StripTags(string s)
+    internal static string StripTags(string s)
     {
         if (string.IsNullOrEmpty(s)) return string.Empty;
         var sb = new System.Text.StringBuilder(s.Length);
