@@ -187,11 +187,12 @@ internal readonly struct TopBarPlugin : IPlugin
                 .Insert<TopBarButton>();
             commands.AddChild(fullGroup.Id, btn.Id);
 
-            // Caption: absolute (button-relative) so it renders like the legacy
-            // bar (unicode font 1, white, centered), but an entity-child of the
-            // button with Interaction so clicks on the text bubble to the
-            // button. The Draw path is left-aligned, so center via the measured
-            // unicode width.
+            // Caption: absolute (button-relative), an entity-child of the button
+            // with Interaction so clicks on the text bubble to the button. The
+            // Draw path is left-aligned, so center via the measured unicode width.
+            // Absolute (not flex) because PressOffsetCaptions nudges Node.Top +1px
+            // on press, and (matching upstream clay.h) only Absolute nodes honour
+            // Left/Top — clay.h has no in-flow position offset.
             int textW = (int)(UoFontRuntime.Fonts?.GetWidthUnicode(1, caption) ?? w);
             int captionX = Math.Max(0, (w - textW) / 2);
             var label = commands.Spawn()
