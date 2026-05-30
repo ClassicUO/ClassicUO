@@ -18,7 +18,8 @@
 //     state capture deferred until the corresponding Bevy.UI widget lands.
 //   * tooltip, itemproperty, noresize, mastergump, togglelimitgumpscale —
 //     no-op for now.
-//   * noclose / nodispose / nomove — flag the root (nomove strips UIMovable).
+//   * noclose / nodispose / nomove — flag the root (nomove tags UINoDrag, which
+//     suppresses drag only; the gump stays a window for close / click-capture).
 
 using System;
 using System.Collections.Generic;
@@ -764,8 +765,11 @@ internal readonly struct ServerGumpPlugin : IPlugin
                 .Insert(new GlobalZIndex(z));
         }
 
+        // nomove disables ONLY drag — keep UIMovable so the gump stays a window
+        // (right-click-close, click-capture-to-world, z-stack). Removing UIMovable
+        // would make the whole gump fall through to the world (clicks ignored).
         if (nomove)
-            commands.Entity(rootId).Remove<UIMovable>();
+            commands.Entity(rootId).Insert<UINoDrag>();
     }
 
     // Wrapped text. Clay.NET (the .NET port shipped with TinyEcs.Bevy.UI)

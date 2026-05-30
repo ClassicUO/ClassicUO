@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using ClassicUO.Network;
 using Microsoft.Xna.Framework;
@@ -151,6 +152,15 @@ internal readonly struct ServerSelectionPlugin : IPlugin
             foreach (var server in ev.Servers)
             {
                 var capturedServer = server;
+                // Single click anywhere on the row selects the server. The name
+                // label is opaque text that sits topmost over the row, so without
+                // its own handler a click on the name would be swallowed (Clay
+                // routes to the topmost Interaction-bearing element). Mirror
+                // CharacterSelectionPlugin: attach the same select observer to the
+                // label so the click "bubbles" to the row's select.
+                Action selectServer = () =>
+                    network.Value.Send_SelectServer((byte)capturedServer.Index);
+
                 var rowEnt = commands.Spawn()
                     .Insert<ServerSelectionScene>()
                     .Insert(server)
@@ -163,12 +173,12 @@ internal readonly struct ServerSelectionPlugin : IPlugin
                         Height = Val.Px(25),
                     })
                     .Insert(Interaction.None)
-                    .Observe((On<UiClick> _) =>
-                    {
-                        network.Value.Send_SelectServer((byte)capturedServer.Index);
-                    });
+                    .Observe((On<UiClick> _) => selectServer());
 
-                AddLabelChild(commands, rowEnt, server.Name, 74, 4, rowColor);
+                var nameLabel = AddLabelChild(commands, rowEnt, server.Name, 74, 4, rowColor);
+                commands.Entity(nameLabel)
+                    .Insert(Interaction.None)
+                    .Observe((On<UiClick> _) => selectServer());
                 AddLabelChild(commands, rowEnt, "-", 250, 4, rowColor);
                 AddLabelChild(commands, rowEnt, "-", 320, 4, rowColor);
 
@@ -198,7 +208,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
         parent.AddChild(label);
     }
 
-    private static void AddLabelChild(
+    private static ulong AddLabelChild(
         Commands commands, EntityCommands parent,
         string text, int x, int y, ClayColor color)
     {
@@ -216,6 +226,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
             .Insert(new TextFont { FontId = (ushort)(5 | UoFontRuntime.AsciiFlag), Size = 12 })
             .Insert(new TextColor(color));
         parent.AddChild(label);
+        return label.Id;
     }
 
     private struct ServerSelectionScene;

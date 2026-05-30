@@ -220,7 +220,8 @@ internal readonly struct WindowDragPlugin : IPlugin
         Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movables,
         Query<Data<TinyEcs.Parent>> parents,
         Query<Data<ContainerItemUI>> itemsQ,
-        Query<Data<PaperdollEquipUI>> equipQ)
+        Query<Data<PaperdollEquipUI>> equipQ,
+        Query<Data<UINoDrag>> noDragQ)
     {
         // IsPressed is false on the press-once frame (oldState=Released), so
         // include IsPressedOnce in the "held" check or the latch attempt
@@ -266,6 +267,10 @@ internal readonly struct WindowDragPlugin : IPlugin
 
             var owner = UiPick.MovableRoot(hit.Entity, movables, parents);
             if (owner == 0) return;
+
+            // nomove windows: still a window (close / click-capture work), but
+            // the drag gesture is suppressed.
+            if (noDragQ.Contains(owner)) return;
 
             var (_, node, _) = movables.Get(owner);
             float ox = node.Ref.Left.Type == ValType.Px ? node.Ref.Left.Value : 0f;

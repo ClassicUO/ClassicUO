@@ -422,6 +422,12 @@ internal struct UOCheckbox
 internal struct UIMovable;
 internal struct TextInput;
 
+// Suppresses ONLY the drag gesture on a UIMovable window (UO `nomove` flag).
+// The window is still a window: right-click-close, click-capture-to-world,
+// pickup/cursor awareness and z-stack all key off UIMovable and keep working —
+// WindowDragPlugin.Drag is the one system that yields to this tag.
+internal struct UINoDrag;
+
 // Real text storage for masked fields (passwords). SyncMaskedText keeps
 // the sibling `Text` component populated with `MaskChar` repeated for the
 // length of `Value`. Editors and consumers (e.g. login) read/write Value;
