@@ -505,6 +505,39 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
+        // 0xBF extended, subcommand 0x1A — cycle a stat's lock (0=up,1=down,2=locked).
+        public static void Send_StatLockStateRequest(this NetClient socket, byte stat, byte state)
+        {
+            const byte ID = 0xBF;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt16BE(0x1A);
+            writer.WriteUInt8(stat);
+            writer.WriteUInt8(state);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
         public static void Send_StatusRequest(this NetClient socket, uint serial)
         {
             const byte ID = 0x34;

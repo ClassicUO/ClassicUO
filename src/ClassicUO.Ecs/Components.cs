@@ -77,6 +77,14 @@ struct Stamina
 
 struct Player;
 
+// Str/Dex/Int stat locks (0=up, 1=down, 2=locked). Client-side state toggled by
+// the status gump's lock buttons; persisted on the player so it survives the
+// gump reopening. The server doesn't push it in the status packet.
+struct StatLocks
+{
+    public byte Str, Dex, Int;
+}
+
 struct PlayerData
 {
     public ushort Str, StrMax;
@@ -100,6 +108,12 @@ struct PlayerData
     public short EnergyRes;
 
     public bool IsFemale;
+
+    // AOS extended stats (status packet Type >= 6) — used by the modern status gump.
+    public short MaxPhysicalRes, MaxFireRes, MaxColdRes, MaxPoisonRes, MaxEnergyRes;
+    public short DefenseChanceInc, MaxDefenseChanceInc;
+    public short HitChanceInc, SwingSpeedInc, DamageInc;
+    public short LowerReagentCost, SpellDamageInc, FasterCastRecovery, FasterCasting, LowerManaCost;
 }
 
 [InlineArray(0x1D + 1)]

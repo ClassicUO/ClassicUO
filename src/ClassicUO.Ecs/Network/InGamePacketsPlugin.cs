@@ -200,6 +200,7 @@ readonly struct InGamePacketsPlugin : IPlugin
 
         app.AddObserver<On<PacketReceived<OnCharacterStatusPacket_0x11>>,
             Commands,
+            ResMut<GameContext>,
             Res<NetworkEntitiesMap>>(OnCharacterStatus);
 
         app.AddObserver<On<PacketReceived<OnMobileAttributesPacket_0x2D>>,
@@ -1004,11 +1005,16 @@ readonly struct InGamePacketsPlugin : IPlugin
     static void OnCharacterStatus(
         On<PacketReceived<OnCharacterStatusPacket_0x11>> trig,
         Commands commands,
+        ResMut<GameContext> gameCtx,
         Res<NetworkEntitiesMap> entitiesMap)
     {
         var packet = trig.Event.Packet;
         var ent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
         ent.Insert(new Hits() { Value = packet.Hits, MaxValue = packet.HitsMax });
+
+        // Cache the player's name for the status bar (the only place it's parsed).
+        if (packet.Serial == gameCtx.Value.PlayerSerial)
+            gameCtx.Value.PlayerName = packet.Name;
 
         if (packet.Stamina.HasValue && packet.StaminaMax.HasValue)
         {
@@ -1053,6 +1059,21 @@ readonly struct InGamePacketsPlugin : IPlugin
                 EnergyRes = packet.EnergyResistance.GetValueOrDefault(),
                 ThithingPoints = packet.TithingPoints.GetValueOrDefault(),
                 IsFemale = packet.IsFemale.GetValueOrDefault(),
+                MaxPhysicalRes = packet.MaxPhysicalResistance.GetValueOrDefault(),
+                MaxFireRes = packet.MaxFireResistance.GetValueOrDefault(),
+                MaxColdRes = packet.MaxColdResistance.GetValueOrDefault(),
+                MaxPoisonRes = packet.MaxPoisonResistance.GetValueOrDefault(),
+                MaxEnergyRes = packet.MaxEnergyResistance.GetValueOrDefault(),
+                DefenseChanceInc = packet.DefenseChanceIncrease.GetValueOrDefault(),
+                MaxDefenseChanceInc = packet.MaxDefenseChanceIncrease.GetValueOrDefault(),
+                HitChanceInc = packet.HitChanceIncrease.GetValueOrDefault(),
+                SwingSpeedInc = packet.SwingSpeedIncrease.GetValueOrDefault(),
+                DamageInc = packet.DamageIncrease.GetValueOrDefault(),
+                LowerReagentCost = packet.LowerReagentCost.GetValueOrDefault(),
+                SpellDamageInc = packet.SpellDamageIncrease.GetValueOrDefault(),
+                FasterCastRecovery = packet.FasterCastRecovery.GetValueOrDefault(),
+                FasterCasting = packet.FasterCasting.GetValueOrDefault(),
+                LowerManaCost = packet.LowerManaCost.GetValueOrDefault(),
             };
             ent.Insert(data);
         }

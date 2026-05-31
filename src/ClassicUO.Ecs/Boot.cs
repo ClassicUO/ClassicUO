@@ -40,6 +40,7 @@ internal readonly struct CuoPlugin : IPlugin
         app.AddPlugin<TopBarPlugin>();
         app.AddPlugin<MiniMapPlugin>();
         app.AddPlugin<JournalPlugin>();
+        app.AddPlugin<StatusBarPlugin>();
 
         app.AddPlugin<NetworkPlugin>();
         app.AddPlugin<GameplayPlugin>();
@@ -63,6 +64,7 @@ struct GameContext
     public Vector2 CenterOffset;
     public bool FreeView;
     public uint PlayerSerial;
+    public string PlayerName;
     public ClientFlags Protocol;
     public CharacterListFlags ClientFeatures;
     public ClientVersion ClientVersion;

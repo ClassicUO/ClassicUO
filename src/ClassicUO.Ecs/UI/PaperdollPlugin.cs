@@ -362,14 +362,22 @@ internal readonly struct PaperdollPlugin : IPlugin
             commands.AddChild(root.Id, btnPeaceWar.Id);
         }
 
-        // Status button — both player and other mobiles. No ECS status gump
-        // yet; re-request character status so the server pushes 0x11.
+        // Status button — re-request character status (server pushes 0x11) and
+        // open the player status bar (single instance, version-based layout).
         var capturedPlayerSerial = gameCtx.PlayerSerial;
         var btnStatus = builder.AddButton(commands, (0x07EB, 0x07EC, 0x07ED), Vector3.UnitZ, new Vector2(185, 44 + 27 * 7));
-        btnStatus.Observe((On<UiClick> _, Res<NetClient> net) =>
+        btnStatus.Observe((On<UiClick> _,
+                           Res<NetClient> net,
+                           Commands cmd,
+                           Res<GumpBuilder> gb,
+                           Res<AssetsServer> assets,
+                           Res<GameContext> ctx,
+                           Res<UiZCounter> z,
+                           Query<Data<StatusBarWindow>> existing) =>
         {
             if (capturedPlayerSerial != 0)
                 net.Value.Send_StatusRequest(capturedPlayerSerial);
+            StatusBarPlugin.OpenOrFocus(cmd, gb.Value, assets.Value, ctx.Value, z.Value, existing);
         });
         commands.AddChild(root.Id, btnStatus.Id);
 
