@@ -312,305 +312,9 @@ namespace ClassicUO.Game.Managers
                 }
             }
 
-            var validatedFloors = new List<Point>();
-            for (int i = 0; i < FloorCount; i++)
-            {
-                int minZ = foundationItem.Z + 7 + i * 20;
-                int maxZ = minZ + 20;
-
-                for (int j = 0; j < 2; j++)
-                {
-                    validatedFloors.Clear();
-
-                    for (int x = _bounds.X; x < EndPos.X + 1; x++)
-                    {
-                        for (int y = _bounds.Y; y < EndPos.Y + 1; y++)
-                        {
-                            IEnumerable<Multi> multi = house.GetMultiAt(x, y);
-
-                            if (multi == null)
-                            {
-                                continue;
-                            }
-
-                            foreach (Multi item in multi)
-                            {
-                                if (!item.IsCustom)
-                                {
-                                    continue;
-                                }
-
-                                if (j == 0)
-                                {
-                                    if (i == 0 && item.Z < minZ)
-                                    {
-                                        item.State = item.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
-
-                                        continue;
-                                    }
-
-                                    if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) == 0)
-                                    {
-                                        continue;
-                                    }
-
-                                    if (i == 0 && item.Z >= minZ && item.Z < maxZ)
-                                    {
-                                        item.State = item.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
-
-                                        continue;
-                                    }
-                                }
-
-                                if ((item.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL)) == 0 &&
-                                    item.Z >= minZ && item.Z < maxZ)
-                                {
-                                    if (!ValidateItemPlace
-                                        (
-                                            foundationItem,
-                                            item,
-                                            minZ,
-                                            maxZ,
-                                            validatedFloors
-                                        ))
-                                    {
-                                        item.State = item.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE;
-                                    }
-                                    else
-                                    {
-                                        item.State = item.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (i != 0 && j == 0)
-                    {
-                        foreach (Point point in validatedFloors)
-                        {
-                            IEnumerable<Multi> multi = house.GetMultiAt(point.X, point.Y);
-
-                            if (multi == null)
-                            {
-                                continue;
-                            }
-
-                            foreach (Multi item in multi)
-                            {
-                                if (item.IsCustom && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 && item.Z >= minZ && item.Z < maxZ)
-                                {
-                                    item.State = item.State & ~CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE;
-                                }
-                            }
-                        }
-
-                        for (int x = _bounds.X; x < EndPos.X + 1; x++)
-                        {
-                            int minY = 0, maxY = 0;
-
-                            for (int y = _bounds.Y; y < EndPos.Y + 1; y++)
-                            {
-                                IEnumerable<Multi> multi = house.GetMultiAt(x, y);
-
-                                if (multi == null)
-                                {
-                                    continue;
-                                }
-
-                                foreach (Multi item in multi)
-                                {
-                                    if (item.IsCustom && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 &&
-                                        (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 &&
-                                        (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0 && item.Z >= minZ && item.Z < maxZ)
-                                    {
-                                        minY = y;
-
-                                        break;
-                                    }
-                                }
-
-                                if (minY != 0)
-                                {
-                                    break;
-                                }
-                            }
-
-                            for (int y = EndPos.Y; y >= _bounds.Y; y--)
-                            {
-                                IEnumerable<Multi> multi = house.GetMultiAt(x, y);
-
-                                if (multi == null)
-                                {
-                                    continue;
-                                }
-
-                                foreach (Multi item in multi)
-                                {
-                                    if (item.IsCustom && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 &&
-                                        (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 &&
-                                        (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0 && item.Z >= minZ && item.Z < maxZ)
-                                    {
-                                        maxY = y;
-
-                                        break;
-                                    }
-                                }
-
-                                if (maxY != 0)
-                                {
-                                    break;
-                                }
-                            }
-
-                            for (int y = minY; y < maxY; y++)
-                            {
-                                IEnumerable<Multi> multi = house.GetMultiAt(x, y);
-
-                                if (multi == null)
-                                {
-                                    continue;
-                                }
-
-                                foreach (Multi item in multi)
-                                {
-                                    if (item.IsCustom && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 &&
-                                        (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 && item.Z >= minZ && item.Z < maxZ)
-                                    {
-                                        item.State = item.State & ~CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE;
-                                    }
-                                }
-                            }
-                        }
-
-                        for (int y = _bounds.Y; y < EndPos.Y + 1; y++)
-                        {
-                            int minX = 0;
-                            int maxX = 0;
-
-                            for (int x = _bounds.X; x < EndPos.X + 1; x++)
-                            {
-                                IEnumerable<Multi> multi = house.GetMultiAt(x, y);
-
-                                if (multi == null)
-                                {
-                                    continue;
-                                }
-
-                                foreach (Multi item in multi)
-                                {
-                                    if (item.IsCustom && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 &&
-                                        (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 &&
-                                        (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0 && item.Z >= minZ && item.Z < maxZ)
-                                    {
-                                        minX = x;
-
-                                        break;
-                                    }
-                                }
-
-                                if (minX != 0)
-                                {
-                                    break;
-                                }
-                            }
-
-                            for (int x = EndPos.X; x >= _bounds.X; x--)
-                            {
-                                IEnumerable<Multi> multi = house.GetMultiAt(x, y);
-
-                                if (multi == null)
-                                {
-                                    continue;
-                                }
-
-                                foreach (Multi item in multi)
-                                {
-                                    if (item.IsCustom && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 &&
-                                        (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 &&
-                                        (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0 && item.Z >= minZ && item.Z < maxZ)
-                                    {
-                                        maxX = x;
-
-                                        break;
-                                    }
-                                }
-
-                                if (maxX != 0)
-                                {
-                                    break;
-                                }
-                            }
-
-                            for (int x = minX; x < maxX; x++)
-                            {
-                                IEnumerable<Multi> multi = house.GetMultiAt(x, y);
-
-                                if (multi == null)
-                                {
-                                    continue;
-                                }
-
-                                foreach (Multi item in multi)
-                                {
-                                    if (item.IsCustom && (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 &&
-                                        (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 && item.Z >= minZ && item.Z < maxZ)
-                                    {
-                                        item.State = item.State & ~CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                // Re-validate pieces still marked incorrect until nothing changes.
-                // A piece can become valid once a neighbor it depends on is validated,
-                // and the single forward scan above misses those late dependencies.
-                bool changed = true;
-
-                while (changed)
-                {
-                    changed = false;
-                    validatedFloors.Clear();
-
-                    for (int x = _bounds.X; x < EndPos.X + 1; x++)
-                    {
-                        for (int y = _bounds.Y; y < EndPos.Y + 1; y++)
-                        {
-                            IEnumerable<Multi> multi = house.GetMultiAt(x, y);
-
-                            if (multi == null)
-                            {
-                                continue;
-                            }
-
-                            foreach (Multi item in multi)
-                            {
-                                if (!item.IsCustom ||
-                                    item.Z < minZ || item.Z >= maxZ ||
-                                    (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) != 0 ||
-                                    (item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0)
-                                {
-                                    continue;
-                                }
-
-                                item.State &= ~(CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE);
-
-                                if (ValidateItemPlace(foundationItem, item, minZ, maxZ, validatedFloors))
-                                {
-                                    item.State |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
-                                    changed = true;
-                                }
-                                else
-                                {
-                                    item.State |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
+            // Recompute per-piece legality on the floor grid and flag any piece
+            // that cannot be legally supported in its current position.
+            ValidateDesignGrid(foundationItem, house);
 
             z = foundationItem.Z + 7 + 20;
 
@@ -1320,6 +1024,588 @@ namespace ClassicUO.Game.Managers
             }
 
             return false;
+        }
+
+        private CustomHousePlaceInfo GetPlaceInfo(ushort graphic)
+        {
+            if (graphic == 0)
+            {
+                return null;
+            }
+
+            (int i1, int i2) = SeekGraphicInCustomHouseObjectList(ObjectsInfo, graphic);
+
+            return i1 != -1 && i2 != -1 ? ObjectsInfo[i1] : null;
+        }
+
+        // Recompute the legality of every placed piece.
+        //
+        // The design is laid out on a fixed 32x32x4 grid of 24-byte cells (a flat byte
+        // buffer). Each cell holds three graphic slots (floor, wall/object, roof), three
+        // legal flags and four directional support markers. Legality is settled one
+        // floor at a time through a fixed sequence of sweeps: reset, push support up from
+        // the floor below, flow floor/roof support along runs back to a braced cell, then
+        // mark floors, roofs and walls legal from the settled support and the per-piece
+        // support columns. The settled legal flags are written back onto each Multi.
+        private void ValidateDesignGrid(Item foundationItem, House house)
+        {
+            // The grid keeps an empty margin row/column at index 0: floor legality is
+            // never settled there, so the plot proper must start at grid (1,1). Shift the
+            // origin one tile out and widen by one to leave that margin.
+            int ox = _bounds.X - 1;
+            int oy = _bounds.Y - 1;
+            int w = _bounds.Width + 1;
+            int h = _bounds.Height + 1;
+            int levels = FloorCount;
+
+            if (w < 1 || w > 32 || h < 1 || h > 32 || levels < 1 || levels > 4)
+            {
+                return;
+            }
+
+            int baseZ = foundationItem.Z + 7;
+
+            // 32 * 0xC00 = 0x18000 cells, plus slack so neighbour writes never run off the end.
+            byte[] g = new byte[0x1A000];
+
+            int Cell(int x, int y, int l) => x * 0xC00 + y * 0x60 + l * 0x18;
+            int FloorG(int c) => g[c + 8] | (g[c + 9] << 8);
+            int ObjG(int c) => g[c + 0xC] | (g[c + 0xD] << 8);
+            int RoofG(int c) => g[c + 0x10] | (g[c + 0x11] << 8);
+
+            // Slot a graphic by its tile data: a short or surface tile is a floor (+8), a
+            // roof-flagged tile is a roof (+0x10), anything else is a wall/object (+0xC).
+            // Stairs are surfaces, so they land in the floor slot and are not validated
+            // like walls.
+            int SlotOf(ushort gfx)
+            {
+                ref StaticTiles td = ref Client.Game.UO.FileManager.TileData.StaticData[gfx];
+
+                if (td.Height < 2 || (td.Flags & TileFlag.Surface) != 0)
+                {
+                    return 8;
+                }
+
+                if ((td.Flags & TileFlag.Roof) != 0)
+                {
+                    return 0x10;
+                }
+
+                return 0xC;
+            }
+
+            int LegalByteOff(int slot) => slot == 8 ? 4 : slot == 0x10 ? 5 : 6;
+
+            int CanGoW(int gfx) { CustomHousePlaceInfo i = GetPlaceInfo((ushort)gfx); return i == null ? 0 : i.CanGoW; }
+            int CanGoN(int gfx) { CustomHousePlaceInfo i = GetPlaceInfo((ushort)gfx); return i == null ? 0 : i.CanGoN; }
+            int CanGoNWS(int gfx) { CustomHousePlaceInfo i = GetPlaceInfo((ushort)gfx); return i == null ? 0 : i.CanGoNWS; }
+            int DirectSup(int gfx) { CustomHousePlaceInfo i = GetPlaceInfo((ushort)gfx); return i == null ? 0 : i.DirectSupports; }
+            int Bottom(int gfx) { CustomHousePlaceInfo i = GetPlaceInfo((ushort)gfx); return i == null ? 0 : i.Bottom; }
+
+            // Adjacency support: does neighbour piece "other" brace "me" from (dx,dy)?
+            bool AdjPair(int me, int other, int dx, int dy)
+            {
+                if (me == 0 || other == 0)
+                {
+                    return false;
+                }
+
+                CustomHousePlaceInfo m = GetPlaceInfo((ushort)me);
+                CustomHousePlaceInfo o = GetPlaceInfo((ushort)other);
+
+                if (m == null || o == null)
+                {
+                    return false;
+                }
+
+                if (dx < 0)
+                {
+                    return (m.AdjUW != 0 && o.AdjUE != 0) || (m.AdjLW != 0 && o.AdjLE != 0);
+                }
+
+                if (dx > 0)
+                {
+                    return (m.AdjUE != 0 && o.AdjUW != 0) || (m.AdjLE != 0 && o.AdjLW != 0);
+                }
+
+                if (dy < 0)
+                {
+                    return (m.AdjUN != 0 && o.AdjUS != 0) || (m.AdjLN != 0 && o.AdjLS != 0);
+                }
+
+                return (m.AdjUS != 0 && o.AdjUN != 0) || (m.AdjLS != 0 && o.AdjLN != 0);
+            }
+
+            // Fill the grid graphics from the placed components.
+            foreach (Multi mm in house.Components)
+            {
+                if (!mm.IsCustom)
+                {
+                    continue;
+                }
+
+                // Skip the auto-generated floor-plan helpers: they are not real design
+                // pieces and would drop phantom floors (and locks) under walls.
+                if ((mm.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) != 0)
+                {
+                    continue;
+                }
+
+                int gx = mm.X - ox;
+                int gy = mm.Y - oy;
+
+                if (gx < 0 || gx >= w || gy < 0 || gy >= h)
+                {
+                    continue;
+                }
+
+                int l = (mm.Z - baseZ) / 20;
+
+                if (l < 0)
+                {
+                    l = 0;
+                }
+
+                if (l >= levels)
+                {
+                    continue;
+                }
+
+                int c = Cell(gx, gy, l);
+                ushort gr = mm.Graphic;
+                int slot = SlotOf(gr);
+
+                g[c + slot] = (byte)gr;
+                g[c + slot + 1] = (byte)(gr >> 8);
+
+                // Certain fixed floor tiles are locked: they are not re-validated and they
+                // block wall validation on their cell.
+                if (slot == 8 && gr >= 0x181D && gr < 0x1829)
+                {
+                    g[c + 0x15] = 1;
+                }
+            }
+
+            // Run-length support scan along (dx,dy): walk while the slot graphic is present;
+            // on reaching a cell already marked supported, back-fill support along the run.
+            bool Run(int x, int y, int l, int dx, int dy, int gfxOff, int fillByte)
+            {
+                for (int step = 1; step < 0x13; step++)
+                {
+                    int X = x + dx * step;
+                    int Y = y + dy * step;
+
+                    if ((uint)X > 0x1f || (uint)Y > 0x1f || (uint)l > 4)
+                    {
+                        return false;
+                    }
+
+                    int c = Cell(X, Y, l);
+
+                    if ((g[c + gfxOff] | (g[c + gfxOff + 1] << 8)) == 0)
+                    {
+                        return false;
+                    }
+
+                    if (g[c + 1] != 0 || g[c + fillByte] != 0)
+                    {
+                        for (int k = 1; k <= step; k++)
+                        {
+                            g[Cell(x + dx * k, y + dy * k, l) + fillByte] = 1;
+                        }
+
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            bool FloorRun4(int x, int y, int l) =>
+                Run(x, y, l, 0, 1, 8, 2) | Run(x, y, l, 1, 0, 8, 2) | Run(x, y, l, -1, 0, 8, 2) | Run(x, y, l, 0, -1, 8, 2);
+
+            bool RoofRun4(int x, int y, int l) =>
+                Run(x, y, l, 0, 1, 0x10, 3) | Run(x, y, l, 1, 0, 0x10, 3) | Run(x, y, l, -1, 0, 0x10, 3) | Run(x, y, l, 0, -1, 0x10, 3);
+
+            // Spread support from a supported piece below into this level's neighbourhood.
+            void Spread(int x, int y, int l)
+            {
+                int p = Cell(x, y, l);
+                g[p + 1] = 1;
+
+                int oBelow = l >= 1 ? ObjG(Cell(x, y, l - 1)) : 0;
+                bool skip = false;
+
+                if ((uint)x < 0x20)
+                {
+                    if ((uint)y < 0x20 && (uint)(x + 1) < 0x20 && (uint)l < 5 && CanGoW(oBelow) != 0)
+                    {
+                        g[p + 0xC02] = 1;
+                        g[p + 0xC03] = 1;
+                        skip = true;
+                    }
+
+                    if (!skip && (uint)y < 0x20 && (uint)(y + 1) < 0x20 && (uint)l < 5 && CanGoN(oBelow) != 0)
+                    {
+                        g[p + 0x62] = 1;
+                        g[p + 0x63] = 1;
+                    }
+                }
+
+                if (FloorG(p) != 0)
+                {
+                    if ((uint)(x + 1) < 0x20 && (uint)y < 0x20 && (uint)l < 5) g[p + 0xC02] = 1;
+                    if ((uint)(x - 1) < 0x20 && (uint)y < 0x20 && (uint)l < 5) g[p - 0xBFE] = 1;
+                    if ((uint)x < 0x20 && (uint)(y + 1) < 0x20 && (uint)l < 5) g[p + 0x62] = 1;
+                    if ((uint)x < 0x20 && (uint)(y - 1) < 0x20 && (uint)l < 5) g[p - 0x5E] = 1;
+                }
+
+                if (RoofG(p) != 0)
+                {
+                    int xm = x - 1, ym = y - 1, yp = y + 1, xp = x + 1;
+
+                    if ((uint)xm < 0x20)
+                    {
+                        if ((uint)ym < 0x20 && (uint)l < 5) g[p - 0xC5D] = 1;
+                        if ((uint)y < 0x20 && (uint)l < 5) g[p - 0xBFD] = 1;
+                    }
+
+                    if ((uint)xm < 0x20 && (uint)yp < 0x20 && (uint)l < 5) g[p - 0xB9D] = 1;
+
+                    if ((uint)x < 0x20)
+                    {
+                        if ((uint)ym < 0x20 && (uint)l < 5) g[p - 0x5D] = 1;
+                        if ((uint)yp < 0x20 && (uint)l < 5) g[p + 0x63] = 1;
+                    }
+
+                    if ((uint)xp < 0x20)
+                    {
+                        if ((uint)ym < 0x20 && (uint)l < 5) g[p + 0xBA3] = 1;
+                        if ((uint)y < 0x20 && (uint)l < 5) g[p + 0xC03] = 1;
+                        if ((uint)yp < 0x20 && (uint)l < 5) g[p + 0xC63] = 1;
+                    }
+                }
+            }
+
+            for (int l = 0; l < levels; l++)
+            {
+                // Reset working/legal bytes; ground cells start supported.
+                for (int x = 0; x < w; x++)
+                {
+                    for (int y = 0; y < h; y++)
+                    {
+                        int c = Cell(x, y, l);
+                        g[c + 0] = 0; g[c + 1] = 0; g[c + 2] = 0; g[c + 3] = 0; g[c + 4] = 0; g[c + 5] = 0; g[c + 6] = 0;
+
+                        if (l == 0)
+                        {
+                            g[c + 1] = 1; g[c + 2] = 1; g[c + 3] = 1;
+                        }
+                    }
+                }
+
+                // Push support up from a legal supporting wall on the floor below.
+                for (int x = 0; x < w; x++)
+                {
+                    for (int y = 0; y < h; y++)
+                    {
+                        int c = Cell(x, y, l);
+
+                        if (l == 0)
+                        {
+                            g[c + 0] = 1; g[c + 1] = 1; g[c + 2] = 1; g[c + 3] = 1;
+                        }
+                        else
+                        {
+                            int b = Cell(x, y, l - 1);
+
+                            if (DirectSup(ObjG(b)) != 0 && g[b + 6] != 0)
+                            {
+                                Spread(x, y, l);
+                            }
+                        }
+                    }
+                }
+
+                // Flow floor/roof support along runs until nothing new is reached.
+                bool changed;
+
+                do
+                {
+                    changed = false;
+
+                    for (int x = 0; x < w; x++)
+                    {
+                        for (int y = 0; y < h; y++)
+                        {
+                            int c = Cell(x, y, l);
+
+                            if (l == 0)
+                            {
+                                g[c + 0] = 1; g[c + 1] = 1; g[c + 2] = 1; g[c + 3] = 1;
+                            }
+                            else if (g[c + 0] == 0)
+                            {
+                                if ((g[c + 2] == 0 && g[c + 1] == 0) || FloorG(c) == 0)
+                                {
+                                    if (g[c + 3] != 0 && RoofG(c) != 0)
+                                    {
+                                        changed |= RoofRun4(x, y, l);
+                                        g[c + 0] = 1;
+                                    }
+                                }
+                                else
+                                {
+                                    changed |= FloorRun4(x, y, l);
+
+                                    if (RoofG(c) != 0)
+                                    {
+                                        changed |= RoofRun4(x, y, l);
+                                    }
+
+                                    g[c + 0] = 1;
+                                }
+                            }
+                        }
+                    }
+                }
+                while (changed);
+
+                // Floor legal: a floor (not on the plot edge) backed by support.
+                for (int x = 0; x < w; x++)
+                {
+                    for (int y = 0; y < h; y++)
+                    {
+                        int c = Cell(x, y, l);
+
+                        if (g[c + 0x14] != 0 || FloorG(c) == 0 || x == 0 || y == 0)
+                        {
+                            continue;
+                        }
+
+                        if (l == levels - 1)
+                        {
+                            ushort fg = (ushort)FloorG(c);
+
+                            if (Client.Game.UO.FileManager.TileData.StaticData[fg].Height >= 2 &&
+                                (Client.Game.UO.FileManager.TileData.StaticData[fg].Flags & TileFlag.Surface) != 0)
+                            {
+                                continue;
+                            }
+                        }
+
+                        if (l == 0 || g[c + 1] != 0 || g[c + 2] != 0)
+                        {
+                            g[c + 4] = 1;
+                        }
+                    }
+                }
+
+                // Roof legal.
+                for (int x = 0; x < w; x++)
+                {
+                    for (int y = 0; y < h; y++)
+                    {
+                        int c = Cell(x, y, l);
+
+                        if (RoofG(c) == 0)
+                        {
+                            continue;
+                        }
+
+                        if (l == 0 || g[c + 1] != 0 || g[c + 3] != 0 || g[c + 4] != 0)
+                        {
+                            g[c + 5] = 1;
+                        }
+                    }
+                }
+
+                // Object/wall legal: braced by support, an underlying floor, or a can-go
+                // neighbour floor.
+                for (int x = 0; x < w; x++)
+                {
+                    for (int y = 0; y < h; y++)
+                    {
+                        bool guard = x != 0 ||
+                            ((y != 0 || CanGoNWS(ObjG(Cell(0, 0, l))) != 0) && CanGoW(ObjG(Cell(0, y, l))) != 0);
+                        guard = guard && (y != 0 || CanGoN(ObjG(Cell(x, 0, l))) != 0);
+
+                        if (!guard)
+                        {
+                            continue;
+                        }
+
+                        int c = Cell(x, y, l);
+
+                        if (Bottom(ObjG(c)) == 0 || g[c + 0x15] != 0)
+                        {
+                            continue;
+                        }
+
+                        bool ok = g[c + 1] != 0 || g[c + 4] != 0
+                            || (CanGoN(ObjG(c)) != 0 && (uint)(y + 1) < 0x20 && (uint)l < 5 && g[c + 0x64] != 0)
+                            || (CanGoW(ObjG(c)) != 0 && (uint)(x + 1) < 0x20 && (uint)l < 5 && g[c + 0xC04] != 0)
+                            || (CanGoNWS(ObjG(c)) != 0 && (uint)(x + 1) < 0x20 && (uint)(y + 1) < 0x20 && (uint)l < 5 && g[c + 0xC64] != 0);
+
+                        if (ok)
+                        {
+                            g[c + 6] = 1;
+                        }
+                    }
+                }
+
+                // Object/wall legal by adjacency to an already-legal lower-rank neighbour.
+                for (int x = 0; x < w; x++)
+                {
+                    for (int y = 0; y < h; y++)
+                    {
+                        bool guard = x != 0 ||
+                            ((y != 0 || CanGoNWS(ObjG(Cell(0, 0, l))) != 0) && CanGoW(ObjG(Cell(0, y, l))) != 0);
+                        guard = guard && (y != 0 || CanGoN(ObjG(Cell(x, 0, l))) != 0);
+
+                        if (!guard)
+                        {
+                            continue;
+                        }
+
+                        int c = Cell(x, y, l);
+                        int me = ObjG(c);
+
+                        if (me == 0 || g[c + 6] != 0 || g[c + 0x15] != 0)
+                        {
+                            continue;
+                        }
+
+                        const int rank = 2;
+                        bool supported = false;
+                        int[] ndx = { -1, 0, 0, 1 };
+                        int[] ndy = { 0, -1, 1, 0 };
+
+                        for (int d = 0; d < 4 && !supported; d++)
+                        {
+                            int nx = x + ndx[d];
+                            int ny = y + ndy[d];
+
+                            if ((uint)nx > 0x1f || (uint)ny > 0x1f)
+                            {
+                                continue;
+                            }
+
+                            int nc = Cell(nx, ny, l);
+
+                            if (g[nc + 6] != 0 && g[nc + 6] < rank && AdjPair(me, ObjG(nc), ndx[d], ndy[d]))
+                            {
+                                supported = true;
+                            }
+                        }
+
+                        if (supported)
+                        {
+                            g[c + 6] = rank;
+                        }
+                    }
+                }
+            }
+
+            // Write the settled legality back onto each piece.
+            foreach (Multi mm in house.Components)
+            {
+                if (!mm.IsCustom)
+                {
+                    continue;
+                }
+
+                mm.State &= ~(CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE);
+                mm.State |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
+
+                if ((mm.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) != 0)
+                {
+                    continue;
+                }
+
+                int gx = mm.X - ox;
+                int gy = mm.Y - oy;
+
+                if (gx < 0 || gx >= w || gy < 0 || gy >= h)
+                {
+                    continue;
+                }
+
+                int l = (mm.Z - baseZ) / 20;
+
+                if (l < 0)
+                {
+                    l = 0;
+                }
+
+                if (l >= levels)
+                {
+                    continue;
+                }
+
+                int c = Cell(gx, gy, l);
+
+                // Locked cells are fixed foundation tiles; their pieces are never flagged.
+                if (g[c + 0x15] != 0)
+                {
+                    continue;
+                }
+
+                int legalByte = c + LegalByteOff(SlotOf(mm.Graphic));
+
+                if (g[legalByte] == 0)
+                {
+                    mm.State |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE;
+                }
+            }
+        }
+
+        // Commit-time legality gate: refuse to send a design that contains any piece
+        // which cannot be legally placed. Mirrors the editor's per-piece check.
+        // Returns true when the design may be sent to the server.
+        public bool ValidateHouseForCommit()
+        {
+            Item foundationItem = _world.Items.Get(Serial);
+
+            if (foundationItem == null || !_world.HouseManager.TryGetHouse(Serial, out House house))
+            {
+                return false;
+            }
+
+            // Structural bounds: width/height in 1..32, floors in 1..4.
+            int width = Math.Abs(EndPos.X - StartPos.X) + 1;
+            int height = Math.Abs(EndPos.Y - StartPos.Y) + 1;
+
+            if (width < 1 || width > 32 || height < 1 || height > 32 || FloorCount < 1 || FloorCount > 4)
+            {
+                return false;
+            }
+
+            // Refresh per-piece legality so the incorrect-place flags reflect the
+            // current design before checking them.
+            GenerateFloorPlace();
+
+            // Every placed piece must be legal; a single bad piece rejects the design.
+            foreach (Multi item in house.Components)
+            {
+                if (!item.IsCustom)
+                {
+                    continue;
+                }
+
+                // Generated/internal helpers are not user pieces — skip.
+                if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) != 0)
+                {
+                    continue;
+                }
+
+                if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) != 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public (int, int) ExistsInList(ref CUSTOM_HOUSE_GUMP_STATE state, ushort graphic)
