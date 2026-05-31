@@ -50,6 +50,31 @@ public class SelectedEntityTests
         Assert.Equal(A, sel.Entity);
     }
 
+    // Regression: a UI window (paperdoll / container) parked in the side gutter
+    // or top bar sits outside the world viewport, so Enabled is off there. The
+    // window claim passes bypassViewport so drop/pickup targeting still resolves
+    // it — otherwise releasing a held item over the gutter-parked gump left
+    // SelectedEntity at 0 and the drop packet was never sent (cursor cleared
+    // locally, server kept dragging).
+    [Fact]
+    public void Disabled_set_with_bypass_still_lands()
+    {
+        var sel = new SelectedEntity { Enabled = false };
+        sel.Set(A, float.MaxValue, bypassViewport: true);
+        sel.Clear();
+        Assert.Equal(A, sel.Entity); // UI window claim survives the viewport gate
+    }
+
+    [Fact]
+    public void Bypass_ui_claim_wins_over_gated_world_pick()
+    {
+        var sel = new SelectedEntity { Enabled = false };
+        sel.Set(A, 5f);                                   // world pick — gated out
+        sel.Set(B, float.MaxValue, bypassViewport: true); // UI window claim
+        sel.Clear();
+        Assert.Equal(B, sel.Entity);
+    }
+
     [Fact]
     public void Re_enabling_restores_picking()
     {

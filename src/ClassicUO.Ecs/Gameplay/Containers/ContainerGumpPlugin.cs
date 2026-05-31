@@ -210,7 +210,10 @@ internal readonly struct ContainerGumpPlugin : IPlugin
 
         // float.MaxValue beats any world-tile/static/body depth so the UI hover
         // always wins over whatever world entity sits under the same pixel.
-        selected.Value.Set(topEnt, float.MaxValue);
+        // bypassViewport: a container window dragged into the side gutter / top
+        // bar is outside Camera.Bounds where the world-pick gate is off; the
+        // claim must still land or drop/pickup over it silently fail.
+        selected.Value.Set(topEnt, float.MaxValue, bypassViewport: true);
     }
 
     private static ushort ResolveBackpackGraphic(AssetsServer assets, ushort requested, int backpackStyle)

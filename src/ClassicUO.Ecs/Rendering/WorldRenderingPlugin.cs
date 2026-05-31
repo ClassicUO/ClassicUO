@@ -1224,9 +1224,17 @@ internal sealed class SelectedEntity
     // Gated each frame by mouse-in-viewport; off => no world object picks.
     public bool Enabled = true;
 
-    public void Set(ulong entity, float depth)
+    // bypassViewport: UI window claims (paperdoll / container / server gumps)
+    // must register even when the cursor is outside Camera.Bounds — gumps live
+    // in the side gutters and top bar, which are off the world viewport. The
+    // Enabled gate exists only to stop WORLD tile/static/mobile picks out
+    // there; UI selection is what drop/pickup target, so it always lands.
+    // Without this, releasing a held item over a gutter-parked paperdoll left
+    // SelectedEntity at 0 -> DropItem cleared the cursor with no drop packet,
+    // so the client dropped the item locally while the server kept dragging.
+    public void Set(ulong entity, float depth, bool bypassViewport = false)
     {
-        if (!Enabled)
+        if (!Enabled && !bypassViewport)
             return;
 
         if (_lastEntity.IsValid() && _lastEntity != entity)

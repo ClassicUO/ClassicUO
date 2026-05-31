@@ -137,6 +137,28 @@ public class WindowDragSystemTests
         Assert.Equal(win, selected.Entity);
     }
 
+    // Regression: a window parked in the side gutter / top bar sits outside the
+    // world viewport, so SelectedEntity.Enabled is off there. The claim must
+    // still land (bypassViewport) or drop/pickup over the gump silently fails —
+    // releasing a held item over it would clear the cursor with no drop packet
+    // while the server kept the item in the drag-hold state.
+    [Fact]
+    public void Gutter_parked_window_claims_selection_even_outside_viewport()
+    {
+        var app = MakeApp(out var mouse);
+        var w = app.GetWorld();
+        var win = SpawnWindow(w, left: 100, top: 50, width: 80, height: 80);
+        var selected = app.GetResource<SelectedEntity>();
+        selected.Enabled = false; // mouse outside Camera.Bounds
+
+        mouse.Frame(Idle(140, 90), Left(140, 90));
+        app.Update();
+
+        Assert.Equal(float.MaxValue, selected.DepthZ);
+        selected.Clear();
+        Assert.Equal(win, selected.Entity); // claim survives the world-pick gate
+    }
+
     [Fact]
     public void Right_click_press_then_release_over_a_window_closes_it()
     {

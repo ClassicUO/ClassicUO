@@ -85,7 +85,10 @@ internal readonly struct WindowDragPlugin : IPlugin
         }
 
         if (topEnt == 0) return;
-        selected.Value.Set(topEnt, float.MaxValue);
+        // bypassViewport: a movable window parked in the side gutter / top bar
+        // sits outside Camera.Bounds, so the world-pick gate is off there. The
+        // window claim must still land or drop/pickup over it silently fail.
+        selected.Value.Set(topEnt, float.MaxValue, bypassViewport: true);
     }
 
     // Right-click-close with UiClick semantics: the close fires on the right
