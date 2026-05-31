@@ -433,10 +433,27 @@ internal readonly struct TopBarPlugin : IPlugin
                 break;
 
             case Buttons.Paperdoll:
-                btn.Observe((On<UiClick> _, Res<NetClient> net, Res<GameContext> ctx) =>
+                // Mirror legacy GameActions.OpenPaperdoll: focus an already-open
+                // paperdoll, else request it with the 0x80000000 high bit set.
+                // A PLAIN dclick on the player serial is the default action
+                // (attack in war mode) — the high bit forces the paperdoll open.
+                btn.Observe((On<UiClick> _,
+                             Commands cmd,
+                             Res<NetClient> net,
+                             Res<GameContext> ctx,
+                             Res<UiZCounter> z,
+                             Query<Data<PaperdollWindow>> existing) =>
                 {
-                    if (ctx.Value.PlayerSerial != 0)
-                        net.Value.Send_DoubleClick(ctx.Value.PlayerSerial);
+                    if (ctx.Value.PlayerSerial == 0) return;
+
+                    foreach (var (ent, w) in existing)
+                    {
+                        if (w.Ref.Serial != ctx.Value.PlayerSerial) continue;
+                        cmd.Entity(ent.Ref).Insert(new GlobalZIndex(z.Value.Bump()));
+                        return;
+                    }
+
+                    net.Value.Send_DoubleClick(ctx.Value.PlayerSerial | 0x80000000);
                 });
                 break;
 
