@@ -1038,11 +1038,30 @@ namespace ClassicUO.Game.Managers
             return i1 != -1 && i2 != -1 ? ObjectsInfo[i1] : null;
         }
 
+        // One cell of the floor-plan grid: the piece in each slot plus the legality and
+        // support state settled by the validation passes.
+        private struct DesignCell
+        {
+            public ushort Floor;
+            public ushort Object;
+            public ushort Roof;
+
+            public bool FloorLegal;
+            public bool RoofLegal;
+            public byte ObjectLegal;   // 0 = not legal; higher values are support ranks
+
+            public bool Visited;       // floor pass has processed this cell
+            public bool Support;       // braced by a wall
+            public bool FloorSupport;  // reached by a floor run
+            public bool RoofSupport;   // reached by a roof run
+
+            public bool Locked;        // fixed foundation cell, never validated
+        }
+
         // Recompute the legality of every placed piece.
         //
-        // The design is laid out on a fixed 32x32x4 grid of 24-byte cells (a flat byte
-        // buffer). Each cell holds three graphic slots (floor, wall/object, roof), three
-        // legal flags and four directional support markers. Legality is settled one
+        // The design is laid out on a width x height x floors grid of cells; each cell
+        // tracks the floor, wall/object and roof piece on it. Legality is settled one
         // floor at a time through a fixed sequence of sweeps: reset, push support up from
         // the floor below, flow floor/roof support along runs back to a braced cell, then
         // mark floors, roofs and walls legal from the settled support and the per-piece
@@ -1065,53 +1084,41 @@ namespace ClassicUO.Game.Managers
 
             int baseZ = foundationItem.Z + 7;
 
-            // 32 * 0xC00 = 0x18000 cells, plus slack so neighbour writes never run off the end.
-            byte[] g = new byte[0x1A000];
+            var grid = new DesignCell[32, 32, levels];
 
-            int Cell(int x, int y, int l) => x * 0xC00 + y * 0x60 + l * 0x18;
-            int FloorG(int c) => g[c + 8] | (g[c + 9] << 8);
-            int ObjG(int c) => g[c + 0xC] | (g[c + 0xD] << 8);
-            int RoofG(int c) => g[c + 0x10] | (g[c + 0x11] << 8);
+            int CanGoW(ushort gfx) { CustomHousePlaceInfo i = GetPlaceInfo(gfx); return i == null ? 0 : i.CanGoW; }
+            int CanGoN(ushort gfx) { CustomHousePlaceInfo i = GetPlaceInfo(gfx); return i == null ? 0 : i.CanGoN; }
+            int CanGoNWS(ushort gfx) { CustomHousePlaceInfo i = GetPlaceInfo(gfx); return i == null ? 0 : i.CanGoNWS; }
+            int DirectSup(ushort gfx) { CustomHousePlaceInfo i = GetPlaceInfo(gfx); return i == null ? 0 : i.DirectSupports; }
+            int Bottom(ushort gfx) { CustomHousePlaceInfo i = GetPlaceInfo(gfx); return i == null ? 0 : i.Bottom; }
 
-            // Slot a graphic by its tile data: a short or surface tile is a floor (+8), a
-            // roof-flagged tile is a roof (+0x10), anything else is a wall/object (+0xC).
-            // Stairs are surfaces, so they land in the floor slot and are not validated
-            // like walls.
+            static bool InGrid(int x, int y) => (uint)x < 32 && (uint)y < 32;
+
+            // Slot a graphic by its tile data: a short or surface tile is a floor, a
+            // roof-flagged tile is a roof, anything else is a wall/object. Stairs are
+            // surfaces, so they land in the floor slot and are not validated like walls.
             int SlotOf(ushort gfx)
             {
                 ref StaticTiles td = ref Client.Game.UO.FileManager.TileData.StaticData[gfx];
 
                 if (td.Height < 2 || (td.Flags & TileFlag.Surface) != 0)
                 {
-                    return 8;
+                    return 0;
                 }
 
-                if ((td.Flags & TileFlag.Roof) != 0)
-                {
-                    return 0x10;
-                }
-
-                return 0xC;
+                return (td.Flags & TileFlag.Roof) != 0 ? 2 : 1;
             }
 
-            int LegalByteOff(int slot) => slot == 8 ? 4 : slot == 0x10 ? 5 : 6;
-
-            int CanGoW(int gfx) { CustomHousePlaceInfo i = GetPlaceInfo((ushort)gfx); return i == null ? 0 : i.CanGoW; }
-            int CanGoN(int gfx) { CustomHousePlaceInfo i = GetPlaceInfo((ushort)gfx); return i == null ? 0 : i.CanGoN; }
-            int CanGoNWS(int gfx) { CustomHousePlaceInfo i = GetPlaceInfo((ushort)gfx); return i == null ? 0 : i.CanGoNWS; }
-            int DirectSup(int gfx) { CustomHousePlaceInfo i = GetPlaceInfo((ushort)gfx); return i == null ? 0 : i.DirectSupports; }
-            int Bottom(int gfx) { CustomHousePlaceInfo i = GetPlaceInfo((ushort)gfx); return i == null ? 0 : i.Bottom; }
-
-            // Adjacency support: does neighbour piece "other" brace "me" from (dx,dy)?
-            bool AdjPair(int me, int other, int dx, int dy)
+            // Does neighbour piece "other" brace "me" from direction (dx,dy)?
+            bool AdjPair(ushort me, ushort other, int dx, int dy)
             {
                 if (me == 0 || other == 0)
                 {
                     return false;
                 }
 
-                CustomHousePlaceInfo m = GetPlaceInfo((ushort)me);
-                CustomHousePlaceInfo o = GetPlaceInfo((ushort)other);
+                CustomHousePlaceInfo m = GetPlaceInfo(me);
+                CustomHousePlaceInfo o = GetPlaceInfo(other);
 
                 if (m == null || o == null)
                 {
@@ -1136,6 +1143,11 @@ namespace ClassicUO.Game.Managers
                 return (m.AdjUS != 0 && o.AdjUN != 0) || (m.AdjLS != 0 && o.AdjLN != 0);
             }
 
+            // A wall on the plot edge is only allowed there if its can-go columns permit it.
+            bool EdgeGuard(int x, int y, int l) =>
+                (x != 0 || ((y != 0 || CanGoNWS(grid[0, 0, l].Object) != 0) && CanGoW(grid[0, y, l].Object) != 0))
+                && (y != 0 || CanGoN(grid[x, 0, l].Object) != 0);
+
             // Fill the grid graphics from the placed components.
             foreach (Multi mm in house.Components)
             {
@@ -1154,7 +1166,7 @@ namespace ClassicUO.Game.Managers
                 int gx = mm.X - ox;
                 int gy = mm.Y - oy;
 
-                if (gx < 0 || gx >= w || gy < 0 || gy >= h)
+                if (!InGrid(gx, gy))
                 {
                     continue;
                 }
@@ -1171,47 +1183,70 @@ namespace ClassicUO.Game.Managers
                     continue;
                 }
 
-                int c = Cell(gx, gy, l);
                 ushort gr = mm.Graphic;
-                int slot = SlotOf(gr);
 
-                g[c + slot] = (byte)gr;
-                g[c + slot + 1] = (byte)(gr >> 8);
-
-                // Certain fixed floor tiles are locked: they are not re-validated and they
-                // block wall validation on their cell.
-                if (slot == 8 && gr >= 0x181D && gr < 0x1829)
+                switch (SlotOf(gr))
                 {
-                    g[c + 0x15] = 1;
+                    case 0:
+                        grid[gx, gy, l].Floor = gr;
+
+                        // Certain fixed floor tiles are locked: they are not re-validated
+                        // and they block wall validation on their cell.
+                        if (gr >= 0x181D && gr < 0x1829)
+                        {
+                            grid[gx, gy, l].Locked = true;
+                        }
+
+                        break;
+
+                    case 2:
+                        grid[gx, gy, l].Roof = gr;
+                        break;
+
+                    default:
+                        grid[gx, gy, l].Object = gr;
+                        break;
                 }
             }
 
-            // Run-length support scan along (dx,dy): walk while the slot graphic is present;
-            // on reaching a cell already marked supported, back-fill support along the run.
-            bool Run(int x, int y, int l, int dx, int dy, int gfxOff, int fillByte)
+            int[] dx = { -1, 1, 0, 0 };
+            int[] dy = { 0, 0, -1, 1 };
+
+            // Run-length support scan along (dx,dy): walk while the slot piece is present;
+            // on reaching a cell already supported, mark every cell along the run supported.
+            bool Run(int x, int y, int l, int sx, int sy, bool roof)
             {
                 for (int step = 1; step < 0x13; step++)
                 {
-                    int X = x + dx * step;
-                    int Y = y + dy * step;
+                    int cx = x + sx * step;
+                    int cy = y + sy * step;
 
-                    if ((uint)X > 0x1f || (uint)Y > 0x1f || (uint)l > 4)
+                    if (!InGrid(cx, cy))
                     {
                         return false;
                     }
 
-                    int c = Cell(X, Y, l);
+                    ref DesignCell c = ref grid[cx, cy, l];
 
-                    if ((g[c + gfxOff] | (g[c + gfxOff + 1] << 8)) == 0)
+                    if ((roof ? c.Roof : c.Floor) == 0)
                     {
                         return false;
                     }
 
-                    if (g[c + 1] != 0 || g[c + fillByte] != 0)
+                    if (c.Support || (roof ? c.RoofSupport : c.FloorSupport))
                     {
                         for (int k = 1; k <= step; k++)
                         {
-                            g[Cell(x + dx * k, y + dy * k, l) + fillByte] = 1;
+                            ref DesignCell run = ref grid[x + sx * k, y + sy * k, l];
+
+                            if (roof)
+                            {
+                                run.RoofSupport = true;
+                            }
+                            else
+                            {
+                                run.FloorSupport = true;
+                            }
                         }
 
                         return true;
@@ -1221,85 +1256,77 @@ namespace ClassicUO.Game.Managers
                 return false;
             }
 
-            bool FloorRun4(int x, int y, int l) =>
-                Run(x, y, l, 0, 1, 8, 2) | Run(x, y, l, 1, 0, 8, 2) | Run(x, y, l, -1, 0, 8, 2) | Run(x, y, l, 0, -1, 8, 2);
+            bool FloorRun(int x, int y, int l) =>
+                Run(x, y, l, 0, 1, false) | Run(x, y, l, 1, 0, false) | Run(x, y, l, -1, 0, false) | Run(x, y, l, 0, -1, false);
 
-            bool RoofRun4(int x, int y, int l) =>
-                Run(x, y, l, 0, 1, 0x10, 3) | Run(x, y, l, 1, 0, 0x10, 3) | Run(x, y, l, -1, 0, 0x10, 3) | Run(x, y, l, 0, -1, 0x10, 3);
+            bool RoofRun(int x, int y, int l) =>
+                Run(x, y, l, 0, 1, true) | Run(x, y, l, 1, 0, true) | Run(x, y, l, -1, 0, true) | Run(x, y, l, 0, -1, true);
 
             // Spread support from a supported piece below into this level's neighbourhood.
             void Spread(int x, int y, int l)
             {
-                int p = Cell(x, y, l);
-                g[p + 1] = 1;
+                grid[x, y, l].Support = true;
 
-                int oBelow = l >= 1 ? ObjG(Cell(x, y, l - 1)) : 0;
-                bool skip = false;
+                ushort below = l >= 1 ? grid[x, y, l - 1].Object : (ushort)0;
+                bool handled = false;
 
-                if ((uint)x < 0x20)
+                if (InGrid(x + 1, y) && CanGoW(below) != 0)
                 {
-                    if ((uint)y < 0x20 && (uint)(x + 1) < 0x20 && (uint)l < 5 && CanGoW(oBelow) != 0)
-                    {
-                        g[p + 0xC02] = 1;
-                        g[p + 0xC03] = 1;
-                        skip = true;
-                    }
-
-                    if (!skip && (uint)y < 0x20 && (uint)(y + 1) < 0x20 && (uint)l < 5 && CanGoN(oBelow) != 0)
-                    {
-                        g[p + 0x62] = 1;
-                        g[p + 0x63] = 1;
-                    }
+                    grid[x + 1, y, l].FloorSupport = true;
+                    grid[x + 1, y, l].RoofSupport = true;
+                    handled = true;
                 }
 
-                if (FloorG(p) != 0)
+                if (!handled && InGrid(x, y + 1) && CanGoN(below) != 0)
                 {
-                    if ((uint)(x + 1) < 0x20 && (uint)y < 0x20 && (uint)l < 5) g[p + 0xC02] = 1;
-                    if ((uint)(x - 1) < 0x20 && (uint)y < 0x20 && (uint)l < 5) g[p - 0xBFE] = 1;
-                    if ((uint)x < 0x20 && (uint)(y + 1) < 0x20 && (uint)l < 5) g[p + 0x62] = 1;
-                    if ((uint)x < 0x20 && (uint)(y - 1) < 0x20 && (uint)l < 5) g[p - 0x5E] = 1;
+                    grid[x, y + 1, l].FloorSupport = true;
+                    grid[x, y + 1, l].RoofSupport = true;
                 }
 
-                if (RoofG(p) != 0)
+                if (grid[x, y, l].Floor != 0)
                 {
-                    int xm = x - 1, ym = y - 1, yp = y + 1, xp = x + 1;
+                    if (InGrid(x + 1, y)) grid[x + 1, y, l].FloorSupport = true;
+                    if (InGrid(x - 1, y)) grid[x - 1, y, l].FloorSupport = true;
+                    if (InGrid(x, y + 1)) grid[x, y + 1, l].FloorSupport = true;
+                    if (InGrid(x, y - 1)) grid[x, y - 1, l].FloorSupport = true;
+                }
 
-                    if ((uint)xm < 0x20)
+                if (grid[x, y, l].Roof != 0)
+                {
+                    for (int nx = x - 1; nx <= x + 1; nx++)
                     {
-                        if ((uint)ym < 0x20 && (uint)l < 5) g[p - 0xC5D] = 1;
-                        if ((uint)y < 0x20 && (uint)l < 5) g[p - 0xBFD] = 1;
-                    }
-
-                    if ((uint)xm < 0x20 && (uint)yp < 0x20 && (uint)l < 5) g[p - 0xB9D] = 1;
-
-                    if ((uint)x < 0x20)
-                    {
-                        if ((uint)ym < 0x20 && (uint)l < 5) g[p - 0x5D] = 1;
-                        if ((uint)yp < 0x20 && (uint)l < 5) g[p + 0x63] = 1;
-                    }
-
-                    if ((uint)xp < 0x20)
-                    {
-                        if ((uint)ym < 0x20 && (uint)l < 5) g[p + 0xBA3] = 1;
-                        if ((uint)y < 0x20 && (uint)l < 5) g[p + 0xC03] = 1;
-                        if ((uint)yp < 0x20 && (uint)l < 5) g[p + 0xC63] = 1;
+                        for (int ny = y - 1; ny <= y + 1; ny++)
+                        {
+                            if ((nx != x || ny != y) && InGrid(nx, ny))
+                            {
+                                grid[nx, ny, l].RoofSupport = true;
+                            }
+                        }
                     }
                 }
             }
 
             for (int l = 0; l < levels; l++)
             {
-                // Reset working/legal bytes; ground cells start supported.
+                // Reset working state; ground cells start braced by the foundation.
                 for (int x = 0; x < w; x++)
                 {
                     for (int y = 0; y < h; y++)
                     {
-                        int c = Cell(x, y, l);
-                        g[c + 0] = 0; g[c + 1] = 0; g[c + 2] = 0; g[c + 3] = 0; g[c + 4] = 0; g[c + 5] = 0; g[c + 6] = 0;
+                        ref DesignCell c = ref grid[x, y, l];
+                        c.Visited = false;
+                        c.Support = false;
+                        c.FloorSupport = false;
+                        c.RoofSupport = false;
+                        c.FloorLegal = false;
+                        c.RoofLegal = false;
+                        c.ObjectLegal = 0;
 
                         if (l == 0)
                         {
-                            g[c + 1] = 1; g[c + 2] = 1; g[c + 3] = 1;
+                            c.Support = true;
+                            c.FloorSupport = true;
+                            c.RoofSupport = true;
                         }
                     }
                 }
@@ -1309,17 +1336,19 @@ namespace ClassicUO.Game.Managers
                 {
                     for (int y = 0; y < h; y++)
                     {
-                        int c = Cell(x, y, l);
-
                         if (l == 0)
                         {
-                            g[c + 0] = 1; g[c + 1] = 1; g[c + 2] = 1; g[c + 3] = 1;
+                            ref DesignCell c = ref grid[x, y, l];
+                            c.Visited = true;
+                            c.Support = true;
+                            c.FloorSupport = true;
+                            c.RoofSupport = true;
                         }
                         else
                         {
-                            int b = Cell(x, y, l - 1);
+                            ref DesignCell below = ref grid[x, y, l - 1];
 
-                            if (DirectSup(ObjG(b)) != 0 && g[b + 6] != 0)
+                            if (DirectSup(below.Object) != 0 && below.ObjectLegal != 0)
                             {
                                 Spread(x, y, l);
                             }
@@ -1338,32 +1367,35 @@ namespace ClassicUO.Game.Managers
                     {
                         for (int y = 0; y < h; y++)
                         {
-                            int c = Cell(x, y, l);
+                            ref DesignCell c = ref grid[x, y, l];
 
                             if (l == 0)
                             {
-                                g[c + 0] = 1; g[c + 1] = 1; g[c + 2] = 1; g[c + 3] = 1;
+                                c.Visited = true;
+                                c.Support = true;
+                                c.FloorSupport = true;
+                                c.RoofSupport = true;
                             }
-                            else if (g[c + 0] == 0)
+                            else if (!c.Visited)
                             {
-                                if ((g[c + 2] == 0 && g[c + 1] == 0) || FloorG(c) == 0)
+                                if ((!c.FloorSupport && !c.Support) || c.Floor == 0)
                                 {
-                                    if (g[c + 3] != 0 && RoofG(c) != 0)
+                                    if (c.RoofSupport && c.Roof != 0)
                                     {
-                                        changed |= RoofRun4(x, y, l);
-                                        g[c + 0] = 1;
+                                        changed |= RoofRun(x, y, l);
+                                        c.Visited = true;
                                     }
                                 }
                                 else
                                 {
-                                    changed |= FloorRun4(x, y, l);
+                                    changed |= FloorRun(x, y, l);
 
-                                    if (RoofG(c) != 0)
+                                    if (c.Roof != 0)
                                     {
-                                        changed |= RoofRun4(x, y, l);
+                                        changed |= RoofRun(x, y, l);
                                     }
 
-                                    g[c + 0] = 1;
+                                    c.Visited = true;
                                 }
                             }
                         }
@@ -1372,31 +1404,30 @@ namespace ClassicUO.Game.Managers
                 while (changed);
 
                 // Floor legal: a floor (not on the plot edge) backed by support.
-                for (int x = 0; x < w; x++)
+                for (int x = 1; x < w; x++)
                 {
-                    for (int y = 0; y < h; y++)
+                    for (int y = 1; y < h; y++)
                     {
-                        int c = Cell(x, y, l);
+                        ref DesignCell c = ref grid[x, y, l];
 
-                        if (g[c + 0x14] != 0 || FloorG(c) == 0 || x == 0 || y == 0)
+                        if (c.Floor == 0)
                         {
                             continue;
                         }
 
                         if (l == levels - 1)
                         {
-                            ushort fg = (ushort)FloorG(c);
+                            ref StaticTiles td = ref Client.Game.UO.FileManager.TileData.StaticData[c.Floor];
 
-                            if (Client.Game.UO.FileManager.TileData.StaticData[fg].Height >= 2 &&
-                                (Client.Game.UO.FileManager.TileData.StaticData[fg].Flags & TileFlag.Surface) != 0)
+                            if (td.Height >= 2 && (td.Flags & TileFlag.Surface) != 0)
                             {
                                 continue;
                             }
                         }
 
-                        if (l == 0 || g[c + 1] != 0 || g[c + 2] != 0)
+                        if (l == 0 || c.Support || c.FloorSupport)
                         {
-                            g[c + 4] = 1;
+                            c.FloorLegal = true;
                         }
                     }
                 }
@@ -1406,16 +1437,11 @@ namespace ClassicUO.Game.Managers
                 {
                     for (int y = 0; y < h; y++)
                     {
-                        int c = Cell(x, y, l);
+                        ref DesignCell c = ref grid[x, y, l];
 
-                        if (RoofG(c) == 0)
+                        if (c.Roof != 0 && (l == 0 || c.Support || c.RoofSupport || c.FloorLegal))
                         {
-                            continue;
-                        }
-
-                        if (l == 0 || g[c + 1] != 0 || g[c + 3] != 0 || g[c + 4] != 0)
-                        {
-                            g[c + 5] = 1;
+                            c.RoofLegal = true;
                         }
                     }
                 }
@@ -1426,30 +1452,26 @@ namespace ClassicUO.Game.Managers
                 {
                     for (int y = 0; y < h; y++)
                     {
-                        bool guard = x != 0 ||
-                            ((y != 0 || CanGoNWS(ObjG(Cell(0, 0, l))) != 0) && CanGoW(ObjG(Cell(0, y, l))) != 0);
-                        guard = guard && (y != 0 || CanGoN(ObjG(Cell(x, 0, l))) != 0);
-
-                        if (!guard)
+                        if (!EdgeGuard(x, y, l))
                         {
                             continue;
                         }
 
-                        int c = Cell(x, y, l);
+                        ref DesignCell c = ref grid[x, y, l];
 
-                        if (Bottom(ObjG(c)) == 0 || g[c + 0x15] != 0)
+                        if (Bottom(c.Object) == 0 || c.Locked)
                         {
                             continue;
                         }
 
-                        bool ok = g[c + 1] != 0 || g[c + 4] != 0
-                            || (CanGoN(ObjG(c)) != 0 && (uint)(y + 1) < 0x20 && (uint)l < 5 && g[c + 0x64] != 0)
-                            || (CanGoW(ObjG(c)) != 0 && (uint)(x + 1) < 0x20 && (uint)l < 5 && g[c + 0xC04] != 0)
-                            || (CanGoNWS(ObjG(c)) != 0 && (uint)(x + 1) < 0x20 && (uint)(y + 1) < 0x20 && (uint)l < 5 && g[c + 0xC64] != 0);
+                        bool ok = c.Support || c.FloorLegal
+                            || (CanGoN(c.Object) != 0 && InGrid(x, y + 1) && grid[x, y + 1, l].FloorLegal)
+                            || (CanGoW(c.Object) != 0 && InGrid(x + 1, y) && grid[x + 1, y, l].FloorLegal)
+                            || (CanGoNWS(c.Object) != 0 && InGrid(x + 1, y + 1) && grid[x + 1, y + 1, l].FloorLegal);
 
                         if (ok)
                         {
-                            g[c + 6] = 1;
+                            c.ObjectLegal = 1;
                         }
                     }
                 }
@@ -1459,49 +1481,37 @@ namespace ClassicUO.Game.Managers
                 {
                     for (int y = 0; y < h; y++)
                     {
-                        bool guard = x != 0 ||
-                            ((y != 0 || CanGoNWS(ObjG(Cell(0, 0, l))) != 0) && CanGoW(ObjG(Cell(0, y, l))) != 0);
-                        guard = guard && (y != 0 || CanGoN(ObjG(Cell(x, 0, l))) != 0);
-
-                        if (!guard)
+                        if (!EdgeGuard(x, y, l))
                         {
                             continue;
                         }
 
-                        int c = Cell(x, y, l);
-                        int me = ObjG(c);
+                        ref DesignCell c = ref grid[x, y, l];
 
-                        if (me == 0 || g[c + 6] != 0 || g[c + 0x15] != 0)
+                        if (c.Object == 0 || c.ObjectLegal != 0 || c.Locked)
                         {
                             continue;
                         }
 
-                        const int rank = 2;
-                        bool supported = false;
-                        int[] ndx = { -1, 0, 0, 1 };
-                        int[] ndy = { 0, -1, 1, 0 };
+                        const byte rank = 2;
 
-                        for (int d = 0; d < 4 && !supported; d++)
+                        for (int d = 0; d < 4; d++)
                         {
-                            int nx = x + ndx[d];
-                            int ny = y + ndy[d];
+                            int nx = x + dx[d];
+                            int ny = y + dy[d];
 
-                            if ((uint)nx > 0x1f || (uint)ny > 0x1f)
+                            if (!InGrid(nx, ny))
                             {
                                 continue;
                             }
 
-                            int nc = Cell(nx, ny, l);
+                            DesignCell n = grid[nx, ny, l];
 
-                            if (g[nc + 6] != 0 && g[nc + 6] < rank && AdjPair(me, ObjG(nc), ndx[d], ndy[d]))
+                            if (n.ObjectLegal != 0 && n.ObjectLegal < rank && AdjPair(c.Object, n.Object, dx[d], dy[d]))
                             {
-                                supported = true;
+                                c.ObjectLegal = rank;
+                                break;
                             }
-                        }
-
-                        if (supported)
-                        {
-                            g[c + 6] = rank;
                         }
                     }
                 }
@@ -1526,7 +1536,7 @@ namespace ClassicUO.Game.Managers
                 int gx = mm.X - ox;
                 int gy = mm.Y - oy;
 
-                if (gx < 0 || gx >= w || gy < 0 || gy >= h)
+                if (!InGrid(gx, gy))
                 {
                     continue;
                 }
@@ -1543,22 +1553,28 @@ namespace ClassicUO.Game.Managers
                     continue;
                 }
 
-                int c = Cell(gx, gy, l);
+                ref DesignCell cell = ref grid[gx, gy, l];
 
                 // Locked cells are fixed foundation tiles; their pieces are never flagged.
-                if (g[c + 0x15] != 0)
+                if (cell.Locked)
                 {
                     continue;
                 }
 
-                int legalByte = c + LegalByteOff(SlotOf(mm.Graphic));
+                bool legal = SlotOf(mm.Graphic) switch
+                {
+                    0 => cell.FloorLegal,
+                    2 => cell.RoofLegal,
+                    _ => cell.ObjectLegal != 0,
+                };
 
-                if (g[legalByte] == 0)
+                if (!legal)
                 {
                     mm.State |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE;
                 }
             }
         }
+
 
         // Commit-time legality gate: refuse to send a design that contains any piece
         // which cannot be legally placed. Mirrors the editor's per-piece check.
@@ -1706,480 +1722,6 @@ namespace ClassicUO.Game.Managers
             }
 
             return true;
-        }
-
-        public bool ValidateItemPlace(Item foundationItem, Multi item, int minZ, int maxZ, List<Point> validatedFloors)
-        {
-            if (item == null || !_world.HouseManager.TryGetHouse(foundationItem, out House house) || !item.IsCustom)
-            {
-                return true;
-            }
-
-            if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0)
-            {
-                bool existsInList(List<Point> list, Point testedPoint)
-                {
-                    foreach (Point point in list)
-                    {
-                        if (testedPoint == point)
-                        {
-                            return true;
-                        }
-                    }
-
-                    return false;
-                }
-
-                if (ValidatePlaceStructure
-                (
-                    foundationItem,
-                    house,
-                    house.GetMultiAt(item.X, item.Y),
-                    minZ - 20,
-                    maxZ - 20,
-                    (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT
-                ) || ValidatePlaceStructure
-                (
-                    foundationItem,
-                    house,
-                    house.GetMultiAt(item.X - 1, item.Y),
-                    minZ - 20,
-                    maxZ - 20,
-                    (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_W)
-                ) || ValidatePlaceStructure
-                (
-                    foundationItem,
-                    house,
-                    house.GetMultiAt(item.X, item.Y - 1),
-                    minZ - 20,
-                    maxZ - 20,
-                    (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_N)
-                ))
-                {
-                    Point[] table =
-                    {
-                        new Point(-1, 0),
-                        new Point(0, -1),
-                        new Point(1, 0),
-                        new Point(0, 1)
-                    };
-
-                    for (int i = 0; i < 4; i++)
-                    {
-                        Point testPoint = new Point(item.X + table[i].X, item.Y + table[i].Y);
-
-                        if (!existsInList(validatedFloors, testPoint))
-                        {
-                            validatedFloors.Add(testPoint);
-                        }
-                    }
-
-                    return true;
-                }
-
-                return false;
-            }
-
-
-            if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF) != 0)
-            {
-                return true;
-            }
-
-            if ((item.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE)) != 0)
-            {
-                foreach (Multi temp in house.GetMultiAt(item.X, item.Y))
-                {
-                    if (temp == item)
-                    {
-                        continue;
-                    }
-
-                    if ((temp.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 && temp.Z >= minZ && temp.Z < maxZ)
-                    {
-                        if ((temp.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 && (temp.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0)
-                        {
-                            return true;
-                        }
-                    }
-                }
-
-                return false;
-            }
-
-
-            (int infoCheck1, int infoCheck2) = SeekGraphicInCustomHouseObjectList(ObjectsInfo, item.Graphic);
-
-            if (infoCheck1 != -1 && infoCheck2 != -1)
-            {
-                CustomHousePlaceInfo info = ObjectsInfo[infoCheck1];
-
-                if (info.CanGoW == 0 && item.X == _bounds.X)
-                {
-                    return false;
-                }
-
-                if (info.CanGoN == 0 && item.Y == _bounds.Y)
-                {
-                    return false;
-                }
-
-                if (info.CanGoNWS == 0 && item.X == _bounds.X && item.Y == _bounds.Y)
-                {
-                    return false;
-                }
-
-                if (info.Bottom == 0)
-                {
-                    bool found = false;
-
-                    if (info.AdjUN != 0)
-                    {
-                        found = ValidatePlaceStructure
-                        (
-                            foundationItem,
-                            house,
-                            house.GetMultiAt(item.X, item.Y + 1),
-                            minZ,
-                            maxZ,
-                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N)
-                        );
-                    }
-
-                    if (!found && info.AdjUE != 0)
-                    {
-                        found = ValidatePlaceStructure
-                        (
-                            foundationItem,
-                            house,
-                            house.GetMultiAt(item.X - 1, item.Y),
-                            minZ,
-                            maxZ,
-                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E)
-                        );
-                    }
-
-                    if (!found && info.AdjUS != 0)
-                    {
-                        found = ValidatePlaceStructure
-                        (
-                            foundationItem,
-                            house,
-                            house.GetMultiAt(item.X, item.Y - 1),
-                            minZ,
-                            maxZ,
-                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S)
-                        );
-                    }
-
-                    if (!found && info.AdjUW != 0)
-                    {
-                        found = ValidatePlaceStructure
-                        (
-                            foundationItem,
-                            house,
-                            house.GetMultiAt(item.X + 1, item.Y),
-                            minZ,
-                            maxZ,
-                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W)
-                        );
-                    }
-
-                    if (!found && minZ == foundationItem.Z + 7)
-                    {
-                        return false;
-                    }
-                }
-
-                if (info.Top == 0)
-                {
-                    bool found = false;
-
-                    if (info.AdjLN != 0)
-                    {
-                        found = ValidatePlaceStructure
-                        (
-                            foundationItem,
-                            house,
-                            house.GetMultiAt(item.X, item.Y + 1),
-                            minZ,
-                            maxZ,
-                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N)
-                        );
-                    }
-
-                    if (!found && info.AdjLE != 0)
-                    {
-                        found = ValidatePlaceStructure
-                        (
-                            foundationItem,
-                            house,
-                            house.GetMultiAt(item.X - 1, item.Y),
-                            minZ,
-                            maxZ,
-                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E)
-                        );
-                    }
-
-                    if (!found && info.AdjLS != 0)
-                    {
-                        found = ValidatePlaceStructure
-                        (
-                            foundationItem,
-                            house,
-                            house.GetMultiAt(item.X, item.Y - 1),
-                            minZ,
-                            maxZ,
-                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S)
-                        );
-                    }
-
-                    if (!found && info.AdjLW != 0)
-                    {
-                        found = ValidatePlaceStructure
-                        (
-                            foundationItem,
-                            house,
-                            house.GetMultiAt(item.X + 1, item.Y),
-                            minZ,
-                            maxZ,
-                            (int) (CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP | CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W)
-                        );
-                    }
-
-                    if (!found && minZ == foundationItem.Z + 7)
-                    {
-                        return false;
-                    }
-                }
-
-            }
-
-            if (minZ > foundationItem.Z + 7)
-            {
-                int belowMinZ = minZ - 20;
-
-                // 1) Check same position on the floor below for wall-type support.
-                bool foundAnyWallBelow = false;
-                bool hasFloorTileBelow = false;
-
-                foreach (Multi below in house.GetMultiAt(item.X, item.Y))
-                {
-                    if (below.IsCustom && below.Z >= belowMinZ && below.Z < minZ)
-                    {
-                        if ((below.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR) != 0 &&
-                            (below.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL) == 0)
-                        {
-                            hasFloorTileBelow = true;
-                        }
-
-                        if ((below.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR |
-                                           CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR |
-                                           CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF |
-                                           CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE |
-                                           CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL)) == 0)
-                        {
-                            foundAnyWallBelow = true;
-
-                            if ((below.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0)
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                }
-
-                if (foundAnyWallBelow)
-                {
-                    return false;
-                }
-
-                // 2) No wall at same position below. If there's a floor tile below,
-                //    check ±1 adjacent positions on the floor below for wall support.
-                if (hasFloorTileBelow)
-                {
-                    int[] adx = { -1, 1, 0, 0 };
-                    int[] ady = { 0, 0, -1, 1 };
-
-                    for (int d = 0; d < 4; d++)
-                    {
-                        foreach (Multi adj in house.GetMultiAt(item.X + adx[d], item.Y + ady[d]))
-                        {
-                            if (adj.IsCustom &&
-                                adj.Z >= belowMinZ && adj.Z < minZ &&
-                                (adj.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR |
-                                             CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR |
-                                             CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF |
-                                             CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE |
-                                             CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL)) == 0 &&
-                                (adj.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0)
-                            {
-                                return true;
-                            }
-                        }
-                    }
-                }
-
-                // 3) No below-support. Check if there's a validated same-floor wall
-                //    neighbor (propagation from walls that do have below-support).
-                int[] dx = { -1, 1, 0, 0 };
-                int[] dy = { 0, 0, -1, 1 };
-
-                for (int d = 0; d < 4; d++)
-                {
-                    foreach (Multi neighbor in house.GetMultiAt(item.X + dx[d], item.Y + dy[d]))
-                    {
-                        if (neighbor.IsCustom &&
-                            neighbor.Z >= minZ && neighbor.Z < maxZ &&
-                            (neighbor.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR |
-                                              CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR |
-                                              CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF |
-                                              CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE |
-                                              CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_GENERIC_INTERNAL)) == 0 &&
-                            (neighbor.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) != 0 &&
-                            (neighbor.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0)
-                        {
-                            return true;
-                        }
-                    }
-                }
-
-                return false;
-            }
-
-            return true;
-        }
-
-        public bool ValidatePlaceStructure
-        (
-            Item foundationItem,
-            House house,
-            IEnumerable<Multi> multi,
-            int minZ,
-            int maxZ,
-            int flags
-        )
-        {
-            if (house == null)
-            {
-                return false;
-            }
-
-            var validatedFloors = new List<Point>();
-            foreach (Multi item in multi)
-            {
-                validatedFloors.Clear();
-
-                if (item.IsCustom && (item.State & (CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FLOOR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_STAIR | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_ROOF | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_FIXTURE)) == 0 && item.Z >= minZ && item.Z < maxZ)
-                {
-                    (int info1, int info2) = SeekGraphicInCustomHouseObjectList(ObjectsInfo, item.Graphic);
-
-                    if (info1 != -1 && info2 != -1)
-                    {
-                        CustomHousePlaceInfo info = ObjectsInfo[info1];
-
-                        if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_DIRECT_SUPPORT) != 0)
-                        {
-                            if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) != 0 || info.DirectSupports == 0)
-                            {
-                                continue;
-                            }
-
-                            if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_W) != 0)
-                            {
-                                if (info.CanGoW != 0)
-                                {
-                                    return true;
-                                }
-                            }
-                            else if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_CANGO_N) != 0)
-                            {
-                                if (info.CanGoN != 0)
-                                {
-                                    return true;
-                                }
-                            }
-                            else
-                            {
-                                return true;
-                            }
-                        }
-                        else if (((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM) != 0 && info.Bottom != 0) || ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_TOP) != 0 && info.Top != 0))
-                        {
-                            if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE) == 0)
-                            {
-                                item.State |= CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
-
-                                if (!ValidateItemPlace
-                                (
-                                    foundationItem,
-                                    item,
-                                    minZ,
-                                    maxZ,
-                                    validatedFloors
-                                ))
-                                {
-                                    item.State = item.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE;
-                                }
-                                else
-                                {
-                                    item.State = item.State | CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_VALIDATED_PLACE;
-                                }
-                            }
-
-                            if ((item.State & CUSTOM_HOUSE_MULTI_OBJECT_FLAGS.CHMOF_INCORRECT_PLACE) == 0)
-                            {
-                                if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_BOTTOM) != 0)
-                                {
-                                    if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N) != 0 && info.AdjUN != 0)
-                                    {
-                                        return true;
-                                    }
-
-                                    if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E) != 0 && info.AdjUE != 0)
-                                    {
-                                        return true;
-                                    }
-
-                                    if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S) != 0 && info.AdjUS != 0)
-                                    {
-                                        return true;
-                                    }
-
-                                    if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W) != 0 && info.AdjUW != 0)
-                                    {
-                                        return true;
-                                    }
-                                }
-                                else
-                                {
-                                    if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_N) != 0 && info.AdjLN != 0)
-                                    {
-                                        return true;
-                                    }
-
-                                    if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_E) != 0 && info.AdjLE != 0)
-                                    {
-                                        return true;
-                                    }
-
-                                    if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_S) != 0 && info.AdjLS != 0)
-                                    {
-                                        return true;
-                                    }
-
-                                    if ((flags & (int) CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS.CHVCF_W) != 0 && info.AdjLW != 0)
-                                    {
-                                        return true;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-
-            return false;
         }
 
         private void ParseFile<T>(List<T> list, string path) where T : CustomHouseObject, new()
@@ -2356,19 +1898,5 @@ namespace ClassicUO.Game.Managers
 
         CHMOF_DONT_REMOVE = 0x200,
         CHMOF_PREVIEW = 0x400
-    }
-
-    [Flags]
-    internal enum CUSTOM_HOUSE_VALIDATE_CHECK_FLAGS
-    {
-        CHVCF_TOP = 0x01,
-        CHVCF_BOTTOM = 0x02,
-        CHVCF_N = 0x04,
-        CHVCF_E = 0x08,
-        CHVCF_S = 0x10,
-        CHVCF_W = 0x20,
-        CHVCF_DIRECT_SUPPORT = 0x40,
-        CHVCF_CANGO_W = 0x80,
-        CHVCF_CANGO_N = 0x100
     }
 }
