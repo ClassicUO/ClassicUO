@@ -81,7 +81,7 @@ internal readonly struct GuiPlugin : IPlugin
 
                 // Debug overlay: outline the topmost element under the pointer
                 // lime, occluded elements beneath it red. Flip to false to hide.
-                global::Clay.Clay.SetPointerHighlightEnabled(true);
+                global::Clay.Clay.SetPointerHighlightEnabled(false);
             });
 
         var states = Enum.GetValues<GameState>();

@@ -464,7 +464,13 @@ internal readonly struct TopBarPlugin : IPlugin
                 break;
 
             case Buttons.Journal:
-                btn.Observe((On<UiClick> _) => Console.WriteLine("[TopBar] Journal — no ECS gump yet"));
+                btn.Observe((On<UiClick> _,
+                             Commands cmd,
+                             Res<GumpBuilder> gb,
+                             Res<AssetsServer> assets,
+                             Res<UiZCounter> z,
+                             Query<Data<JournalWindow>> existing) =>
+                    JournalPlugin.OpenOrFocus(cmd, gb.Value, assets.Value, z.Value, existing));
                 break;
             case Buttons.Chat:
                 btn.Observe((On<UiClick> _) => Console.WriteLine("[TopBar] Chat — no ECS gump yet"));
