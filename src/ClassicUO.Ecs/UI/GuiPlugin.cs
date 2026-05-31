@@ -51,7 +51,8 @@ internal readonly struct GuiPlugin : IPlugin
                 Commands commands,
                 Res<AssetsServer> assets,
                 ResMut<UiClayContext> clay,
-                Query<Data<UiCustom>> customQuery) =>
+                Query<Data<UiCustom>> customQuery,
+                Query<Data<UiContainsByBounds>> boundsQuery) =>
             {
                 var assetsServer = assets.Value;
                 commands.InsertResource(new GumpBuilder(assetsServer));
@@ -68,6 +69,11 @@ internal readonly struct GuiPlugin : IPlugin
                 // UiHitTest.PixelHit directly; this covers the Interaction path.
                 clay.Value.PixelHitTest = (entityId, pos, box) =>
                 {
+                    // Legacy ContainsByBounds: some gump roots (healthbar, status
+                    // bar) capture the whole bounding box, not pixel-perfect — so
+                    // a click on a transparent bg slot still hits the window
+                    // instead of falling through.
+                    if (boundsQuery.Contains(entityId)) return true;
                     if (!customQuery.Contains(entityId)) return true;
                     var (_, customPtr) = customQuery.Get(entityId);
                     var bb = new ComputedNode

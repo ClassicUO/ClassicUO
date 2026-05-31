@@ -846,7 +846,8 @@ readonly struct InGamePacketsPlugin : IPlugin
         var ent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
         ent.Insert(new Graphic() { Value = packet.Graphic })
             .Insert(new Hue() { Value = packet.Hue })
-            .Insert(new ServerFlags() { Value = packet.Flags });
+            .Insert(new ServerFlags() { Value = packet.Flags })
+            .Insert(new Notoriety() { Value = packet.Notoriety });
 
         EquipmentSlots slots;
         bool existed = queries.qEquipmentSlots.Contains(ent.Id);
@@ -900,7 +901,8 @@ readonly struct InGamePacketsPlugin : IPlugin
         var ent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
         ent.Insert(new Graphic() { Value = packet.Graphic })
             .Insert(new Hue() { Value = packet.Hue })
-            .Insert(new ServerFlags() { Value = packet.Flags });
+            .Insert(new ServerFlags() { Value = packet.Flags })
+            .Insert(new Notoriety() { Value = packet.Notoriety });
 
         EquipmentSlots slots;
         bool existed = queries.qEquipmentSlots.Contains(ent.Id);
@@ -1011,6 +1013,10 @@ readonly struct InGamePacketsPlugin : IPlugin
         var packet = trig.Event.Packet;
         var ent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
         ent.Insert(new Hits() { Value = packet.Hits, MaxValue = packet.HitsMax });
+
+        // Name carried by the status packet — used by the healthbar's name label.
+        if (!string.IsNullOrEmpty(packet.Name))
+            ent.Insert(new EntityName() { Value = packet.Name });
 
         // Cache the player's name for the status bar (the only place it's parsed).
         if (packet.Serial == gameCtx.Value.PlayerSerial)

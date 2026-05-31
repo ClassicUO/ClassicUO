@@ -32,6 +32,7 @@ internal readonly struct WindowDragPlugin : IPlugin
     public void Build(App app)
     {
         app.AddResource(new UiZCounter());
+        app.AddResource(new ForcedWindowDrag());
         var dragFn = Drag;
         var closeOnRightClickFn = CloseOnRightClick;
         var claimSelectionFn = ClaimSelectedFromMovable;
@@ -218,6 +219,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         Res<GrabbedItem> grabbed,
         Res<DragGate> gate,
         Res<AssetsServer> assets,
+        Res<ForcedWindowDrag> forced,
         Local<DragAnchor> anchor,
         Query<Data<ComputedNode, Node, UiCustom>, Filter<Optional<UiCustom>>> rendered,
         Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movables,
@@ -235,6 +237,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         {
             anchor.Value.Active = false;
             anchor.Value.Owner = 0;
+            forced.Value.Owner = 0;
             if (gate.Value.Mode == ActiveDrag.UIWindow)
                 gate.Value.Mode = ActiveDrag.None;
             return;
@@ -248,7 +251,36 @@ internal readonly struct WindowDragPlugin : IPlugin
         {
             anchor.Value.Active = false;
             anchor.Value.Owner = 0;
+            forced.Value.Owner = 0;
             return;
+        }
+
+        // Forced drag: a window spawned mid-gesture (a healthbar dragged off a
+        // mobile) asks to ride the cursor without a fresh press. Latch it the
+        // frame its entity materialises (spawn is deferred), re-centered under
+        // the cursor so it tracks like legacy AttemptDragControl.
+        if (forced.Value.Owner != 0)
+        {
+            if (movables.Contains(forced.Value.Owner))
+            {
+                var ownerF = forced.Value.Owner;
+                var (_, nodeF, zF) = movables.Get(ownerF);
+                var pos = mouse.Value.Position;
+                float wF = nodeF.Ref.Width.Type == ValType.Px ? nodeF.Ref.Width.Value : 0f;
+                float hF = nodeF.Ref.Height.Type == ValType.Px ? nodeF.Ref.Height.Value : 0f;
+                anchor.Value = new DragAnchor
+                {
+                    Active = true,
+                    Owner = ownerF,
+                    Mouse = pos,
+                    OriginX = pos.X - wF / 2f,
+                    OriginY = pos.Y - hF / 2f,
+                };
+                gate.Value.Mode = ActiveDrag.UIWindow;
+                zF.Ref.Value = zCounter.Value.Bump();
+                forced.Value.Owner = 0;
+            }
+            // else: entity not applied yet — keep the request for next frame.
         }
 
         if (mouse.Value.IsPressedOnce(MouseButtonType.Left))
@@ -321,4 +353,13 @@ internal sealed class UiZCounter
 {
     private int _next = 1;
     public int Bump() => _next++;
+}
+
+// Hand-off for a window that must start dragging without its own press edge —
+// set Owner to a just-spawned window root and WindowDragPlugin.Drag latches it
+// onto the held cursor on the next frame (the spawn is a deferred command).
+// Used when a healthbar is dragged off a mobile so the bar follows the mouse.
+internal sealed class ForcedWindowDrag
+{
+    public ulong Owner;
 }

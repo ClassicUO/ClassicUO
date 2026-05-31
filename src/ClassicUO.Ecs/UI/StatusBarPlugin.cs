@@ -123,8 +123,14 @@ internal readonly struct StatusBarPlugin : IPlugin
         var color = UoFontRuntime.AsciiHue(LabelHue);
         ushort fontId = 1 | UoFontRuntime.AsciiFlag;
 
+        // Clicking the status bar minimizes it into the player healthbar — see
+        // HealthBarPlugin.WindowInteractions (UiPick over the raw mouse, so it
+        // works over the bar's transparent cutouts and isn't stolen by other
+        // centered interactive surfaces). UiContainsByBounds makes the whole
+        // panel a hit target (legacy ContainsByBounds).
         var root = builder.SpawnUOGump(commands, bg, Vector3.UnitZ, new Vector2(20, 150), zCounter)
-            .Insert<StatusBarWindow>();
+            .Insert<StatusBarWindow>()
+            .Insert<UiContainsByBounds>();
 
         foreach (var (x, y, field, cw) in layout)
         {

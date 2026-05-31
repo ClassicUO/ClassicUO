@@ -9,6 +9,14 @@ namespace ClassicUO.Ecs;
 // root are NOT tagged — only the window root.
 internal struct UOGump;
 
+// Marks an interactive UO gump root that captures the whole bounding box for
+// hit-testing (legacy ContainsByBounds) instead of pixel-perfect alpha. The
+// GuiPlugin PixelHitTest hook returns true for these so a click on a
+// transparent bg slot (e.g. a healthbar's bar cutouts, the status panel's
+// see-through frame) still lands on the window. Used by gumps whose whole
+// surface is a click target — healthbar (drag/dclick), status bar (click).
+internal struct UiContainsByBounds;
+
 // Spawns a UO gump window in one bundle. By design a UOGump:
 //   * is positioned absolutely (UO gumps float, never flow),
 //   * carries its focus order on the ROOT only (GlobalZIndex); children

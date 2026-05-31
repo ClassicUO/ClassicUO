@@ -570,6 +570,41 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
+        // 0xBF subcommand 0x0C: tell the server we closed a mobile's status/
+        // healthbar gump so it stops streaming hp updates for it. Sent when a
+        // healthbar goes out of range; the matching Send_StatusRequest re-subs
+        // when it comes back. Mirrors legacy Send_CloseStatusBarGump.
+        public static void Send_CloseStatusBarGump(this NetClient socket, uint serial)
+        {
+            const byte ID = 0xBF;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt16BE(0x0C);
+            writer.WriteUInt32BE(serial);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
         public static void Send_SkillsRequest(this NetClient socket, uint serial)
         {
             const byte ID = 0x34;

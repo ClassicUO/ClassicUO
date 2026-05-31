@@ -77,6 +77,21 @@ struct Stamina
 
 struct Player;
 
+// Mobile notoriety (innocent/criminal/enemy/...) from the world-object packets.
+// Drives healthbar name/background hue. Items never carry it.
+struct Notoriety
+{
+    public NotorietyFlag Value;
+}
+
+// Display name for a network entity. Player name is also cached in
+// GameContext.PlayerName; this component carries names for any mobile whose
+// status (0x11) has been requested (e.g. on opening its healthbar).
+struct EntityName
+{
+    public string Value;
+}
+
 // Str/Dex/Int stat locks (0=up, 1=down, 2=locked). Client-side state toggled by
 // the status gump's lock buttons; persisted on the player so it survives the
 // gump reopening. The server doesn't push it in the status packet.
