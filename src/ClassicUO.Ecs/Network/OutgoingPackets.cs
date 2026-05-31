@@ -148,6 +148,144 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
+        // 0x6C target response (entity). Mirrors legacy NetClientExt.Send_TargetObject:
+        // flag 0x00 = object, echo the server's cursorID + cursorType, then the
+        // clicked entity's serial / x / y / z / graphic. z occupies two bytes.
+        public static void Send_TargetObject(
+            this NetClient socket,
+            uint entity,
+            ushort graphic,
+            ushort x,
+            ushort y,
+            sbyte z,
+            uint cursorID,
+            byte cursorType)
+        {
+            const byte ID = 0x6C;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt8(0x00);
+            writer.WriteUInt32BE(cursorID);
+            writer.WriteUInt8(cursorType);
+            writer.WriteUInt32BE(entity);
+            writer.WriteUInt16BE(x);
+            writer.WriteUInt16BE(y);
+            writer.WriteUInt16BE((ushort)z);
+            writer.WriteUInt16BE(graphic);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+
+            writer.Dispose();
+        }
+
+        // 0x6C target response (ground / static). flag 0x01 = position; serial is
+        // zero. Land sends graphic 0; a static sends its own graphic.
+        public static void Send_TargetXYZ(
+            this NetClient socket,
+            ushort graphic,
+            ushort x,
+            ushort y,
+            sbyte z,
+            uint cursorID,
+            byte cursorType)
+        {
+            const byte ID = 0x6C;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt8(0x01);
+            writer.WriteUInt32BE(cursorID);
+            writer.WriteUInt8(cursorType);
+            writer.WriteUInt32BE(0x00);
+            writer.WriteUInt16BE(x);
+            writer.WriteUInt16BE(y);
+            writer.WriteUInt16BE((ushort)z);
+            writer.WriteUInt16BE(graphic);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+
+            writer.Dispose();
+        }
+
+        // 0x6C cancel response. flag carries the original cursor mode; the
+        // trailing 0xFFFFFFFF / 0x00000000 sentinels mirror legacy Send_TargetCancel.
+        public static void Send_TargetCancel(
+            this NetClient socket,
+            byte cursorTarget,
+            uint cursorID,
+            byte cursorType)
+        {
+            const byte ID = 0x6C;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt8(cursorTarget);
+            writer.WriteUInt32BE(cursorID);
+            writer.WriteUInt8(cursorType);
+            writer.WriteUInt32BE(0x00);
+            writer.WriteUInt32BE(0xFFFF_FFFF);
+            writer.WriteUInt32BE(0x0000_0000);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+
+            writer.Dispose();
+        }
+
         public static void Send_Seed
         (
             this NetClient socket,

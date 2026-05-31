@@ -129,6 +129,7 @@ readonly struct NetworkPlugin : IPlugin
                 packetsMap.Value.Register<OnMapDataPacket_0x56>();
                 packetsMap.Value.Register<OnWeatherPacket_0x65>();
                 packetsMap.Value.Register<OnBookPagesPacket_0x66>();
+                packetsMap.Value.Register<OnTargetCursorPacket_0x6C>();
                 packetsMap.Value.Register<OnPlayMusicPacket_0x6D>();
                 packetsMap.Value.Register<OnCharacterAnimationPacket_0x6E>();
                 packetsMap.Value.Register<OnGraphicEffectPacket_0x70>();

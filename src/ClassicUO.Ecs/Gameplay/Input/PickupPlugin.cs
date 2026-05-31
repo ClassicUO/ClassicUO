@@ -100,11 +100,15 @@ internal readonly struct PickupPlugin : IPlugin
                 latch.Value.Entity = sel.Value.Entity;
             })
             .InStage(Stage.First)
+            // A press while targeting is the target click (TargetingPlugin owns
+            // it) — don't latch a pickup candidate from it.
+            .RunIf((Res<TargetingState> targeting) => !targeting.Value.IsTargeting)
             .Build()
 
             .AddSystem(pickupItemFn)
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+            .RunIf((Res<TargetingState> targeting) => !targeting.Value.IsTargeting)
             .RunIf((Commands cmds) => cmds.HasResource<SelectedEntity>() && cmds.HasResource<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial == 0)
             .RunIf((Res<MouseContext> mouseCtx, Local<float?> holdDeadline, Res<Time> time) =>
@@ -181,6 +185,7 @@ internal readonly struct PickupPlugin : IPlugin
             .AddSystem(dropItemFn)
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+            .RunIf((Res<TargetingState> targeting) => !targeting.Value.IsTargeting)
             .RunIf((Commands cmds) => cmds.HasResource<SelectedEntity>() && cmds.HasResource<GrabbedItem>())
             // Skip while awaiting a server response to a previous drop — the
             // user can't initiate another drop on the same held item until the

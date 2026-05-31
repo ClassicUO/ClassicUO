@@ -45,6 +45,7 @@ internal readonly struct CuoPlugin : IPlugin
 
         app.AddPlugin<NetworkPlugin>();
         app.AddPlugin<GameplayPlugin>();
+        app.AddPlugin<TargetingPlugin>();
         app.AddPlugin<RenderingPlugin>();
 
         app.AddPlugin<ModdingPlugin>();

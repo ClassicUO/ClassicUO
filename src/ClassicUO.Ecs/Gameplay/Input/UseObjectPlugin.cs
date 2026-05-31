@@ -15,6 +15,9 @@ internal readonly struct UseObjectPlugin : IPlugin
             .AddSystem(useObjectFn)
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+            // A double-click while a target cursor is up belongs to targeting,
+            // not double-click-to-use.
+            .RunIf((Res<TargetingState> targeting) => !targeting.Value.IsTargeting)
             .RunIf((Res<MouseContext> mouseCtx) => mouseCtx.Value.IsPressedDouble(Input.MouseButtonType.Left))
             .Build();
     }
