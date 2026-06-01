@@ -67,21 +67,31 @@ namespace ClassicUO.Game.Data
         public static void Build(ReadOnlySpan<ushort> graphic, bool altTorsoTable, Span<Layer> order)
         {
             // 1) base table selection --------------------------------------------
+            // An Arms-graphic alternate match locks the Alternate table and skips the
+            // Torso/race checks entirely.
             Layer[] table = T2; // default
 
             uint arms = graphic[(int)Layer.Arms];
+            bool armsAlternate;
             if (arms < 0x3d0)
             {
-                if (arms == 0x3cf || arms == 0x210 || arms == 0x3b3) table = T1;
+                armsAlternate = arms == 0x3cf || arms == 0x210 || arms == 0x3b3;
             }
-            else if (arms == 0x3dd)
+            else
+            {
+                armsAlternate = arms == 0x3dd;
+            }
+
+            if (armsAlternate)
             {
                 table = T1;
             }
-
-            uint torso = graphic[(int)Layer.Torso];
-            if (torso == 0x21a) table = T1;
-            else if (torso - 0x399 < 5 && altTorsoTable) table = T3;
+            else
+            {
+                uint torso = graphic[(int)Layer.Torso];
+                if (torso == 0x21a) table = T1;
+                else if (torso - 0x399 < 5 && altTorsoTable) table = T3;
+            }
 
             table.AsSpan(0, N).CopyTo(order);
             Span<Layer> o = order.Slice(0, N);
@@ -157,8 +167,11 @@ namespace ClassicUO.Game.Data
         }
 
         /// <summary>
-        /// Fill <paramref name="gfx"/> (length >= N) with the entity's per-layer item
-        /// graphics (0x00..0x18); empty layers are left at 0.
+        /// Fill <paramref name="gfx"/> (length >= N) with the entity's per-layer equip
+        /// AnimIDs (0x00..0x18); empty layers are left at 0. The base-table selection and
+        /// reorder rules are keyed on the item AnimID (the gump/equip display id), NOT the
+        /// world tile graphic — e.g. bone-armor arms 0x1410/0x1417 both resolve to AnimID
+        /// 0x210, which selects the arms-late table.
         /// </summary>
         public static void GraphicsFromEntity(Entity entity, Span<ushort> gfx)
         {
@@ -169,7 +182,7 @@ namespace ClassicUO.Game.Data
                 Item item = entity.FindItemByLayer((Layer)layer);
                 if (item != null)
                 {
-                    gfx[layer] = item.Graphic;
+                    gfx[layer] = item.ItemData.AnimID;
                 }
             }
         }

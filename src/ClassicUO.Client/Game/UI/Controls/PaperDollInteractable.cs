@@ -143,7 +143,9 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (holdLayer > 0 && holdLayer < layerGraphics.Length && layerGraphics[holdLayer] == 0)
                 {
-                    layerGraphics[holdLayer] = Client.Game.UO.GameCursor.ItemHold.Graphic;
+                    // layerGraphics is keyed on equip AnimID (see PaperdollOrder), not the
+                    // world tile graphic, so the held-item preview must inject its AnimID too.
+                    layerGraphics[holdLayer] = Client.Game.UO.GameCursor.ItemHold.ItemData.AnimID;
                 }
             }
 
