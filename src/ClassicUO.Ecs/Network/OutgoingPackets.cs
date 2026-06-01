@@ -775,6 +775,72 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
+        // 0x3A — change a skill's lock state (up/down/locked). Mirrors main's
+        // Send_SkillStatusChangeRequest.
+        public static void Send_SkillStatusChangeRequest(this NetClient socket, ushort skillindex, byte lockstate)
+        {
+            const byte ID = 0x3A;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt16BE(skillindex);
+            writer.WriteUInt8(lockstate);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
+        // 0x12 type 0x24 — request use of a skill by index. Mirrors main's
+        // Send_UseSkill / GameActions.UseSkill.
+        public static void Send_UseSkill(this NetClient socket, int idx)
+        {
+            const byte ID = 0x12;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt8(0x24);
+            writer.WriteASCII($"{idx} 0");
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
         public static void Send_ClickRequest(this NetClient socket, uint serial)
         {
             const byte ID = 0x09;

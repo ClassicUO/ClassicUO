@@ -225,14 +225,18 @@ internal sealed class GumpBuilder
             .Insert(MakeFloatingNode(position, new Vector2(width, height)))
             .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.GumpTiled, AssetId = ScrollBackground, Hue = hue } })
             .Insert(new Scrollbar { Target = target, Orientation = ScrollbarOrientation.Vertical, MinThumbLength = 16f })
-            .Insert(Interaction.None);
+            .Insert(Interaction.None)
+            // Inside a draggable window the thumb/track press must drive the
+            // scrollbar, not latch a window move.
+            .Insert<UINoWindowDrag>();
 
         var thumb = commands.Spawn()
             .Insert(MakeFloatingNode(new Vector2(0, 0), new Vector2(width, thumbInfo.UV.Height)))
             .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.Gump, AssetId = ScrollThumb, Hue = hue } })
             .Insert(new ScrollbarThumb())
             .Insert(new ScrollbarDragState())
-            .Insert(Interaction.None);
+            .Insert(Interaction.None)
+            .Insert<UINoWindowDrag>();
 
         commands.AddChild(track.Id, thumb.Id);
         return track;

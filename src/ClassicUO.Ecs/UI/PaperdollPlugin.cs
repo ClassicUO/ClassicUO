@@ -314,14 +314,22 @@ internal readonly struct PaperdollPlugin : IPlugin
             });
             commands.AddChild(root.Id, btnQuests.Id);
 
-            // Skills: main re-requests via Send_SkillsRequest and pops the
-            // local SkillsGump. ECS has no SkillsGump yet so just refresh
-            // server-side skills.
+            // Skills: re-request server-side skills (refresh values) and open
+            // (or focus) the StandardSkillsGump.
             var btnSkills = builder.AddButton(commands, (0x07DF, 0x07E0, 0x07E1), Vector3.UnitZ, new Vector2(185, 44 + 27 * 4));
-            btnSkills.Observe((On<UiClick> _, Res<NetClient> net, Res<GameContext> ctx) =>
+            btnSkills.Observe((On<UiClick> _,
+                               Commands cmd,
+                               Res<NetClient> net,
+                               Res<GameContext> ctx,
+                               Res<GumpBuilder> gb,
+                               Res<AssetsServer> a,
+                               Res<UiZCounter> z,
+                               Res<PlayerSkills> sk,
+                               Query<Data<SkillsWindow>> existing) =>
             {
                 if (ctx.Value.PlayerSerial != 0)
                     net.Value.Send_SkillsRequest(ctx.Value.PlayerSerial);
+                SkillsGumpPlugin.OpenOrFocus(cmd, gb.Value, a.Value, z.Value, sk.Value, existing);
             });
             commands.AddChild(root.Id, btnSkills.Id);
 

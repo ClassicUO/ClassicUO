@@ -226,7 +226,8 @@ internal readonly struct WindowDragPlugin : IPlugin
         Query<Data<TinyEcs.Parent>> parents,
         Query<Data<ContainerItemUI>> itemsQ,
         Query<Data<PaperdollEquipUI>> equipQ,
-        Query<Data<UINoDrag>> noDragQ)
+        Query<Data<UINoDrag>> noDragQ,
+        Query<Data<UINoWindowDrag>> noWindowDragChildQ)
     {
         // IsPressed is false on the press-once frame (oldState=Released), so
         // include IsPressedOnce in the "held" check or the latch attempt
@@ -300,6 +301,12 @@ internal readonly struct WindowDragPlugin : IPlugin
             // doesn't drag the window they sit in.
             if (itemsQ.Contains(hit.Entity) || equipQ.Contains(hit.Entity)) return;
 
+            // Interactive in-window controls (skills group arrows, lock/use
+            // buttons, reset, resize handle, checkboxes) opt out of window-drag:
+            // a press on them must reach their own UiClick / drag handler, not
+            // latch a window move that cancels the click.
+            if (noWindowDragChildQ.Contains(hit.Entity)) return;
+
             var owner = UiPick.MovableRoot(hit.Entity, movables, parents);
             if (owner == 0) return;
 
@@ -363,3 +370,8 @@ internal sealed class ForcedWindowDrag
 {
     public ulong Owner;
 }
+
+// Marker for an interactive child of a UIMovable window (button, toggle, resize
+// handle, checkbox) whose press must NOT latch a window drag — WindowDragPlugin
+// yields the gesture so the control's own UiClick / drag handler runs.
+internal struct UINoWindowDrag;

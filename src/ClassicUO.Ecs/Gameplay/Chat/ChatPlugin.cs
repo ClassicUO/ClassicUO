@@ -86,8 +86,12 @@ internal readonly struct ChatPlugin : IPlugin
             }
         )
         .InStage(Stage.Update)
-            .RunIf((EventReader<CharInputEvent> reader, Res<NetClient> network)
-            => reader.HasEvents && network.Value.IsConnected)
+            // Yield while a UI text field (e.g. a skills group-name editor) holds
+            // keyboard focus, so typed chars edit the field instead of the chat.
+            .RunIf((EventReader<CharInputEvent> reader, Res<NetClient> network,
+                    Res<FocusedInput> focused, Query<Data<SkillNameEdit>> editsQ)
+            => reader.HasEvents && network.Value.IsConnected
+               && !(focused.Value.Entity != 0 && editsQ.Contains(focused.Value.Entity)))
             .Build();
     }
 }

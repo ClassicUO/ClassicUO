@@ -123,6 +123,8 @@ readonly struct InGamePacketsPlugin : IPlugin
 {
     public void Build(App app)
     {
+        app.AddResource(new PlayerSkills());
+
         app.AddObserver<On<PacketReceived<OnEnterWorldPacket_0x1B>>,
             Commands,
             Res<NetworkEntitiesMap>,
@@ -260,7 +262,8 @@ readonly struct InGamePacketsPlugin : IPlugin
         Stub<OnShowDeathScreenPacket_0x2C>(app);
         Stub<OnSwingPacket_0x2F>(app);
         Stub<OnPathfindingPacket_0x38>(app);
-        Stub<OnUpdateSkillsPacket_0x3A>(app);
+        app.AddObserver<On<PacketReceived<OnUpdateSkillsPacket_0x3A>>,
+            ResMut<PlayerSkills>>(OnUpdateSkills);
         Stub<OnSoundEffectPacket_0x54>(app);
         Stub<OnMapDataPacket_0x56>(app);
         Stub<OnWeatherPacket_0x65>(app);
@@ -1254,6 +1257,30 @@ readonly struct InGamePacketsPlugin : IPlugin
                 : sf.Ref.Value & ~Flags.WarMode;
             if (newFlags == sf.Ref.Value) continue;
             commands.Entity(ent.Ref).Insert(new ServerFlags { Value = newFlags });
+        }
+    }
+
+    // 0x3A UpdateSkills. Store each value entry into PlayerSkills indexed by
+    // skill id (the gump reads names from the SkillsLoader, so the 0xFE name
+    // definition variant carries nothing we keep). Mirrors main's
+    // PacketHandlers.UpdateSkills writing into World.Player.Skills.
+    static void OnUpdateSkills(
+        On<PacketReceived<OnUpdateSkillsPacket_0x3A>> trig,
+        ResMut<PlayerSkills> skills)
+    {
+        var packet = trig.Event.Packet;
+        if (packet.Values == null) return;
+
+        foreach (var v in packet.Values)
+        {
+            if (v.Id < 0 || v.Id >= skills.Value.Values.Length) continue;
+            ref var slot = ref skills.Value.Values[v.Id];
+            slot.Real = (ushort)v.RealValue;
+            slot.Base = (ushort)v.BaseValue;
+            slot.Lock = v.Status;
+            if (v.Cap.HasValue) slot.Cap = (ushort)v.Cap.Value;
+            slot.Received = true;
+            skills.Value.HasData = true;
         }
     }
 }
