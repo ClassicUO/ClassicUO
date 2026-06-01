@@ -45,6 +45,26 @@ internal static class InputHandlers
         d.Register("input.mouseWheel", MouseWheel);
         d.Register("input.clear", InputClear);
         d.Register("input.type", Type);
+        d.Register("debug.openSpellbook", DebugOpenSpellbook);
+    }
+
+    // Test-only: deterministically open a Magery spellbook without a server item.
+    // Populates SpellbookStore with the given (or full) spell mask and fires the
+    // ContainerOpenedEvent the 0x24 0xFFFF path would. Handlers run on the game
+    // thread (see AgentRpcContext) so direct resource/event access is safe.
+    public static JsonRpcResponse DebugOpenSpellbook(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        uint serial = 0x40000001;
+        ulong bits = ulong.MaxValue; // all 64 Magery spells present
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object
+            && p.TryGetProperty("bits", out var bEl) && bEl.TryGetUInt64(out var b))
+            bits = b;
+
+        var store = ctx.Runtime.GetResource<SpellbookStore>();
+        store.BySerial[serial] = new SpellbookData { Type = 1, Bitfields = bits };
+        store.Revision++;
+        ctx.Runtime.SendEvent(new ContainerOpenedEvent(serial, 0xFFFF));
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true } };
     }
 
     public static JsonRpcResponse MouseMove(JsonRpcRequest req, in AgentRpcContext<App> ctx)

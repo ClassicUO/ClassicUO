@@ -124,6 +124,7 @@ readonly struct InGamePacketsPlugin : IPlugin
     public void Build(App app)
     {
         app.AddResource(new PlayerSkills());
+        app.AddResource(new SpellbookStore());
 
         app.AddObserver<On<PacketReceived<OnEnterWorldPacket_0x1B>>,
             Commands,
@@ -159,6 +160,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             Res<UOFileManager>,
             ResMut<GameContext>,
             Res<DelayedAction>,
+            ResMut<SpellbookStore>,
             InGameQueries>(OnExtendedCommand);
 
         app.AddObserver<On<PacketReceived<OnUpdateItemPacket_0x1A>>,
@@ -525,9 +527,18 @@ readonly struct InGamePacketsPlugin : IPlugin
         Res<UOFileManager> fileManager,
         ResMut<GameContext> gameCtx,
         Res<DelayedAction> delayedActions,
+        ResMut<SpellbookStore> spellbooks,
         InGameQueries queries)
     {
         var packet = trig.Event.Packet;
+
+        if (packet.SpellbookContent.HasValue)
+        {
+            var sc = packet.SpellbookContent.Value;
+            ulong bits = sc.SpellBitfields[0] | ((ulong)sc.SpellBitfields[1] << 32);
+            spellbooks.Value.BySerial[sc.Serial] = new SpellbookData { Type = sc.Type, Bitfields = bits };
+            spellbooks.Value.Revision++;
+        }
 
         switch (packet.Command)
         {
