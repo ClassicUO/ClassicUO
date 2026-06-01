@@ -1481,5 +1481,263 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
+        // 0xBF subcommand 0x06 party packets. Byte layout mirrors legacy
+        // NetClientExt.Send_Party* verbatim (the party code is a single byte
+        // after the 0x06 subcommand).
+
+        // code 1 + count 1 + serial 0: ask the server to target-invite someone.
+        public static void Send_PartyInviteRequest(this NetClient socket)
+        {
+            const byte ID = 0xBF;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt16BE(0x06);
+            writer.WriteUInt8(0x01);
+            writer.WriteUInt32BE(0x00);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
+        // code 2 + serial: remove a member (own serial = leave/disband).
+        public static void Send_PartyRemoveRequest(this NetClient socket, uint serial)
+        {
+            const byte ID = 0xBF;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt16BE(0x06);
+            writer.WriteUInt8(0x02);
+            writer.WriteUInt32BE(serial);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
+        // code 6 + bool: allow / disallow party loot of my corpse.
+        public static void Send_PartyChangeLootTypeRequest(this NetClient socket, bool type)
+        {
+            const byte ID = 0xBF;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt16BE(0x06);
+            writer.WriteUInt8(0x06);
+            writer.WriteBool(type);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
+        // code 8 + inviter serial: accept a party invite.
+        public static void Send_PartyAccept(this NetClient socket, uint serial)
+        {
+            const byte ID = 0xBF;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt16BE(0x06);
+            writer.WriteUInt8(0x08);
+            writer.WriteUInt32BE(serial);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
+        // code 9 + inviter serial: decline a party invite.
+        public static void Send_PartyDecline(this NetClient socket, uint serial)
+        {
+            const byte ID = 0xBF;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt16BE(0x06);
+            writer.WriteUInt8(0x09);
+            writer.WriteUInt32BE(serial);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
+        // code 3 (+ target serial) for a private tell, code 4 for a broadcast.
+        public static void Send_PartyMessage(this NetClient socket, string text, uint serial)
+        {
+            const byte ID = 0xBF;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt16BE(0x06);
+
+            if (Game.SerialHelper.IsValid(serial))
+            {
+                writer.WriteUInt8(0x03);
+                writer.WriteUInt32BE(serial);
+            }
+            else
+            {
+                writer.WriteUInt8(0x04);
+            }
+
+            writer.WriteUnicodeBE(text);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
+        // Cast a spell by index. Post-CV_60142 uses 0xBF subcommand 0x1C; older
+        // clients use 0x12 type 0x56 with the index as ASCII. Mirrors legacy
+        // NetClientExt.Send_CastSpell (used by the party heal buttons).
+        public static void Send_CastSpell(this NetClient socket, int idx, ClientVersion version)
+        {
+            const byte ID = 0xBF;
+            const byte ID_OLD = 0x12;
+
+            byte id = version < ClientVersion.CV_60142 ? ID_OLD : ID;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(id);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            if (version >= ClientVersion.CV_60142)
+            {
+                writer.WriteUInt16BE(0x1C);
+                writer.WriteUInt16BE(0x02);
+                writer.WriteUInt16BE((ushort)idx);
+            }
+            else
+            {
+                writer.WriteUInt8(0x56);
+                writer.WriteASCII(idx.ToString());
+            }
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
     }
 }

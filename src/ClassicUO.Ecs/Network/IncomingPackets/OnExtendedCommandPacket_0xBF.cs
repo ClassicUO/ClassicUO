@@ -76,6 +76,15 @@ internal struct OnExtendedCommandPacket_0xBF : IPacket
     public RaceType? Race { get; private set; }
     public StatueAnimationData? StatueAnimation { get; private set; }
 
+    // Party (subcommand 0x06). PartyCode: 1 add, 2 remove, 3/4 message, 7 invite.
+    public byte? PartyCode { get; private set; }
+    public byte PartyCount { get; private set; }
+    public uint[] PartyMembers { get; private set; }
+    public uint? PartyRemovedSerial { get; private set; }
+    public uint? PartyMessageSerial { get; private set; }
+    public string PartyMessageText { get; private set; }
+    public uint? PartyInviter { get; private set; }
+
     public void Fill(StackDataReader reader)
     {
         Command = reader.ReadUInt16BE();
@@ -104,6 +113,13 @@ internal struct OnExtendedCommandPacket_0xBF : IPacket
         IsFemale = null;
         Race = null;
         StatueAnimation = null;
+        PartyCode = null;
+        PartyCount = 0;
+        PartyMembers = Array.Empty<uint>();
+        PartyRemovedSerial = null;
+        PartyMessageSerial = null;
+        PartyMessageText = null;
+        PartyInviter = null;
 
         switch (Command)
         {
@@ -122,6 +138,46 @@ internal struct OnExtendedCommandPacket_0xBF : IPacket
             case 4:
                 ClosedGumpSerial = reader.ReadUInt32BE();
                 ClosedGumpButton = reader.ReadInt32BE();
+                break;
+
+            case 6:
+                {
+                    byte code = reader.ReadUInt8();
+                    PartyCode = code;
+
+                    switch (code)
+                    {
+                        case 1:
+                        case 2:
+                            byte count = reader.ReadUInt8();
+                            PartyCount = count;
+                            // count <= 1 means disband — no member list follows.
+                            if (count > 1)
+                            {
+                                // Remove (code 2) prefixes the dropped serial; add
+                                // (code 1) does not. The member list (the new party
+                                // roster, leader first) follows either way.
+                                if (code == 2)
+                                    PartyRemovedSerial = reader.ReadUInt32BE();
+
+                                var members = new uint[count];
+                                for (int i = 0; i < count; i++)
+                                    members[i] = reader.ReadUInt32BE();
+                                PartyMembers = members;
+                            }
+                            break;
+
+                        case 3:
+                        case 4:
+                            PartyMessageSerial = reader.ReadUInt32BE();
+                            PartyMessageText = reader.ReadUnicodeBE();
+                            break;
+
+                        case 7:
+                            PartyInviter = reader.ReadUInt32BE();
+                            break;
+                    }
+                }
                 break;
 
             case 8:

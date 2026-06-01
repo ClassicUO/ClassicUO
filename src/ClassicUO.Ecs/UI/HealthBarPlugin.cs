@@ -43,6 +43,9 @@ internal struct HealthBarWindow
     // server with repeat requests if the entity churns in/out before the reply
     // lands (legacy HitsRequestStatus Pending/Received).
     public bool HpRequested;
+    // Which layout is currently built (party 3-bar vs normal). The rebuild
+    // system flips the layout when this diverges from PartyState.Contains.
+    public bool InParty;
 }
 
 // Carried by each fill bar (HP=0, Mana=1, Stam=2). Refresh resolves the
@@ -53,6 +56,9 @@ internal struct HealthBarFill
     public uint Serial;
     public byte Kind;
     public int BarWidth;
+    // Party bars tint the HP bar on poison/yellow (hue 63/353) instead of
+    // swapping the graphic, and keep the LINE_BLUE_PARTY sprite.
+    public bool Party;
 }
 
 // Carried by each red backing line. Out-of-range (the tracked mobile left the
@@ -78,6 +84,19 @@ internal readonly struct HealthBarPlugin : IPlugin
     private const ushort LINE_POISONED = 0x0808;
     private const ushort LINE_YELLOWHITS = 0x0809;
 
+    // Party-mode bar graphics (legacy LINE_RED_PARTY / LINE_BLUE_PARTY) and the
+    // two heal-spell buttons (Greater Heal 0x0938 / Cure 0x0939, shared hover
+    // 0x093A). Party bars fill 96px at 100%.
+    private const ushort LINE_RED_PARTY = 0x0028;
+    private const ushort LINE_BLUE_PARTY = 0x0029;
+    private const ushort HEAL1_NORMAL = 0x0938;
+    private const ushort HEAL2_NORMAL = 0x0939;
+    private const ushort HEAL_OVER = 0x093A;
+    private const int BAR_WIDTH_PARTY = 96;
+    // Greater Heal / Cure spell indices (legacy ButtonParty heal handlers).
+    private const int SPELL_GREATER_HEAL = 29;
+    private const int SPELL_CURE = 11;
+
     // Non-party bar fill spans 109px at 100% (legacy barW for the single-mobile
     // / player path). The name label hue is the legacy status text hue.
     private const int BAR_WIDTH = 109;
@@ -102,6 +121,7 @@ internal readonly struct HealthBarPlugin : IPlugin
         var interactFn = WindowInteractions;
         var refreshFn = Refresh;
         var despawnFn = Despawn;
+        var rebuildFn = RebuildOnPartyChange;
 
         app.AddSystem(openFn)
             .InStage(Stage.Update)
@@ -109,6 +129,13 @@ internal readonly struct HealthBarPlugin : IPlugin
             .Build();
 
         app.AddSystem(interactFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+            .Build();
+
+        // Rebuild a bar's layout when its party membership flips. Declared before
+        // Refresh so (declaration order preserved) the new bars fill same frame.
+        app.AddSystem(rebuildFn)
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
             .Build();
@@ -136,6 +163,7 @@ internal readonly struct HealthBarPlugin : IPlugin
         Res<GameContext> gameCtx,
         Res<UiZCounter> zCounter,
         Res<NetClient> net,
+        Res<PartyState> party,
         Local<ClickLatch> latch,
         HbInteractParams p)
     {
@@ -204,7 +232,7 @@ internal readonly struct HealthBarPlugin : IPlugin
                 spawn = new Vector2(n.Ref.Left.Value, n.Ref.Top.Value);
             }
             OpenForSerial(commands, builder.Value, assets.Value, gameCtx.Value, zCounter.Value,
-                net.Value, gameCtx.Value.PlayerSerial, spawn, center: false, p.Hb);
+                net.Value, party.Value, gameCtx.Value.PlayerSerial, spawn, center: false, p.Hb);
             DespawnSubtree(commands, target, p.Children);
         }
     }
@@ -246,6 +274,7 @@ internal readonly struct HealthBarPlugin : IPlugin
         Res<UiZCounter> zCounter,
         Res<NetClient> net,
         Res<ForcedWindowDrag> forcedDrag,
+        Res<PartyState> party,
         Local<HbDragState> drag,
         Query<Data<NetworkSerial>> serialQ,
         Query<Data<HealthBarWindow>> existingQ)
@@ -290,7 +319,7 @@ internal readonly struct HealthBarPlugin : IPlugin
         // to ForcedWindowDrag so WindowDragPlugin latches it onto the still-held
         // mouse next frame (the spawn is deferred).
         var newRoot = OpenForSerial(commands, builder.Value, assets.Value, gameCtx.Value, zCounter.Value,
-            net.Value, drag.Value.Serial, drag.Value.PressPos, center: true, existingQ);
+            net.Value, party.Value, drag.Value.Serial, drag.Value.PressPos, center: true, existingQ);
         if (newRoot != 0)
             forcedDrag.Value.Owner = newRoot;
     }
@@ -307,6 +336,7 @@ internal readonly struct HealthBarPlugin : IPlugin
         GameContext gameCtx,
         UiZCounter zCounter,
         NetClient net,
+        PartyState party,
         uint serial,
         Vector2 anchor,
         bool center,
@@ -325,13 +355,17 @@ internal readonly struct HealthBarPlugin : IPlugin
         net.Send_StatusRequest(serial);
 
         bool isPlayer = serial == gameCtx.PlayerSerial;
+        bool inParty = party.Contains(serial);
         ushort bgId = isPlayer ? BACKGROUND_NORMAL : BACKGROUND_MOBILE;
+        // Party bars are 115x55 with an invisible background (legacy bg Alpha=0);
+        // normal bars are sized to the bg sprite.
         ref readonly var bgInfo = ref assets.Gumps.GetGump(bgId);
+        Vector2 size = inParty ? new Vector2(115, 55) : new Vector2(bgInfo.UV.Width, bgInfo.UV.Height);
         var topLeft = center
-            ? new Vector2(anchor.X - bgInfo.UV.Width / 2f, anchor.Y - bgInfo.UV.Height / 2f)
+            ? new Vector2(anchor.X - size.X / 2f, anchor.Y - size.Y / 2f)
             : anchor;
 
-        return BuildWindow(commands, builder, assets, gameCtx, zCounter, topLeft, serial, bgId, isPlayer);
+        return BuildWindow(commands, builder, assets, gameCtx, zCounter, topLeft, serial, bgId, isPlayer, inParty);
     }
 
     private static ulong BuildWindow(
@@ -343,7 +377,8 @@ internal readonly struct HealthBarPlugin : IPlugin
         Vector2 spawnPos,
         uint serial,
         ushort bgId,
-        bool isPlayer)
+        bool isPlayer,
+        bool inParty)
     {
         // Double-click handling lives in WindowInteractions (UiPick over the raw
         // mouse), NOT a UiDoubleClick observer — Bevy pointer events route to the
@@ -351,21 +386,113 @@ internal readonly struct HealthBarPlugin : IPlugin
         // can steal over the bar cutouts. The drag/close gestures use UiPick for
         // the same reason (see the UO Gump contract).
         var root = builder.SpawnUOGump(commands, bgId, Vector3.UnitZ, spawnPos, zCounter)
-            .Insert(new HealthBarWindow { Serial = serial, IsPlayer = isPlayer })
+            .Insert(new HealthBarWindow { Serial = serial, IsPlayer = isPlayer, InParty = inParty })
             .Insert<UiContainsByBounds>();
         var rootId = root.Id;
 
-        int barHeight = assets.Gumps.GetGump(LINE_BLUE).UV.Height;
+        ConfigureRoot(commands, assets, rootId, bgId, spawnPos, inParty);
+        Populate(commands, builder, assets, gameCtx, rootId, serial, isPlayer, inParty);
+        return rootId;
+    }
+
+    // Set the root's box size + background render for the chosen layout. Party
+    // mode hides the background (legacy bg Alpha=0) and fixes the box at 115x55;
+    // normal mode keeps the bg sprite. Re-inserting Node/UiCustom replaces them,
+    // so this also re-shapes a window during a layout rebuild.
+    private static void ConfigureRoot(
+        Commands commands,
+        AssetsServer assets,
+        ulong rootId,
+        ushort bgId,
+        Vector2 spawnPos,
+        bool inParty)
+    {
+        ref readonly var bgInfo = ref assets.Gumps.GetGump(bgId);
+        Vector2 size = inParty ? new Vector2(115, 55) : new Vector2(bgInfo.UV.Width, bgInfo.UV.Height);
+
+        commands.Entity(rootId).Insert(new Node
+        {
+            Display = Display.Flex,
+            PositionType = PositionType.Absolute,
+            Left = Val.Px(spawnPos.X), Top = Val.Px(spawnPos.Y),
+            Width = Val.Px(size.X), Height = Val.Px(size.Y),
+        });
+
+        commands.Entity(rootId).Insert(new UiCustom
+        {
+            Data = new UOCustomRender
+            {
+                // None = nothing drawn but still hit-testable (UiContainsByBounds).
+                Kind = inParty ? UOCustomKind.None : UOCustomKind.Gump,
+                AssetId = bgId,
+                Hue = Vector3.UnitZ,
+            }
+        });
+    }
+
+    // Build the bars / name / heal buttons for the chosen layout under rootId.
+    private static void Populate(
+        Commands commands,
+        GumpBuilder builder,
+        AssetsServer assets,
+        GameContext gameCtx,
+        ulong rootId,
+        uint serial,
+        bool isPlayer,
+        bool inParty)
+    {
+        if (inParty)
+        {
+            int barHeight = assets.Gumps.GetGump(LINE_BLUE_PARTY).UV.Height;
+
+            // All party members show three bars (HP/Mana/Stam) at x=18.
+            AddBar(commands, builder, rootId, serial, 0, 18, 20, barHeight, LINE_RED_PARTY, LINE_BLUE_PARTY, BAR_WIDTH_PARTY, true);
+            AddBar(commands, builder, rootId, serial, 1, 18, 33, barHeight, LINE_RED_PARTY, LINE_BLUE_PARTY, BAR_WIDTH_PARTY, true);
+            AddBar(commands, builder, rootId, serial, 2, 18, 45, barHeight, LINE_RED_PARTY, LINE_BLUE_PARTY, BAR_WIDTH_PARTY, true);
+
+            // Greater Heal / Cure buttons down the left edge.
+            // Legacy Button(id, normal, pressed, over): Heal1 (0x0938,0x093A,0x0938).
+            var heal1 = builder.AddButton(commands, (HEAL1_NORMAL, HEAL_OVER, HEAL1_NORMAL), Vector3.UnitZ, new Vector2(0, 20));
+            var ver = gameCtx.ClientVersion;
+            heal1.Observe((On<UiClick> _, Res<NetClient> net) => net.Value.Send_CastSpell(SPELL_GREATER_HEAL, ver));
+            commands.AddChild(rootId, heal1.Id);
+
+            var heal2 = builder.AddButton(commands, (HEAL2_NORMAL, HEAL_OVER, HEAL2_NORMAL), Vector3.UnitZ, new Vector2(0, 33));
+            heal2.Observe((On<UiClick> _, Res<NetClient> net) => net.Value.Send_CastSpell(SPELL_CURE, ver));
+            commands.AddChild(rootId, heal2.Id);
+
+            // Name label (legacy font 3, Fixed). Player shows the static "Self"
+            // and is NOT live-refreshed (legacy keeps it). Width 120 (player) /
+            // 109 (other) per legacy.
+            ushort partyFont = (ushort)(3 | UoFontRuntime.AsciiFlag);
+            var partyColor = UoFontRuntime.AsciiHue(isPlayer ? (ushort)0x005A : NameHue);
+            var nameCmd = commands.Spawn()
+                .Insert(new Node
+                {
+                    PositionType = PositionType.Absolute,
+                    Left = Val.Px(0), Top = Val.Px(-2),
+                    Width = Val.Px(isPlayer ? 120 : 109), Height = Val.Px(50),
+                })
+                .Insert(new Text(isPlayer ? "Self" : string.Empty))
+                .Insert(new TextFont { FontId = partyFont, Size = 12 })
+                .Insert(new TextColor(partyColor));
+            if (!isPlayer)
+                nameCmd.Insert(new HealthBarNameText { Serial = serial });
+            commands.AddChild(rootId, nameCmd.Id);
+            return;
+        }
+
+        int normalBarH = assets.Gumps.GetGump(LINE_BLUE).UV.Height;
 
         if (isPlayer)
         {
-            AddBar(commands, builder, rootId, serial, 0, 34, 12, barHeight);
-            AddBar(commands, builder, rootId, serial, 1, 34, 25, barHeight);
-            AddBar(commands, builder, rootId, serial, 2, 34, 38, barHeight);
+            AddBar(commands, builder, rootId, serial, 0, 34, 12, normalBarH, LINE_RED, LINE_BLUE, BAR_WIDTH, false);
+            AddBar(commands, builder, rootId, serial, 1, 34, 25, normalBarH, LINE_RED, LINE_BLUE, BAR_WIDTH, false);
+            AddBar(commands, builder, rootId, serial, 2, 34, 38, normalBarH, LINE_RED, LINE_BLUE, BAR_WIDTH, false);
         }
         else
         {
-            AddBar(commands, builder, rootId, serial, 0, 34, 38, barHeight);
+            AddBar(commands, builder, rootId, serial, 0, 34, 38, normalBarH, LINE_RED, LINE_BLUE, BAR_WIDTH, false);
 
             var color = UoFontRuntime.AsciiHue(NameHue);
             ushort fontId = (ushort)(1 | UoFontRuntime.AsciiFlag);
@@ -382,8 +509,43 @@ internal readonly struct HealthBarPlugin : IPlugin
                 .Insert(new HealthBarNameText { Serial = serial });
             commands.AddChild(rootId, name.Id);
         }
+    }
 
-        return rootId;
+    // Rebuild a window's children when its party membership flips (join -> party
+    // 3-bar layout, leave -> normal). Mirrors legacy BaseHealthBarGump.
+    // UpdateContents (Clear + BuildGump) keyed on World.Party.Contains.
+    private static void RebuildOnPartyChange(
+        Commands commands,
+        Res<PartyState> party,
+        Res<GumpBuilder> builder,
+        Res<AssetsServer> assets,
+        Res<GameContext> gameCtx,
+        Query<Data<HealthBarWindow, Node>> windowsQ,
+        Query<Data<TinyEcs.Children>> childrenQ)
+    {
+        foreach (var (ent, win, node) in windowsQ)
+        {
+            bool desired = party.Value.Contains(win.Ref.Serial);
+            if (desired == win.Ref.InParty)
+                continue;
+
+            ulong rootId = ent.Ref;
+
+            // Drop the current children (bars / name / heal buttons).
+            if (childrenQ.Contains(rootId))
+            {
+                var (_, kids) = childrenQ.Get(rootId);
+                foreach (var cid in kids.Ref)
+                    DespawnSubtree(commands, cid, childrenQ);
+            }
+
+            ushort bgId = win.Ref.IsPlayer ? BACKGROUND_NORMAL : BACKGROUND_MOBILE;
+            var spawnPos = new Vector2(node.Ref.Left.Value, node.Ref.Top.Value);
+
+            ConfigureRoot(commands, assets.Value, rootId, bgId, spawnPos, desired);
+            Populate(commands, builder.Value, assets.Value, gameCtx.Value, rootId, win.Ref.Serial, win.Ref.IsPlayer, desired);
+            win.Ref.InParty = desired;
+        }
     }
 
     // Red backing line + the dynamic blue fill bar over it, at (x,y).
@@ -395,16 +557,20 @@ internal readonly struct HealthBarPlugin : IPlugin
         byte kind,
         int x,
         int y,
-        int barHeight)
+        int barHeight,
+        ushort redId,
+        ushort blueId,
+        int barWidth,
+        bool party)
     {
-        var red = builder.AddGump(commands, LINE_RED, Vector3.UnitZ, new Vector2(x, y))
+        var red = builder.AddGump(commands, redId, Vector3.UnitZ, new Vector2(x, y))
             .Insert(new HealthBarBackLine { Serial = serial });
         commands.AddChild(rootId, red.Id);
 
         // Width starts at 0 (empty) — refresh sets it from the stat the moment
         // the status packet lands.
-        var fill = builder.AddGumpTiled(commands, LINE_BLUE, Vector3.UnitZ, new Vector2(x, y), new Vector2(0, barHeight))
-            .Insert(new HealthBarFill { Serial = serial, Kind = kind, BarWidth = BAR_WIDTH });
+        var fill = builder.AddGumpTiled(commands, blueId, Vector3.UnitZ, new Vector2(x, y), new Vector2(0, barHeight))
+            .Insert(new HealthBarFill { Serial = serial, Kind = kind, BarWidth = barWidth, Party = party });
         commands.AddChild(rootId, fill.Id);
     }
 
@@ -445,9 +611,21 @@ internal readonly struct HealthBarPlugin : IPlugin
                 if (r != null)
                 {
                     var flags = flagsQ.Contains(ent) ? Get(flagsQ, ent).Value : Flags.None;
-                    r.AssetId = (flags & Flags.Poisoned) != 0 ? LINE_POISONED
-                              : (flags & Flags.YellowBar) != 0 ? LINE_YELLOWHITS
-                              : LINE_BLUE;
+                    if (fill.Ref.Party)
+                    {
+                        // Party HP bar keeps the LINE_BLUE_PARTY sprite and tints
+                        // it (legacy _bars[0].Hue = 63 lime / 353 orange).
+                        r.AssetId = LINE_BLUE_PARTY;
+                        r.Hue = (flags & Flags.Poisoned) != 0 ? ToShaderHue(63)
+                              : (flags & Flags.YellowBar) != 0 ? ToShaderHue(353)
+                              : Vector3.UnitZ;
+                    }
+                    else
+                    {
+                        r.AssetId = (flags & Flags.Poisoned) != 0 ? LINE_POISONED
+                                  : (flags & Flags.YellowBar) != 0 ? LINE_YELLOWHITS
+                                  : LINE_BLUE;
+                    }
                 }
             }
         }
@@ -493,6 +671,10 @@ internal readonly struct HealthBarPlugin : IPlugin
                 }
                 win.Ref.OutOfRange = !inRange;
             }
+
+            // Party bars have no background sprite (render kind None) — leave it.
+            if (win.Ref.InParty)
+                continue;
 
             if (win.Ref.IsPlayer)
             {

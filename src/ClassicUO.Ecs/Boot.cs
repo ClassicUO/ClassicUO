@@ -42,11 +42,16 @@ internal readonly struct CuoPlugin : IPlugin
         app.AddPlugin<JournalPlugin>();
         app.AddPlugin<StatusBarPlugin>();
         app.AddPlugin<HealthBarPlugin>();
+        app.AddPlugin<PartyPlugin>();
+        app.AddPlugin<PartyGumpPlugin>();
 
         app.AddPlugin<NetworkPlugin>();
         app.AddPlugin<GameplayPlugin>();
-        app.AddPlugin<TargetingPlugin>();
         app.AddPlugin<RenderingPlugin>();
+        // After RenderingPlugin: TargetingPlugin's cursor render system orders
+        // .After("cuo:gui_rendering"), a label RenderingPlugin's GuiRenderingPlugin
+        // child registers. The label must exist before TargetingPlugin.Build runs.
+        app.AddPlugin<TargetingPlugin>();
 
         app.AddPlugin<ModdingPlugin>();
 

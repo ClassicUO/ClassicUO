@@ -41,7 +41,7 @@ namespace ClassicUO.Configuration
         public int CounterBarCellSize { get; set; } = 40;
 
         // --- party / shop / grid loot ---
-        public bool PartyInviteGump { get; set; }
+        public bool PartyInviteGump { get; set; } = true;
         public int VendorGumpHeight { get; set; } = 60;
         public int GridLootType { get; set; }                            // 0=none, 1=grid only, 2=both
     }

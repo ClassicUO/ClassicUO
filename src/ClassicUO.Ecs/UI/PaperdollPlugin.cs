@@ -414,12 +414,24 @@ internal readonly struct PaperdollPlugin : IPlugin
             if (isPlayer)
             {
                 // Party manifest gump (0x07D2 again, second slot). OOP opens
-                // PartyGump on left double-click — ECS has no party UI yet.
+                // PartyGump on left double-click.
                 int partyX = profileX + 14;
                 var partyPic = builder.AddGump(commands, 0x07D2, Vector3.UnitZ, new Vector2(partyX, 196))
                     .Insert(Interaction.None);
-                partyPic.Observe((On<UiDoubleClick> _) =>
-                    Console.WriteLine("[Paperdoll] Party manifest clicked — no ECS PartyGump"));
+                partyPic.Observe((On<UiDoubleClick> _,
+                                  Commands cmd,
+                                  Res<GumpBuilder> gb,
+                                  Res<AssetsServer> a,
+                                  Res<UiZCounter> z,
+                                  Res<PartyState> party,
+                                  Res<GameContext> ctx,
+                                  Res<NetworkEntitiesMap> map,
+                                  Query<Data<EntityName>> names,
+                                  Query<Data<PartyManifestWindow>> existing) =>
+                {
+                    PartyGumpPlugin.OpenOrFocus(cmd, gb.Value, a.Value, z.Value, party.Value,
+                        ctx.Value.PlayerSerial, map.Value, names, existing);
+                });
                 commands.AddChild(root.Id, partyPic.Id);
             }
         }
