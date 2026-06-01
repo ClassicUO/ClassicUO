@@ -21,6 +21,7 @@ namespace ClassicUO.Ecs;
 internal struct SpellbookWindow
 {
     public uint Serial;
+    public SpellBookType School;
     public int Page;          // current spread (0-based); each spread = 2 pages
     public int PageCount;
     public int BuiltRevision;
@@ -32,8 +33,8 @@ internal struct SpellbookWindow
 internal struct SpellEntryClick { public int SpellId; }
 internal struct SpellLabel;
 internal struct SpellbookCorner { public ulong Window; public int Dir; }
-internal struct SpellIconDrag { public int SpellId; }
-internal struct SpellCastButton { public int SpellId; }
+internal struct SpellIconDrag { public int CastId; public ushort Icon; }
+internal struct SpellCastButton { public int CastId; }
 
 internal readonly struct SpellbookGumpPlugin : IPlugin
 {
@@ -78,6 +79,7 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
         Res<GumpBuilder> builder,
         Res<AssetsServer> assets,
         Res<UiZCounter> zCounter,
+        Res<SpellbookStore> store,
         EventReader<ContainerOpenedEvent> reader,
         Query<Data<SpellbookWindow>> existingQ)
     {
@@ -95,20 +97,26 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
             }
             if (focused) continue;
 
-            Build(commands, builder.Value, assets.Value, zCounter.Value, ev.Serial);
+            // School comes from the content packet (resolved on item graphic).
+            // Real servers push 0xBF 0x1B before the 0x24 open, so the store
+            // entry exists here; default to Magery if it somehow doesn't.
+            var schoolType = store.Value.BySerial.TryGetValue(ev.Serial, out var data)
+                ? data.School : SpellBookType.Magery;
+            Build(commands, builder.Value, assets.Value, zCounter.Value, ev.Serial, schoolType);
         }
     }
 
-    private static void Build(Commands commands, GumpBuilder builder, AssetsServer assets, UiZCounter zCounter, uint serial)
+    private static void Build(Commands commands, GumpBuilder builder, AssetsServer assets, UiZCounter zCounter, uint serial, SpellBookType schoolType)
     {
+        var school = SpellSchools.Get(schoolType);
         var pos = new Vector2(100, 100);
-        var root = builder.SpawnUOGump(commands, MageryBook.BookGraphic, Vector3.UnitZ, pos, zCounter);
-        int bookW = GumpW(assets, MageryBook.BookGraphic);
+        var root = builder.SpawnUOGump(commands, school.BookGraphic, Vector3.UnitZ, pos, zCounter);
+        int bookW = GumpW(assets, school.BookGraphic);
 
         // Content container FIRST so the controls added after it paint/hit-test
         // on top — corners added before it never received clicks.
         var content = commands.Spawn()
-            .Insert(new Node { PositionType = PositionType.Absolute, Left = Val.Px(0), Top = Val.Px(0), Width = Val.Px(bookW), Height = Val.Px(GumpH(assets, MageryBook.BookGraphic)) });
+            .Insert(new Node { PositionType = PositionType.Absolute, Left = Val.Px(0), Top = Val.Px(0), Width = Val.Px(bookW), Height = Val.Px(GumpH(assets, school.BookGraphic)) });
         commands.AddChild(root.Id, content.Id);
 
         // Page corners (flip). The curled-page sprites are mostly transparent, so
@@ -124,25 +132,29 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
         commands.AddChild(root.Id, right.Id);
 
         // Circle buttons (0x08B1..0x08B8) along the bottom — jump to the index
-        // spread holding that circle. Positions mirror legacy CreateBook.
-        ReadOnlySpan<int> bx = stackalloc int[] { 58, 93, 130, 164, 227, 260, 297, 332 };
-        for (int b = 0; b < 8; b++)
+        // spread holding that circle. Magery only; mirrors legacy CreateBook.
+        if (school.HasCircles)
         {
-            ushort g = (ushort)(0x08B1 + b);
-            int spread = b / 2;
-            var cb = builder.AddGump(commands, g, Vector3.UnitZ, new Vector2(bx[b], 175))
-                .Insert(Interaction.None).Insert<UINoWindowDrag>().Insert<UiContainsByBounds>();
-            cb.Observe((On<UiClick> _, Query<Data<SpellbookWindow>> wq) =>
+            ReadOnlySpan<int> bx = stackalloc int[] { 58, 93, 130, 164, 227, 260, 297, 332 };
+            for (int b = 0; b < 8; b++)
             {
-                foreach (var (_, w) in wq)
-                    if (w.Ref.Serial == serial && w.Ref.Page != spread) { w.Ref.Page = spread; w.Ref.Dirty = true; }
-            });
-            commands.AddChild(root.Id, cb.Id);
+                ushort g = (ushort)(0x08B1 + b);
+                int spread = b / 2;
+                var cb = builder.AddGump(commands, g, Vector3.UnitZ, new Vector2(bx[b], 175))
+                    .Insert(Interaction.None).Insert<UINoWindowDrag>().Insert<UiContainsByBounds>();
+                cb.Observe((On<UiClick> _, Query<Data<SpellbookWindow>> wq) =>
+                {
+                    foreach (var (_, w) in wq)
+                        if (w.Ref.Serial == serial && w.Ref.Page != spread) { w.Ref.Page = spread; w.Ref.Dirty = true; }
+                });
+                commands.AddChild(root.Id, cb.Id);
+            }
         }
 
         commands.Entity(root.Id).Insert(new SpellbookWindow
         {
             Serial = serial,
+            School = schoolType,
             Page = 0,
             BuiltRevision = -1,
             Dirty = true,
@@ -170,21 +182,30 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
             win.Ref.Dirty = false;
             win.Ref.BuiltRevision = store.Value.Revision;
 
+            var school = SpellSchools.Get(win.Ref.School);
+            int maxSpells = school.MaxSpells;
+
             ulong bits = 0;
             if (store.Value.BySerial.TryGetValue(win.Ref.Serial, out var data)) bits = data.Bitfields;
 
             // Ordered list of present spells + id -> present-index map (for the
             // index "click name → open that spell's page" jump).
-            Span<int> present = stackalloc int[MageryBook.MaxSpells];
-            Span<int> presentIdx = stackalloc int[MageryBook.MaxSpells + 1];
+            Span<int> present = stackalloc int[maxSpells];
+            Span<int> presentIdx = stackalloc int[maxSpells + 1];
             presentIdx.Fill(-1);
             int count = 0;
-            for (int id = 1; id <= MageryBook.MaxSpells; id++)
+            for (int id = 1; id <= maxSpells; id++)
                 if ((bits & (1UL << (id - 1))) != 0) { presentIdx[id] = count; present[count++] = id; }
 
-            const int IndexSpreads = 4;             // 8 circles, 2 per spread
+            // Index pages cover the whole spell list, spellsPerPage per side.
+            // pagesToFill / spellsOnPage mirror legacy GetBookInfo.
+            int dictPages = (int)Math.Ceiling(maxSpells / 8.0);
+            if (dictPages % 2 != 0) dictPages++;
+            int indexSpreads = dictPages >> 1;
+            int spellsPerPage = Math.Min(maxSpells >> 1, 8);
+
             int infoSpreads = (count + 1) / 2;       // 2 spells per spread
-            win.Ref.PageCount = IndexSpreads + infoSpreads;
+            win.Ref.PageCount = indexSpreads + infoSpreads;
             win.Ref.Page = Math.Clamp(win.Ref.Page, 0, Math.Max(0, win.Ref.PageCount - 1));
 
             var content = win.Ref.ContentEntity;
@@ -195,30 +216,34 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
                 foreach (var cid in kids.Ref) commands.Entity(cid).Despawn();
             }
 
-            if (win.Ref.Page < IndexSpreads)
+            if (win.Ref.Page < indexSpreads)
             {
-                // INDEX layout: per side, "INDEX" title + circle name + the
-                // present spells of that circle. Single-click a name opens its
-                // spell page; double-click casts.
+                // INDEX layout: per side, "INDEX" title (+ circle name for
+                // Magery) then the present spells of that id-range. Single-click
+                // a name opens its spell page; double-click casts.
                 for (int j = 0; j < 2; j++)
                 {
-                    int circle = win.Ref.Page * 2 + j;
-                    if (circle >= MageryBook.CircleNames.Length) continue;
+                    int sideBase = (win.Ref.Page * 2 + j) * spellsPerPage; // 0-based id index
 
                     int indexX = j == 0 ? 106 : 269;
                     int dataX = j == 0 ? 62 : 225;
                     AddText(commands, content, "INDEX", 6, indexX, 10);
-                    AddText(commands, content, MageryBook.CircleNames[circle], 6, dataX, 30);
+                    if (school.HasCircles)
+                    {
+                        int circle = win.Ref.Page * 2 + j;
+                        if (circle < school.CircleNames.Length)
+                            AddText(commands, content, school.CircleNames[circle], 6, dataX, 30);
+                    }
 
                     int y = 0;
-                    for (int k = 0; k < 8; k++)
+                    for (int k = 0; k < spellsPerPage; k++)
                     {
-                        int id = circle * 8 + k + 1;
-                        if (id > MageryBook.MaxSpells || presentIdx[id] < 0) continue;
+                        int id = sideBase + k + 1;
+                        if (id > maxSpells || presentIdx[id] < 0) continue;
 
-                        int castId = id;
-                        int targetPage = IndexSpreads + presentIdx[id] / 2;
-                        var name = SpawnSpellLabel(commands, MageryBook.Name(id), 9, dataX, 52 + y, 130);
+                        int castId = school.CastId(id);
+                        int targetPage = indexSpreads + presentIdx[id] / 2;
+                        var name = SpawnSpellLabel(commands, school.Name(id), 9, dataX, 52 + y, 130);
                         name.Observe((On<UiClick> _, Query<Data<SpellbookWindow>> wq) =>
                         {
                             foreach (var (_, w) in wq)
@@ -234,9 +259,9 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
             else
             {
                 // SPELL pages: two spells per spread, each with its gump icon,
-                // circle name, spell name and power words. Double-click the icon
-                // or name to cast.
-                int baseP = (win.Ref.Page - IndexSpreads) * 2;
+                // header, name + power words, optional reagents and a mana/skill
+                // requirement line. Double-click the icon or name to cast.
+                int baseP = (win.Ref.Page - indexSpreads) * 2;
                 for (int side = 0; side < 2; side++)
                 {
                     int p = baseP + side;
@@ -245,33 +270,60 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
                     int iconX = side == 0 ? 62 : 225;
                     int topTextX = side == 0 ? 87 : 224;
                     int iconTextX = side == 0 ? 112 : 275;
-                    int castId = id;
+                    int castId = school.CastId(id);
+                    ushort iconGfx = school.Icon(id);
 
-                    var icon = builder.Value.AddGump(commands, MageryBook.Icon(id), Vector3.UnitZ, new Vector2(iconX, 40))
+                    var icon = builder.Value.AddGump(commands, iconGfx, Vector3.UnitZ, new Vector2(iconX, 40))
                         .Insert(Interaction.None).Insert<UINoWindowDrag>().Insert<UiContainsByBounds>()
-                        .Insert(new SpellIconDrag { SpellId = id });
+                        .Insert(new SpellIconDrag { CastId = castId, Icon = iconGfx });
                     icon.Observe((On<UiDoubleClick> _, Res<NetClient> net, Res<GameContext> ctx) =>
                         net.Value.Send_CastSpell(castId, ctx.Value.ClientVersion));
                     commands.AddChild(content, icon.Id);
 
-                    AddText(commands, content, MageryBook.CircleNames[MageryBook.Circle(id)], 6, topTextX, 10);
-
-                    var nm = SpawnSpellLabel(commands, MageryBook.Name(id), 6, iconTextX, 34, 90);
+                    EntityCommands nm;
+                    if (school.HasCircles)
+                    {
+                        AddText(commands, content, school.CircleNames[school.Circle(id)], 6, topTextX, 10);
+                        nm = SpawnSpellLabel(commands, school.Name(id), 6, iconTextX, 34, 90);
+                        AddText(commands, content, school.PowerWord(id), 8, iconTextX, 60);
+                    }
+                    else
+                    {
+                        nm = SpawnSpellLabel(commands, school.Name(id), 6, topTextX, 6, 130);
+                        if (school.PowerWord(id).Length != 0)
+                            AddText(commands, content, school.PowerWord(id), 8, iconTextX, 34);
+                    }
                     nm.Observe((On<UiDoubleClick> _, Res<NetClient> net, Res<GameContext> ctx) =>
                         net.Value.Send_CastSpell(castId, ctx.Value.ClientVersion));
                     commands.AddChild(content, nm.Id);
 
-                    // Power words in the runic font (8), like legacy.
-                    AddText(commands, content, MageryBook.PowerWord(id), 8, iconTextX, 60);
+                    if (school.ShowReagents)
+                    {
+                        var reagents = school.Reagent(id);
+                        if (reagents.Length != 0)
+                        {
+                            // Dotted divider, "Reagents" header, then the names stacked.
+                            var div = builder.Value.AddGumpTiled(commands, 0x0835, Vector3.UnitZ, new Vector2(iconX, 88), new Vector2(120, 5));
+                            commands.AddChild(content, div.Id);
+                            AddText(commands, content, "Reagents", 6, iconX, 92);
+                            var regs = reagents.Split(", ", StringSplitOptions.RemoveEmptyEntries);
+                            for (int r = 0; r < regs.Length; r++)
+                                AddText(commands, content, regs[r], 9, iconX, 110 + r * 14);
+                        }
+                    }
 
-                    // Reagents: a dotted divider, the "Reagents" header, then the
-                    // reagent names stacked (mirrors legacy spell page).
-                    var div = builder.Value.AddGumpTiled(commands, 0x0835, Vector3.UnitZ, new Vector2(iconX, 88), new Vector2(120, 5));
-                    commands.AddChild(content, div.Id);
-                    AddText(commands, content, "Reagents", 6, iconX, 92);
-                    var regs = MageryBook.Reagent(id).Split(", ", StringSplitOptions.RemoveEmptyEntries);
-                    for (int r = 0; r < regs.Length; r++)
-                        AddText(commands, content, regs[r], 9, iconX, 110 + r * 14);
+                    if (school.ShowRequires)
+                    {
+                        // Mana cost / min skill (+ upkeep for tithing schools).
+                        int reqY = 162;
+                        int tithing = school.TithingCost[id - 1];
+                        if (tithing > 0)
+                        {
+                            AddText(commands, content, $"Upkeep Cost: {tithing}", 6, iconX, 148);
+                        }
+                        AddText(commands, content, $"Mana cost: {school.ManaCost[id - 1]}", 6, iconX, reqY);
+                        AddText(commands, content, $"Min. Skill: {school.MinSkill[id - 1]}", 6, iconX, reqY + 14);
+                    }
                 }
             }
         }
@@ -347,7 +399,7 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
         => p.X >= bb.Position.X && p.Y >= bb.Position.Y
         && p.X < bb.Position.X + bb.Size.X && p.Y < bb.Position.Y + bb.Size.Y;
 
-    private struct IconDragAnchor { public bool Active, Claimed, Spawned; public int SpellId; public Vector2 Start; }
+    private struct IconDragAnchor { public bool Active, Claimed, Spawned; public int CastId; public ushort Icon; public Vector2 Start; }
 
     // Drag a spell icon off the page to make a standalone "cast button" (same
     // page icon) that rides the cursor immediately and drops where released —
@@ -383,7 +435,8 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
                 if (!Contains(bb.Ref, pos)) continue;
                 anchor.Value.Active = true;
                 anchor.Value.Claimed = true;
-                anchor.Value.SpellId = ic.Ref.SpellId;
+                anchor.Value.CastId = ic.Ref.CastId;
+                anchor.Value.Icon = ic.Ref.Icon;
                 anchor.Value.Start = pos;
                 gate.Value.Mode = ActiveDrag.UIWindow;
                 break;
@@ -396,15 +449,16 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
             && (mouse.Value.Position - anchor.Value.Start).Length() > 6f)
         {
             var pos = mouse.Value.Position;
-            int castId = anchor.Value.SpellId;
+            int castId = anchor.Value.CastId;
+            ushort iconGfx = anchor.Value.Icon;
 
             // Only one floating button per spell — drop the old one first
             // (legacy GetSpellFloatingButton(id)?.Dispose()).
             foreach (var (ent, b) in existingButtonsQ)
-                if (b.Ref.SpellId == castId) commands.Entity(ent.Ref).Despawn();
+                if (b.Ref.CastId == castId) commands.Entity(ent.Ref).Despawn();
 
-            var fb = builder.Value.SpawnUOGump(commands, MageryBook.Icon(castId), Vector3.UnitZ, new Vector2(pos.X - 22, pos.Y - 22), z.Value)
-                .Insert(new SpellCastButton { SpellId = castId });
+            var fb = builder.Value.SpawnUOGump(commands, iconGfx, Vector3.UnitZ, new Vector2(pos.X - 22, pos.Y - 22), z.Value)
+                .Insert(new SpellCastButton { CastId = castId });
             fb.Observe((On<UiDoubleClick> _, Res<NetClient> net, Res<GameContext> ctx) =>
                 net.Value.Send_CastSpell(castId, ctx.Value.ClientVersion));
 

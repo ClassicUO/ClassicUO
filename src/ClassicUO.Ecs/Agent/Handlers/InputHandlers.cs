@@ -48,20 +48,30 @@ internal static class InputHandlers
         d.Register("debug.openSpellbook", DebugOpenSpellbook);
     }
 
-    // Test-only: deterministically open a Magery spellbook without a server item.
+    // Test-only: deterministically open a spellbook without a server item.
     // Populates SpellbookStore with the given (or full) spell mask and fires the
-    // ContainerOpenedEvent the 0x24 0xFFFF path would. Handlers run on the game
-    // thread (see AgentRpcContext) so direct resource/event access is safe.
+    // ContainerOpenedEvent the 0x24 0xFFFF path would. Optional "graphic" param
+    // selects the school via the item graphic (default 0x0EFA == Magery); "bits"
+    // sets the present-spell mask. Handlers run on the game thread (see
+    // AgentRpcContext) so direct resource/event access is safe.
     public static JsonRpcResponse DebugOpenSpellbook(JsonRpcRequest req, in AgentRpcContext<App> ctx)
     {
-        uint serial = 0x40000001;
-        ulong bits = ulong.MaxValue; // all 64 Magery spells present
-        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object
-            && p.TryGetProperty("bits", out var bEl) && bEl.TryGetUInt64(out var b))
-            bits = b;
+        ulong bits = ulong.MaxValue; // all spells present
+        ushort graphic = 0x0EFA;     // Magery spellbook item graphic
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object)
+        {
+            if (p.TryGetProperty("bits", out var bEl) && bEl.TryGetUInt64(out var b))
+                bits = b;
+            if (p.TryGetProperty("graphic", out var gEl) && gEl.TryGetUInt16(out var g))
+                graphic = g;
+        }
+
+        // Distinct serial per graphic so each school opens its own window (a real
+        // server gives every spellbook item its own serial).
+        uint serial = 0x40000000u | graphic;
 
         var store = ctx.Runtime.GetResource<SpellbookStore>();
-        store.BySerial[serial] = new SpellbookData { Type = 1, Bitfields = bits };
+        store.BySerial[serial] = new SpellbookData { School = SpellSchools.Resolve(graphic), Bitfields = bits };
         store.Revision++;
         ctx.Runtime.SendEvent(new ContainerOpenedEvent(serial, 0xFFFF));
         return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true } };

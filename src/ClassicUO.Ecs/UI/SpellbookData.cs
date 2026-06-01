@@ -1,7 +1,8 @@
 // Spellbook content store + Magery spell table. The 0x24 (graphic 0xFFFF) open
 // and the 0xBF 0x1B content packet feed SpellbookStore; SpellbookGumpPlugin
-// renders the book from it. Only Magery is ported for now (the common case);
-// other schools fall back to Magery layout until their tables are added.
+// renders the book from it. The school is resolved from the item graphic in the
+// content packet (see SpellSchools.Resolve); per-school data lives in
+// UI/Spellbook/*SpellData.cs + SpellbookSchools.cs.
 
 using System.Collections.Generic;
 
@@ -9,8 +10,8 @@ namespace ClassicUO.Ecs;
 
 internal struct SpellbookData
 {
-    public ushort Type;        // server spellbook type (1 == Magery offset table)
-    public ulong Bitfields;    // 64-bit "spell present" mask (bit i => spell i+1)
+    public SpellBookType School;   // resolved from the content packet's item graphic
+    public ulong Bitfields;        // 64-bit "spell present" mask (bit i => spell i+1)
 }
 
 // serial -> contents, populated by the 0xBF 0x1B observer. SpellbookGumpPlugin

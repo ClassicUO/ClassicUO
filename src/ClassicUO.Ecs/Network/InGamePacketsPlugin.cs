@@ -536,7 +536,7 @@ readonly struct InGamePacketsPlugin : IPlugin
         {
             var sc = packet.SpellbookContent.Value;
             ulong bits = sc.SpellBitfields[0] | ((ulong)sc.SpellBitfields[1] << 32);
-            spellbooks.Value.BySerial[sc.Serial] = new SpellbookData { Type = sc.Type, Bitfields = bits };
+            spellbooks.Value.BySerial[sc.Serial] = new SpellbookData { School = SpellSchools.Resolve(sc.Graphic), Bitfields = bits };
             spellbooks.Value.Revision++;
         }
 
