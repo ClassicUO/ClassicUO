@@ -31,10 +31,6 @@ internal sealed class PartyState
     public bool CanLoot;
     public readonly uint[] Members = new uint[PartySize];
 
-    // Bumped on every roster change so open party UI (the manifest) can detect
-    // it needs to rebuild without diffing the member array itself.
-    public int Revision;
-
     public bool Contains(uint serial)
     {
         if (serial == 0)
@@ -140,7 +136,9 @@ internal readonly struct PartyPlugin : IPlugin
             case 2: // remove
             {
                 bool isRemove = packet.PartyCode.Value == 2;
-                st.Revision++; // roster changed — open manifest rebuilds
+                // Roster/leader changed — tag an open manifest for rebuild.
+                foreach (var (e, _) in p.Manifests)
+                    commands.Entity(e.Ref).Insert<PartyManifestDirty>();
 
                 // count <= 1: the party fell apart entirely.
                 if (packet.PartyCount <= 1)
@@ -281,13 +279,15 @@ internal readonly struct PartyPlugin : IPlugin
         var accept = AddTextButton(commands, "Accept");
         commands.AddChild(rowId, accept.Id);
         accept.Observe((On<UiClick> _, Res<NetClient> net, ResMut<PartyState> party, Commands cmd,
-                        Query<Data<PartyInviteWindow>> wins) =>
+                        Query<Data<PartyInviteWindow>> wins,
+                        Query<Data<PartyManifestWindow>> manifests) =>
         {
             if (party.Value.Inviter != 0 && party.Value.Leader == 0)
             {
                 net.Value.Send_PartyAccept(party.Value.Inviter);
-                party.Value.Leader = party.Value.Inviter;
+                party.Value.Leader = party.Value.Inviter; // leader flip w/o packet
                 party.Value.Inviter = 0;
+                foreach (var (m, _) in manifests) cmd.Entity(m.Ref).Insert<PartyManifestDirty>();
             }
             foreach (var (e, _) in wins) cmd.Entity(e.Ref).Despawn();
         });
@@ -344,7 +344,8 @@ internal readonly struct PartyPlugin : IPlugin
         Res<UiZCounter> zCounter,
         Res<NetClient> net,
         Query<Data<NetworkSerial>, Filter<With<Hits>>> mobilesQ,
-        Query<Data<HealthBarWindow>> existingQ)
+        Query<Data<HealthBarWindow>> existingQ,
+        Query<Data<PartyManifestWindow>> manifestsQ)
     {
         if (done.Value)
             return;
@@ -368,7 +369,8 @@ internal readonly struct PartyPlugin : IPlugin
                 break;
             st.Members[idx++] = s;
         }
-        st.Revision++; // let an already-open manifest pick up the debug roster
+        foreach (var (m, _) in manifestsQ)
+            commands.Entity(m.Ref).Insert<PartyManifestDirty>();
 
         int col = 0;
         for (int i = 0; i < PartyState.PartySize; i++)
@@ -392,11 +394,13 @@ internal sealed class PartyPacketParams : CompositeSystemParam
     public readonly EventWriter<TextOverheadEvent> Overhead;
     public readonly Query<Data<EntityName>> Names;
     public readonly Query<Data<PartyInviteWindow>> Invites;
+    public readonly Query<Data<PartyManifestWindow>> Manifests;
 
     public PartyPacketParams()
     {
         Overhead = Add(new EventWriter<TextOverheadEvent>());
         Names = Add(new Query<Data<EntityName>>());
         Invites = Add(new Query<Data<PartyInviteWindow>>());
+        Manifests = Add(new Query<Data<PartyManifestWindow>>());
     }
 }

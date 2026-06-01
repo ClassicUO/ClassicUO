@@ -15,14 +15,12 @@ namespace ClassicUO.Ecs;
 internal struct PartyManifestWindow
 {
     public bool CanLoot;
-    // PartyState.Revision the rows were last built from; the refresh system
-    // rebuilds the rows when the roster moves past this.
-    public int LastRevision;
-    // Leader the rows were last built for. Leadership decides the Kick / Add
-    // buttons and the Leave-vs-Disband label, and can flip without a roster
-    // change (e.g. accepting an invite), so it's tracked separately.
-    public uint LastLeader;
 }
+
+// Set on the open manifest by party mutation sites (roster add/remove, leader
+// flip) to request a row rebuild. Consumed + removed by RebuildDirtyManifests.
+// Observer-driven instead of a per-frame revision compare.
+internal struct PartyManifestDirty;
 
 // A manifest member-name label. Its text is resolved live every frame (the
 // member's name often arrives after they join), mirroring legacy
@@ -40,7 +38,7 @@ internal readonly struct PartyGumpPlugin : IPlugin
 
     public void Build(App app)
     {
-        var refreshFn = RefreshOnPartyChange;
+        var refreshFn = RebuildDirtyManifests;
         app.AddSystem(refreshFn)
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
@@ -57,9 +55,10 @@ internal readonly struct PartyGumpPlugin : IPlugin
         app.AddSystem(despawnFn).OnExit(GameState.GameScreen).Build();
     }
 
-    // Rebuild the open manifest's rows when the roster changed (member added /
-    // removed). Mirrors legacy UIManager.GetGump<PartyGump>()?.RequestUpdateContents().
-    private static void RefreshOnPartyChange(
+    // Rebuild the rows of any manifest tagged PartyManifestDirty (roster / leader
+    // changed). Only touches tagged windows — no per-frame state compare. Mirrors
+    // legacy UIManager.GetGump<PartyGump>()?.RequestUpdateContents().
+    private static void RebuildDirtyManifests(
         Commands commands,
         Res<PartyState> party,
         Res<GumpBuilder> builder,
@@ -67,14 +66,11 @@ internal readonly struct PartyGumpPlugin : IPlugin
         Res<GameContext> gameCtx,
         Res<NetworkEntitiesMap> entities,
         Query<Data<EntityName>> nameQ,
-        Query<Data<PartyManifestWindow>> windowsQ,
+        Query<Data<PartyManifestWindow>, Filter<With<PartyManifestDirty>>> windowsQ,
         Query<Data<TinyEcs.Children>> childrenQ)
     {
         foreach (var (ent, win) in windowsQ)
         {
-            if (win.Ref.LastRevision == party.Value.Revision && win.Ref.LastLeader == party.Value.Leader)
-                continue;
-
             ulong rootId = ent.Ref;
             if (childrenQ.Contains(rootId))
             {
@@ -85,8 +81,7 @@ internal readonly struct PartyGumpPlugin : IPlugin
 
             Populate(commands, builder.Value, assets.Value, gameCtx.Value.PlayerSerial,
                 party.Value, entities.Value, nameQ, rootId, win.Ref.CanLoot);
-            win.Ref.LastRevision = party.Value.Revision;
-            win.Ref.LastLeader = party.Value.Leader;
+            commands.Entity(rootId).Remove<PartyManifestDirty>();
         }
     }
 
@@ -132,7 +127,7 @@ internal readonly struct PartyGumpPlugin : IPlugin
                 Width = Val.Px(450), Height = Val.Px(480),
             })
             .Insert(Interaction.None)
-            .Insert(new PartyManifestWindow { CanLoot = canLoot, LastRevision = party.Revision, LastLeader = party.Leader })
+            .Insert(new PartyManifestWindow { CanLoot = canLoot })
             .Insert<UIMovable>()
             .Insert<UiContainsByBounds>()
             .Insert(new GlobalZIndex(zCounter.Bump()));
