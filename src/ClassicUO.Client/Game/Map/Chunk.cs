@@ -403,11 +403,15 @@ namespace ClassicUO.Game.Map
                 }
             }
 
-            if (Node.Next != null || Node.Previous != null)
+            if (Node != null)
             {
-                Node.List?.Remove(Node);
+                if (Node.Next != null || Node.Previous != null)
+                {
+                    Node.List?.Remove(Node);
+                }
+
+                Node = null;
             }
-            Node = null;
 
             IsDestroyed = true;
 
