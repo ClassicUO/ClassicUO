@@ -9,8 +9,9 @@
 // Drag / right-click-close / z-stack / pixel-hit come free from UIMovable +
 // UOGumpBundle + the new UiHitTest.MiniMap case (shares the bg-gump mask).
 //
-// v1 scope vs legacy: LAND-only radar. Statics + live multis need the Chunk
-// tile-grid that ECS doesn't model as a grid (spec open question — deferred).
+// Radar = land + statics (statics read straight from the statics file per block,
+// topmost-Z wins the pixel — same as the land walk). Live multis (placed houses)
+// still need the Chunk tile-grid ECS doesn't model, so they don't show yet.
 // Mobile dots are drawn red (no Notoriety component in ECS yet) — notoriety
 // hueing is deferred until a Notoriety component is persisted from packets.
 
@@ -207,15 +208,21 @@ internal readonly struct MiniMapPlugin : IPlugin
         payload.Dynamic = state.Texture;
     }
 
-    // Land-only radar bake. Mirrors MiniMapGump.CreateMiniMapTexture: walk the
-    // map blocks around the player, project each cell isometrically, and stamp a
-    // 2px vertical radar-coloured mark over the blank sentinel pixels.
+    // Topmost static per cell while baking a block (legacy ColorInfo).
+    private struct MiniMapCell { public ushort Color; public sbyte Z; public bool IsLand; }
+
+    // Radar bake (land + statics). Mirrors MiniMapGump.CreateMiniMapTexture: walk
+    // the map blocks around the player, take the topmost static over each land
+    // cell, project isometrically, and stamp a 2px vertical radar mark over the
+    // blank sentinel pixels. Live multis (the Chunk tile-grid) are still skipped —
+    // ECS doesn't model that grid; placed houses won't show until they do.
     private static void BakeRadar(UOFileManager files, MiniMapState state, int map, int lastX, int lastY, int w, int h)
     {
         System.Array.Copy(state.Blank, state.Radar, state.Blank.Length);
 
         var maps = files.Maps;
         var hues = files.Hues;
+        var tileData = files.TileData;
 
         int blockOffsetX = w >> 2;
         int blockOffsetY = h >> 2;
@@ -231,6 +238,8 @@ internal readonly struct MiniMapPlugin : IPlugin
         int mapBlockHeight = maps.MapBlocksSize[map, 1];
         int maxBlockIndex = maps.MapBlocksSize[map, 0] * mapBlockHeight;
 
+        var staticsZ = new MiniMapCell[64];
+
         for (int i = minBlockX; i <= maxBlockX; i++)
         {
             int blockIndexOffset = i * mapBlockHeight;
@@ -241,6 +250,25 @@ internal readonly struct MiniMapPlugin : IPlugin
 
                 ref var im = ref maps.GetIndex(map, i, j);
                 if (!im.IsValid()) break;
+
+                for (int k = 0; k < 64; k++)
+                    staticsZ[k] = new MiniMapCell { Z = sbyte.MinValue };
+
+                // Collect the topmost drawable static over each cell of the block.
+                im.StaticFile.Seek((long)im.StaticAddress, System.IO.SeekOrigin.Begin);
+                for (int c = 0; c < im.StaticCount; c++)
+                {
+                    var sb = im.StaticFile.Read<StaticsBlock>();
+                    if (sb.Color == 0 || sb.Color == 0xFFFF || !CanBeDrawn(tileData, sb.Color))
+                        continue;
+                    ref var st = ref staticsZ[sb.Y * 8 + sb.X];
+                    if (st.Z < sb.Z)
+                    {
+                        st.Color = sb.Hue > 0 ? (ushort)(sb.Hue + 0x4000) : sb.Color;
+                        st.Z = sb.Z;
+                        st.IsLand = sb.Hue > 0;
+                    }
+                }
 
                 im.MapFile.Seek((long)im.MapAddress, System.IO.SeekOrigin.Begin);
                 var cells = im.MapFile.Read<MapBlock>().Cells;
@@ -253,8 +281,25 @@ internal readonly struct MiniMapPlugin : IPlugin
                     int cpx = realBlockX + x - lastX + gumpCenterX;
                     for (int y = 0; y < 8; y++)
                     {
-                        int color = cells[(y << 3) + x].TileID;
-                        ushort radar = hues.GetRadarColorData(color);
+                        ref readonly var cell = ref cells[(y << 3) + x];
+                        int color = cell.TileID;
+                        bool isLand = true;
+                        int z = cell.Z;
+
+                        // A static sitting at/above the land tile wins the pixel.
+                        ref var stZ = ref staticsZ[y * 8 + x];
+                        if (stZ.Z >= z)
+                        {
+                            color = stZ.Color;
+                            isLand = stZ.IsLand;
+                        }
+
+                        if (!isLand)
+                            color += 0x4000; // statics live at 0x4000+graphic in radarcol
+
+                        int radar = isLand && color > 0x4000
+                            ? hues.GetColor16(16384, (ushort)(color - 0x4000)) // hued land/static
+                            : hues.GetRadarColorData(color);
 
                         int cpy = realBlockY + y - lastY;
                         int gx = cpx - cpy;
@@ -267,6 +312,49 @@ internal readonly struct MiniMapPlugin : IPlugin
                 }
             }
         }
+    }
+
+    // Minimap subset of GameObject.CanBeDrawn — filters no-draw / decorative
+    // statics so they don't speckle the radar. (Drops the gargoyle-animated and
+    // client-version easel edge cases; not worth the race/version plumbing here.)
+    private static bool CanBeDrawn(TileDataLoader tileData, ushort g)
+    {
+        switch (g)
+        {
+            case 0x0001:
+            case 0x21BC:
+            case 0xA1FE:
+            case 0xA1FF:
+            case 0xA200:
+            case 0xA201:
+                return false;
+
+            case 0x9E4C:
+            case 0x9E64:
+            case 0x9E65:
+            case 0x9E7D:
+            {
+                ref var d = ref tileData.StaticData[g];
+                return !d.IsBackground && !d.IsSurface;
+            }
+        }
+
+        if (g == 0x63D3)
+            return false;
+        if (g >= 0x2198 && g <= 0x21A4)
+            return false;
+
+        if (g < tileData.StaticData.Length)
+        {
+            ref var data = ref tileData.StaticData[g];
+            if (!string.IsNullOrEmpty(data.Name) &&
+                data.Name.StartsWith("nodraw", System.StringComparison.OrdinalIgnoreCase))
+                return false;
+            if (!data.IsNoDiagonal)
+                return true;
+        }
+
+        return false;
     }
 
     // Radar pixel: only paints over the blank sentinel (matches legacy
