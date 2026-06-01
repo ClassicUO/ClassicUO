@@ -368,6 +368,11 @@ internal enum UOCustomKind : byte
     // measured content so the scroll container clips/scrolls correctly. Text
     // params ride in the UOCustomRender.Text* fields.
     WrappedText,
+    // A sub-rectangle of a gump sprite (legacy GumpPicTexture). Src* select the
+    // source slice; SliceTiled tiles it across the node box (false = draw the
+    // slice once at the box origin). Used by the resizable vendor panels
+    // (top / middle-tiled / bottom slices of one tall gump).
+    GumpSlice,
 }
 
 // Reference type (NOT an ECS component) — the instance lives in UiCustom.Data
@@ -400,6 +405,11 @@ internal sealed class UOCustomRender
     public bool IsHtml;
     public uint HtmlStartColor;
     public bool HtmlBg;
+
+    // For UOCustomKind.GumpSlice: source sub-rectangle within the gump sprite,
+    // and whether to tile it across the node box (vs draw once at the origin).
+    public ushort SrcX, SrcY, SrcW, SrcH;
+    public bool SliceTiled;
 }
 
 // The UO render payload lives in UiCustom.Data (a reference, so it threads into

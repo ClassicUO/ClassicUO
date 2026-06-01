@@ -132,6 +132,30 @@ internal sealed class GumpBuilder
             });
     }
 
+    /// Spawn a sub-rectangle slice of a gump sprite (legacy GumpPicTexture).
+    /// `src` selects the source region; `tiled` tiles it across the node box,
+    /// otherwise it's drawn once at the box origin. Node size = `size`.
+    public EntityCommands AddGumpSlice(Commands commands, ushort id, Vector3 hue, Vector2 position, Vector2 size, Rectangle src, bool tiled)
+    {
+        var node = MakeFloatingNode(position, size);
+        return commands.Spawn()
+            .Insert(node)
+            .Insert(new UiCustom
+            {
+                Data = new UOCustomRender
+                {
+                    Kind = UOCustomKind.GumpSlice,
+                    AssetId = id,
+                    Hue = hue,
+                    SrcX = (ushort)src.X,
+                    SrcY = (ushort)src.Y,
+                    SrcW = (ushort)src.Width,
+                    SrcH = (ushort)src.Height,
+                    SliceTiled = tiled,
+                }
+            });
+    }
+
     /// Spawn a nine-patch (scalable) gump. The supplied size overrides the
     /// natural sprite size.
     public EntityCommands AddGumpNinePatch(Commands commands, ushort id, Vector3 hue, Vector2? position = null, Vector2? size = null)

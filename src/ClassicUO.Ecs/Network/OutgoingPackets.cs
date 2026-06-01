@@ -1805,5 +1805,79 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
+        // 0x3B — buy reply. Each entry is (item serial, amount). Empty list
+        // sends the 0x00 "buy nothing" terminator (closes the vendor cleanly).
+        public static void Send_BuyRequest(this NetClient socket, uint vendorSerial, ReadOnlySpan<(uint serial, ushort amount)> items)
+        {
+            const byte ID = 0x3B;
+            int length = socket.PacketsTable.GetPacketLength(ID);
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+            if (length < 0)
+                writer.WriteZero(2);
+
+            writer.WriteUInt32BE(vendorSerial);
+
+            if (items.Length > 0)
+            {
+                writer.WriteUInt8(0x02);
+                for (int i = 0; i < items.Length; ++i)
+                {
+                    writer.WriteUInt8(0x1A);
+                    writer.WriteUInt32BE(items[i].serial);
+                    writer.WriteUInt16BE(items[i].amount);
+                }
+            }
+            else
+            {
+                writer.WriteUInt8(0x00);
+            }
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
+        // 0x9F — sell reply. Item count then (item serial, amount) per entry.
+        public static void Send_SellRequest(this NetClient socket, uint vendorSerial, ReadOnlySpan<(uint serial, ushort amount)> items)
+        {
+            const byte ID = 0x9F;
+            int length = socket.PacketsTable.GetPacketLength(ID);
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+            if (length < 0)
+                writer.WriteZero(2);
+
+            writer.WriteUInt32BE(vendorSerial);
+            writer.WriteUInt16BE((ushort)items.Length);
+            for (int i = 0; i < items.Length; ++i)
+            {
+                writer.WriteUInt32BE(items[i].serial);
+                writer.WriteUInt16BE(items[i].amount);
+            }
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
     }
 }

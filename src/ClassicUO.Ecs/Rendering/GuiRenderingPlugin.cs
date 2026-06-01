@@ -313,6 +313,34 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                 break;
             }
 
+            case UOCustomKind.GumpSlice:
+            {
+                ref readonly var info = ref assets.Gumps.GetGump(custom.AssetId);
+                if (info.Texture != null)
+                {
+                    var src = new Rectangle(info.UV.X + custom.SrcX, info.UV.Y + custom.SrcY, custom.SrcW, custom.SrcH);
+                    if (custom.SliceTiled)
+                    {
+                        b.DrawTiled(
+                            info.Texture,
+                            new Rectangle((int)bb.X, (int)bb.Y, (int)bb.Width, (int)bb.Height),
+                            src,
+                            custom.Hue,
+                            cmd.ZIndex);
+                    }
+                    else
+                    {
+                        b.Draw(
+                            info.Texture,
+                            new Vector2((int)bb.X, (int)bb.Y),
+                            src,
+                            custom.Hue,
+                            cmd.ZIndex);
+                    }
+                }
+                break;
+            }
+
             case UOCustomKind.GumpNinePatch:
                 DrawGumpNinePatch(b, assets, in cmd, in custom);
                 break;
