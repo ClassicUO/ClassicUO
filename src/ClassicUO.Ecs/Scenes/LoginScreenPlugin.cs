@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
 using TinyEcs.Bevy.UI;
+using TinyEcs.Bevy.UI.Widgets;
 using ClayColor = Clay.Color;
 using XnaVector2 = Microsoft.Xna.Framework.Vector2;
 using XnaVector3 = Microsoft.Xna.Framework.Vector3;
@@ -313,12 +314,13 @@ internal readonly struct LoginScreenPlugin : IPlugin
         passwordField.AddChild(passwordText);
         mainMenu.AddChild(passwordField);
 
-        // Version text — matches main's LoginGump.ctor else-branch
-        // (CV>=500A): two lines at (286, 453) and (286, 465), small
-        // font 9, hue 0x0481. ECS color picker doesn't speak UO hues
-        // yet so approximate with light gray.
-        // Approximation of main's UO hue 0x0481 (dark orange-red).
-        var versionColor = new ClayColor(208, 138, 78, 255);
+        // Version text — matches main's LoginGump.ctor CV>=706400 branch:
+        // two lines at (286, 453) and (286, 465), ASCII font 9, hue 0x0481.
+        // FontId carries the AsciiFlag so the renderer uses the UO ASCII font
+        // set; TextColor carries the packed hue (baked per pixel) — pixel-exact
+        // vs the OOP client, not a flat RGB approximation.
+        var versionColor = UoFontRuntime.AsciiHue(0x0481);
+        var versionFont = new TextFont { FontId = (ushort)(9 | UoFontRuntime.AsciiFlag), Size = 10 };
         var uoVersion = commands.Spawn()
             .Insert<LoginScene>()
             .Insert(new Node
@@ -330,7 +332,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
                 Height = Val.Auto,
             })
             .Insert(new Text($"UO Version {settings.Value.ClientVersion}."))
-            .Insert(new TextFont { FontId = 0, Size = 10 })
+            .Insert(versionFont)
             .Insert(new TextColor(versionColor));
         mainMenu.AddChild(uoVersion);
 
@@ -345,18 +347,26 @@ internal readonly struct LoginScreenPlugin : IPlugin
                 Height = Val.Auto,
             })
             .Insert(new Text($"ClassicUO Version {ClassicUO.CUOEnviroment.Version}"))
-            .Insert(new TextFont { FontId = 0, Size = 10 })
+            .Insert(versionFont)
             .Insert(new TextColor(versionColor));
         mainMenu.AddChild(cuoVersion);
 
-        // Autologin / SaveAccount checkboxes — main's LoginGump positions
-        // these via 0x00D2 unchecked / 0x00D3 checked. ECS doesn't have a
-        // toggle widget yet; render the unchecked gump as a placeholder so
-        // the bottom strip visually matches main.
-        var checkboxColor = new ClayColor(180, 100, 50, 255);
-        mainMenu.AddChild(gumpBuilder.Value.AddGump(
-            commands, 0x00D2, XnaVector3.UnitZ, new XnaVector2(150, 417))
-            .Insert<LoginScene>());
+        // Autologin / SaveAccount checkboxes — main's LoginGump (CV>=706400)
+        // uses ASCII font 9, hue 0x0481, toggling 0x00D2 unchecked / 0x00D3
+        // checked. AddCheckbox is the real widget: CheckboxPlugin flips
+        // Checkbox.Checked on click and fires CheckboxChanged; UpdateUOCheckboxes
+        // swaps the sprite. hue UnitZ — AddCheckbox's default Vector3.Zero has
+        // alpha 0 (invisible box). The .Observe persists the new value into the
+        // Settings singleton so it round-trips like main's SaveCheckboxStatus.
+        var checkboxColor = UoFontRuntime.AsciiHue(0x0481);
+        var checkboxFont = new TextFont { FontId = (ushort)(9 | UoFontRuntime.AsciiFlag), Size = 11 };
+
+        var autologinCheck = gumpBuilder.Value.AddCheckbox(
+            commands, settings.Value.AutoLogin, new XnaVector2(150, 417), hue: XnaVector3.UnitZ)
+            .Insert<LoginScene>()
+            .Observe((On<CheckboxChanged> trig, Res<Settings> s) => s.Value.AutoLogin = trig.Event.Checked);
+        mainMenu.AddChild(autologinCheck);
+
         var autologinLabel = commands.Spawn()
             .Insert<LoginScene>()
             .Insert(new Node
@@ -368,13 +378,16 @@ internal readonly struct LoginScreenPlugin : IPlugin
                 Height = Val.Auto,
             })
             .Insert(new Text("Autologin"))
-            .Insert(new TextFont { FontId = 0, Size = 11 })
+            .Insert(checkboxFont)
             .Insert(new TextColor(checkboxColor));
         mainMenu.AddChild(autologinLabel);
 
-        mainMenu.AddChild(gumpBuilder.Value.AddGump(
-            commands, 0x00D2, XnaVector3.UnitZ, new XnaVector2(240, 417))
-            .Insert<LoginScene>());
+        var saveAccountCheck = gumpBuilder.Value.AddCheckbox(
+            commands, settings.Value.SaveAccount, new XnaVector2(240, 417), hue: XnaVector3.UnitZ)
+            .Insert<LoginScene>()
+            .Observe((On<CheckboxChanged> trig, Res<Settings> s) => s.Value.SaveAccount = trig.Event.Checked);
+        mainMenu.AddChild(saveAccountCheck);
+
         var saveAccountLabel = commands.Spawn()
             .Insert<LoginScene>()
             .Insert(new Node
@@ -386,7 +399,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
                 Height = Val.Auto,
             })
             .Insert(new Text("Save Account"))
-            .Insert(new TextFont { FontId = 0, Size = 11 })
+            .Insert(checkboxFont)
             .Insert(new TextColor(checkboxColor));
         mainMenu.AddChild(saveAccountLabel);
     }
