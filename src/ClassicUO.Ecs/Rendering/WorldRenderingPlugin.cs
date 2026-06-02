@@ -22,7 +22,6 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         var cleanupFn = Cleanup;
         var beginRenderingFn = BeginRendering;
         var renderingFn = Rendering;
-        var showTextOverheadFn = ShowTextOverhead;
         var endRenderingFn = EndRendering;
 
         // TODO: find a better place to initialize this
@@ -119,25 +118,9 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             .Build();
     }
 
-
     private static void Cleanup(Res<SelectedEntity> selectedEntity)
     {
         selectedEntity.Value.Clear();
-    }
-
-    private static void ShowTextOverhead(
-        Commands commands,
-        Query<Data<WorldPosition, ScreenPositionOffset>> query,
-        Res<Time> time,
-        Res<TextOverHeadManager> textOverHeadManager,
-        Res<NetworkEntitiesMap> networkEntities,
-        Res<UltimaBatcher2D> batcher,
-        Res<GameContext> gameCtx,
-        Res<Camera> camera,
-        Res<UOFileManager> fileManager)
-    {
-        textOverHeadManager.Value.Update(commands, time.Value, networkEntities.Value);
-        textOverHeadManager.Value.Render(commands, networkEntities.Value, batcher.Value, gameCtx.Value, camera.Value, fileManager.Value.Hues, query);
     }
 
     private static void BeginRendering(

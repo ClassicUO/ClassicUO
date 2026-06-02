@@ -503,6 +503,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             Name = packet.Name,
             Hue = packet.Hue,
             Font = (byte)packet.Font,
+            IsUnicode = true,
             Text = packet.Text,
             MessageType = packet.MessageType
         });
@@ -534,6 +535,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             Name = packet.Name,
             Hue = packet.Hue,
             Font = (byte)packet.Font,
+            IsUnicode = false,
             Text = packet.Text,
             MessageType = packet.MessageType
         });
@@ -561,6 +563,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 Name = packet.Name,
                 Hue = packet.Hue,
                 Font = (byte)packet.Font,
+                IsUnicode = true,
                 Text = text,
                 MessageType = packet.MessageType,
             });

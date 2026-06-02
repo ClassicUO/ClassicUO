@@ -48,7 +48,15 @@ internal readonly struct GuiRenderingPlugin : IPlugin
             Res<AssetsServer>,
             Res<ImageCache>,
             Res<UoGame>,
-            Res<UiRenderCommands>> renderFn = Render;
+            Res<UiRenderCommands>,
+            Res<State<GameState>>,
+            Res<TextOverHeadManager>,
+            Res<NetworkEntitiesMap>,
+            Res<Time>,
+            Res<GameContext>,
+            Res<Camera>,
+            Res<RenderTarget2D>,
+            Query<Data<WorldPosition, ScreenPositionOffset>>> renderFn = Render;
 
         app.AddSystem(renderFn)
             .InStage(UiPlugin.UiRenderStage)
@@ -64,7 +72,15 @@ internal readonly struct GuiRenderingPlugin : IPlugin
         Res<AssetsServer> assets,
         Res<ImageCache> imageCache,
         Res<UoGame> game,
-        Res<UiRenderCommands> renderCommands)
+        Res<UiRenderCommands> renderCommands,
+        Res<State<GameState>> gameState,
+        Res<TextOverHeadManager> overhead,
+        Res<NetworkEntitiesMap> networkEntities,
+        Res<Time> time,
+        Res<GameContext> gameCtx,
+        Res<Camera> camera,
+        Res<RenderTarget2D> worldRt,
+        Query<Data<WorldPosition, ScreenPositionOffset>> overheadQuery)
     {
         dumbTexture.Value.Texture ??= MakeWhitePixel(batcher.Value.GraphicsDevice);
 
@@ -116,6 +132,16 @@ internal readonly struct GuiRenderingPlugin : IPlugin
 
                 case RenderCommandType.Image:
                     DrawImage(b, imageCache.Value, in cmd);
+                    // Overhead world text is drawn right after the game-window
+                    // image (the world RT) so it sits ON the world but UNDER any
+                    // gump windows, which paint later in this loop. UoFontRenderer
+                    // only renders into this UI RT, and no scissor is active here.
+                    if (gameState.Value.Current == GameState.GameScreen
+                        && ReferenceEquals(cmd.Image.ImageData, worldRt.Value))
+                    {
+                        overhead.Value.Update(time.Value, networkEntities.Value);
+                        overhead.Value.Render(networkEntities.Value, b, gameCtx.Value, camera.Value, overheadQuery);
+                    }
                     break;
 
                 case RenderCommandType.Custom:

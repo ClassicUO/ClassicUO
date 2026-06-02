@@ -227,18 +227,22 @@ internal static class UoFontRenderer
         XnaColor unicodeTint,
         int destX,
         int destY,
-        float depth)
+        float depth,
+        bool border = false,
+        uint unicodeBaked = 0)
     {
         var atlas = UoFontRuntime.Atlas;
         if (atlas == null || layout.Info == null)
             return;
 
         // ASCII bakes the UO hue per pixel (the partial-hue gradient can't be
-        // reproduced by a flat tint); HTML bakes the per-segment ARGB. Every
-        // glyph is then drawn through SHADER_RGB_TINT — the ECS UI render target
-        // doesn't honour the neutral/mode-NONE Vector3 path (it renders white),
-        // so even baked-colour glyphs go through RGB_TINT (× white = unchanged).
-        uint baseColor = (!isUnicode && !isHtml) ? asciiHue : 0;
+        // reproduced by a flat tint); HTML bakes the per-segment ARGB; overhead
+        // unicode bakes the GetPolygoneColor ARGB (unicodeBaked) so the legacy
+        // black-border-on-near-black skip applies per glyph. Every glyph is then
+        // drawn through SHADER_RGB_TINT — the ECS UI render target doesn't honour
+        // the neutral/mode-NONE Vector3 path (it renders white), so even
+        // baked-colour glyphs go through RGB_TINT (× white = unchanged).
+        uint baseColor = isHtml ? 0u : (isUnicode ? unicodeBaked : asciiHue);
 
         int lineOffsY = 0;
         var ptr = layout.Info;
@@ -270,7 +274,7 @@ internal static class UoFontRenderer
                     continue;
 
                 byte charFont = font;
-                bool charBorder = false, charSolid = false, charItalic = false;
+                bool charBorder = border, charSolid = false, charItalic = false;
                 uint charColor = baseColor;
 
                 if (isHtml)
@@ -351,7 +355,10 @@ internal static class UoFontRenderer
         XnaColor tint,
         int x, int y,
         int maxWidth,
-        float layerDepth)
+        float layerDepth,
+        bool allowHtml = true,
+        bool border = false,
+        uint unicodeBaked = 0)
     {
         if (string.IsNullOrEmpty(text) || UoFontRuntime.Fonts == null || UoFontRuntime.Atlas == null)
             return;
@@ -361,12 +368,13 @@ internal static class UoFontRenderer
         // ASCII gump text carries its UO hue in the tint's R/G bytes.
         ushort asciiHue = ascii ? (ushort)(tint.R | (tint.G << 8)) : (ushort)0;
 
-        // Any text with '<' goes through the HTML parse (BASEFONT/BR/etc).
-        // Inline html seeds white as the body colour.
-        bool isHtml = !ascii && text.IndexOf('<') >= 0;
+        // Unicode text with '<' goes through the HTML parse (BASEFONT/BR/etc).
+        // Callers rendering plain text (e.g. speech overhead, where '<' is a
+        // literal char) pass allowHtml: false to keep '<' visible.
+        bool isHtml = allowHtml && !ascii && text.IndexOf('<') >= 0;
 
         var layout = GetLayout(text, font, ascii, isHtml, 0xFFFFFFFF, htmlBg: false, maxWidth);
-        DrawGlyphs(batcher, layout, font, isUnicode: !ascii, isHtml, asciiHue, tint, x, y, layerDepth);
+        DrawGlyphs(batcher, layout, font, isUnicode: !ascii, isHtml, asciiHue, tint, x, y, layerDepth, border, unicodeBaked);
     }
 
     // Wrapped HTML block draw path (UOCustomKind.WrappedText). The node was
@@ -397,6 +405,19 @@ internal static class UoFontRenderer
         DrawGlyphs(batcher, layout, font, isUnicode: true, isHtml, asciiHue: 0, tint, x, y, layerDepth);
     }
 
+    // Legacy RenderedText unicode baked colour (MessageManager overhead path):
+    // GetPolygoneColor(cell 30, hue) (its own hue-1) → 0x00BBGGRR, then
+    // (<<8 | 0xFF) + RgbaToArgb → 0xFFBBGGRR, a packed XNA colour the atlas bakes
+    // per glyph. hue 0 → the sentinel near-black (0xFF010101), matching legacy —
+    // NOT white. The black border is added separately at the draw call.
+    private static uint UnicodeBakedColor(ushort hue)
+    {
+        var hues = UoFontRuntime.Hues;
+        if (hues == null) return 0xFFFFFFFF;
+        uint poly = hues.GetPolygoneColor(30, hue);
+        return HuesHelper.RgbaToArgb((poly << 8) | 0xFF);
+    }
+
     // UO hue index → flat tint for plain (non-HTML) text. cell 30 is the bright
     // end of the hue gradient (OOP RenderedText default); the atlas glyph keeps
     // its own per-pixel alpha so a uniform tint reads correctly on any bg.
@@ -418,6 +439,44 @@ internal static class UoFontRenderer
             return (0, 0);
 
         var layout = GetLayout(text, font, ascii: false, isHtml, htmlStartColor, htmlBg, maxWidth, align);
+        return (layout.Width, layout.Height);
+    }
+
+    // Hue-driven draw for code paths that only have a UO hue (overhead text).
+    // Resolves ascii/unicode from the fontId and builds the right tint: ascii
+    // carries the hue in the tint's R/G bytes (Draw's asciiHue convention),
+    // unicode tints the white glyph by the hue's bright-end colour.
+    public static void Draw(
+        UltimaBatcher2D batcher,
+        string text,
+        ushort fontId,
+        ushort hue,
+        int x, int y,
+        int maxWidth,
+        float layerDepth,
+        bool allowHtml = true)
+    {
+        var (_, ascii) = UoFontRuntime.Resolve(fontId);
+        // Overhead/world text mirrors legacy MessageManager.CreateMessage:
+        // FontStyle.BlackBorder outline + colour baked into the glyph (ASCII per-
+        // pixel hue carried in the tint R/G bytes; unicode the GetPolygoneColor
+        // ARGB). Baked-colour glyphs draw under a white tint (SHADER_RGB_TINT
+        // leaves them unchanged); the border is baked black per glyph.
+        XnaColor tint = ascii ? new XnaColor(hue & 0xFF, (hue >> 8) & 0xFF, 0, 255) : XnaColor.White;
+        uint unicodeBaked = ascii ? 0u : UnicodeBakedColor(hue);
+        Draw(batcher, text, fontId, tint, x, y, maxWidth, layerDepth, allowHtml, border: true, unicodeBaked: unicodeBaked);
+    }
+
+    // Measure a run honouring the fontId's ascii/unicode flag (the other Measure
+    // is unicode-only). Builds + caches the layout the matching Draw will reuse.
+    public static (int Width, int Height) MeasureFont(string text, ushort fontId, int maxWidth, bool allowHtml = true)
+    {
+        if (string.IsNullOrEmpty(text) || UoFontRuntime.Fonts == null)
+            return (0, 0);
+
+        var (font, ascii) = UoFontRuntime.Resolve(fontId);
+        bool isHtml = allowHtml && !ascii && text.IndexOf('<') >= 0;
+        var layout = GetLayout(text, font, ascii, isHtml, 0xFFFFFFFF, htmlBg: false, maxWidth);
         return (layout.Width, layout.Height);
     }
 

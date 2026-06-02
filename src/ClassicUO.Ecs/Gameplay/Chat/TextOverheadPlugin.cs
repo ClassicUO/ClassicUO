@@ -1,17 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Text;
 using ClassicUO.Assets;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Renderer;
-using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using TinyEcs;
 using TinyEcs.Bevy;
-using World = TinyEcs.World;
 
 namespace ClassicUO.Ecs;
 
@@ -22,6 +18,7 @@ internal struct TextOverheadEvent
     public string Name;
     public ushort Hue;
     public byte Font;
+    public bool IsUnicode;   // 0xAE/cliloc = unicode font; 0x1C = ascii font
     public MessageType MessageType;
     public float Time;
 }
@@ -73,18 +70,14 @@ internal readonly struct TextOverheadPlugin : IPlugin
             }
         }
     }
-
-
 }
 
 internal sealed class TextOverHeadManager
 {
-    const int MAX_LENGTH = 200;
-
-    private readonly StringBuilder _sb = new();
+    // Wrap width for an overhead line (legacy ItemView/overhead uses ~200px).
+    private const int MaxWidth = 200;
 
     private readonly List<uint> _toRemove = new();
-    private readonly List<(int, int)> _cuttedTextIndices = new();
     private readonly Dictionary<uint, LinkedList<TextOverheadEvent>> _textOverHeadMap = new();
     private readonly LinkedList<LinkedList<TextOverheadEvent>> _mainLinkedList = new();
 
@@ -104,13 +97,13 @@ internal sealed class TextOverHeadManager
         _mainLinkedList.AddLast(list);
     }
 
-    public void Update(Commands commands, Time time, NetworkEntitiesMap networkEntities)
+    public void Update(Time time, NetworkEntitiesMap networkEntities)
     {
         foreach ((var serial, var list) in _textOverHeadMap)
         {
-            var ent = networkEntities.Get(commands, serial);
-
-            if (!ent.Id.IsValid() || list.Count == 0)
+            // Read-only lookup: Get(commands, ...) returns a default
+            // EntityCommands for unmapped serials whose .Id throws.
+            if (!networkEntities.TryGet(serial, out _) || list.Count == 0)
             {
                 _toRemove.Add(serial);
                 continue;
@@ -132,36 +125,37 @@ internal sealed class TextOverHeadManager
             foreach (var serial in _toRemove)
             {
                 if (_textOverHeadMap.Remove(serial, out var list))
-                {
-                    if (!_mainLinkedList.Remove(list))
-                    {
-
-                    }
-                }
+                    _mainLinkedList.Remove(list);
             }
             _toRemove.Clear();
         }
     }
 
-    private static Texture2D _texture;
+    // Resolve the engine font id from the packet data: unicode keeps the raw
+    // font index, ascii sets the AsciiFlag so UoFontRenderer uses the .mul
+    // ascii path (and reads the hue from the tint's R/G bytes).
+    private static ushort FontId(in TextOverheadEvent t)
+        => t.IsUnicode ? t.Font : (ushort)(t.Font | UoFontRuntime.AsciiFlag);
 
-
-    private void CopyToStringBuilder(ReadOnlySpan<char> span)
+    // Mirror legacy MessageManager.CreateMessage hue handling: mask to the hue
+    // bits and clamp out-of-range values so an oversized packet hue doesn't
+    // index garbage in the palette (wrong/weird colour).
+    private static ushort NormalizeHue(ushort hue)
     {
-        _sb.Clear();
-        foreach (ref readonly var c in span)
-        {
-            _sb.Append(c);
-        }
+        ushort c = (ushort)(hue & 0x3FFF);
+        if (c >= 0x0BB8) c = 1;
+        return c;
     }
 
+    // Draws into the CALLER's already-open batch — invoked from inside
+    // GuiRenderingPlugin's Phase 1 (the UI render target, logical pixels), the
+    // only place UoFontRenderer's atlas path renders. Coords are RT-local logical
+    // (world panel origin + camera.WorldToScreen); the Phase 2 blit scales them.
     public void Render(
-        Commands commands,
         NetworkEntitiesMap networkEntities,
         UltimaBatcher2D batch,
         GameContext gameCtx,
         Camera camera,
-        HuesLoader huesLoader,
         Query<Data<WorldPosition, ScreenPositionOffset>> query
     )
     {
@@ -172,340 +166,46 @@ internal sealed class TextOverHeadManager
         center.Y += 22f;
         center -= gameCtx.CenterOffset;
 
-        const int FONT_SIZE = 18;
-
-        // var backupViewport = batch.GraphicsDevice.Viewport;
-        // batch.GraphicsDevice.Viewport = camera.GetViewport();
-        //
-        batch.Begin();
-
-        var lines = _cuttedTextIndices;
-
-        if (_texture == null)
-        {
-            _texture = new(batch.GraphicsDevice, 1, 1);
-            _texture.SetData(new Color[1] { Color.White });
-        }
+        var panelOrigin = new Vector2(camera.Bounds.X, camera.Bounds.Y);
 
         foreach (var list in _mainLinkedList)
         {
-            if (list.Count == 0)
+            if (list.Count == 0 || list.First == null)
                 continue;
 
-            if (list.First == null)
+            if (!networkEntities.TryGet(list.First.Value.Serial, out var entId) || !query.Contains(entId))
                 continue;
 
-            var ent = networkEntities.Get(commands, list.First.Value.Serial);
-
-            if (!ent.Id.IsValid())
-                continue;
-
-            if (!query.Contains(ent.Id))
-                continue;
-
-            (var worldPos, var offset) = query.Get(ent.Id);
+            (var worldPos, var offset) = query.Get(entId);
 
             var position = Isometric.IsoToScreen(worldPos.Ref.X, worldPos.Ref.Y, worldPos.Ref.Z);
-
             if (!Unsafe.IsNullRef(ref offset))
                 position += offset.Ref.Value;
             position -= center;
-
             position.X += 22f;
             position.Y += 22f;
             position.Y -= Constants.DEFAULT_CHARACTER_HEIGHT * 5;
+            position = camera.WorldToScreen(position) + panelOrigin;
 
-            (var bounds, var totalLines) = GetBounds(list, FONT_SIZE);
-
-            var lineHeight = bounds.Y / totalLines;
-            // if (position.X < camera.Bounds.X)
-            //     position.X = camera.Bounds.X;
-            // if (position.Y < bounds.Y - lineHeight)
-            //     position.Y = bounds.Y - lineHeight;
-
-            position = camera.WorldToScreen(position);
-
-
-            // batch.DrawRectangle(_texture, (int)(position.X - bounds.X * 0.5f), (int)(position.Y - bounds.Y + lineHeight), (int)bounds.X, (int)bounds.Y, Vector3.UnitZ);
-            batch.Draw(_texture, new Rectangle((int)(position.X - bounds.X * 0.5f) - 2, (int)(position.Y - bounds.Y + lineHeight) - 2, (int)bounds.X + 4, (int)bounds.Y + 4),
-                new Rectangle(0, 0, 1, 1), ShaderHueTranslator.GetHueVector(1, false, 0.5f));
-
-            var last = list.Last;
-            var offsetY = 0f;
-            var alpha = IsOverlapped(commands, networkEntities, list, FONT_SIZE, query) ? 0.3f : 1f;
-
-            while (last != null)
+            // Newest line sits just above the head; older lines stack upward.
+            float y = position.Y;
+            for (var node = list.Last; node != null; node = node.Previous)
             {
-                var startPos = position;
-                startPos.Y += offsetY;
+                var t = node.Value;
+                if (string.IsNullOrEmpty(t.Text)) continue;
 
-                var text = last.Value;
-                var font = text.MessageType switch
-                {
-                    MessageType.Spell => FontCache.GetFont(4),
-                    _ => FontCache.GetFont(0),
-                };
+                var fontId = FontId(t);
+                // Speech is plain text — don't let '<' trigger the HTML parser
+                // (it would swallow the '<' and any "tag" after it).
+                var (w, h) = UoFontRenderer.MeasureFont(t.Text, fontId, MaxWidth, allowHtml: false);
+                if (h <= 0) continue;
 
-                var dynFont = font.GetFont(FONT_SIZE);
+                y -= h;
+                int x = (int)(position.X - w / 2f);
+                if (x < 0) x = 0;
 
-                var textLength = text.Text.Length;
-                var currentStart = 0;
-                float widthMax = 0f, heightMax = 0f;
-                while (currentStart < textLength)
-                {
-                    var maxSize = 0f;
-                    var cutAtIndex = textLength;
-                    var lastWhiteSpaceIndex = -1;
-
-                    for (int i = currentStart; i < textLength; i++)
-                    {
-                        CopyToStringBuilder(text.Text.AsSpan(i, 1));
-                        var charSize = dynFont.MeasureString(_sb).X;
-                        if (char.IsWhiteSpace(text.Text[i]))
-                            lastWhiteSpaceIndex = i;
-
-                        if (maxSize + charSize > MAX_LENGTH)
-                        {
-                            // Cut at the last whitespace or current index if no whitespace found
-                            cutAtIndex = lastWhiteSpaceIndex >= currentStart ? lastWhiteSpaceIndex : i;
-                            break;
-                        }
-
-                        maxSize += charSize;
-                    }
-
-                    // Determine the length of the current line
-                    var spanLength = cutAtIndex - currentStart;
-
-                    // Collect the substring that fits in this line
-                    lines.Add((currentStart, spanLength));
-
-                    var line = text.Text.AsSpan(currentStart, spanLength);
-                    CopyToStringBuilder(line);
-                    var size = dynFont.MeasureString(_sb);
-                    var pos = position - size / 2f;
-                    startPos.X = Math.Min(startPos.X, pos.X);
-                    widthMax = Math.Max(widthMax, size.X);
-                    heightMax = Math.Max(heightMax, size.Y);
-
-                    // Move to the next segment of the text, skip any whitespace after the cut
-                    currentStart = cutAtIndex + (cutAtIndex < textLength - 1 && char.IsWhiteSpace(text.Text[cutAtIndex]) ? 1 : 0);
-                }
-
-                if (startPos.X < 0)
-                    startPos.X = 0;
-                if (startPos.Y < (lines.Count - 1) * heightMax)
-                    startPos.Y = (lines.Count - 1) * heightMax;
-                if (startPos.X + widthMax > windowSize.X)
-                    startPos.X = windowSize.X - widthMax;
-
-                // Now draw the lines in correct order (top-down)
-                for (var i = lines.Count - 1; i >= 0; i--)
-                {
-                    var line = text.Text.AsSpan(lines[i].Item1, lines[i].Item2);
-                    CopyToStringBuilder(line);
-                    dynFont.DrawText(batch,
-                       _sb, startPos,
-                       GetColor(huesLoader, alpha, text.Hue),
-                       effect: FontStashSharp.FontSystemEffect.Stroked,
-                       effectAmount: 1
-                    );
-
-                    // // Draw the text
-                    // batch.DrawString(font, line, startPos + Vector2.One, ShaderHueTranslator.GetHueVector(1, false, alpha));
-                    // batch.DrawString(font, line, startPos, ShaderHueTranslator.GetHueVector(text.Hue, false, alpha));
-
-                    startPos.Y -= heightMax;
-                    offsetY -= heightMax;
-                }
-
-                last = last.Previous; // Move to the previous sentence in the list
-
-                lines.Clear();
+                UoFontRenderer.Draw(batch, t.Text, fontId, NormalizeHue(t.Hue), x, (int)y, MaxWidth, 0f, allowHtml: false);
             }
         }
-
-        // batch.SetSampler(null);
-        batch.End();
-        //
-        // batch.GraphicsDevice.Viewport = backupViewport;
-    }
-
-    private Color GetColor(HuesLoader huesLoader, float alpha = 1.0f, ushort hue = 0)
-    {
-        // this might be simplified somehow
-        var h = HuesHelper.Color16To32(
-            huesLoader.GetColor16(
-                 HuesHelper.ColorToHue(Color.White), hue > 0 ? hue : ushort.MinValue)) | 0xFF_00_00_00;
-
-        var c = new Color() { PackedValue = h };
-        c.A = (byte)Microsoft.Xna.Framework.MathHelper.Clamp(alpha * 255f, byte.MinValue, byte.MaxValue);
-
-        return c;
-    }
-
-    private bool IsOverlapped(
-        Commands commands,
-        NetworkEntitiesMap networkEntities,
-        LinkedList<TextOverheadEvent> list,
-        int fontSize,
-        Query<Data<WorldPosition, ScreenPositionOffset>> query
-    )
-    {
-        (var bounds, var totalLines) = GetBounds(list, fontSize);
-
-        if (list.Count == 0)
-            return false;
-
-        if (list.First == null)
-            return false;
-
-        var mainEnt = networkEntities.Get(commands, list.First.Value.Serial);
-        if (!mainEnt.Id.IsValid())
-            return false;
-
-        if (!query.Contains(mainEnt.Id))
-            return false;
-
-        (var worldPosMain, var offsetMain) = query.Get(mainEnt.Id);
-
-        var positionMain = Isometric.IsoToScreen(worldPosMain.Ref.X, worldPosMain.Ref.Y, worldPosMain.Ref.Z);
-
-        if (!Unsafe.IsNullRef(ref offsetMain))
-            positionMain += offsetMain.Ref.Value;
-
-        positionMain.X += 22f;
-        positionMain.Y += 22f;
-        positionMain.Y -= Constants.DEFAULT_CHARACTER_HEIGHT * 5;
-
-        var lineHeight = bounds.Y / totalLines;
-        if (positionMain.X < 0)
-            positionMain.X = 0;
-        if (positionMain.Y < bounds.Y - lineHeight)
-            positionMain.Y = bounds.Y - lineHeight;
-
-        var rectMain = new Rectangle((int)(positionMain.X - bounds.X * 0.5f), (int)(positionMain.Y - bounds.Y + lineHeight), (int)bounds.X, (int)bounds.Y);
-
-        var first = _mainLinkedList.First;
-        LinkedListNode<LinkedList<TextOverheadEvent>> current = null;
-        while (first != null)
-        {
-            if (first.Value == list)
-            {
-                current = first.Next;
-                break;
-            }
-            first = first.Next;
-        }
-
-        while (current != null)
-        {
-            if (current.Value.First == null)
-                return false;
-
-            (var bounds2, var totalLines2) = GetBounds(current.Value, fontSize);
-
-            var ent = networkEntities.Get(commands, current.Value.First.Value.Serial);
-            if (!ent.Id.IsValid())
-                continue;
-
-            if (!query.Contains(ent.Id))
-                continue;
-
-            (var worldPos, var offset) = query.Get(ent.Id);
-
-            var position = Isometric.IsoToScreen(worldPos.Ref.X, worldPos.Ref.Y, worldPos.Ref.Z);
-
-            if (!Unsafe.IsNullRef(ref offset))
-                position += offset.Ref.Value;
-
-            position.X += 22f;
-            position.Y += 22f;
-            position.Y -= Constants.DEFAULT_CHARACTER_HEIGHT * 5;
-
-            var lineHeight2 = bounds2.Y / totalLines2;
-            if (position.X < 0)
-                position.X = 0;
-            if (position.Y < bounds2.Y - lineHeight2)
-                position.Y = bounds2.Y - lineHeight2;
-
-            var rect = new Rectangle((int)(position.X - bounds2.X * 0.5f), (int)(position.Y - bounds2.Y + lineHeight2), (int)bounds2.X, (int)bounds2.Y);
-
-            if (rectMain.Intersects(rect))
-            {
-                return true;
-            }
-
-            current = current.Next;
-        }
-
-        return false;
-    }
-
-    private (Vector2 bounds, int lines) GetBounds(LinkedList<TextOverheadEvent> list, int fontSize)
-    {
-        var bounds = Vector2.Zero;
-        var last = list.Last;
-        var lines = 0;
-
-        while (last != null)
-        {
-            var text = last.Value;
-            var font = text.MessageType switch
-            {
-                MessageType.Spell => FontCache.GetFont(4),
-                _ => FontCache.GetFont(0),
-            };
-
-            var dynFont = font.GetFont(fontSize);
-
-            var textLength = text.Text.Length;
-            var currentStart = 0;
-            float widthMax = 0f, heightMax = 0f;
-            var linesCount = 0;
-
-            while (currentStart < textLength)
-            {
-                var maxSize = 0f;
-                var cutAtIndex = textLength;
-                var lastWhiteSpaceIndex = -1;
-
-                for (int i = currentStart; i < textLength; i++)
-                {
-                    CopyToStringBuilder(text.Text.AsSpan(i, 1));
-                    var charSize = dynFont.MeasureString(_sb).X;
-                    if (char.IsWhiteSpace(text.Text[i]))
-                        lastWhiteSpaceIndex = i;
-
-                    if (maxSize + charSize > MAX_LENGTH)
-                    {
-                        cutAtIndex = lastWhiteSpaceIndex >= currentStart ? lastWhiteSpaceIndex : i;
-                        break;
-                    }
-
-                    maxSize += charSize;
-                }
-
-                var spanLength = cutAtIndex - currentStart;
-                var line = text.Text.AsSpan(currentStart, spanLength);
-                CopyToStringBuilder(line);
-                var size = dynFont.MeasureString(_sb);
-
-                widthMax = Math.Max(widthMax, size.X);
-                heightMax = Math.Max(heightMax, size.Y);
-
-                linesCount++;
-
-                currentStart = cutAtIndex + (cutAtIndex < textLength - 1 && char.IsWhiteSpace(text.Text[cutAtIndex]) ? 1 : 0);
-            }
-
-            bounds.X = Math.Max(bounds.X, widthMax);
-            bounds.Y += heightMax * linesCount;
-            last = last.Previous;
-
-            lines += linesCount;
-        }
-
-        return (bounds, lines);
     }
 }
