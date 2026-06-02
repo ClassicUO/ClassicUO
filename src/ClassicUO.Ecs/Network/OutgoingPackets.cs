@@ -148,6 +148,73 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
+        // 0xBF 0x13 — ask the server for the context/popup menu of an entity.
+        public static void Send_RequestPopupMenu(this NetClient socket, uint serial)
+        {
+            const byte ID = 0xBF;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt16BE(0x13);
+            writer.WriteUInt32BE(serial);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+
+            writer.Dispose();
+        }
+
+        // 0xBF 0x15 — respond with the chosen popup menu entry index.
+        public static void Send_PopupMenuSelection(this NetClient socket, uint serial, ushort index)
+        {
+            const byte ID = 0xBF;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt16BE(0x15);
+            writer.WriteUInt32BE(serial);
+            writer.WriteUInt16BE(index);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+
+            writer.Dispose();
+        }
+
         // 0x6C target response (entity). Mirrors legacy NetClientExt.Send_TargetObject:
         // flag 0x00 = object, echo the server's cursorID + cursorType, then the
         // clicked entity's serial / x / y / z / graphic. z occupies two bytes.

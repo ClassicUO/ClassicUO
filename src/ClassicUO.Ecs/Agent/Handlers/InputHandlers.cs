@@ -20,12 +20,15 @@
 #nullable enable
 
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using ClassicUO.Agent.Contracts;
 using ClassicUO.Agent.Host;
+using ClassicUO.Assets;
 using ClassicUO.Ecs;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using TinyEcs.Bevy;
 
@@ -47,6 +50,47 @@ internal static class InputHandlers
         d.Register("input.type", Type);
         d.Register("debug.openSpellbook", DebugOpenSpellbook);
         d.Register("debug.openVendor", DebugOpenVendor);
+        d.Register("debug.openPopup", DebugOpenPopup);
+    }
+
+    // Test-only: open a context/popup menu without a server entity. Mirrors the
+    // 0xBF 0x14 path by setting PopupMenuState directly. Real cliloc strings are
+    // pulled from the loaded Cliloc file so the rendered labels are realistic;
+    // one entry is flagged disabled (greyed) to exercise that hue.
+    public static JsonRpcResponse DebugOpenPopup(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        int x = 120, y = 80;
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object)
+        {
+            if (p.TryGetProperty("x", out var xe) && xe.TryGetInt32(out var xv)) x = xv;
+            if (p.TryGetProperty("y", out var ye) && ye.TryGetInt32(out var yv)) y = yv;
+        }
+
+        var fm = ctx.Runtime.GetResource<UOFileManager>();
+        var items = new List<OnExtendedCommandPacket_0xBF.PopupMenuItemData>();
+        ushort idx = 0;
+        // Scan a dense cliloc range for non-empty strings to use as menu labels.
+        for (int c = 3000122; c < 3002000 && items.Count < 5; c++)
+        {
+            var s = fm.Clilocs.GetString(c);
+            if (string.IsNullOrEmpty(s)) continue;
+            bool disabled = items.Count == 2;   // grey the third entry
+            items.Add(new OnExtendedCommandPacket_0xBF.PopupMenuItemData
+            {
+                Cliloc = c,
+                Index = idx,
+                Hue = disabled ? (ushort)0x0386 : (ushort)0xFFFF,
+                ReplacedHue = 0,
+                Flags = (ushort)(disabled ? 0x01 : 0x00),
+            });
+            idx++;
+        }
+
+        var state = ctx.Runtime.GetResource<PopupMenuState>();
+        state.SetPending(0x00000001u, items.ToArray());
+        state.RequestPos = new Vector2(x, y);
+
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true, ["count"] = items.Count } };
     }
 
     // Test-only: open a vendor gump without a server NPC. Sell mode is fully

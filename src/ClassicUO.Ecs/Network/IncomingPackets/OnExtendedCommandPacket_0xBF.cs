@@ -48,6 +48,23 @@ internal struct OnExtendedCommandPacket_0xBF : IPacket
         public byte FrameCount;
     }
 
+    // One entry of a 0x14 "display popup/context menu". Flags: 0x01 disabled
+    // (greyed), 0x02 arrow/continuation, 0x20 carries a replaced hue.
+    internal struct PopupMenuItemData
+    {
+        public int Cliloc;
+        public ushort Index;
+        public ushort Hue;        // 0xFFFF white, 0x0386 when disabled
+        public ushort ReplacedHue;
+        public ushort Flags;
+    }
+
+    internal struct PopupMenuInfo
+    {
+        public uint Serial;
+        public PopupMenuItemData[] Items;
+    }
+
     public byte Id => 0xBF;
 
     public ushort Command { get; private set; }
@@ -75,6 +92,7 @@ internal struct OnExtendedCommandPacket_0xBF : IPacket
     public bool? IsFemale { get; private set; }
     public RaceType? Race { get; private set; }
     public StatueAnimationData? StatueAnimation { get; private set; }
+    public PopupMenuInfo? PopupMenu { get; private set; }
 
     // Party (subcommand 0x06). PartyCode: 1 add, 2 remove, 3/4 message, 7 invite.
     public byte? PartyCode { get; private set; }
@@ -113,6 +131,7 @@ internal struct OnExtendedCommandPacket_0xBF : IPacket
         IsFemale = null;
         Race = null;
         StatueAnimation = null;
+        PopupMenu = null;
         PartyCode = null;
         PartyCount = 0;
         PartyMembers = Array.Empty<uint>();
@@ -217,6 +236,57 @@ internal struct OnExtendedCommandPacket_0xBF : IPacket
                     }
 
                     DisplayEquipInfo = info;
+                }
+                break;
+
+            case 0x14:
+                {
+                    ushort mode = reader.ReadUInt16BE();
+                    bool isNewCliloc = mode >= 2;
+                    uint serial = reader.ReadUInt32BE();
+                    byte count = reader.ReadUInt8();
+                    var items = new PopupMenuItemData[count];
+
+                    for (int i = 0; i < count; i++)
+                    {
+                        ushort hue = 0xFFFF, replaced = 0;
+                        int cliloc;
+                        ushort index, flags;
+
+                        if (isNewCliloc)
+                        {
+                            cliloc = (int)reader.ReadUInt32BE();
+                            index = reader.ReadUInt16BE();
+                            flags = reader.ReadUInt16BE();
+                        }
+                        else
+                        {
+                            index = reader.ReadUInt16BE();
+                            cliloc = reader.ReadUInt16BE() + 3000000;
+                            flags = reader.ReadUInt16BE();
+
+                            if ((flags & 0x84) != 0)
+                                reader.Skip(2);
+                            if ((flags & 0x40) != 0)
+                                reader.Skip(2);
+                            if ((flags & 0x20) != 0)
+                                replaced = reader.ReadUInt16BE();
+                        }
+
+                        if ((flags & 0x01) != 0)
+                            hue = 0x0386;
+
+                        items[i] = new PopupMenuItemData
+                        {
+                            Cliloc = cliloc,
+                            Index = index,
+                            Hue = hue,
+                            ReplacedHue = replaced,
+                            Flags = flags,
+                        };
+                    }
+
+                    PopupMenu = new PopupMenuInfo { Serial = serial, Items = items };
                 }
                 break;
 

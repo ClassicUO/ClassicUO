@@ -20,11 +20,13 @@
 #nullable enable
 
 using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using ClassicUO.Agent.Contracts;
 using ClassicUO.Agent.Host;
+using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.Game.UI.Gumps;
 using ClassicUO.Input;
@@ -49,6 +51,7 @@ internal static class InputHandlers
         d.Register("input.type", Type);
         d.Register("input.key", Key);
         d.Register("debug.openShop", DebugOpenShop);
+        d.Register("debug.openPopup", DebugOpenPopup);
     }
 
     // Test-only: open a ShopGump with fixed fake items (sell by default, buy if
@@ -71,6 +74,38 @@ internal static class InputHandlers
         gump.AddItem(0x4005, 0x097F, 0, 5, 75, "Leather Tunic", false);
         UIManager.Add(gump);
         return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true } };
+    }
+
+    // Test-only: open a PopupMenuGump with fake entries (no server entity).
+    // Mirrors the ECS debug.openPopup fixture (same cliloc scan, same disabled
+    // entry) so the two clients render the same menu for a parity diff.
+    public static JsonRpcResponse DebugOpenPopup(JsonRpcRequest req, in AgentRpcContext<GameController> ctx)
+    {
+        var world = ctx.Runtime.UO.World;
+        int x = 120, y = 80;
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object)
+        {
+            if (p.TryGetProperty("x", out var xe) && xe.TryGetInt32(out var xv)) x = xv;
+            if (p.TryGetProperty("y", out var ye) && ye.TryGetInt32(out var yv)) y = yv;
+        }
+
+        var clilocs = Client.Game.UO.FileManager.Clilocs;
+        var list = new List<PopupMenuItem>();
+        ushort idx = 0;
+        for (int c = 3000122; c < 3002000 && list.Count < 5; c++)
+        {
+            var s = clilocs.GetString(c);
+            if (string.IsNullOrEmpty(s)) continue;
+            bool disabled = list.Count == 2;
+            ushort hue = disabled ? (ushort)0x0386 : (ushort)0xFFFF;
+            ushort flags = (ushort)(disabled ? 0x01 : 0x00);
+            list.Add(new PopupMenuItem(c, idx, hue, 0, flags));
+            idx++;
+        }
+
+        var data = new PopupMenuData(1, list.ToArray());
+        UIManager.ShowGamePopup(new PopupMenuGump(world, data) { X = x, Y = y });
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true, ["count"] = list.Count } };
     }
 
     // Synthetic key press+release. Params: { key (SDL3 keycode int), mod? }.

@@ -161,6 +161,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             ResMut<GameContext>,
             Res<DelayedAction>,
             ResMut<SpellbookStore>,
+            ResMut<PopupMenuState>,
             InGameQueries>(OnExtendedCommand);
 
         app.AddObserver<On<PacketReceived<OnUpdateItemPacket_0x1A>>,
@@ -528,6 +529,7 @@ readonly struct InGamePacketsPlugin : IPlugin
         ResMut<GameContext> gameCtx,
         Res<DelayedAction> delayedActions,
         ResMut<SpellbookStore> spellbooks,
+        ResMut<PopupMenuState> popupMenu,
         InGameQueries queries)
     {
         var packet = trig.Event.Packet;
@@ -538,6 +540,12 @@ readonly struct InGamePacketsPlugin : IPlugin
             ulong bits = sc.SpellBitfields[0] | ((ulong)sc.SpellBitfields[1] << 32);
             spellbooks.Value.BySerial[sc.Serial] = new SpellbookData { School = SpellSchools.Resolve(sc.Graphic), Bitfields = bits };
             spellbooks.Value.Revision++;
+        }
+
+        if (packet.PopupMenu.HasValue)
+        {
+            var pm = packet.PopupMenu.Value;
+            popupMenu.Value.SetPending(pm.Serial, pm.Items);
         }
 
         switch (packet.Command)

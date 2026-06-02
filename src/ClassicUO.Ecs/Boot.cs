@@ -47,6 +47,7 @@ internal readonly struct CuoPlugin : IPlugin
         app.AddPlugin<SkillsGumpPlugin>();
         app.AddPlugin<SpellbookGumpPlugin>();
         app.AddPlugin<VendorGumpPlugin>();
+        app.AddPlugin<PopupMenuPlugin>();
 
         app.AddPlugin<NetworkPlugin>();
         app.AddPlugin<GameplayPlugin>();
