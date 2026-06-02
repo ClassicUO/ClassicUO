@@ -184,7 +184,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         Query<Empty, With<NormalMulti>> qNormalMultis,
         Single<Data<WorldPosition>, With<Player>> queryPlayer,
         Query<Data<WorldPosition, ScreenPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> queryTiles,
-        Query<Data<WorldPosition, ScreenPosition, Graphic, Hue>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>>> queryStatics,
+        Query<Data<WorldPosition, ScreenPosition, Graphic, Hue, Amount>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>, Optional<Amount>>> queryStatics,
         Query<Data<WorldPosition, Graphic, Hue, NetworkSerial, ScreenPositionOffset, Facing, MobAnimation, MobileSteps>,
             Filter<Without<ContainedInto>, Optional<Facing>, Optional<MobAnimation>, Optional<MobileSteps>>> queryBodyOnly,
         Query<Data<EquipmentSlots, ScreenPositionOffset, WorldPosition, Graphic, Facing, MobileSteps, MobAnimation>,
@@ -454,16 +454,19 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         Vector2 mousePos,
         Rectangle cameraBounds,
         Query<Empty, With<NormalMulti>> qNormalMultis,
-        Query<Data<WorldPosition, ScreenPosition, Graphic, Hue>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>>> queryStatics)
+        Query<Data<WorldPosition, ScreenPosition, Graphic, Hue, Amount>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>, Optional<Amount>>> queryStatics)
     {
         // Cache frequently accessed resources
         var tileDataCache = fileManager.Value.TileData;
         var arts = assetsServer.Value.Arts;
 
         // Process all statics in one pass with optimized property access
-        foreach (var (entity, worldPos, screenPos, graphic, hue) in queryStatics)
+        foreach (var (entity, worldPos, screenPos, graphic, hue, amount) in queryStatics)
         {
             ref readonly var tileData = ref tileDataCache.StaticData[graphic.Ref.Value];
+            int amountVal = amount.IsValid() ? amount.Ref.Value : 1;
+            // Coins draw a pile sprite (base+1 / base+2) by amount.
+            ushort drawGraphic = ItemGraphics.Displayed(graphic.Ref.Value, amountVal);
 
             // Early filtering
             if (tileData.IsInternal)
@@ -486,7 +489,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             if (!CanBeDrawn(gameCtx.Value.ClientVersion, tileDataCache, graphic.Ref.Value))
                 continue;
 
-            ref readonly var artInfo = ref arts.GetArt(graphic.Ref.Value);
+            ref readonly var artInfo = ref arts.GetArt(drawGraphic);
             if (artInfo.Texture == null)
                 continue;
 
@@ -563,8 +566,26 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
             // Selection checking
             var p = mousePos - position;
-            if (assetsServer.Value.Arts.PixelCheck(graphic.Ref.Value, (int)p.X, (int)p.Y))
+            if (assetsServer.Value.Arts.PixelCheck(drawGraphic, (int)p.X, (int)p.Y))
                 selectedEntity.Value.Set(entity.Ref, depthZ);
+
+            // Stacked pile: a back sprite -5/-5 behind the main one (legacy
+            // ItemView.DrawStaticAnimated(graphic, posX-5, posY-5) then posX,posY).
+            // Coins are excluded — their amount shows through the pile graphic.
+            if (ItemGraphics.DrawStacked(graphic.Ref.Value, amountVal, tileData.IsStackable))
+            {
+                batch.Value.Draw(
+                    artInfo.Texture,
+                    position - new Vector2(5, 5),
+                    artInfo.UV,
+                    color,
+                    rotation: 0f,
+                    origin: Vector2.Zero,
+                    scale: 1f,
+                    effects: SpriteEffects.None,
+                    depthZ
+                );
+            }
 
             // Draw the static
             batch.Value.Draw(

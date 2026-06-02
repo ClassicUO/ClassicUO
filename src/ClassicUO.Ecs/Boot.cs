@@ -54,6 +54,10 @@ internal readonly struct CuoPlugin : IPlugin
         app.AddPlugin<NetworkPlugin>();
         app.AddPlugin<GameplayPlugin>();
         app.AddPlugin<RenderingPlugin>();
+        // After RenderingPlugin: its WorldRenderingPlugin child registers the
+        // "cuo:rendering:rendering"/"end" labels the system-message render
+        // orders between (draws into the world RT, over terrain).
+        app.AddPlugin<SystemMessagePlugin>();
         // After RenderingPlugin: TargetingPlugin's cursor render system orders
         // .After("cuo:gui_rendering"), a label RenderingPlugin's GuiRenderingPlugin
         // child registers. The label must exist before TargetingPlugin.Build runs.

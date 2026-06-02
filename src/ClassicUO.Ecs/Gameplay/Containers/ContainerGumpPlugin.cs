@@ -470,9 +470,13 @@ internal readonly struct ContainerGumpPlugin : IPlugin
                     continue;
             }
 
+            // Coins draw a pile sprite (base+1 / base+2) by amount; everything
+            // else draws its own graphic. `displayed` stays the base graphic for
+            // the tiledata/layer logic above.
+            ushort artGraphic = ItemGraphics.Displayed(ev.Graphic, ev.Amount);
             ushort drawGraphic = entry.IsBoard
-                ? (ushort)(displayed - Constants.ITEM_GUMP_TEXTURE_OFFSET)
-                : displayed;
+                ? (ushort)(artGraphic - Constants.ITEM_GUMP_TEXTURE_OFFSET)
+                : artGraphic;
 
             float scale = entry.Scale;
             int spriteW, spriteH;
@@ -527,7 +531,7 @@ internal readonly struct ContainerGumpPlugin : IPlugin
             if (!entry.IsBoard && displayed < tileData.Length)
             {
                 ref readonly var td = ref tileData[displayed];
-                stacked = ev.Amount > 1 && td.IsStackable;
+                stacked = ItemGraphics.DrawStacked(ev.Graphic, ev.Amount, td.IsStackable);
             }
 
             var itemUi = commands.Spawn()

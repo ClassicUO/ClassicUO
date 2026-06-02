@@ -146,11 +146,18 @@ readonly struct InGamePacketsPlugin : IPlugin
 
         app.AddObserver<On<PacketReceived<OnUnicodeSpeechPacket_0xAE>>,
             Res<NetClient>,
-            EventWriter<TextOverheadEvent>>(OnUnicodeSpeech);
+            EventWriter<TextOverheadEvent>,
+            EventWriter<SystemMessageEvent>>(OnUnicodeSpeech);
 
         app.AddObserver<On<PacketReceived<OnAsciiSpeechPacket_0x1C>>,
             Res<NetClient>,
-            EventWriter<TextOverheadEvent>>(OnAsciiSpeech);
+            EventWriter<TextOverheadEvent>,
+            EventWriter<SystemMessageEvent>>(OnAsciiSpeech);
+
+        app.AddObserver<On<PacketReceived<OnClilocMessagePacket_0xC1>>,
+            Res<UOFileManager>,
+            EventWriter<TextOverheadEvent>,
+            EventWriter<SystemMessageEvent>>(OnClilocMessage);
 
         app.AddObserver<On<PacketReceived<OnViewRangePacket_0xC8>>,
             ResMut<GameContext>>(OnViewRange);
@@ -302,7 +309,6 @@ readonly struct InGamePacketsPlugin : IPlugin
         Stub<OnQuestPointerPacket_0xBA_Pre7090>(app);
         Stub<OnQuestPointerPacket_0xBA_Post7090>(app);
         Stub<OnGraphicEffectC0Packet_0xC0>(app);
-        Stub<OnClilocMessagePacket_0xC1>(app);
         Stub<OnUnicodePromptPacket_0xC2>(app);
         Stub<OnGraphicEffectC7Packet_0xC7>(app);
         Stub<OnClilocMessageAffixPacket_0xCC>(app);
@@ -461,10 +467,15 @@ readonly struct InGamePacketsPlugin : IPlugin
         network.Value.Send_ClientVersion(settings.Value.ClientVersion);
     }
 
+    // Server messages carry the broadcast serial 0xFFFFFFFF and belong in the
+    // bottom-left system log, not over an entity.
+    const uint SystemSerial = 0xFFFF_FFFF;
+
     static void OnUnicodeSpeech(
         On<PacketReceived<OnUnicodeSpeechPacket_0xAE>> trig,
         Res<NetClient> network,
-        EventWriter<TextOverheadEvent> textOverHeadQueue)
+        EventWriter<TextOverheadEvent> textOverHeadQueue,
+        EventWriter<SystemMessageEvent> systemMsgQueue)
     {
         var packet = trig.Event.Packet;
 
@@ -480,7 +491,11 @@ readonly struct InGamePacketsPlugin : IPlugin
             return;
         }
 
-        Console.WriteLine("[0xAE] {0} says: '{1}'", packet.Name, packet.Text);
+        if (packet.Serial == SystemSerial)
+        {
+            systemMsgQueue.Send(new SystemMessageEvent { Text = packet.Text, Hue = packet.Hue, Font = (byte)packet.Font });
+            return;
+        }
 
         textOverHeadQueue.Send(new TextOverheadEvent
         {
@@ -496,7 +511,8 @@ readonly struct InGamePacketsPlugin : IPlugin
     static void OnAsciiSpeech(
         On<PacketReceived<OnAsciiSpeechPacket_0x1C>> trig,
         Res<NetClient> network,
-        EventWriter<TextOverheadEvent> textOverHeadQueue)
+        EventWriter<TextOverheadEvent> textOverHeadQueue,
+        EventWriter<SystemMessageEvent> systemMsgQueue)
     {
         var packet = trig.Event.Packet;
 
@@ -506,7 +522,11 @@ readonly struct InGamePacketsPlugin : IPlugin
             return;
         }
 
-        Console.WriteLine("[0x1C] {0} says: '{1}'", packet.Name, packet.Text);
+        if (packet.Serial == SystemSerial)
+        {
+            systemMsgQueue.Send(new SystemMessageEvent { Text = packet.Text, Hue = packet.Hue, Font = (byte)packet.Font });
+            return;
+        }
 
         textOverHeadQueue.Send(new TextOverheadEvent
         {
@@ -517,6 +537,33 @@ readonly struct InGamePacketsPlugin : IPlugin
             Text = packet.Text,
             MessageType = packet.MessageType
         });
+    }
+
+    // 0xC1 cliloc message — server text keyed by a cliloc id with tab-separated
+    // arguments. System notices (broadcast serial) go to the bottom-left log;
+    // anything tied to an entity (name labels, NPC barks) is overhead text.
+    static void OnClilocMessage(
+        On<PacketReceived<OnClilocMessagePacket_0xC1>> trig,
+        Res<UOFileManager> files,
+        EventWriter<TextOverheadEvent> textOverHeadQueue,
+        EventWriter<SystemMessageEvent> systemMsgQueue)
+    {
+        var packet = trig.Event.Packet;
+        var text = files.Value.Clilocs.Translate((int)packet.Cliloc, packet.Arguments);
+        if (string.IsNullOrEmpty(text)) return;
+
+        if (packet.Serial == SystemSerial || packet.Serial == 0)
+            systemMsgQueue.Send(new SystemMessageEvent { Text = text, Hue = packet.Hue, Font = (byte)packet.Font });
+        else
+            textOverHeadQueue.Send(new TextOverheadEvent
+            {
+                Serial = packet.Serial,
+                Name = packet.Name,
+                Hue = packet.Hue,
+                Font = (byte)packet.Font,
+                Text = text,
+                MessageType = packet.MessageType,
+            });
     }
 
     static void OnViewRange(

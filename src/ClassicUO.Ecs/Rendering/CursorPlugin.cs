@@ -42,16 +42,18 @@ internal readonly struct CursorPlugin : IPlugin
     )
     {
         var grabbed = grabbedItem.Value;
-        ref readonly var artInfo = ref assets.Value.Arts.GetArt(grabbed.Graphic);
+        // Coins on the cursor show the pile sprite (base+1 / base+2) by amount,
+        // like the container/world draw.
+        var drawGraphic = ItemGraphics.Displayed(grabbed.Graphic, grabbed.Amount);
+        ref readonly var artInfo = ref assets.Value.Arts.GetArt(drawGraphic);
         if (artInfo.Texture == null)
             return;
 
-        // A held stack (Amount > 1) draws a second sprite +5/+5 to fake a pile,
-        // same as the container/world render (GuiRenderingPlugin).
+        // A held stack (Amount > 1) draws a second sprite +5/+5 to fake a pile —
+        // coins are excluded (their amount shows through the pile graphic).
         var tileData = files.Value.TileData.StaticData;
-        bool stacked = grabbed.Amount > 1
-            && grabbed.Graphic < tileData.Length
-            && tileData[grabbed.Graphic].IsStackable;
+        bool stacked = grabbed.Graphic < tileData.Length
+            && ItemGraphics.DrawStacked(grabbed.Graphic, grabbed.Amount, tileData[grabbed.Graphic].IsStackable);
 
         var b = batch.Value;
         // Cursor position is in LOGICAL pixels; the batch otherwise draws in
