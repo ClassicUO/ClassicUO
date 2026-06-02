@@ -405,6 +405,8 @@ internal sealed class UOCustomRender
     public bool IsHtml;
     public uint HtmlStartColor;
     public bool HtmlBg;
+    // Center each wrapped line within WrapWidth (legacy tooltip uses TS_CENTER).
+    public bool TextCenter;
 
     // For UOCustomKind.GumpSlice: source sub-rectangle within the gump sprite,
     // and whether to tile it across the node box (vs draw once at the origin).

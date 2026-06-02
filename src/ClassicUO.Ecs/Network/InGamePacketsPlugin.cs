@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Text;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
@@ -125,6 +126,7 @@ readonly struct InGamePacketsPlugin : IPlugin
     {
         app.AddResource(new PlayerSkills());
         app.AddResource(new SpellbookStore());
+        app.AddResource(new ObjectPropertyLists());
 
         app.AddObserver<On<PacketReceived<OnEnterWorldPacket_0x1B>>,
             Commands,
@@ -307,8 +309,12 @@ readonly struct InGamePacketsPlugin : IPlugin
         Stub<OnLogoutRequestPacket_0xD1>(app);
         Stub<OnUpdateCharacterAltPacket_0xD2>(app);
         Stub<OnOpenBookAltPacket_0xD4>(app);
-        Stub<OnMegaClilocPacket_0xD6>(app);
-        Stub<OnOplInfoPacket_0xDC>(app);
+        app.AddObserver<On<PacketReceived<OnMegaClilocPacket_0xD6>>,
+            Res<UOFileManager>,
+            ResMut<GameContext>,
+            ResMut<ObjectPropertyLists>>(OnMegaCliloc);
+        app.AddObserver<On<PacketReceived<OnOplInfoPacket_0xDC>>,
+            ResMut<ObjectPropertyLists>>(OnOplInfo);
         Stub<OnOpenCompressedGumpPacket_0xDD>(app);
         Stub<OnUpdateMobileStatusPacket_0xDE>(app);
         Stub<OnBuffDebuffPacket_0xDF>(app);
@@ -1301,5 +1307,77 @@ readonly struct InGamePacketsPlugin : IPlugin
             slot.Received = true;
             skills.Value.HasData = true;
         }
+    }
+
+    // 0xD6 MegaCliloc: the server's Object Property List. First translated
+    // cliloc line is the object name; the rest are property lines joined with
+    // newlines. Stored by serial+revision for the tooltip renderer. Mirrors
+    // main's PacketHandlers.MegaCliloc.
+    static void OnMegaCliloc(
+        On<PacketReceived<OnMegaClilocPacket_0xD6>> trig,
+        Res<UOFileManager> fileManager,
+        ResMut<GameContext> gameCtx,
+        ResMut<ObjectPropertyLists> opl)
+    {
+        var packet = trig.Event.Packet;
+        if (packet.Unknown > 1)
+            return;
+
+        string name = string.Empty;
+        var sb = new StringBuilder();
+        bool first = true;
+
+        if (packet.Entries != null)
+        {
+            foreach (var entry in packet.Entries)
+            {
+                string str = fileManager.Value.Clilocs.Translate(entry.Cliloc, entry.Argument, true);
+                if (str == null)
+                    continue;
+
+                str = ApplyClilocColor(entry.Cliloc, str, gameCtx.Value.ClientVersion);
+
+                if (first)
+                {
+                    name = str;
+                    first = false;
+                }
+                else
+                {
+                    if (sb.Length != 0)
+                        sb.Append('\n');
+                    sb.Append(str);
+                }
+            }
+        }
+
+        opl.Value.Add(packet.Serial, packet.Revision, name, sb.ToString());
+    }
+
+    // A few clilocs carry a hardcoded colour in the legacy client (the per-pixel
+    // strength-requirement red is skipped — it needs the player's stats).
+    static string ApplyClilocColor(int cliloc, string str, ClientVersion version)
+    {
+        switch (cliloc)
+        {
+            case 1080418:
+                return version >= ClientVersion.CV_60143 ? "<basefont color=#40a4fe>" + str + "</basefont>" : str;
+            case 1062613:
+                return "<basefont color=#FFCC33>" + str + "</basefont>";
+            case 1159561:
+                return "<basefont color=#b66dff>" + str + "</basefont>";
+        }
+        return str;
+    }
+
+    // 0xDC OPLInfo: the server announces an entity's current OPL revision. If it
+    // differs from what we cached (or we have nothing), queue a 0xD6 refresh.
+    static void OnOplInfo(
+        On<PacketReceived<OnOplInfoPacket_0xDC>> trig,
+        ResMut<ObjectPropertyLists> opl)
+    {
+        var packet = trig.Event.Packet;
+        if (!opl.Value.IsRevisionEquals(packet.Serial, packet.Revision))
+            opl.Value.ForceRequest(packet.Serial);
     }
 }

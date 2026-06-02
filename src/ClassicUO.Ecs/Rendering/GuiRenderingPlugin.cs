@@ -456,7 +456,8 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                     custom.HtmlBg,
                     (int)bb.X,
                     (int)bb.Y,
-                    cmd.ZIndex);
+                    cmd.ZIndex,
+                    custom.TextCenter ? ClassicUO.Assets.TEXT_ALIGN_TYPE.TS_CENTER : ClassicUO.Assets.TEXT_ALIGN_TYPE.TS_LEFT);
                 break;
 
             case UOCustomKind.None:

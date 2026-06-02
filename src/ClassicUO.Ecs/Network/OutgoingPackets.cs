@@ -215,6 +215,74 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
+        // 0xD6 batch — ask the server for the Object Property List (tooltip) of
+        // up to 15 entities. CV_5090+. Mirrors legacy Send_MegaClilocRequest.
+        public static void Send_MegaClilocRequest(this NetClient socket, ReadOnlySpan<uint> serials)
+        {
+            const byte ID = 0xD6;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            int count = Math.Min(15, serials.Length);
+            for (int i = 0; i < count; ++i)
+            {
+                writer.WriteUInt32BE(serials[i]);
+            }
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
+        // 0xBF 0x10 — single-serial OPL request for pre-CV_5090 clients.
+        public static void Send_MegaClilocRequest_Old(this NetClient socket, uint serial)
+        {
+            const byte ID = 0xBF;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt16BE(0x10);
+            writer.WriteUInt32BE(serial);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
         // 0x6C target response (entity). Mirrors legacy NetClientExt.Send_TargetObject:
         // flag 0x00 = object, echo the server's cursorID + cursorType, then the
         // clicked entity's serial / x / y / z / graphic. z occupies two bytes.

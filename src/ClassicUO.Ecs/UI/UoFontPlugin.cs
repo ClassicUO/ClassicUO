@@ -135,18 +135,19 @@ internal static class UoFontRenderer
         public readonly uint HtmlStartColor;
         public readonly bool HtmlBg;
         public readonly int Width;
+        public readonly TEXT_ALIGN_TYPE Align;
 
-        public LayoutKey(string text, byte font, bool ascii, bool isHtml, uint htmlStartColor, bool htmlBg, int width)
+        public LayoutKey(string text, byte font, bool ascii, bool isHtml, uint htmlStartColor, bool htmlBg, int width, TEXT_ALIGN_TYPE align)
         {
             Text = text; Font = font; Ascii = ascii; IsHtml = isHtml;
-            HtmlStartColor = htmlStartColor; HtmlBg = htmlBg; Width = width;
+            HtmlStartColor = htmlStartColor; HtmlBg = htmlBg; Width = width; Align = align;
         }
 
         public bool Equals(LayoutKey o) =>
             Text == o.Text && Font == o.Font && Ascii == o.Ascii && IsHtml == o.IsHtml
-            && HtmlStartColor == o.HtmlStartColor && HtmlBg == o.HtmlBg && Width == o.Width;
+            && HtmlStartColor == o.HtmlStartColor && HtmlBg == o.HtmlBg && Width == o.Width && Align == o.Align;
         public override bool Equals(object? o) => o is LayoutKey k && Equals(k);
-        public override int GetHashCode() => HashCode.Combine(Text, Font, Ascii, IsHtml, HtmlStartColor, HtmlBg, Width);
+        public override int GetHashCode() => HashCode.Combine(Text, Font, Ascii, IsHtml, HtmlStartColor, HtmlBg, Width, Align);
     }
 
     private sealed class Layout
@@ -174,9 +175,9 @@ internal static class UoFontRenderer
     // under SetUseHTML so per-char Font/Color/Flags in the MultilinesFontData
     // already carry the resolved per-segment colour (untagged segments use
     // htmlStartColor). The cached info is read-only afterwards.
-    private static Layout GetLayout(string text, byte font, bool ascii, bool isHtml, uint htmlStartColor, bool htmlBg, int maxWidth)
+    private static Layout GetLayout(string text, byte font, bool ascii, bool isHtml, uint htmlStartColor, bool htmlBg, int maxWidth, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT)
     {
-        var key = new LayoutKey(text, font, ascii, isHtml, htmlStartColor, htmlBg, maxWidth);
+        var key = new LayoutKey(text, font, ascii, isHtml, htmlStartColor, htmlBg, maxWidth, align);
         if (_layouts.TryGetValue(key, out var cached))
             return cached;
 
@@ -191,8 +192,8 @@ internal static class UoFontRenderer
         try
         {
             MultilinesFontInfo? info = ascii
-                ? fonts.GetInfoASCII(font, parseText, parseText.Length, TEXT_ALIGN_TYPE.TS_LEFT, 0, maxWidth, countret: true, countspaces: true)
-                : fonts.GetInfoUnicode(font, parseText, parseText.Length, TEXT_ALIGN_TYPE.TS_LEFT, 0, maxWidth, countret: true, countspaces: true);
+                ? fonts.GetInfoASCII(font, parseText, parseText.Length, align, 0, maxWidth, countret: true, countspaces: true)
+                : fonts.GetInfoUnicode(font, parseText, parseText.Length, align, 0, maxWidth, countret: true, countspaces: true);
 
             int w = 0, h = 0;
             for (var ptr = info; ptr != null; ptr = ptr.Next)
@@ -382,7 +383,8 @@ internal static class UoFontRenderer
         uint htmlStartColor,
         bool htmlBg,
         int x, int y,
-        float layerDepth)
+        float layerDepth,
+        TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT)
     {
         if (string.IsNullOrEmpty(text) || UoFontRuntime.Fonts == null || UoFontRuntime.Atlas == null)
             return;
@@ -391,7 +393,7 @@ internal static class UoFontRenderer
         // wrapped text (croppedtext/text) is a white glyph tinted by the UO
         // hue — same flat-tint model as inline unicode labels. hue 0 → white.
         var tint = (!isHtml && hue != 0) ? HueToTint(hue) : XnaColor.White;
-        var layout = GetLayout(text, font, ascii: false, isHtml, htmlStartColor, htmlBg, maxWidth);
+        var layout = GetLayout(text, font, ascii: false, isHtml, htmlStartColor, htmlBg, maxWidth, align);
         DrawGlyphs(batcher, layout, font, isUnicode: true, isHtml, asciiHue: 0, tint, x, y, layerDepth);
     }
 
@@ -410,12 +412,12 @@ internal static class UoFontRenderer
     // Measure a wrapped block (no draw). Builds + caches the layout so the
     // subsequent DrawWrapped is a cache hit. Returns the content (width, height)
     // used to size the scrollable inner node.
-    public static (int Width, int Height) Measure(string text, byte font, int maxWidth, bool isHtml, uint htmlStartColor, bool htmlBg)
+    public static (int Width, int Height) Measure(string text, byte font, int maxWidth, bool isHtml, uint htmlStartColor, bool htmlBg, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT)
     {
         if (string.IsNullOrEmpty(text) || UoFontRuntime.Fonts == null)
             return (0, 0);
 
-        var layout = GetLayout(text, font, ascii: false, isHtml, htmlStartColor, htmlBg, maxWidth);
+        var layout = GetLayout(text, font, ascii: false, isHtml, htmlStartColor, htmlBg, maxWidth, align);
         return (layout.Width, layout.Height);
     }
 
