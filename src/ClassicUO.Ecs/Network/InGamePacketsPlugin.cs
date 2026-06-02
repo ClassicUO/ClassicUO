@@ -6,6 +6,7 @@ using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
+using ClassicUO.Game.Managers;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Utility;
@@ -311,7 +312,10 @@ readonly struct InGamePacketsPlugin : IPlugin
         Stub<OnGraphicEffectC0Packet_0xC0>(app);
         Stub<OnUnicodePromptPacket_0xC2>(app);
         Stub<OnGraphicEffectC7Packet_0xC7>(app);
-        Stub<OnClilocMessageAffixPacket_0xCC>(app);
+        app.AddObserver<On<PacketReceived<OnClilocMessageAffixPacket_0xCC>>,
+            Res<UOFileManager>,
+            EventWriter<TextOverheadEvent>,
+            EventWriter<SystemMessageEvent>>(OnClilocMessageAffix);
         Stub<OnLogoutRequestPacket_0xD1>(app);
         Stub<OnUpdateCharacterAltPacket_0xD2>(app);
         Stub<OnOpenBookAltPacket_0xD4>(app);
@@ -566,6 +570,41 @@ readonly struct InGamePacketsPlugin : IPlugin
                 IsUnicode = true,
                 Text = text,
                 MessageType = packet.MessageType,
+            });
+    }
+
+    // 0xCC cliloc-with-affix — like 0xC1 but the server tacks an extra
+    // prepend/append string onto the translated cliloc, and an affix System flag
+    // can force the line into the system log. Mirrors legacy PacketHandlers.
+    static void OnClilocMessageAffix(
+        On<PacketReceived<OnClilocMessageAffixPacket_0xCC>> trig,
+        Res<UOFileManager> files,
+        EventWriter<TextOverheadEvent> textOverHeadQueue,
+        EventWriter<SystemMessageEvent> systemMsgQueue)
+    {
+        var packet = trig.Event.Packet;
+        var text = files.Value.Clilocs.Translate((int)packet.Cliloc, packet.Arguments);
+        if (string.IsNullOrEmpty(text)) return;
+
+        if (!string.IsNullOrWhiteSpace(packet.Affix))
+            text = (packet.AffixType & AffixType.Prepend) != 0
+                ? $"{packet.Affix}{text}"
+                : $"{text}{packet.Affix}";
+
+        var type = (packet.AffixType & AffixType.System) != 0 ? MessageType.System : packet.MessageType;
+
+        if (packet.Serial == SystemSerial || packet.Serial == 0 || type == MessageType.System)
+            systemMsgQueue.Send(new SystemMessageEvent { Text = text, Hue = packet.Hue, Font = (byte)packet.Font });
+        else
+            textOverHeadQueue.Send(new TextOverheadEvent
+            {
+                Serial = packet.Serial,
+                Name = packet.Name,
+                Hue = packet.Hue,
+                Font = (byte)packet.Font,
+                IsUnicode = true,
+                Text = text,
+                MessageType = type,
             });
     }
 

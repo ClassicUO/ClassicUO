@@ -125,6 +125,7 @@ internal readonly struct JournalPlugin : IPlugin
         app.AddResource(new JournalTimeProvider());
 
         var captureFn = Capture;
+        var captureSystemFn = CaptureSystem;
         var rebuildFn = RebuildContent;
         var layoutFn = LayoutWindow;
         var flagFn = PositionFlag;
@@ -132,6 +133,8 @@ internal readonly struct JournalPlugin : IPlugin
 
         app.AddSystem(captureFn).InStage(Stage.Update)
             .RunIf((EventReader<TextOverheadEvent> texts) => texts.HasEvents).Build();
+        app.AddSystem(captureSystemFn).InStage(Stage.Update)
+            .RunIf((EventReader<SystemMessageEvent> msgs) => msgs.HasEvents).Build();
         app.AddSystem(rebuildFn).InStage(Stage.Update).Build();
         app.AddSystem(layoutFn).InStage(Stage.Update).Build();
         app.AddSystem(flagFn).InStage(Stage.PostUpdate).Build();
@@ -217,6 +220,29 @@ internal readonly struct JournalPlugin : IPlugin
                 Name = t.Name,
                 Hue = t.Hue,
                 TextType = type,
+                TimeLabel = clock.Value.NowLabel(),
+            });
+        }
+    }
+
+    // Server broadcasts (serial 0xFFFFFFFF / cliloc system notices) are routed
+    // to SystemMessageEvent for the bottom-left log, not TextOverheadEvent — so
+    // the Capture path above never sees them. Mirror them into the journal as
+    // System lines (legacy's journal shows server system text under its System
+    // filter). Independent EventReader cursor; the system log keeps its own.
+    private static void CaptureSystem(
+        Res<JournalTimeProvider> clock,
+        EventReader<SystemMessageEvent> msgs,
+        ResMut<JournalStore> store)
+    {
+        foreach (var m in msgs.Read())
+        {
+            store.Value.Append(new JournalEntry
+            {
+                Text = m.Text,
+                Name = "System",
+                Hue = m.Hue,
+                TextType = JournalTextType.System,
                 TimeLabel = clock.Value.NowLabel(),
             });
         }

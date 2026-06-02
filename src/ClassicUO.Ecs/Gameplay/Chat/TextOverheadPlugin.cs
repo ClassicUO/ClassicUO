@@ -48,6 +48,8 @@ internal readonly struct TextOverheadPlugin : IPlugin
             switch (text.MessageType)
             {
                 case MessageType.Regular:
+                case MessageType.Emote:
+                case MessageType.Focus:
                 case MessageType.Spell:
                 case MessageType.Whisper:
                 case MessageType.Yell:
