@@ -50,7 +50,7 @@ internal readonly struct VendorGumpPlugin : IPlugin
             opened.Send(new VendorOpenedEvent(trig.Event.Packet.Serial, true));
         });
 
-        // Sell: 0x9E carries the whole list.
+        // Sell: 0x9E carries the whole list. Names resolve live at rebuild.
         app.AddObserver((
             On<PacketReceived<OnSellListPacket_0x9E>> trig,
             ResMut<VendorStore> store,
@@ -59,13 +59,24 @@ internal readonly struct VendorGumpPlugin : IPlugin
             var p = trig.Event.Packet;
             var list = new List<VendorEntry>(p.Entries.Count);
             foreach (var e in p.Entries)
-                list.Add(new VendorEntry { Serial = e.ItemSerial, Graphic = e.Graphic, Hue = e.Hue, Amount = e.Amount, Price = e.Price, Name = ResolveName(e.Name) });
+                list.Add(new VendorEntry { Serial = e.ItemSerial, Graphic = e.Graphic, Hue = e.Hue, Amount = e.Amount, Price = e.Price, RawName = e.Name });
             store.Value.SellByVendor[p.Serial] = list;
             store.Value.Revision++;
             opened.Send(new VendorOpenedEvent(p.Serial, false));
         });
 
-        // 0x74 BuyList — stamp price/name onto the container's item entities.
+        // OPL (0xD6 mega-cliloc) carries the real item names; they typically
+        // arrive after the gump opens. Bump the revision so open windows rebuild
+        // and re-resolve names from the now-populated OPL (legacy SetNameTo).
+        app.AddObserver((
+            On<PacketReceived<OnMegaClilocPacket_0xD6>> trig,
+            ResMut<VendorStore> store) =>
+        {
+            store.Value.Revision++;
+        });
+
+        // 0x74 BuyList — stamp price + raw name onto the container's item
+        // entities. Display names resolve live at rebuild.
         app.AddObserver((
             On<PacketReceived<OnBuyListPacket_0x74>> trig,
             Commands commands,
@@ -80,7 +91,7 @@ internal readonly struct VendorGumpPlugin : IPlugin
             var ordered = OrderShopChildren(containerEnt, ReadGraphic(graphicQ, containerEnt), childrenQ, slotQ);
             int n = Math.Min(ordered.Count, p.Entries.Count);
             for (int i = 0; i < n; i++)
-                commands.Entity(ordered[i]).Insert(new VendorListing { Price = p.Entries[i].Price, Name = ResolveName(p.Entries[i].Name) });
+                commands.Entity(ordered[i]).Insert(new VendorListing { Price = p.Entries[i].Price, RawName = p.Entries[i].Name });
             store.Value.Revision++;
         });
 
@@ -146,10 +157,35 @@ internal readonly struct VendorGumpPlugin : IPlugin
         commands.Entity(e.Id).Despawn();
     }
 
-    private static string ResolveName(string raw)
+    // Buy name (legacy PacketHandlers.BuyList): OPL name first, else a numeric
+    // raw is a cliloc translated with "\t{itemdata}: \t{amount}" args, else the
+    // tiledata name when blank, else the raw string.
+    private static string ResolveBuyName(uint serial, ushort graphic, ushort amount, string raw, UOFileManager files, ObjectPropertyLists opl)
     {
-        if (string.IsNullOrEmpty(raw)) return "Item";
+        if (serial != 0 && opl.TryGet(serial, out var e) && !string.IsNullOrEmpty(e.Name)) return e.Name;
+        if (int.TryParse(raw, out int cliloc))
+            return files.Clilocs.Translate(cliloc, $"\t{TileName(files, graphic)}: \t{amount}", true);
+        if (string.IsNullOrEmpty(raw)) return TileName(files, graphic);
         return raw;
+    }
+
+    // Sell name (legacy PacketHandlers.SellList): numeric raw is a cliloc; blank
+    // falls back to OPL then tiledata; otherwise the raw string.
+    private static string ResolveSellName(uint serial, ushort graphic, string raw, UOFileManager files, ObjectPropertyLists opl)
+    {
+        if (int.TryParse(raw, out int cliloc)) return files.Clilocs.GetString(cliloc);
+        if (string.IsNullOrEmpty(raw))
+        {
+            if (serial != 0 && opl.TryGet(serial, out var e) && !string.IsNullOrEmpty(e.Name)) return e.Name;
+            return TileName(files, graphic);
+        }
+        return raw;
+    }
+
+    private static string TileName(UOFileManager files, ushort graphic)
+    {
+        var name = files.TileData.StaticData[graphic].Name;
+        return string.IsNullOrEmpty(name) ? "Item" : name;
     }
 
     private static int GumpW(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Width; }
@@ -356,13 +392,13 @@ internal readonly struct VendorGumpPlugin : IPlugin
         Res<VendorStore> store,
         Res<GumpBuilder> builder,
         Res<AssetsServer> assets,
+        Res<UOFileManager> files,
+        ResMut<ObjectPropertyLists> opl,
         Query<Data<VendorWindow>> windowsQ,
         Query<Data<TinyEcs.Children>> childrenQ,
         Query<Data<EquipmentSlots>> equipQ,
         Query<Data<Graphic>> graphicQ,
-        Query<Data<Hue>> hueQ,
-        Query<Data<Amount>> amountQ,
-        Query<Data<NetworkSerial>> serialQ,
+        Query<Data<Graphic, Hue, Amount, NetworkSerial>> itemQ,
         Query<Data<ContainerSlotPosition>> slotQ,
         Query<Data<VendorListing>> listingQ,
         Query<Data<PlayerData>> playerQ,
@@ -380,9 +416,23 @@ internal readonly struct VendorGumpPlugin : IPlugin
             win.Ref.Items.Clear();
             var items = new List<VendorEntry>();
             if (win.Ref.IsBuy)
-                GatherBuyItems(win.Ref.Vendor, items, map, equipQ, graphicQ, hueQ, amountQ, serialQ, slotQ, listingQ, childrenQ);
+                GatherBuyItems(win.Ref.Vendor, items, map, equipQ, graphicQ, itemQ, slotQ, listingQ, childrenQ);
             else if (store.Value.SellByVendor.TryGetValue(win.Ref.Vendor, out var sell))
                 items.AddRange(sell);
+
+            // Resolve display names live from the now-current OPL (the real names
+            // usually arrive via 0xD6 after the gump opened) with cliloc/tiledata
+            // /raw fallbacks, and request OPL for any item we don't have yet so
+            // the names fill in (legacy requests mega-clilocs for shop contents).
+            for (int i = 0; i < items.Count; i++)
+            {
+                var it = items[i];
+                it.Name = win.Ref.IsBuy
+                    ? ResolveBuyName(it.Serial, it.Graphic, it.Amount, it.RawName, files.Value, opl.Value)
+                    : ResolveSellName(it.Serial, it.Graphic, it.RawName, files.Value, opl.Value);
+                items[i] = it;
+                if (it.Serial != 0) opl.Value.Request(it.Serial);
+            }
 
             foreach (var it in items) win.Ref.Items[it.Serial] = it;
 
@@ -431,9 +481,7 @@ internal readonly struct VendorGumpPlugin : IPlugin
         Res<NetworkEntitiesMap> map,
         Query<Data<EquipmentSlots>> equipQ,
         Query<Data<Graphic>> graphicQ,
-        Query<Data<Hue>> hueQ,
-        Query<Data<Amount>> amountQ,
-        Query<Data<NetworkSerial>> serialQ,
+        Query<Data<Graphic, Hue, Amount, NetworkSerial>> itemQ,
         Query<Data<ContainerSlotPosition>> slotQ,
         Query<Data<VendorListing>> listingQ,
         Query<Data<TinyEcs.Children>> childrenQ)
@@ -448,22 +496,21 @@ internal readonly struct VendorGumpPlugin : IPlugin
             var ordered = OrderShopChildren(containerEnt, ReadGraphic(graphicQ, containerEnt), childrenQ, slotQ);
             foreach (var child in ordered)
             {
-                if (!serialQ.Contains(child)) continue;
-                var (_, sn) = serialQ.Get(child);
+                if (!itemQ.Contains(child)) continue;
+                var (_, g, h, a, sn) = itemQ.Get(child);
                 var entry = new VendorEntry
                 {
                     Serial = sn.Ref.Value,
-                    Graphic = ReadGraphic(graphicQ, child),
-                    Hue = ReadHue(hueQ, child),
-                    Amount = ReadAmount(amountQ, child),
+                    Graphic = g.Ref.Value,
+                    Hue = h.Ref.Value,
+                    Amount = (ushort)a.Ref.Value,
                 };
                 if (listingQ.Contains(child))
                 {
                     var (_, l) = listingQ.Get(child);
                     entry.Price = l.Ref.Price;
-                    entry.Name = l.Ref.Name;
+                    entry.RawName = l.Ref.RawName;
                 }
-                else entry.Name = "Item";
                 outItems.Add(entry);
             }
         }
@@ -471,10 +518,6 @@ internal readonly struct VendorGumpPlugin : IPlugin
 
     private static ushort ReadGraphic(Query<Data<Graphic>> q, ulong e)
     { if (e == 0 || !q.Contains(e)) return 0; var (_, g) = q.Get(e); return g.Ref.Value; }
-    private static ushort ReadHue(Query<Data<Hue>> q, ulong e)
-    { if (e == 0 || !q.Contains(e)) return 0; var (_, h) = q.Get(e); return h.Ref.Value; }
-    private static ushort ReadAmount(Query<Data<Amount>> q, ulong e)
-    { if (e == 0 || !q.Contains(e)) return 1; var (_, a) = q.Get(e); return (ushort)a.Ref.Value; }
     private static int ReadSlotX(Query<Data<ContainerSlotPosition>> q, ulong e)
     { if (e == 0 || !q.Contains(e)) return 0; var (_, s) = q.Get(e); return s.Ref.X; }
 
@@ -539,23 +582,24 @@ internal readonly struct VendorGumpPlugin : IPlugin
     private static void BuildTxnRow(Commands commands, GumpBuilder builder, ulong list, ulong rootId, VendorEntry it, int amount)
     {
         const int RowH = 22;
+        // Legacy TransactionItem: 220-wide row, children at fixed X (amount 10,
+        // name 50, +button 190, -button 210). Flex flowed them all hard-left and
+        // buried the +/- under the name — absolute positions restore parity.
         var row = commands.Spawn()
-            .Insert(new Node { Display = Display.Flex, FlexDirection = FlexDirection.Row, AlignItems = AlignItems.Center, Gap = Val.Px(4), Width = Val.Px(220), Height = Val.Px(RowH) })
+            .Insert(new Node { Width = Val.Px(220), Height = Val.Px(RowH) })
             .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.None, Hue = Vector3.UnitZ } });
         commands.AddChild(list, row.Id);
 
-        var amt = AddFlowText(commands, amount.ToString(), 9, TextHue);
-        commands.AddChild(row.Id, amt.Id);
-        var label = AddFlowText(commands, it.Name, 9, TextHue);
-        commands.AddChild(row.Id, label.Id);
+        AddText(commands, row.Id, amount.ToString(), 9, 10, 4, TextHue);
+        AddText(commands, row.Id, it.Name, 9, 50, 4, TextHue);
 
         uint serial = it.Serial;
-        var plus = builder.AddGump(commands, 0x37, Vector3.UnitZ, new Vector2(0, 0))
+        var plus = builder.AddGump(commands, 0x37, Vector3.UnitZ, new Vector2(190, 5))
             .Insert(Interaction.None).Insert<UINoWindowDrag>().Insert<UiContainsByBounds>()
             .Insert(new VendorTxnButton { Window = rootId, Serial = serial, Dir = +1 });
         commands.AddChild(row.Id, plus.Id);
 
-        var minus = builder.AddGump(commands, 0x38, Vector3.UnitZ, new Vector2(0, 0))
+        var minus = builder.AddGump(commands, 0x38, Vector3.UnitZ, new Vector2(210, 5))
             .Insert(Interaction.None).Insert<UINoWindowDrag>().Insert<UiContainsByBounds>()
             .Insert(new VendorTxnButton { Window = rootId, Serial = serial, Dir = -1 });
         commands.AddChild(row.Id, minus.Id);
@@ -569,8 +613,10 @@ internal readonly struct VendorGumpPlugin : IPlugin
         Res<KeyboardContext> kb,
         Res<NetClient> net,
         Res<GameContext> ctx,
+        Res<Time> time,
         Commands commands,
         Local<bool> claimed,
+        Local<TxnRepeat> repeat,
         Query<Data<ComputedNode, VendorActionButton>> actQ,
         Query<Data<ComputedNode, VendorTxnButton>> txnQ,
         Query<Data<ComputedNode, VendorShopRow>> rowQ,
@@ -582,14 +628,40 @@ internal readonly struct VendorGumpPlugin : IPlugin
         {
             if (claimed.Value && gate.Value.Mode == ActiveDrag.UIWindow) gate.Value.Mode = ActiveDrag.None;
             claimed.Value = false;
+            repeat.Value = default;
             return;
         }
+
+        var p = mouse.Value.Position;
+
+        // Auto-repeat: while a +/- is held and the cursor stays over it, fire on an
+        // accelerating cadence after a 500ms initial delay (legacy TransactionItem
+        // MouseDown→MouseOver: t0 = +500, then every (45 - stepChanger) ms, with
+        // stepChanger += 2 each 3 fires, capped at 45). Shift re-read each fire.
+        if (repeat.Value.Active && !mouse.Value.IsPressedOnce(MouseButtonType.Left))
+        {
+            bool over = false;
+            foreach (var (_, bb, b) in txnQ)
+            {
+                if (b.Ref.Window != repeat.Value.Window || b.Ref.Serial != repeat.Value.Serial || b.Ref.Dir != repeat.Value.Dir) continue;
+                if (Contains(bb.Ref, p)) over = true;
+                break;
+            }
+            if (over && time.Value.Total > repeat.Value.NextTime)
+            {
+                AdjustTxn(repeat.Value.Window, repeat.Value.Serial, repeat.Value.Dir, ShiftDown(kb.Value), windowsQ);
+                repeat.Value.NextTime = time.Value.Total + (45 - repeat.Value.StepChanger);
+                repeat.Value.StepsDone++;
+                if (repeat.Value.StepChanger < 45 && repeat.Value.StepsDone % 3 == 0) repeat.Value.StepChanger += 2;
+            }
+            return;
+        }
+
         if (!mouse.Value.IsPressedOnce(MouseButtonType.Left)) return;
         // Allow our own prior-frame claim through (a double-click's first press
         // claims the gate; the second press must still register on the row).
         if (gate.Value.Mode != ActiveDrag.None && !claimed.Value) return;
 
-        var p = mouse.Value.Position;
         bool dbl = mouse.Value.IsPressedDouble(MouseButtonType.Left);
         bool shift = ShiftDown(kb.Value);
 
@@ -604,6 +676,11 @@ internal readonly struct VendorGumpPlugin : IPlugin
         {
             if (!Contains(bb.Ref, p)) continue;
             AdjustTxn(b.Ref.Window, b.Ref.Serial, b.Ref.Dir, shift, windowsQ);
+            repeat.Value = new TxnRepeat
+            {
+                Active = true, Window = b.Ref.Window, Serial = b.Ref.Serial, Dir = b.Ref.Dir,
+                NextTime = time.Value.Total + 500, StepChanger = 0, StepsDone = 0,
+            };
             gate.Value.Mode = ActiveDrag.UIWindow; claimed.Value = true; return;
         }
         foreach (var (_, bb, r) in rowQ)
@@ -612,6 +689,15 @@ internal readonly struct VendorGumpPlugin : IPlugin
             if (dbl) AdjustTxn(r.Ref.Window, r.Ref.Serial, +1, shift, windowsQ);
             gate.Value.Mode = ActiveDrag.UIWindow; claimed.Value = true; return;
         }
+    }
+
+    private struct TxnRepeat
+    {
+        public bool Active;
+        public ulong Window;
+        public uint Serial;
+        public int Dir;
+        public float NextTime, StepChanger, StepsDone;
     }
 
     // Hold an up/down arrow to scroll its list (legacy ScrollArea hitboxes).

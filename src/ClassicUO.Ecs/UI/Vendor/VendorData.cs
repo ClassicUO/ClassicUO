@@ -17,15 +17,18 @@ internal struct VendorEntry
     public ushort Hue;
     public ushort Amount;   // stock available
     public uint Price;
-    public string Name;
+    public string RawName;  // name as sent in the packet (may be blank or a cliloc number)
+    public string Name;     // resolved display name (OPL → cliloc → tiledata → raw)
 }
 
-// Stamped on a buy item entity by the 0x74 BuyList observer (price + display
-// name). The buy gump reads it off each shop-container child.
+// Stamped on a buy item entity by the 0x74 BuyList observer (price + raw packet
+// name). The buy gump reads it off each shop-container child and resolves the
+// display name live (OPL → cliloc → tiledata → raw) at rebuild — OPL/tooltip
+// data usually arrives after the gump opens, like legacy SetNameTo.
 internal struct VendorListing
 {
     public uint Price;
-    public string Name;
+    public string RawName;
 }
 
 // Sell lists arrive whole in 0x9E; buy lists are read live from the entity
