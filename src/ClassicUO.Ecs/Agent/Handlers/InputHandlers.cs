@@ -51,6 +51,45 @@ internal static class InputHandlers
         d.Register("debug.openSpellbook", DebugOpenSpellbook);
         d.Register("debug.openVendor", DebugOpenVendor);
         d.Register("debug.openPopup", DebugOpenPopup);
+        d.Register("debug.openSplit", DebugOpenSplit);
+    }
+
+    // Test-only: open the split-stack menu without a server item / drag. The
+    // live path is drag-only (PickupPlugin intercepts a stackable drag), which
+    // the synthetic mouse can't drive, so seed SplitPrompt directly and let
+    // SplitMenuPlugin.OpenWindow build it. The gump anchors at the cursor minus
+    // (80,40), so move the synthetic mouse first for deterministic placement.
+    // Optional "amount" sets the stack size (slider max); default 750.
+    public static JsonRpcResponse DebugOpenSplit(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        int amount = 750;
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object
+            && p.TryGetProperty("amount", out var ae) && ae.TryGetInt32(out var av) && av > 1)
+            amount = av;
+
+        var prompt = ctx.Runtime.GetResource<SplitPrompt>();
+        prompt.Open = true;
+        prompt.Built = false;
+        prompt.HasPos = true;
+        prompt.PosX = 250;
+        prompt.PosY = 180;
+        prompt.PendingSerial = 0x40001234u;
+        prompt.Graphic = 0x0EED;   // gold pile
+        prompt.Hue = 0;
+        prompt.MaxAmount = amount;
+        prompt.SourceUiEntity = 0;
+        prompt.SourceContainer = 0;
+        prompt.OriginalGraphic = 0x0EED;
+        prompt.OriginalHue = 0;
+        prompt.OriginalAmount = (ushort)amount;
+        prompt.OriginalX = 0;
+        prompt.OriginalY = 0;
+        prompt.OriginalZ = 0;
+        prompt.OriginalContainer = 0;
+        prompt.OriginalGridIndex = 0;
+        prompt.OriginalFromSlot = false;
+
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true, ["amount"] = amount } };
     }
 
     // Test-only: open a context/popup menu without a server entity. Mirrors the

@@ -6,6 +6,10 @@ namespace ClassicUO.Ecs;
 
 internal static class UiHitTest
 {
+    // Pile offset for stacked items (Amount > 1) — must match the +5/+5 second
+    // sprite drawn in GuiRenderingPlugin.
+    private const float StackOffset = 5f;
+
     // True when pos lands on an OPAQUE pixel of the entity's UO sprite.
     // Mirrors main's Gumps/Arts PixelCheck: a click inside the bounding box
     // but over a fully-transparent pixel misses the sprite and passes through
@@ -13,10 +17,16 @@ internal static class UiHitTest
     // none) stay bbox-opaque.
     public static bool PixelHit(AssetsServer assets, UOCustomRender custom, in ComputedNode bb, Vector2 pos)
     {
+        // Stacked items (Amount > 1) draw a second sprite +5/+5 (see
+        // GuiRenderingPlugin / ContainerGumpPlugin), so the pile extends 5px
+        // past the node box on the right/bottom — widen the reject to match,
+        // else clicks on the offset half of the pile fall through.
+        float stackExt = (custom is not null && custom.Stacked) ? StackOffset : 0f;
+
         // Bounding-box reject first.
         if (pos.X < bb.Position.X || pos.Y < bb.Position.Y) return false;
-        if (pos.X >= bb.Position.X + bb.Size.X) return false;
-        if (pos.Y >= bb.Position.Y + bb.Size.Y) return false;
+        if (pos.X >= bb.Position.X + bb.Size.X + stackExt) return false;
+        if (pos.Y >= bb.Position.Y + bb.Size.Y + stackExt) return false;
 
         // No custom payload on the element (shouldn't happen for UO sprites) —
         // treat the whole bounding box as opaque.
@@ -79,11 +89,24 @@ internal static class UiHitTest
                 }
                 float ox = bb.Position.X + (boundW - destW) * 0.5f;
                 float oy = bb.Position.Y + (boundH - destH) * 0.5f;
-                if (pos.X < ox || pos.Y < oy || pos.X >= ox + destW || pos.Y >= oy + destH)
-                    return false;
-                int lx = (int)((pos.X - ox) * scaleX);
-                int ly = (int)((pos.Y - oy) * scaleY);
-                return assets.Arts.PixelCheck(custom.AssetId, lx, ly);
+                if (pos.X >= ox && pos.Y >= oy && pos.X < ox + destW && pos.Y < oy + destH)
+                {
+                    int lx = (int)((pos.X - ox) * scaleX);
+                    int ly = (int)((pos.Y - oy) * scaleY);
+                    if (assets.Arts.PixelCheck(custom.AssetId, lx, ly)) return true;
+                }
+                // Stacked: the pile's second sprite is drawn at +5/+5 at native
+                // size (scale 1), so test it too — the offset half of the pile is
+                // only covered by this sprite.
+                if (custom.Stacked)
+                {
+                    float sx2 = bb.Position.X + StackOffset;
+                    float sy2 = bb.Position.Y + StackOffset;
+                    if (pos.X >= sx2 && pos.Y >= sy2 && pos.X < sx2 + artW && pos.Y < sy2 + artH
+                        && assets.Arts.PixelCheck(custom.AssetId, (int)(pos.X - sx2), (int)(pos.Y - sy2)))
+                        return true;
+                }
+                return false;
             }
             default:
                 // GumpNinePatch (resizepic window bg) / None: solid fill within

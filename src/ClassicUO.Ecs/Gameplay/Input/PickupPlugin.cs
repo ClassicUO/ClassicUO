@@ -109,6 +109,9 @@ internal readonly struct PickupPlugin : IPlugin
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
             .RunIf((Res<TargetingState> targeting) => !targeting.Value.IsTargeting)
+            // A split menu is up (or pending) — don't re-pick while the user
+            // chooses an amount.
+            .RunIf((Res<SplitPrompt> split) => !split.Value.Open)
             .RunIf((Commands cmds) => cmds.HasResource<SelectedEntity>() && cmds.HasResource<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial == 0)
             .RunIf((Res<MouseContext> mouseCtx, Local<float?> holdDeadline, Res<Time> time) =>
@@ -242,7 +245,7 @@ internal readonly struct PickupPlugin : IPlugin
             Commands commands,
             Res<GrabbedItem> grabbedItem) =>
         {
-            if (grabbedItem.Value.PendingDrop && trig.Event.Packet.Serial == grabbedItem.Value.Serial)
+            if (IsDropAck(grabbedItem.Value, trig.Event.Packet.Serial))
                 FinalizeDrop(commands, grabbedItem.Value, "0x25");
         });
 
@@ -251,7 +254,7 @@ internal readonly struct PickupPlugin : IPlugin
             Commands commands,
             Res<GrabbedItem> grabbedItem) =>
         {
-            if (grabbedItem.Value.PendingDrop && trig.Event.Packet.Serial == grabbedItem.Value.Serial)
+            if (IsDropAck(grabbedItem.Value, trig.Event.Packet.Serial))
                 FinalizeDrop(commands, grabbedItem.Value, "0x25");
         });
 
@@ -260,7 +263,7 @@ internal readonly struct PickupPlugin : IPlugin
             Commands commands,
             Res<GrabbedItem> grabbedItem) =>
         {
-            if (grabbedItem.Value.PendingDrop && trig.Event.Packet.Serial == grabbedItem.Value.Serial)
+            if (IsDropAck(grabbedItem.Value, trig.Event.Packet.Serial))
                 FinalizeDrop(commands, grabbedItem.Value, "0x2E");
         });
 
@@ -269,7 +272,7 @@ internal readonly struct PickupPlugin : IPlugin
             Commands commands,
             Res<GrabbedItem> grabbedItem) =>
         {
-            if (grabbedItem.Value.PendingDrop && trig.Event.Packet.Serial == grabbedItem.Value.Serial)
+            if (IsDropAck(grabbedItem.Value, trig.Event.Packet.Serial))
                 FinalizeDrop(commands, grabbedItem.Value, "0x1A");
         });
 
@@ -278,10 +281,31 @@ internal readonly struct PickupPlugin : IPlugin
             Commands commands,
             Res<GrabbedItem> grabbedItem) =>
         {
-            if (grabbedItem.Value.PendingDrop && trig.Event.Packet.Serial == grabbedItem.Value.Serial)
+            if (IsDropAck(grabbedItem.Value, trig.Event.Packet.Serial))
                 FinalizeDrop(commands, grabbedItem.Value, "0xF3");
         });
+
+        // Merging a held stack onto a same-graphic stack deletes the held item
+        // server-side instead of readdressing it, so none of the readdress acks
+        // above fire — the held item + source slot would stay stuck. Treat a
+        // delete of the pending-drop serial as the drop ack.
+        app.AddObserver((
+            On<PacketReceived<OnDeleteObjectPacket_0x1D>> trig,
+            Commands commands,
+            Res<GrabbedItem> grabbedItem) =>
+        {
+            if (IsDropAck(grabbedItem.Value, trig.Event.Packet.Serial))
+                FinalizeDrop(commands, grabbedItem.Value, "0x1D");
+        });
     }
+
+    // A readdress packet acks the pending drop if it touches the held item OR
+    // the drop target. The target match is what finalizes a same-graphic merge,
+    // where the held serial is consumed and only the target stack updates.
+    private static bool IsDropAck(GrabbedItem grabbed, uint serial)
+        => grabbed.PendingDrop
+        && (serial == grabbed.Serial
+            || (grabbed.DropTargetSerial != 0 && serial == grabbed.DropTargetSerial));
 
     private static void FinalizeDrop(Commands commands, GrabbedItem grabbed, string tag)
     {
@@ -292,6 +316,12 @@ internal readonly struct PickupPlugin : IPlugin
         }
         grabbed.Clear();
     }
+
+    private static bool ShiftDown(KeyboardContext kb)
+        => kb.IsPressed(Microsoft.Xna.Framework.Input.Keys.LeftShift)
+        || kb.IsPressed(Microsoft.Xna.Framework.Input.Keys.RightShift)
+        || kb.IsPressedOnce(Microsoft.Xna.Framework.Input.Keys.LeftShift)
+        || kb.IsPressedOnce(Microsoft.Xna.Framework.Input.Keys.RightShift);
 
     private static int GetZ(Query<Data<GlobalZIndex>> q, ulong ent)
     {
@@ -352,6 +382,9 @@ internal readonly struct PickupPlugin : IPlugin
         Res<GrabbedItem> grabbedItem,
         Res<NetClient> network,
         Res<NetworkEntitiesMap> entitiesMap,
+        Res<UOFileManager> fileManager,
+        Res<KeyboardContext> keyboard,
+        ResMut<SplitPrompt> splitPrompt,
         Query<Data<NetworkSerial, Amount, Graphic, Hue>, Filter<Optional<Amount>>> q,
         Query<Data<WorldPosition>> worldPosQ,
         Query<Data<ContainerSlotPosition>> slotPosQ,
@@ -439,6 +472,38 @@ internal readonly struct PickupPlugin : IPlugin
         // send a stack count for worn gear). Default to 1 in that case;
         // ground/stackable items always carry it.
         int amountValue = amount.IsValid() ? amount.Ref.Value : 1;
+
+        // Stackable + amount>1 + Shift up -> prompt for a split instead of
+        // lifting the whole pile (legacy GameActions.PickUp; default profile
+        // HoldShiftToSplitStack == false, so the menu shows when Shift is up).
+        // Snapshot the full pickup context into SplitPrompt; SplitMenuPlugin's
+        // OK/Enter commit replays it as a normal pickup. The pickup system's
+        // RunIf gate (SplitPrompt.Open) keeps this from re-firing while up.
+        var graphicId = graphic.Ref.Value;
+        bool stackable = graphicId < fileManager.Value.TileData.StaticData.Length
+            && fileManager.Value.TileData.StaticData[graphicId].IsStackable;
+        if (!splitPrompt.Value.Open && amountValue > 1 && stackable && !ShiftDown(keyboard.Value))
+        {
+            splitPrompt.Value.Open = true;
+            splitPrompt.Value.Built = false;
+            splitPrompt.Value.PendingSerial = serial.Ref.Value;
+            splitPrompt.Value.Graphic = graphicId;
+            splitPrompt.Value.Hue = hue.Ref.Value;
+            splitPrompt.Value.MaxAmount = amountValue;
+            splitPrompt.Value.SourceUiEntity = sourceUi;
+            splitPrompt.Value.SourceContainer = sourceContainer;
+            splitPrompt.Value.OriginalGraphic = graphicId;
+            splitPrompt.Value.OriginalHue = hue.Ref.Value;
+            splitPrompt.Value.OriginalAmount = (ushort)amountValue;
+            splitPrompt.Value.OriginalX = origX;
+            splitPrompt.Value.OriginalY = origY;
+            splitPrompt.Value.OriginalZ = origZ;
+            splitPrompt.Value.OriginalContainer = sourceContainer;
+            splitPrompt.Value.OriginalGridIndex = origGrid;
+            splitPrompt.Value.OriginalFromSlot = fromSlot;
+            return;
+        }
+
         network.Value.Send_PickUpRequest(serial.Ref.Value, (ushort)amountValue);
 
         grabbedItem.Value.Clear();
@@ -586,6 +651,7 @@ internal readonly struct PickupPlugin : IPlugin
                 mouse.Value.Position, computed.Ref, tag.Ref,
                 assets.Value, grabbedItem.Value.Graphic, uiScale.Value);
             network.Value.Send_DropRequest(grabbedItem.Value.Serial, x, y, 0, 0, window.Ref.Serial);
+            grabbedItem.Value.DropTargetSerial = window.Ref.Serial;
             grabbedItem.Value.PendingDrop = true;
             return;
         }
@@ -644,12 +710,14 @@ internal readonly struct PickupPlugin : IPlugin
             {
                 network.Value.Send_DropRequest(
                     grabbedItem.Value.Serial, 0xFFFF, 0xFFFF, 0, 0, targetSerial);
+                grabbedItem.Value.DropTargetSerial = targetSerial;
                 itemSent = true;
             }
             else if ((td.IsStackable && targetGraphic == grabbedItem.Value.Graphic) || IsPileGraphic(targetGraphic))
             {
                 network.Value.Send_DropRequest(
                     grabbedItem.Value.Serial, targetItemX, targetItemY, 0, 0, targetSerial);
+                grabbedItem.Value.DropTargetSerial = targetSerial;
                 itemSent = true;
             }
             else if (containerQuery.Contains(link.Ref.Container))
@@ -659,6 +727,7 @@ internal readonly struct PickupPlugin : IPlugin
                     mouse.Value.Position, pcomputed.Ref, ptag.Ref,
                     assets.Value, grabbedItem.Value.Graphic, uiScale.Value);
                 network.Value.Send_DropRequest(grabbedItem.Value.Serial, x, y, 0, 0, pwindow.Ref.Serial);
+                grabbedItem.Value.DropTargetSerial = pwindow.Ref.Serial;
                 itemSent = true;
             }
             if (itemSent)
@@ -676,6 +745,7 @@ internal readonly struct PickupPlugin : IPlugin
             (ushort tx, ushort ty, sbyte tz) = targetWorldPos.Ref;
             if (serial != 0xFFFF_FFFF) (tx, ty, tz) = (0, 0, 0);
             network.Value.Send_DropRequest(grabbedItem.Value.Serial, tx, ty, tz, 0, serial);
+            grabbedItem.Value.DropTargetSerial = serial;
             grabbedItem.Value.PendingDrop = true;
         }
         else
@@ -877,6 +947,13 @@ internal sealed class GrabbedItem
     // handlers (0x27/0x28/0x29).
     public bool PendingDrop { get; set; }
 
+    // Serial the held item was dropped onto/into (target stack for a merge,
+    // container for a plain drop). A merge CONSUMES the held serial, so the
+    // server only readdresses the TARGET (a 0x25/0x1A amount update) — none of
+    // the held-serial acks fire and the item would stay stuck on the cursor.
+    // Matching this serial in the implicit-ack observers finalizes the merge.
+    public uint DropTargetSerial { get; set; }
+
 
     public void Clear()
     {
@@ -886,5 +963,6 @@ internal sealed class GrabbedItem
         Hue = 0;
         Amount = 0;
         PendingDrop = false;
+        DropTargetSerial = 0;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using ClassicUO.Assets;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -36,6 +37,7 @@ internal readonly struct CursorPlugin : IPlugin
         Res<MouseContext> mouseCtx,
         Res<GrabbedItem> grabbedItem,
         Res<AssetsServer> assets,
+        Res<UOFileManager> files,
         Res<UoGame> game
     )
     {
@@ -43,6 +45,13 @@ internal readonly struct CursorPlugin : IPlugin
         ref readonly var artInfo = ref assets.Value.Arts.GetArt(grabbed.Graphic);
         if (artInfo.Texture == null)
             return;
+
+        // A held stack (Amount > 1) draws a second sprite +5/+5 to fake a pile,
+        // same as the container/world render (GuiRenderingPlugin).
+        var tileData = files.Value.TileData.StaticData;
+        bool stacked = grabbed.Amount > 1
+            && grabbed.Graphic < tileData.Length
+            && tileData[grabbed.Graphic].IsStackable;
 
         var b = batch.Value;
         // Cursor position is in LOGICAL pixels; the batch otherwise draws in
@@ -61,17 +70,28 @@ internal readonly struct CursorPlugin : IPlugin
         // tracked in the ECS — half-size centering is the visually-correct base
         // case (grab-point precision is a follow-up when MouseOffset is wired).
         var halfSize = new Vector2(artInfo.UV.Width * 0.5f, artInfo.UV.Height * 0.5f);
+        var origin = mouseCtx.Value.Position - halfSize;
+        var hue = grabbed.Hue == 0 ? Vector3.UnitZ : new Vector3(grabbed.Hue, 1, 1f);
+
         b.Draw(
             artInfo.Texture,
-            mouseCtx.Value.Position - halfSize,
+            origin,
             artInfo.UV,
-            grabbed.Hue == 0 ? Vector3.UnitZ : new(grabbed.Hue, 1, 1f),
+            hue,
             0f,
             Vector2.Zero,
             1f,
             SpriteEffects.None,
             0f
         );
+
+        if (stacked)
+        {
+            // Front sprite of the pile, +5/+5 over the base (matches the
+            // container/world stacked render order).
+            b.Draw(artInfo.Texture, origin + new Vector2(5, 5), artInfo.UV, hue,
+                0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+        }
 
         b.SetSampler(null);
         b.End();
