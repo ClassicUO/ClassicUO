@@ -26,10 +26,10 @@ namespace ClassicUO.Ecs;
 
 internal readonly struct TargetingPlugin : IPlugin
 {
-    // Peace-mode targeting reticle (legacy GameCursor._cursorData[0, 12]); a
-    // cursor Art sprite, not a gump. War mode uses 0x205F — peace is the v1
-    // default until ServerFlags war state is threaded in here.
-    private const ushort TargetCursorGraphic = 0x2076;
+    // The targeting reticle cursor (legacy _cursorData[war, 12]) is drawn by
+    // GameCursorPlugin — it owns the whole cursor (border-clip, hotspot, felucca
+    // hue) so the reticle gets the same treatment as every other cursor state.
+    // This plugin only owns the targeting STATE + click/cancel resolution.
 
     public void Build(App app)
     {
@@ -56,7 +56,6 @@ internal readonly struct TargetingPlugin : IPlugin
 
         var clickFn = ResolveTargetClick;
         var cancelFn = CancelTarget;
-        var renderFn = RenderTargetCursor;
 
         // Stage.First so the target/cancel consume their mouse button before the
         // pickup latch (also Stage.First, gated off while targeting) and before
@@ -72,12 +71,6 @@ internal readonly struct TargetingPlugin : IPlugin
                 .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
                 .RunIf((Res<TargetingState> t) => t.Value.IsTargeting)
                 .RunIf((Res<MouseContext> m) => m.Value.IsPressedOnce(Input.MouseButtonType.Left))
-                .Build()
-            .AddSystem(renderFn)
-                .InStage(UiPlugin.UiRenderStage)
-                .SingleThreaded()
-                .After("cuo:gui_rendering")
-                .RunIf((Res<TargetingState> t) => t.Value.IsTargeting)
                 .Build();
     }
 
@@ -144,40 +137,6 @@ internal readonly struct TargetingPlugin : IPlugin
 
         net.Value.Send_TargetCancel(targeting.Value.Mode, targeting.Value.CursorId, targeting.Value.CursorType);
         targeting.Value.Clear();
-    }
-
-    private static void RenderTargetCursor(
-        Res<UltimaBatcher2D> batch,
-        Res<MouseContext> mouseCtx,
-        Res<AssetsServer> assets,
-        Res<UoGame> game)
-    {
-        ref readonly var artInfo = ref assets.Value.Arts.GetArt(TargetCursorGraphic);
-        if (artInfo.Texture == null)
-            return;
-
-        var b = batch.Value;
-        var dpi = game.Value.DpiScale;
-        if (dpi <= 0f) dpi = 1f;
-        b.Begin(null, Matrix.CreateScale(dpi));
-        b.SetSampler(dpi == System.Math.Floor(dpi) ? SamplerState.PointClamp : SamplerState.LinearClamp);
-
-        // Center the reticle on the cursor.
-        var halfSize = new Vector2(artInfo.UV.Width * 0.5f, artInfo.UV.Height * 0.5f);
-        b.Draw(
-            artInfo.Texture,
-            mouseCtx.Value.Position - halfSize,
-            artInfo.UV,
-            Vector3.UnitZ,
-            0f,
-            Vector2.Zero,
-            1f,
-            SpriteEffects.None,
-            0f
-        );
-
-        b.SetSampler(null);
-        b.End();
     }
 
     // Legacy TargetType (0x6C cursorType byte). Cancel is the "not targeting"

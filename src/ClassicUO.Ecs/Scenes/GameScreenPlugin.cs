@@ -655,7 +655,9 @@ internal readonly struct GameScreenPlugin : IPlugin
     }
 
     private struct GameScene;
-    private struct GameWindowUI;
+    // internal (not private): GameCursorPlugin queries it to tell "cursor is over
+    // the game world" (a hit on this viewport node) from "over a gump".
+    internal struct GameWindowUI;
     private struct GameWindowBorderUI;
     private struct GameWindowBorderResizeUI;
     private struct TotalEntitiesMenu;

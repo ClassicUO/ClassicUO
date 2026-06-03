@@ -211,6 +211,35 @@ namespace ClassicUO.Renderer.Arts
             } 
         }
 
+        // Cursor hotspot: UO cursor art encodes its click point as a green
+        // marker pixel (0xFF00FF00 ABGR) in the first row (gives hotX) and first
+        // column (gives hotY). Mirrors the scan in CreateCursorSurfacePtr but
+        // returns only the offset — the software cursor (ECS GameCursorPlugin)
+        // draws the sprite at mouse-pos minus this hotspot so the tip aligns.
+        public void GetCursorHotspot(uint idx, out int hotX, out int hotY)
+        {
+            hotX = hotY = 0;
+
+            var artInfo = _artLoader.GetArt(idx + 0x4000);
+            if (artInfo.Pixels.IsEmpty)
+                return;
+
+            int w = artInfo.Width;
+            int h = artInfo.Height;
+
+            for (int y = 0; y < h; y++)
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    if (artInfo.Pixels[y * w + x] != 0xFF_00_FF_00)
+                        continue;
+
+                    if (x == 0) hotY = y;
+                    if (y == 0) hotX = x;
+                }
+            }
+        }
+
         public Rectangle GetRealArtBounds(uint idx) =>
             idx < 0 || idx >= _realArtBounds.Length
                 ? Rectangle.Empty

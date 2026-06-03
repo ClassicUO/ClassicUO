@@ -28,7 +28,8 @@ internal readonly struct CuoPlugin : IPlugin
         app.AddPlugin(new FnaPlugin()
         {
             WindowResizable = true,
-            MouseVisible = true,
+            // OS cursor hidden — GameCursorPlugin draws the UO art cursor.
+            MouseVisible = false,
             VSync = true, // don't kill the gpu
         });
         app.AddPlugin<AssetsPlugin>();
@@ -62,6 +63,10 @@ internal readonly struct CuoPlugin : IPlugin
         // .After("cuo:gui_rendering"), a label RenderingPlugin's GuiRenderingPlugin
         // child registers. The label must exist before TargetingPlugin.Build runs.
         app.AddPlugin<TargetingPlugin>();
+        // After RenderingPlugin (needs "cuo:gui_rendering") and TargetingPlugin
+        // (reads TargetingState to stand down while the reticle is up). Draws the
+        // UO art cursor now that the OS cursor is hidden.
+        app.AddPlugin<GameCursorPlugin>();
 
         app.AddPlugin<ModdingPlugin>();
 
