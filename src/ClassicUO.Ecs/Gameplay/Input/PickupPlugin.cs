@@ -38,7 +38,7 @@ internal readonly struct PickupPlugin : IPlugin
                 Res<Camera> camera,
                 Res<AssetsServer> assets,
                 ResMut<LeftPressLatch> latch,
-                Query<Data<ComputedNode, Node, UiCustom>, Filter<Optional<UiCustom>>> rendered,
+                Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
                 Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movables,
                 Query<Data<TinyEcs.Parent>> parents,
                 Query<Data<ContainerItemUI>> itemsQ,

@@ -754,7 +754,7 @@ internal readonly struct HealthBarPlugin : IPlugin
 // button exclusions, and the status-bar position / despawn.
 internal sealed class HbInteractParams : CompositeSystemParam
 {
-    public readonly Query<Data<ComputedNode, Node, UiCustom>, Filter<Optional<UiCustom>>> Rendered;
+    public readonly Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> Rendered;
     public readonly Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> Movables;
     public readonly Query<Data<TinyEcs.Parent>> Parents;
     public readonly Query<Data<HealthBarWindow>> Hb;
@@ -766,7 +766,7 @@ internal sealed class HbInteractParams : CompositeSystemParam
 
     public HbInteractParams()
     {
-        Rendered    = Add(new Query<Data<ComputedNode, Node, UiCustom>, Filter<Optional<UiCustom>>>());
+        Rendered    = Add(new Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>>());
         Movables    = Add(new Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>>());
         Parents     = Add(new Query<Data<TinyEcs.Parent>>());
         Hb          = Add(new Query<Data<HealthBarWindow>>());

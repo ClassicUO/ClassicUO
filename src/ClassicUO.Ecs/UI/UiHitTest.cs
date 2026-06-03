@@ -108,12 +108,82 @@ internal static class UiHitTest
                 }
                 return false;
             }
+            case UOCustomKind.GumpNinePatch:
+                // resizepic window bg: pixel-perfect across the 9 slices, exactly
+                // like legacy ResizePic.Contains — a click on a transparent corner
+                // / gap passes through instead of capturing the whole box.
+                return NinePatchHit(assets, custom.AssetId, in bb, pos);
+
             default:
-                // GumpNinePatch (resizepic window bg) / None: solid fill within
-                // bounds — a stretched nine-patch has no meaningful per-pixel
-                // mask, and a window background should capture clicks anywhere
-                // inside it (drag, right-click-close, click-capture).
+                // None (invisible hit/drag surface) / GumpSlice: solid fill within
+                // bounds.
                 return true;
         }
+    }
+
+    // 9-slice pixel hit mirroring legacy ResizePic.Contains + the ECS ninepatch
+    // renderer (GuiRenderingPlugin.DrawGumpNinePatch): corners drawn native,
+    // edges/centre tiled. Graphic order: 0..3 = TL/top/TR/left, +4 = centre,
+    // +5..+8 = right/BL/bottom/BR.
+    private static bool NinePatchHit(AssetsServer assets, uint id, in ComputedNode bb, Vector2 pos)
+    {
+        int x = (int)bb.Position.X, y = (int)bb.Position.Y;
+        int w = (int)bb.Size.X, h = (int)bb.Size.Y;
+
+        ref readonly var g0 = ref assets.Gumps.GetGump(id + 0); // top-left
+        ref readonly var g1 = ref assets.Gumps.GetGump(id + 1); // top
+        ref readonly var g2 = ref assets.Gumps.GetGump(id + 2); // top-right
+        ref readonly var g3 = ref assets.Gumps.GetGump(id + 3); // left
+        ref readonly var g4 = ref assets.Gumps.GetGump(id + 5); // right
+        ref readonly var g5 = ref assets.Gumps.GetGump(id + 6); // bottom-left
+        ref readonly var g6 = ref assets.Gumps.GetGump(id + 7); // bottom
+        ref readonly var g7 = ref assets.Gumps.GetGump(id + 8); // bottom-right
+        ref readonly var g8 = ref assets.Gumps.GetGump(id + 4); // centre
+
+        int offsetTop = Math.Max(g0.UV.Height, g2.UV.Height) - g1.UV.Height;
+        int offsetBottom = Math.Max(g5.UV.Height, g7.UV.Height) - g6.UV.Height;
+        int offsetLeft = Math.Abs(Math.Max(g0.UV.Width, g5.UV.Width) - g2.UV.Width);
+        int offsetRight = Math.Max(g2.UV.Width, g7.UV.Width) - g4.UV.Width;
+
+        if (HitNative(assets, id + 0, g0.UV, x, y, pos)) return true;
+        if (HitNative(assets, id + 2, g2.UV, x + (w - g2.UV.Width), y + offsetTop, pos)) return true;
+        if (HitNative(assets, id + 6, g5.UV, x, y + (h - g5.UV.Height), pos)) return true;
+        if (HitNative(assets, id + 8, g7.UV, x + (w - g7.UV.Width), y + (h - g7.UV.Height), pos)) return true;
+
+        int dw = w - g0.UV.Width - g2.UV.Width;
+        if (dw >= 1 && HitTiled(assets, id + 1, g1.UV, x + g0.UV.Width, y, dw, g1.UV.Height, pos)) return true;
+
+        int dh = h - g0.UV.Height - g5.UV.Height;
+        if (dh >= 1 && HitTiled(assets, id + 3, g3.UV, x, y + g0.UV.Height, g3.UV.Width, dh, pos)) return true;
+
+        dh = h - g2.UV.Height - g7.UV.Height;
+        if (dh >= 1 && HitTiled(assets, id + 5, g4.UV, x + (w - g4.UV.Width), y + g2.UV.Height, g4.UV.Width, dh, pos)) return true;
+
+        dw = w - g5.UV.Width - g7.UV.Width;
+        if (dw >= 1 && HitTiled(assets, id + 7, g6.UV, x + g5.UV.Width, y + (h - g6.UV.Height - offsetBottom), dw, g6.UV.Height, pos)) return true;
+
+        dw = (w - g0.UV.Width - g2.UV.Width) + (offsetLeft + offsetRight);
+        dh = h - g2.UV.Height - g7.UV.Height;
+        if (dw >= 1 && dh >= 1 && HitTiled(assets, id + 4, g8.UV, x + g0.UV.Width, y + g0.UV.Height, dw, dh, pos)) return true;
+
+        return false;
+    }
+
+    // Corner piece drawn at native size: direct mask lookup at the local coord.
+    private static bool HitNative(AssetsServer assets, uint id, Rectangle uv, int dx, int dy, Vector2 pos)
+    {
+        if (uv.Width <= 0 || uv.Height <= 0) return false;
+        int lx = (int)pos.X - dx, ly = (int)pos.Y - dy;
+        if (lx < 0 || ly < 0 || lx >= uv.Width || ly >= uv.Height) return false;
+        return assets.Gumps.PixelCheck(id, lx, ly);
+    }
+
+    // Edge / centre piece tiled across (dw,dh): wrap the local coord by the tile.
+    private static bool HitTiled(AssetsServer assets, uint id, Rectangle uv, int dx, int dy, int dw, int dh, Vector2 pos)
+    {
+        if (uv.Width <= 0 || uv.Height <= 0) return false;
+        int lx = (int)pos.X - dx, ly = (int)pos.Y - dy;
+        if (lx < 0 || ly < 0 || lx >= dw || ly >= dh) return false;
+        return assets.Gumps.PixelCheck(id, lx % uv.Width, ly % uv.Height);
     }
 }

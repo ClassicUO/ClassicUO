@@ -170,7 +170,7 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         Res<MouseContext> mouse,
         Res<SelectedEntity> selected,
         Res<AssetsServer> assets,
-        Query<Data<ComputedNode, Node, UiCustom>, Filter<Optional<UiCustom>>> rendered,
+        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
         Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movables,
         Query<Data<TinyEcs.Parent>> parents,
         Query<Data<ContainerItemUI, ComputedNode, UiCustom, Node, GlobalZIndex>> itemQuery,

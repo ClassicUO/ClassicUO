@@ -108,7 +108,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         Res<MouseContext> mouse,
         Res<AssetsServer> assets,
         Local<ulong> pressTarget,
-        Query<Data<ComputedNode, Node, UiCustom>, Filter<Optional<UiCustom>>> allRenderedQ,
+        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> allRenderedQ,
         Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movablesQ,
         Query<Data<TinyEcs.Parent>> parentsQ,
         Query<Data<ContainerWindow>> containerQuery,
@@ -185,7 +185,7 @@ internal readonly struct WindowDragPlugin : IPlugin
     private static ulong TopmostMovable(
         Vector2 pos,
         AssetsServer assets,
-        Query<Data<ComputedNode, Node, UiCustom>, Filter<Optional<UiCustom>>> allRenderedQ,
+        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> allRenderedQ,
         Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movablesQ,
         Query<Data<TinyEcs.Parent>> parentsQ)
         => UiPick.MovableRoot(UiPick.Topmost(pos, assets, allRenderedQ).Entity, movablesQ, parentsQ);
@@ -221,7 +221,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         Res<AssetsServer> assets,
         Res<ForcedWindowDrag> forced,
         Local<DragAnchor> anchor,
-        Query<Data<ComputedNode, Node, UiCustom>, Filter<Optional<UiCustom>>> rendered,
+        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
         Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movables,
         Query<Data<TinyEcs.Parent>> parents,
         Query<Data<ContainerItemUI>> itemsQ,

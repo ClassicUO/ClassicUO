@@ -271,7 +271,7 @@ internal readonly struct TopBarPlugin : IPlugin
         Local<DragAnchor> anchor,
         Query<Data<ComputedNode, Node>, Filter<With<TopBarButton>>> buttonsQ,
         Query<Data<ComputedNode, Node>, Filter<With<TopBarDragHandle>>> handlesQ,
-        Query<Data<ComputedNode, Node, UiCustom>, Filter<Optional<UiCustom>>> allRenderedQ,
+        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> allRenderedQ,
         Query<Data<Node>, Filter<With<IsTopBar>>> rootQ)
     {
         bool held = mouse.Value.IsPressed(MouseButtonType.Left)
@@ -365,7 +365,7 @@ internal readonly struct TopBarPlugin : IPlugin
         Res<AssetsServer> assets,
         Query<Data<ComputedNode, Node>, Filter<With<TopBarDragHandle>>> handlesQ,
         Query<Data<ComputedNode, Node>, Filter<With<TopBarButton>>> buttonsQ,
-        Query<Data<ComputedNode, Node, UiCustom>, Filter<Optional<UiCustom>>> allRenderedQ,
+        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> allRenderedQ,
         Query<Data<Node>, Filter<With<IsTopBar>>> rootQ)
     {
         var pos = mouse.Value.Position;
@@ -411,7 +411,7 @@ internal readonly struct TopBarPlugin : IPlugin
         AssetsServer assets,
         Vector2 pos,
         int barTopOrder,
-        Query<Data<ComputedNode, Node, UiCustom>, Filter<Optional<UiCustom>>> allRenderedQ)
+        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> allRenderedQ)
     {
         // Topmost element overall sits above the bar's own topmost element ->
         // a gump is stacked above the bar here. Same pick everything else uses.

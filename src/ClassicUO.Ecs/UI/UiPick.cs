@@ -38,22 +38,30 @@ internal static class UiPick
     // or equipment overlay) sitting over a window's transparent interior is the
     // real hit, instead of falling through to a window drawn behind it.
     // UiCustom is OPTIONAL: a plain text label (server-gump title, a Label
-    // widget) renders and gets a ComputedNode but carries no UiCustom. Those
-    // are part of their window and must be hit — treated as a solid bounding
-    // box, exactly like PixelHit's null-custom path. Skipping them let a click
-    // on a window's title text fall through to the window drawn behind it,
-    // which the drag system then raised.
+    // widget) or a solid-colour panel renders and gets a ComputedNode but
+    // carries no UiCustom. Those ARE part of their window and must be hit —
+    // treated as a solid bounding box, exactly like PixelHit's null-custom path.
+    // But a bare LAYOUT node (a flex wrapper like a container's `content`, a
+    // server gump's body wrapper) also gets a ComputedNode and paints NOTHING —
+    // it must NOT be a hit, or the whole window becomes draggable / closable over
+    // its transparent areas, defeating the bg sprite's pixel-perfect mask. So a
+    // null-custom element only counts when it actually paints: it has Text
+    // (glyphs) or BackgroundColor (solid rect). Text/BackgroundColor are OPTIONAL
+    // in the query purely to make that distinction.
     public static UiHit Topmost(
         Vector2 pos,
         AssetsServer assets,
-        Query<Data<ComputedNode, Node, UiCustom>, Filter<Optional<UiCustom>>> rendered)
+        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered)
     {
         var hit = UiHit.None;
-        foreach (var (ent, computed, node, custom) in rendered)
+        foreach (var (ent, computed, node, custom, bg, text) in rendered)
         {
             if (node.Ref.Display == Display.None) continue;
-            var bb = computed.Ref;
             var render = custom.IsValid() ? custom.Ref.Render() : null;
+            // Bare layout node (no sprite, no fill, no text) — invisible, so not
+            // a hit; let the gesture reach whatever actually paints behind it.
+            if (render is null && !bg.IsValid() && !text.IsValid()) continue;
+            var bb = computed.Ref;
             if (!UiHitTest.PixelHit(assets, render, bb, pos)) continue;
             if (bb.PaintOrder >= hit.PaintOrder)
                 hit = new UiHit(ent.Ref, bb.PaintOrder);

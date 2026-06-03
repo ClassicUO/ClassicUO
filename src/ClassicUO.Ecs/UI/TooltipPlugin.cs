@@ -171,7 +171,7 @@ internal readonly struct TooltipPlugin : IPlugin
         Query<Data<NetworkSerial, Notoriety>, Filter<Optional<Notoriety>>> worldQ,
         Query<Data<ContainerItemUI>> contQ,
         Query<Data<PaperdollSlot>> slotQ,
-        Query<Data<ComputedNode, Node, UiCustom>, Filter<Optional<UiCustom>>> rendered,
+        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
         Query<Data<Node>, With<TooltipRoot>> rootQ,
         Query<Data<TinyEcs.Children>> childrenQ)
     {
@@ -195,7 +195,7 @@ internal readonly struct TooltipPlugin : IPlugin
             // tooltip serial on their render payload, pre-seeded in the OPL store.
             else if (rendered.Contains(hit.Entity))
             {
-                var (_, _, _, uc) = rendered.Get(hit.Entity);
+                var (_, _, _, uc, _, _) = rendered.Get(hit.Entity);
                 if (uc.IsValid() && uc.Ref.Render() is { TooltipSerial: not 0 } r)
                     serial = r.TooltipSerial;
             }
