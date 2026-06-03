@@ -169,9 +169,22 @@ internal readonly struct SystemMessagePlugin : IPlugin
 
             sb.Value.Clear();
             sb.Value.Append(chatText);
+            var chatColor = GetColor(files.Value.Hues, 0);
             font.DrawText(b, sb.Value, new Vector2(LeftMargin, barTop + 2),
-                GetColor(files.Value.Hues, 0),
+                chatColor,
                 effect: FontStashSharp.FontSystemEffect.Stroked, effectAmount: 1);
+
+            // Blinking caret after the in-progress line — same ~530ms cadence as
+            // the Bevy.UI text inputs (GuiPlugin.CaretBlink). Drawn as a separate
+            // glyph, NOT appended to the input buffer, so it never reaches the
+            // speech packet (the send path reads ChatInputState.Text).
+            if ((int)(time.Value.Total / 530f) % 2 == 0)
+            {
+                var caretX = LeftMargin + font.MeasureString(sb.Value).X;
+                font.DrawText(b, "_", new Vector2(caretX, barTop + 2),
+                    chatColor,
+                    effect: FontStashSharp.FontSystemEffect.Stroked, effectAmount: 1);
+            }
         }
 
         // System messages stack upward from just above the chat bar. Each line
