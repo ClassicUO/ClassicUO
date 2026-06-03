@@ -33,9 +33,23 @@ public class UiPickTests
         w.Set(id, new GlobalZIndex(0));
     }
 
-    // Text-like element: rendered (has ComputedNode) and laid out, but carries
-    // NO UiCustom — exactly a server-gump title label.
+    // Text-like element: a rendered label — has a Text component (so it paints
+    // glyphs) but NO UiCustom. A server-gump title label / OK-Cancel label.
     private static ulong TextElement(World w, float x, float y, float width, float height, int paintOrder)
+        => w.Entity()
+            .Set(new Node())
+            .Set(new Text("x"))
+            .Set(new ComputedNode
+            {
+                Position = new Vector2(x, y),
+                Size = new Vector2(width, height),
+                PaintOrder = paintOrder,
+            }).ID;
+
+    // Bare LAYOUT node: rendered (ComputedNode) + laid out, but paints NOTHING —
+    // no UiCustom, no Text, no BackgroundColor. A container's full-size `content`
+    // wrapper or a server-gump text scroll wrapper. Must NOT be a hit.
+    private static ulong BareLayoutNode(World w, float x, float y, float width, float height, int paintOrder)
         => w.Entity()
             .Set(new Node())
             .Set(new ComputedNode
@@ -45,9 +59,9 @@ public class UiPickTests
                 PaintOrder = paintOrder,
             }).ID;
 
-    private static Query<Data<ComputedNode, Node, UiCustom>, Filter<Optional<UiCustom>>> Rendered(App app)
+    private static Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> Rendered(App app)
     {
-        var q = new Query<Data<ComputedNode, Node, UiCustom>, Filter<Optional<UiCustom>>>();
+        var q = new Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>>();
         q.Initialize(app);
         q.Fetch(app);
         return q;
@@ -197,6 +211,37 @@ public class UiPickTests
         var hit = UiPick.Topmost(new XnaVector2(110, 12), null, Rendered(app));
         Assert.Equal(title, hit.Entity);
         Assert.Equal(frontRoot, UiPick.MovableRoot(hit.Entity, Movables(app), Parents(app)));
+    }
+
+    // A bare layout node paints nothing — it must not be a hit, or a window's
+    // invisible full-size wrapper would capture clicks over its whole box.
+    [Fact]
+    public void Topmost_skips_bare_layout_node()
+    {
+        var app = new App();
+        var w = app.GetWorld();
+        BareLayoutNode(w, 0, 0, 100, 100, 5);
+        var hit = UiPick.Topmost(new XnaVector2(50, 50), null, Rendered(app));
+        Assert.False(hit.Found);
+    }
+
+    // Server-gump shape: a window root that DOES paint (a None-kind drag frame /
+    // bg sprite — modelled as a UiCustom-bearing solid bbox) sits under a bare
+    // full-size content wrapper. A click resolves THROUGH the invisible wrapper
+    // to the root, so the gump stays draggable from anywhere over its frame.
+    [Fact]
+    public void Bare_wrapper_falls_through_to_the_painting_window_root()
+    {
+        var app = new App();
+        var w = app.GetWorld();
+        var root = Element(w, 0, 0, 200, 80, 1); // UiCustom-bearing => a hit surface
+        MakeMovable(w, root);
+        var wrapper = BareLayoutNode(w, 0, 0, 200, 80, 7); // invisible, on top
+        w.AddChild(root, wrapper);
+
+        var hit = UiPick.Topmost(new XnaVector2(100, 40), null, Rendered(app));
+        Assert.Equal(root, hit.Entity);
+        Assert.Equal(root, UiPick.MovableRoot(hit.Entity, Movables(app), Parents(app)));
     }
 
     private static Query<Data<ContainerItemUI>> Items(App app)

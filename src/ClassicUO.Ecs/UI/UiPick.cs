@@ -57,10 +57,15 @@ internal static class UiPick
         foreach (var (ent, computed, node, custom, bg, text) in rendered)
         {
             if (node.Ref.Display == Display.None) continue;
+            // Bare layout node (a container's `content` flex wrapper, a text
+            // scroll wrapper): no UiCustom surface, no text glyphs, no fill — it
+            // paints nothing, so it's NOT a hit. Skipping it lets the gesture
+            // reach whatever actually paints behind it (the bg sprite's mask),
+            // instead of the whole window capturing clicks over its transparent
+            // areas. A UiCustom present but with null Data is still an intentional
+            // surface (None-kind drag frame) — keyed on the component, not Data.
+            if (!custom.IsValid() && !bg.IsValid() && !text.IsValid()) continue;
             var render = custom.IsValid() ? custom.Ref.Render() : null;
-            // Bare layout node (no sprite, no fill, no text) — invisible, so not
-            // a hit; let the gesture reach whatever actually paints behind it.
-            if (render is null && !bg.IsValid() && !text.IsValid()) continue;
             var bb = computed.Ref;
             if (!UiHitTest.PixelHit(assets, render, bb, pos)) continue;
             if (bb.PaintOrder >= hit.PaintOrder)
