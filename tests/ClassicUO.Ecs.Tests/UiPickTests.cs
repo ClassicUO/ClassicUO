@@ -213,6 +213,115 @@ public class UiPickTests
         Assert.Equal(frontRoot, UiPick.MovableRoot(hit.Entity, Movables(app), Parents(app)));
     }
 
+    // Repro of the server-gump html-text orphan: SpawnWrappedText makes `outer`
+    // a parent of `inner`, then the caller adds `outer` as a child of the gump
+    // root — both AddChilds in one deferred command flush. If the mapper drops
+    // outer's parent link, the html text resolves to no movable root (un-draggable).
+    [Fact]
+    public void Deferred_addchild_parent_then_as_child_keeps_both_links()
+    {
+        var app = new App();
+        var w = app.GetWorld();
+        var root = w.Entity().Set(new Node()).ID;
+        var outer = w.Entity().Set(new Node()).ID;
+        var inner = w.Entity().Set(new Node()).ID;
+
+        w.BeginDeferred();
+        w.AddChild(outer, inner);   // outer becomes a parent (matches SpawnWrappedText)
+        w.AddChild(root, outer);    // outer added as a child of root (matches caller)
+        w.EndDeferred();
+
+        Assert.Equal(outer, (ulong)w.GetParent(inner));
+        Assert.Equal(root, (ulong)w.GetParent(outer));
+    }
+
+    // Faithful repro: spawn via Commands like ServerGumpPlugin — root (UIMovable),
+    // a scroll wrapper `outer` (Overflow.Scroll + ScrollPosition) parenting `inner`,
+    // then add `outer` under root — and run a full update (layout + scroll sync).
+    [Fact]
+    public void Html_scroll_wrapper_resolves_to_root_after_update()
+    {
+        var app = new App();
+        ulong root = 0, outer = 0, inner = 0;
+        app.AddSystem((Commands commands) =>
+        {
+            var r = commands.Spawn().Insert(new Node()).Insert<UIMovable>().Insert(new GlobalZIndex(0));
+            var o = commands.Spawn().Insert(new Node { Overflow = Overflow.Scroll }).Insert(new ScrollPosition());
+            var i = commands.Spawn().Insert(new Node());
+            commands.AddChild(o.Id, i.Id);
+            commands.AddChild(r.Id, o.Id);
+            root = r.Id; outer = o.Id; inner = i.Id;
+        }).InStage(Stage.Startup).Build();
+        app.Update();
+
+        var w = app.GetWorld();
+        Assert.Equal(outer, (ulong)w.GetParent(inner));
+        Assert.Equal(root, (ulong)w.GetParent(outer));
+    }
+
+    // The real symptom only shows after entity slots are RECYCLED (the html
+    // elements had high generation). Build a parented structure, delete it
+    // (DeleteDescendants), then rebuild reusing the freed slots and re-parent in
+    // one deferred flush. If despawn cleanup left the relationship mapper dirty,
+    // the reused outer's parent link silently fails -> un-draggable html gump.
+    [Fact]
+    public void Recycled_slots_reparent_correctly()
+    {
+        var app = new App();
+        var w = app.GetWorld();
+
+        var rootA = w.Entity().Set(new Node()).Set<UIMovable>().ID;
+        var outerA = w.Entity().Set(new Node()).ID;
+        var innerA = w.Entity().Set(new Node()).ID;
+        w.AddChild(outerA, innerA);
+        w.AddChild(rootA, outerA);
+        w.Delete(rootA); // DeleteDescendants -> frees outerA/innerA slots
+
+        var rootB = w.Entity().Set(new Node()).Set<UIMovable>().ID;
+        var outerB = w.Entity().Set(new Node()).ID;
+        var innerB = w.Entity().Set(new Node()).ID;
+        w.BeginDeferred();
+        w.AddChild(outerB, innerB);
+        w.AddChild(rootB, outerB);
+        w.EndDeferred();
+
+        Assert.Equal(outerB, (ulong)w.GetParent(innerB));
+        Assert.Equal(rootB, (ulong)w.GetParent(outerB));
+    }
+
+    private sealed class RepushLatest { public ulong Root, Outer, Inner; }
+
+    // Faithful re-push repro: each frame despawn the previous gump root and
+    // rebuild (root+outer+inner, AddChild(outer,inner) then AddChild(root,outer))
+    // in ONE command buffer — exactly ServerGumpPlugin's re-push path. Repeated
+    // frames recycle slots (the high-gen ids seen live). After several frames the
+    // latest outer must still resolve to its root.
+    [Fact]
+    public void Repush_rebuild_keeps_html_wrapper_parented()
+    {
+        var app = new App();
+        app.AddResource(new RepushLatest());
+        app.AddSystem((Commands commands, Res<RepushLatest> latest) =>
+        {
+            if (latest.Value.Root != 0)
+                commands.Entity(latest.Value.Root).Despawn();
+            var r = commands.Spawn().Insert(new Node()).Insert<UIMovable>().Insert(new GlobalZIndex(0));
+            var o = commands.Spawn().Insert(new Node { Overflow = Overflow.Scroll }).Insert(new ScrollPosition());
+            var i = commands.Spawn().Insert(new Node());
+            commands.AddChild(o.Id, i.Id);
+            commands.AddChild(r.Id, o.Id);
+            latest.Value.Root = r.Id; latest.Value.Outer = o.Id; latest.Value.Inner = i.Id;
+        }).InStage(Stage.Update).Build();
+
+        for (int f = 0; f < 6; f++)
+            app.Update();
+
+        var w = app.GetWorld();
+        var l = app.GetResource<RepushLatest>();
+        Assert.Equal(l.Outer, (ulong)w.GetParent(l.Inner));
+        Assert.Equal(l.Root, (ulong)w.GetParent(l.Outer));
+    }
+
     // A bare layout node paints nothing — it must not be a hit, or a window's
     // invisible full-size wrapper would capture clicks over its whole box.
     [Fact]

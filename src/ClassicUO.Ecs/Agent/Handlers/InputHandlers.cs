@@ -52,6 +52,42 @@ internal static class InputHandlers
         d.Register("debug.openVendor", DebugOpenVendor);
         d.Register("debug.openPopup", DebugOpenPopup);
         d.Register("debug.openSplit", DebugOpenSplit);
+        d.Register("debug.openServerGump", DebugOpenServerGump);
+    }
+
+    // Test-only: spawn a NOTICE-style server gump (resizepic frame + scrollable
+    // htmlgump + OK/Cancel buttons) through the real 0xB0 path. Reproduces the
+    // server-html-gump drag case deterministically. Optional x/y/gumpId.
+    public static JsonRpcResponse DebugOpenServerGump(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        int x = 100, y = 100; uint gumpId = 0xD00D;
+        string? layout = null;
+        string[]? lines = null;
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object)
+        {
+            if (p.TryGetProperty("x", out var xe) && xe.TryGetInt32(out var xv)) x = xv;
+            if (p.TryGetProperty("y", out var ye) && ye.TryGetInt32(out var yv)) y = yv;
+            if (p.TryGetProperty("gumpId", out var ge) && ge.TryGetUInt32(out var gv)) gumpId = gv;
+            if (p.TryGetProperty("layout", out var le) && le.ValueKind == JsonValueKind.String) layout = le.GetString();
+            if (p.TryGetProperty("lines", out var lne) && lne.ValueKind == JsonValueKind.Array)
+            {
+                var list = new List<string>();
+                foreach (var el in lne.EnumerateArray()) list.Add(el.GetString() ?? string.Empty);
+                lines = list.ToArray();
+            }
+        }
+
+        layout ??= "{ resizepic 0 0 2486 420 230 }{ htmlgump 20 20 360 180 0 1 1 }{ button 30 195 247 248 1 0 1 }{ button 200 195 242 241 1 0 0 }";
+        lines ??= new[]
+        {
+            "This is a long NOTICE-style html body. It should wrap and scroll inside the box. " +
+            "Line two of the body text. Line three. Line four to force the content taller than the " +
+            "box so a scrollbar and the scroll wrapper exist, reproducing the html drag case.",
+        };
+
+        var q = ctx.Runtime.GetResource<DebugServerGumpQueue>();
+        q.Pending.Add((gumpId, x, y, layout, lines));
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true, ["gumpId"] = gumpId } };
     }
 
     // Test-only: open the split-stack menu without a server item / drag. The

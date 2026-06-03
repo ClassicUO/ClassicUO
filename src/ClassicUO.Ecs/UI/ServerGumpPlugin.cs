@@ -117,7 +117,47 @@ internal readonly struct ServerGumpPlugin : IPlugin
         // container's ScrollPosition.OffsetY.
         var thumbDragFn = ScrollThumbDrag;
         app.AddSystem(thumbDragFn).InStage(Stage.PreUpdate).Build();
+
+#if AGENT_BUILD
+        app.AddResource(new DebugServerGumpQueue());
+        Action<Commands, Res<DebugServerGumpQueue>> drainFn = DrainDebugGumps;
+        app.AddSystem(Stage.First, drainFn);
+#endif
     }
+
+#if AGENT_BUILD
+    // Drains debug.openServerGump requests by emitting the same PacketReceived
+    // trigger the network path fires, so the gump is built through the real
+    // 0xB0 parse + BuildGump path (deterministic harness repro of server gumps).
+    private static void DrainDebugGumps(Commands commands, Res<DebugServerGumpQueue> q)
+    {
+        if (q.Value.Pending.Count == 0) return;
+        foreach (var r in q.Value.Pending)
+            commands.EmitTrigger(new PacketReceived<OnOpenGumpPacket_0xB0>
+            {
+                Packet = BuildDebugPacket(r.GumpId, r.X, r.Y, r.Layout, r.Lines)
+            });
+        q.Value.Pending.Clear();
+    }
+
+    private static OnOpenGumpPacket_0xB0 BuildDebugPacket(uint gumpId, int x, int y, string layout, string[] lines)
+    {
+        // Serialize into the real 0xB0 wire body (sender onward; id+len are
+        // stripped by the dispatcher) and Fill() — exact network parse path.
+        var buf = new List<byte>();
+        void U16(int v) { buf.Add((byte)(v >> 8)); buf.Add((byte)v); }
+        void U32(uint v) { buf.Add((byte)(v >> 24)); buf.Add((byte)(v >> 16)); buf.Add((byte)(v >> 8)); buf.Add((byte)v); }
+        U32(0);                 // sender
+        U32(gumpId);
+        U32((uint)x); U32((uint)y);
+        U16(layout.Length); foreach (var c in layout) buf.Add((byte)c);       // ASCII command
+        U16(lines.Length);
+        foreach (var ln in lines) { U16(ln.Length); foreach (var c in ln) U16(c); } // unicode BE
+        var pkt = new OnOpenGumpPacket_0xB0();
+        pkt.Fill(new StackDataReader(System.Runtime.InteropServices.CollectionsMarshal.AsSpan(buf)));
+        return pkt;
+    }
+#endif
 
     private struct ScrollThumbAnchor
     {
@@ -1096,6 +1136,15 @@ internal sealed class ServerGumpRegistry
 {
     public readonly Dictionary<uint, ulong> ByGumpId = new();
 }
+
+#if AGENT_BUILD
+// Harness-only queue: debug.openServerGump pushes a layout here; the drain
+// system emits the real 0xB0 trigger next frame.
+internal sealed class DebugServerGumpQueue
+{
+    public readonly List<(uint GumpId, int X, int Y, string Layout, string[] Lines)> Pending = new();
+}
+#endif
 
 // Pending page switch for a gump root. Written by a switchpage button's
 // observer (via Commands), consumed + removed by ApplyPageRequests.
