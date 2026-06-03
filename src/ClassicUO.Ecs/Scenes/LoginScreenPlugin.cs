@@ -23,6 +23,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
         var typeIntoFocusedFn = TypeIntoFocused;
         var applyDpiFn = ApplyLoginScreenDpiSize;
         var updateInputHueFn = UpdateInputHue;
+        var caretBlinkFn = CaretBlink;
 
         app
             .AddState(LoginInteraction.None)
@@ -56,6 +57,12 @@ internal readonly struct LoginScreenPlugin : IPlugin
             // Mirror LoginGump.Update: focused textbox renders with hue 0x0021,
             // unfocused with hue 0 (white).
             .AddSystem(updateInputHueFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> s) => s.Value.Current == GameState.LoginScreen)
+            .Build()
+
+            // Blink the focused field's caret (visible cursor on empty fields).
+            .AddSystem(caretBlinkFn)
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> s) => s.Value.Current == GameState.LoginScreen)
             .Build()
@@ -271,14 +278,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
             .Insert<UiContainsByBounds>();
 
         var usernameText = commands.Spawn()
-            .Insert(new Node
-            {
-                PositionType = PositionType.Absolute,
-                Left = Val.Px(4),
-                Top = Val.Px(4),
-                Width = Val.Auto,
-                Height = Val.Auto,
-            })
+            .Insert(new Node { Width = Val.Auto, Height = Val.Auto })
             .Insert(new Text(settings.Value.Username ?? string.Empty))
             // Parity with main's LoginGump textboxes: StbTextBox(font:5,
             // isunicode:false) — UO ASCII font 5. TextColor carries the packed
@@ -296,7 +296,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
             focused.Value.Entity = usernameTextId;
         });
 
-        usernameField.AddChild(usernameText);
+        AddFieldContent(commands, usernameField, usernameText, usernameTextId);
         mainMenu.AddChild(usernameField);
 
         // Parity with main's LoginGump: auto-focus username field on entry
@@ -322,14 +322,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
         var decrypted = Crypter.Decrypt(settings.Value.Password ?? string.Empty) ?? string.Empty;
 
         var passwordText = commands.Spawn()
-            .Insert(new Node
-            {
-                PositionType = PositionType.Absolute,
-                Left = Val.Px(4),
-                Top = Val.Px(4),
-                Width = Val.Auto,
-                Height = Val.Auto,
-            })
+            .Insert(new Node { Width = Val.Auto, Height = Val.Auto })
             .Insert(new Text(string.Empty))
             .Insert(new MaskedText { Value = decrypted, MaskChar = '*' })
             .Insert(new TextFont { FontId = (ushort)(5 | UoFontRuntime.AsciiFlag), Size = 20 })
@@ -344,7 +337,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
             focused.Value.Entity = passwordTextId;
         });
 
-        passwordField.AddChild(passwordText);
+        AddFieldContent(commands, passwordField, passwordText, passwordTextId);
         mainMenu.AddChild(passwordField);
 
         // Version text — matches main's LoginGump.ctor CV>=706400 branch:
@@ -437,6 +430,52 @@ internal readonly struct LoginScreenPlugin : IPlugin
         mainMenu.AddChild(saveAccountLabel);
     }
 
+    // Lay out a textbox's content as a left-anchored flex row holding the
+    // value text followed by a caret. The caret is empty until the field is
+    // focused (CaretBlink), giving an empty focused field a visible cursor —
+    // the "highlight" the legacy StbTextBox draws via DrawCaret.
+    private static void AddFieldContent(Commands commands, EntityCommands field, EntityCommands text, ulong textId)
+    {
+        var row = commands.Spawn()
+            .Insert<LoginScene>()
+            .Insert(new Node
+            {
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(4),
+                Top = Val.Px(4),
+                FlexDirection = FlexDirection.Row,
+                AlignItems = AlignItems.Center,
+                Width = Val.Auto,
+                Height = Val.Auto,
+            });
+
+        var caret = commands.Spawn()
+            .Insert<LoginScene>()
+            .Insert(new Node { Width = Val.Auto, Height = Val.Auto })
+            .Insert(new Text(string.Empty))
+            .Insert(new TextFont { FontId = (ushort)(5 | UoFontRuntime.AsciiFlag), Size = 20 })
+            .Insert(new TextColor(UoFontRuntime.AsciiHue(FocusHue)))
+            .Insert(new FieldCaret { Target = textId });
+
+        row.AddChild(text);
+        row.AddChild(caret);
+        field.AddChild(row);
+    }
+
+    // Blink the caret of the focused field. "_" mirrors legacy's caret glyph;
+    // ~530ms half-period matches StbTextBox's blink cadence. Empty string when
+    // not focused or in the off phase, so it occupies no width.
+    private static void CaretBlink(
+        Res<Time> time,
+        Res<FocusedInput> focused,
+        Query<Data<Text, FieldCaret>> carets)
+    {
+        var on = (int)(time.Value.Total / 530f) % 2 == 0;
+        var focusEnt = focused.Value.Entity;
+        foreach (var (_, text, caret) in carets)
+            text.Ref.Value = (caret.Ref.Target == focusEnt && on) ? "_" : string.Empty;
+    }
+
     private static void DeleteMenu(
         Commands commands,
         Query<Data<Node>, Filter<With<LoginScene>>> query)
@@ -482,7 +521,10 @@ internal readonly struct LoginScreenPlugin : IPlugin
         LoginRequested
     }
 
+    private const ushort FocusHue = 0x0021;
+
     private struct LoginScene;
     private struct UsernameInput;
     private struct PasswordInput;
+    private struct FieldCaret { public ulong Target; }
 }
