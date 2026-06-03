@@ -196,24 +196,6 @@ float4 PixelShader_Hue(PS_INPUT IN) : COLOR0
 		}
 	}
 
-	if (useTrans && CircleOfTransparencyRadius > 0)
-	{
-		float2 pixelDist = IN.PixelPos.xy * Viewport * 0.5;
-		float ratio = length(pixelDist) / CircleOfTransparencyRadius;
-
-		if (ratio < 0.85f)
-			discard;
-
-		if (ratio < 1.0f)
-		{
-			float t = (ratio - 0.85f) / 0.15f;
-			alpha *= t * t * t;
-
-			if (alpha < 0.02f)
-				discard;
-		}
-	}
-
 	return color * alpha;
 }
 
