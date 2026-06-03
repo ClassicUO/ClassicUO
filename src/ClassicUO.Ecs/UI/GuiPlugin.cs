@@ -104,7 +104,7 @@ internal readonly struct GuiPlugin : IPlugin
         Action<Res<Time>, Res<MouseContext>, ResMut<UiClayContext>> syncDeltaAndScrollFn = SyncDeltaAndScroll;
         Action<Query<Data<UiCustom, UOButton, Interaction>>> updateUOButtonsStateFn = UpdateUOButtonsState;
         Action<Query<Data<UiCustom, UOCheckbox, TinyEcs.Bevy.UI.Widgets.Checkbox>>> updateUOCheckboxesFn = UpdateUOCheckboxes;
-        Action<Query<Data<Text, MaskedText>, Filter<Changed<MaskedText>>>> syncMaskedTextFn = SyncMaskedText;
+        Action<Query<Data<Text, MaskedText>>> syncMaskedTextFn = SyncMaskedText;
 
         app.AddSystem(Stage.First, syncSurfaceFn);
         app.AddSystem(Stage.First, syncPointerFn);
@@ -358,8 +358,13 @@ internal readonly struct GuiPlugin : IPlugin
         }
     }
 
+    // No Changed<MaskedText> filter: the producer (login TypeIntoFocused)
+    // mutates MaskedText.Value through a random-access query Get, which does
+    // not bump the change tick, so a Changed filter would never re-fire and
+    // the mask chars would never reach Text. Only password fields carry both
+    // Text + MaskedText, so the unconditional scan is effectively free.
     private static void SyncMaskedText(
-        Query<Data<Text, MaskedText>, Filter<Changed<MaskedText>>> query)
+        Query<Data<Text, MaskedText>> query)
     {
         foreach (var (text, masked) in query)
         {

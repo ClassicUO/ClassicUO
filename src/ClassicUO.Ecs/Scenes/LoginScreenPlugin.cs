@@ -22,6 +22,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
         var deleteMenuFn = DeleteMenu;
         var typeIntoFocusedFn = TypeIntoFocused;
         var applyDpiFn = ApplyLoginScreenDpiSize;
+        var updateInputHueFn = UpdateInputHue;
 
         app
             .AddState(LoginInteraction.None)
@@ -50,6 +51,13 @@ internal readonly struct LoginScreenPlugin : IPlugin
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> s, EventReader<CharInputEvent> r)
                 => s.Value.Current == GameState.LoginScreen && r.HasEvents)
+            .Build()
+
+            // Mirror LoginGump.Update: focused textbox renders with hue 0x0021,
+            // unfocused with hue 0 (white).
+            .AddSystem(updateInputHueFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> s) => s.Value.Current == GameState.LoginScreen)
             .Build()
 
             .AddPlugin<ServerSelectionPlugin>()
@@ -101,6 +109,21 @@ internal readonly struct LoginScreenPlugin : IPlugin
                     t.Ref.Value = (t.Ref.Value ?? string.Empty) + ch;
                 }
             }
+        }
+    }
+
+    // Per-frame hue toggle to match LoginGump.Update: the focused textbox
+    // renders with hue 0x0021, all others with hue 0. TextColor carries the
+    // packed ASCII hue (see UoFontRuntime.AsciiHue), not an RGB tint.
+    private static void UpdateInputHue(
+        Res<FocusedInput> focused,
+        Query<Data<TextColor>, Filter<With<TextInput>, With<LoginScene>>> inputs)
+    {
+        var focusEnt = focused.Value.Entity;
+        foreach (var (ent, color) in inputs)
+        {
+            var hue = ent.Ref == focusEnt ? (ushort)0x0021 : (ushort)0;
+            color.Ref = new TextColor(UoFontRuntime.AsciiHue(hue));
         }
     }
 
@@ -240,7 +263,12 @@ internal readonly struct LoginScreenPlugin : IPlugin
             // Interaction.None makes the gump frame clickable so a click
             // anywhere over the field sets the keyboard focus to the
             // child Text entity (which is what TypeIntoFocused queries).
-            .Insert(Interaction.None);
+            // UiContainsByBounds: 0x0BB8 is a hollow input *frame* (its
+            // interior is transparent), so pixel-perfect hit-test rejects
+            // clicks in the middle of the field. Bounds-capture makes the
+            // whole box focusable, matching legacy's solid StbTextBox.
+            .Insert(Interaction.None)
+            .Insert<UiContainsByBounds>();
 
         var usernameText = commands.Spawn()
             .Insert(new Node
@@ -252,8 +280,12 @@ internal readonly struct LoginScreenPlugin : IPlugin
                 Height = Val.Auto,
             })
             .Insert(new Text(settings.Value.Username ?? string.Empty))
-            .Insert(new TextFont { FontId = 0, Size = 20 })
-            .Insert(new TextColor(new ClayColor(51, 51, 51, 255)))
+            // Parity with main's LoginGump textboxes: StbTextBox(font:5,
+            // isunicode:false) — UO ASCII font 5. TextColor carries the packed
+            // hue (0 resting); UpdateInputHue swaps it to 0x0021 on focus,
+            // matching LoginGump.Update's per-frame hue toggle.
+            .Insert(new TextFont { FontId = (ushort)(5 | UoFontRuntime.AsciiFlag), Size = 20 })
+            .Insert(new TextColor(UoFontRuntime.AsciiHue(0)))
             .Insert<TextInput>()
             .Insert<UsernameInput>()
             .Insert<LoginScene>();
@@ -282,7 +314,8 @@ internal readonly struct LoginScreenPlugin : IPlugin
             new XnaVector2(218, 283 + 50),
             new XnaVector2(210, 30))
             .Insert<LoginScene>()
-            .Insert(Interaction.None);
+            .Insert(Interaction.None)
+            .Insert<UiContainsByBounds>();
 
         // Real password kept in MaskedText.Value; SyncMaskedText (GuiPlugin)
         // mirrors it into Text as mask chars before the renderer sees it.
@@ -299,8 +332,8 @@ internal readonly struct LoginScreenPlugin : IPlugin
             })
             .Insert(new Text(string.Empty))
             .Insert(new MaskedText { Value = decrypted, MaskChar = '*' })
-            .Insert(new TextFont { FontId = 0, Size = 20 })
-            .Insert(new TextColor(ClayColor.White))
+            .Insert(new TextFont { FontId = (ushort)(5 | UoFontRuntime.AsciiFlag), Size = 20 })
+            .Insert(new TextColor(UoFontRuntime.AsciiHue(0)))
             .Insert<TextInput>()
             .Insert<PasswordInput>()
             .Insert<LoginScene>();
