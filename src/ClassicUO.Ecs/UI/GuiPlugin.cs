@@ -423,6 +423,12 @@ internal sealed class UOCustomRender
     // and whether to tile it across the node box (vs draw once at the origin).
     public ushort SrcX, SrcY, SrcW, SrcH;
     public bool SliceTiled;
+
+    // Tooltip serial for elements that aren't backed by a world/container item
+    // but still want the hover tooltip (e.g. a dragged-out spell cast button).
+    // TooltipPlugin reads this off the topmost hit element's UOCustomRender and
+    // renders the OPL entry pre-seeded under this synthetic serial. 0 = none.
+    public uint TooltipSerial;
 }
 
 // The UO render payload lives in UiCustom.Data (a reference, so it threads into

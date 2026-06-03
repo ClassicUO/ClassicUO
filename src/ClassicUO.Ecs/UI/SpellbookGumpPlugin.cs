@@ -33,7 +33,7 @@ internal struct SpellbookWindow
 internal struct SpellEntryClick { public int SpellId; }
 internal struct SpellLabel;
 internal struct SpellbookCorner { public ulong Window; public int Dir; }
-internal struct SpellIconDrag { public int CastId; public ushort Icon; }
+internal struct SpellIconDrag { public int CastId; public ushort Icon; public int Cliloc; public string Name; }
 internal struct SpellCastButton { public int CastId; }
 
 internal readonly struct SpellbookGumpPlugin : IPlugin
@@ -275,7 +275,7 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
 
                     var icon = builder.Value.AddGump(commands, iconGfx, Vector3.UnitZ, new Vector2(iconX, 40))
                         .Insert(Interaction.None).Insert<UINoWindowDrag>().Insert<UiContainsByBounds>()
-                        .Insert(new SpellIconDrag { CastId = castId, Icon = iconGfx });
+                        .Insert(new SpellIconDrag { CastId = castId, Icon = iconGfx, Cliloc = SpellTooltipCliloc(castId), Name = school.Name(id) });
                     icon.Observe((On<UiDoubleClick> _, Res<NetClient> net, Res<GameContext> ctx) =>
                         net.Value.Send_CastSpell(castId, ctx.Value.ClientVersion));
                     commands.AddChild(content, icon.Id);
@@ -399,7 +399,7 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
         => p.X >= bb.Position.X && p.Y >= bb.Position.Y
         && p.X < bb.Position.X + bb.Size.X && p.Y < bb.Position.Y + bb.Size.Y;
 
-    private struct IconDragAnchor { public bool Active, Claimed, Spawned; public int CastId; public ushort Icon; public Vector2 Start; }
+    private struct IconDragAnchor { public bool Active, Claimed, Spawned; public int CastId; public ushort Icon; public int Cliloc; public string Name; public Vector2 Start; }
 
     // Drag a spell icon off the page to make a standalone "cast button" (same
     // page icon) that rides the cursor immediately and drops where released —
@@ -413,6 +413,8 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
         Res<ForcedWindowDrag> forced,
         Res<GumpBuilder> builder,
         Res<UiZCounter> z,
+        Res<UOFileManager> fileManager,
+        ResMut<ObjectPropertyLists> opl,
         Commands commands,
         Local<IconDragAnchor> anchor,
         Query<Data<ComputedNode, SpellIconDrag>> iconsQ,
@@ -437,6 +439,8 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
                 anchor.Value.Claimed = true;
                 anchor.Value.CastId = ic.Ref.CastId;
                 anchor.Value.Icon = ic.Ref.Icon;
+                anchor.Value.Cliloc = ic.Ref.Cliloc;
+                anchor.Value.Name = ic.Ref.Name;
                 anchor.Value.Start = pos;
                 gate.Value.Mode = ActiveDrag.UIWindow;
                 break;
@@ -457,7 +461,18 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
             foreach (var (ent, b) in existingButtonsQ)
                 if (b.Ref.CastId == castId) commands.Entity(ent.Ref).Despawn();
 
+            // Hover tooltip on the dragged button (legacy UseSpellButtonGump.
+            // SetTooltip): pre-seed an OPL entry under a synthetic serial keyed by
+            // cast id (spell-name cliloc, falling back to the table name when the
+            // dataset lacks it) and stamp that serial on the button's render so the
+            // shared tooltip path picks it up — no network request, no real serial.
+            uint tipSerial = SpellTooltipSerial(castId);
+            string tip = anchor.Value.Cliloc != 0 ? fileManager.Value.Clilocs.GetString(anchor.Value.Cliloc) : null;
+            if (string.IsNullOrEmpty(tip)) tip = anchor.Value.Name;
+            opl.Value.Add(tipSerial, 1, tip ?? string.Empty, string.Empty);
+
             var fb = builder.Value.SpawnUOGump(commands, iconGfx, Vector3.UnitZ, new Vector2(pos.X - 22, pos.Y - 22), z.Value)
+                .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.Gump, AssetId = iconGfx, Hue = Vector3.UnitZ, TooltipSerial = tipSerial } })
                 .Insert(new SpellCastButton { CastId = castId });
             fb.Observe((On<UiDoubleClick> _, Res<NetClient> net, Res<GameContext> ctx) =>
                 net.Value.Send_CastSpell(castId, ctx.Value.ClientVersion));
@@ -467,6 +482,26 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
             anchor.Value.Claimed = false;
             anchor.Value.Spawned = true;
         }
+    }
+
+    // Synthetic OPL serial for a dragged spell button — not a real object, just a
+    // stable key per cast id in the 0xF0000000 range (above item/mobile serials).
+    private static uint SpellTooltipSerial(int castId) => 0xF000_0000u | (uint)castId;
+
+    // Spell-name cliloc per cast id, mirroring legacy UseSpellButtonGump.
+    // GetSpellTooltip (cast id == legacy spell.ID across all schools).
+    private static int SpellTooltipCliloc(int id)
+    {
+        if (id >= 1 && id <= 64) return 3002011 + (id - 1);       // Magery
+        if (id >= 101 && id <= 117) return 1060509 + (id - 101);  // Necromancy
+        if (id >= 201 && id <= 210) return 1060585 + (id - 201);  // Chivalry
+        if (id >= 401 && id <= 406) return 1060595 + (id - 401);  // Bushido
+        if (id >= 501 && id <= 508) return 1060610 + (id - 501);  // Ninjitsu
+        if (id >= 601 && id <= 616) return 1071026 + (id - 601);  // Spellweaving
+        if (id >= 678 && id <= 693) return 1031678 + (id - 678);  // Mysticism
+        if (id >= 701 && id <= 745)
+            return id <= 706 ? 1115612 + (id - 701) : 1155896 + (id - 707); // Mastery
+        return 0;
     }
 
     // Recolour spell labels to hue 0x33 while hovered (legacy HoveredLabel

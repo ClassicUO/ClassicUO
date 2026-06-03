@@ -163,12 +163,12 @@ internal readonly struct TooltipPlugin : IPlugin
         Res<MouseContext> mouse,
         Res<SelectedEntity> selected,
         Res<GrabbedItem> grabbed,
+        Res<DragGate> gate,
         Res<AssetsServer> assets,
         Res<UiSurface> surface,
         ResMut<ObjectPropertyLists> opl,
         ResMut<TooltipState> state,
-        Query<Data<NetworkSerial>> netQ,
-        Query<Data<Notoriety>> notoQ,
+        Query<Data<NetworkSerial, Notoriety>, Filter<Optional<Notoriety>>> worldQ,
         Query<Data<ContainerItemUI>> contQ,
         Query<Data<PaperdollSlot>> slotQ,
         Query<Data<ComputedNode, Node, UiCustom>, Filter<Optional<UiCustom>>> rendered,
@@ -191,23 +191,30 @@ internal readonly struct TooltipPlugin : IPlugin
             // Slot bg / frame / icon all carry the equipped item's serial, so the
             // tooltip fires anywhere over the slot square, not only the icon art.
             else if (slotQ.Contains(hit.Entity)) { var (_, sl) = slotQ.Get(hit.Entity); serial = sl.Ref.ItemSerial; }
+            // Non-item elements (e.g. a dragged spell cast button) carry a synthetic
+            // tooltip serial on their render payload, pre-seeded in the OPL store.
+            else if (rendered.Contains(hit.Entity))
+            {
+                var (_, _, _, uc) = rendered.Get(hit.Entity);
+                if (uc.IsValid() && uc.Ref.Render() is { TooltipSerial: not 0 } r)
+                    serial = r.TooltipSerial;
+            }
         }
         // entity 0 is the null/sentinel id — Contains(0) can resolve to a stale
         // archetype entry, so the tooltip would show for "nothing" hovered.
-        if (serial == 0 && selected.Value.Entity != 0 && netQ.Contains(selected.Value.Entity))
+        if (serial == 0 && selected.Value.Entity != 0 && worldQ.Contains(selected.Value.Entity))
         {
-            var (_, s) = netQ.Get(selected.Value.Entity);
+            var (_, s, n) = worldQ.Get(selected.Value.Entity);
             serial = s.Ref.Value;
             // Mobile names are coloured by notoriety (legacy ReadProperties).
-            if (notoQ.Contains(selected.Value.Entity))
-            {
-                var (_, n) = notoQ.Get(selected.Value.Entity);
+            if (n.IsValid())
                 noto = n.Ref.Value;
-            }
         }
 
-        // Dragging an item suppresses the tooltip (legacy hides it while held).
-        if (grabbed.Value.IsActive || grabbed.Value.Serial != 0)
+        // Dragging suppresses the tooltip (legacy hides it while held): an item
+        // pickup in flight, or any active window/forced drag (e.g. a spell cast
+        // button just torn off the spellbook riding the cursor).
+        if (grabbed.Value.IsActive || grabbed.Value.Serial != 0 || gate.Value.Mode != ActiveDrag.None)
             serial = 0;
 
         if (serial == 0)
