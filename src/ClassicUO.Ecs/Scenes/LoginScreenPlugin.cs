@@ -440,10 +440,9 @@ internal readonly struct LoginScreenPlugin : IPlugin
     }
 
     // Caption next to a checkbox that toggles it on click, so the checkbox +
-    // its label read as one control (legacy Checkbox bundles the label). The
-    // label forwards to the checkbox the same way CheckboxPlugin does on a
-    // direct hit: flip Checked + emit CheckboxChanged on the checkbox entity
-    // (its persist observer + the sprite swap both key off that).
+    // its label read as one control. CheckboxLabel + GuiPlugin's global
+    // observer do the toggling generically; the label just has to be hittable
+    // (Interaction.None + UiContainsByBounds).
     private static void AddCheckboxLabel(Commands commands, EntityCommands parent, string text, XnaVector2 pos, TextFont font, ClayColor color, ulong checkboxId)
     {
         var label = commands.Spawn()
@@ -460,14 +459,8 @@ internal readonly struct LoginScreenPlugin : IPlugin
             .Insert(font)
             .Insert(new TextColor(color))
             .Insert(Interaction.None)
-            .Insert<UiContainsByBounds>();
-        label.Observe((On<UiClick> _, Commands cmd, Query<Data<Checkbox>> boxes) =>
-        {
-            if (!boxes.Contains(checkboxId)) return;
-            var (_, cb) = boxes.Get(checkboxId);
-            cb.Ref.Checked = !cb.Ref.Checked;
-            cmd.Entity(checkboxId).EmitTrigger(new CheckboxChanged { Checked = cb.Ref.Checked }, propagate: true);
-        });
+            .Insert<UiContainsByBounds>()
+            .Insert(new CheckboxLabel { Target = checkboxId });
         parent.AddChild(label);
     }
 
