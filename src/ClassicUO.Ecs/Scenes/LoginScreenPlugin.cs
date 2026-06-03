@@ -23,7 +23,6 @@ internal readonly struct LoginScreenPlugin : IPlugin
         var typeIntoFocusedFn = TypeIntoFocused;
         var applyDpiFn = ApplyLoginScreenDpiSize;
         var updateInputHueFn = UpdateInputHue;
-        var caretBlinkFn = CaretBlink;
 
         app
             .AddState(LoginInteraction.None)
@@ -57,12 +56,6 @@ internal readonly struct LoginScreenPlugin : IPlugin
             // Mirror LoginGump.Update: focused textbox renders with hue 0x0021,
             // unfocused with hue 0 (white).
             .AddSystem(updateInputHueFn)
-            .InStage(Stage.Update)
-            .RunIf((Res<State<GameState>> s) => s.Value.Current == GameState.LoginScreen)
-            .Build()
-
-            // Blink the focused field's caret (visible cursor on empty fields).
-            .AddSystem(caretBlinkFn)
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> s) => s.Value.Current == GameState.LoginScreen)
             .Build()
@@ -464,25 +457,14 @@ internal readonly struct LoginScreenPlugin : IPlugin
             .Insert(new Text(string.Empty))
             .Insert(new TextFont { FontId = (ushort)(5 | UoFontRuntime.AsciiFlag), Size = 20 })
             .Insert(new TextColor(UoFontRuntime.AsciiHue(FocusHue)))
-            .Insert(new FieldCaret { Target = textId });
+            // Shared caret: GuiPlugin.CaretBlink fills/clears this glyph based
+            // on focus, so every text input that drops a TextCaret sibling gets
+            // the same blinking cursor.
+            .Insert(new TextCaret { Target = textId });
 
         row.AddChild(text);
         row.AddChild(caret);
         field.AddChild(row);
-    }
-
-    // Blink the caret of the focused field. "_" mirrors legacy's caret glyph;
-    // ~530ms half-period matches StbTextBox's blink cadence. Empty string when
-    // not focused or in the off phase, so it occupies no width.
-    private static void CaretBlink(
-        Res<Time> time,
-        Res<FocusedInput> focused,
-        Query<Data<Text, FieldCaret>> carets)
-    {
-        var on = (int)(time.Value.Total / 530f) % 2 == 0;
-        var focusEnt = focused.Value.Entity;
-        foreach (var (_, text, caret) in carets)
-            text.Ref.Value = (caret.Ref.Target == focusEnt && on) ? "_" : string.Empty;
     }
 
     private static void DeleteMenu(
@@ -535,5 +517,4 @@ internal readonly struct LoginScreenPlugin : IPlugin
     private struct LoginScene;
     private struct UsernameInput;
     private struct PasswordInput;
-    private struct FieldCaret { public ulong Target; }
 }

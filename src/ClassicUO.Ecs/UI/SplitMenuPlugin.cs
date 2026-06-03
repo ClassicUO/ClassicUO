@@ -189,17 +189,43 @@ internal readonly struct SplitMenuPlugin : IPlugin
             .Insert<UINoWindowDrag>();
         commands.AddChild(track.Id, knob.Id);
 
-        // Numbers-only text box (legacy StbTextBox, font 1, hue 0x0386).
+        // Numbers-only text box (legacy StbTextBox, font 1, hue 0x0386). The
+        // value text + a trailing caret sit in a flex row so the shared
+        // GuiPlugin.CaretBlink shows a blinking cursor while the box is focused
+        // (same TextCaret mechanism as the login fields). The row is the click
+        // target (focuses the value text) and carries the box bounds.
+        var textFont = new TextFont { FontId = (ushort)(1 | UoFontRuntime.AsciiFlag), Size = 12 };
+        var textColor = new TextColor(UoFontRuntime.AsciiHue(0x0386));
         var text = commands.Spawn()
-            .Insert(new Node { PositionType = PositionType.Absolute, Left = Val.Px(29), Top = Val.Px(42), Width = Val.Px(60), Height = Val.Px(20) })
+            .Insert(new Node { Width = Val.Auto, Height = Val.Auto })
             .Insert(new Text(max.ToString()))
-            .Insert(new TextFont { FontId = (ushort)(1 | UoFontRuntime.AsciiFlag), Size = 12 })
-            .Insert(new TextColor(UoFontRuntime.AsciiHue(0x0386)))
+            .Insert(textFont)
+            .Insert(textColor)
             .Insert<TextInput>()
-            .Insert(Interaction.None)
             .Insert<UINoWindowDrag>();
-        commands.AddChild(rootId, text.Id);
-        focused.Value.Entity = text.Id;
+        ulong textId = text.Id;
+        var caret = commands.Spawn()
+            .Insert(new Node { Width = Val.Auto, Height = Val.Auto })
+            .Insert(new Text(string.Empty))
+            .Insert(textFont)
+            .Insert(textColor)
+            .Insert(new TextCaret { Target = textId })
+            .Insert<UINoWindowDrag>();
+        var textRow = commands.Spawn()
+            .Insert(new Node
+            {
+                PositionType = PositionType.Absolute, Left = Val.Px(29), Top = Val.Px(42),
+                Width = Val.Px(60), Height = Val.Px(20),
+                FlexDirection = FlexDirection.Row, AlignItems = AlignItems.Center,
+            })
+            .Insert(Interaction.None)
+            .Insert<UiContainsByBounds>()
+            .Insert<UINoWindowDrag>();
+        textRow.Observe((On<UiPointerDown> _, ResMut<FocusedInput> f) => f.Value.Entity = textId);
+        commands.AddChild(textRow.Id, text.Id);
+        commands.AddChild(textRow.Id, caret.Id);
+        commands.AddChild(rootId, textRow.Id);
+        focused.Value.Entity = textId;
 
         // OK button (legacy Button 0x085d/e/f at 102,37).
         var ok = builder.Value.AddButton(commands, (OkNormal, OkPressed, OkOver), Vector3.UnitZ, new Vector2(102, 37))

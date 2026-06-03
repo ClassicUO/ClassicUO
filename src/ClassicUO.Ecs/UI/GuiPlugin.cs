@@ -105,6 +105,7 @@ internal readonly struct GuiPlugin : IPlugin
         Action<Query<Data<UiCustom, UOButton, Interaction>>> updateUOButtonsStateFn = UpdateUOButtonsState;
         Action<Query<Data<UiCustom, UOCheckbox, TinyEcs.Bevy.UI.Widgets.Checkbox>>> updateUOCheckboxesFn = UpdateUOCheckboxes;
         Action<Query<Data<Text, MaskedText>>> syncMaskedTextFn = SyncMaskedText;
+        Action<Res<Time>, Res<FocusedInput>, Query<Data<Text, TextCaret>>> caretBlinkFn = CaretBlink;
 
         app.AddSystem(Stage.First, syncSurfaceFn);
         app.AddSystem(Stage.First, syncPointerFn);
@@ -139,6 +140,8 @@ internal readonly struct GuiPlugin : IPlugin
             .Build();
         // Mirror MaskedText.Value into Text as mask chars before layout reads Text.
         app.AddSystem(Stage.PreUpdate, syncMaskedTextFn);
+        // Blink the caret glyph of the focused text input (any TextCaret entity).
+        app.AddSystem(Stage.PreUpdate, caretBlinkFn);
 
 #if AGENT_BUILD
         // Harness diagnostic: when debug.dumpLayout enables it, every left-click
@@ -374,6 +377,22 @@ internal readonly struct GuiPlugin : IPlugin
                 : new string(masked.Ref.MaskChar, value.Length);
         }
     }
+
+    // Blink the caret glyph for any TextCaret entity: show "_" while its linked
+    // input is focused and we're in the on-phase (~530ms), otherwise clear it so
+    // it occupies no width. Shared by every text input (login, split, …) so a
+    // focused field always shows a cursor — including an empty one, where the
+    // caret entity still holds its slot in the input's flex row.
+    private static void CaretBlink(
+        Res<Time> time,
+        Res<FocusedInput> focused,
+        Query<Data<Text, TextCaret>> carets)
+    {
+        var on = (int)(time.Value.Total / 530f) % 2 == 0;
+        var focusEnt = focused.Value.Entity;
+        foreach (var (_, text, caret) in carets)
+            text.Ref.Value = (caret.Ref.Target == focusEnt && on) ? "_" : string.Empty;
+    }
 }
 
 // FontStashSharp-backed text measurer for Bevy.UI / Clay.
@@ -509,6 +528,11 @@ internal struct UOCheckbox
 // Marker tags carried over from the old plugin.
 internal struct UIMovable;
 internal struct TextInput;
+
+// A caret glyph entity linked to a focusable text input (Target). CaretBlink
+// fills/clears its Text each frame based on focus + blink phase. Place it as a
+// flex-row sibling after the input's Text so it follows the typed text.
+internal struct TextCaret { public ulong Target; }
 
 #if AGENT_BUILD
 // Harness diagnostic toggle: when DumpOnClick is set (via debug.dumpLayout),
