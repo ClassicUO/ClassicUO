@@ -139,7 +139,55 @@ internal readonly struct GuiPlugin : IPlugin
             .Build();
         // Mirror MaskedText.Value into Text as mask chars before layout reads Text.
         app.AddSystem(Stage.PreUpdate, syncMaskedTextFn);
+
+#if AGENT_BUILD
+        // Harness diagnostic: when debug.dumpLayout enables it, every left-click
+        // prints the UI element stack under the cursor (topmost first) so the
+        // pixel-perfect hit-test can be inspected against the real layout.
+        app.AddResource(new DebugLayoutDump());
+        Action<
+            Res<DebugLayoutDump>,
+            Res<MouseContext>,
+            Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>>,
+            Query<Data<TinyEcs.Parent>>,
+            Query<Data<UIMovable>>> dumpFn = DumpLayoutOnClick;
+        app.AddSystem(Stage.Last, dumpFn);
+#endif
     }
+
+#if AGENT_BUILD
+    private static void DumpLayoutOnClick(
+        Res<DebugLayoutDump> dump,
+        Res<MouseContext> mouse,
+        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
+        Query<Data<TinyEcs.Parent>> parents,
+        Query<Data<UIMovable>> movables)
+    {
+        if (!dump.Value.DumpOnClick || !mouse.Value.IsPressedOnce(MouseButtonType.Left))
+            return;
+
+        var pt = mouse.Value.Position;
+        var rows = new List<(int paint, string line)>();
+        foreach (var (ent, comp, node, custom, bg, text) in rendered)
+        {
+            var bb = comp.Ref;
+            if (pt.X < bb.Position.X || pt.Y < bb.Position.Y
+                || pt.X >= bb.Position.X + bb.Size.X || pt.Y >= bb.Position.Y + bb.Size.Y)
+                continue;
+
+            ulong par = 0;
+            if (parents.Contains(ent.Ref)) { var (_, p) = parents.Get(ent.Ref); par = (ulong)p.Ref.Id; }
+            string kind = custom.IsValid() ? (custom.Ref.Render()?.Kind.ToString() ?? "nullData") : "noCustom";
+            rows.Add((bb.PaintOrder,
+                $"  ent={ent.Ref} paint={bb.PaintOrder} pos=({bb.Position.X:0},{bb.Position.Y:0}) " +
+                $"size=({bb.Size.X:0},{bb.Size.Y:0}) overflow={node.Ref.Overflow} disp={node.Ref.Display} " +
+                $"kind={kind} text={text.IsValid()} bg={bg.IsValid()} mov={movables.Contains(ent.Ref)} parent={par}"));
+        }
+        rows.Sort((a, b) => b.paint.CompareTo(a.paint)); // topmost (highest paint order) first
+        Console.WriteLine($"[Layout] {rows.Count} element(s) under ({pt.X:0},{pt.Y:0}) — topmost first:");
+        foreach (var r in rows) Console.WriteLine(r.line);
+    }
+#endif
 
     private static void SyncSurface(
         Res<GraphicsDevice> device,
@@ -456,6 +504,15 @@ internal struct UOCheckbox
 // Marker tags carried over from the old plugin.
 internal struct UIMovable;
 internal struct TextInput;
+
+#if AGENT_BUILD
+// Harness diagnostic toggle: when DumpOnClick is set (via debug.dumpLayout),
+// GuiPlugin.DumpLayoutOnClick prints the UI element stack under each left-click.
+internal sealed class DebugLayoutDump
+{
+    public bool DumpOnClick;
+}
+#endif
 
 // Suppresses ONLY the drag gesture on a UIMovable window (UO `nomove` flag).
 // The window is still a window: right-click-close, click-capture-to-world,

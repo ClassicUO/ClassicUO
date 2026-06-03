@@ -64,32 +64,30 @@ internal readonly struct WindowDragPlugin : IPlugin
         Res<MouseContext> mouse,
         Res<SelectedEntity> selected,
         Res<AssetsServer> assets,
-        Query<Data<ComputedNode, GlobalZIndex, UiCustom>, Filter<With<UIMovable>, Without<ContainerWindow>>> q)
+        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
+        Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movables,
+        Query<Data<TinyEcs.Parent>> parents,
+        Query<Data<ContainerWindow>> containers)
     {
+        // Resolve via the SHARED pixel-perfect hit-test, same as drag/pickup, so
+        // the claim follows the real topmost element and walks to its window root.
+        // The old per-root bbox loop missed windows whose root carries no sprite
+        // of its own (server gumps: the hit is a child resizepic/text that walks
+        // up to the bare UIMovable root) — those let world clicks trespass through.
         var pos = mouse.Value.Position;
-        ulong topEnt = 0;
-        int topZ = int.MinValue;
-        int topOrder = int.MinValue;
+        var hit = UiPick.Topmost(pos, assets.Value, rendered, parents);
+        if (!hit.Found) return;
 
-        foreach (var (ent, computed, z, custom) in q)
-        {
-            var bb = computed.Ref;
-            // Pixel-perfect: a click on a transparent pixel of the window's bg
-            // gump passes through (doesn't claim selection).
-            if (!UiHitTest.PixelHit(assets.Value, custom.Ref.Render(), bb, pos)) continue;
-            if (z.Ref.Value > topZ || (z.Ref.Value == topZ && bb.PaintOrder >= topOrder))
-            {
-                topZ = z.Ref.Value;
-                topOrder = bb.PaintOrder;
-                topEnt = ent.Ref;
-            }
-        }
+        var owner = UiPick.MovableRoot(hit.Entity, movables, parents);
+        if (owner == 0) return;
+        // Container windows have their own item-aware claim
+        // (ContainerGumpPlugin.UpdateSelectedFromContainerUI) — don't race it.
+        if (containers.Contains(owner)) return;
 
-        if (topEnt == 0) return;
         // bypassViewport: a movable window parked in the side gutter / top bar
         // sits outside Camera.Bounds, so the world-pick gate is off there. The
         // window claim must still land or drop/pickup over it silently fail.
-        selected.Value.Set(topEnt, float.MaxValue, bypassViewport: true);
+        selected.Value.Set(owner, float.MaxValue, bypassViewport: true);
     }
 
     // Right-click-close with UiClick semantics: the close fires on the right

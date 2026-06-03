@@ -779,14 +779,16 @@ internal readonly struct ServerGumpPlugin : IPlugin
             }
         }
 
-        // Root is an invisible frame at the GUMP ORIGIN (x,y) sized to the full
-        // content extent. The background resizepic (if any) is a normal child
-        // at its own (rx,ry), so every control lands at its true gump-local
-        // coord relative to this frame — no (rx,ry) shift. UOCustomKind.None
-        // gives the frame a ComputedNode + solid hit-test so it behaves like
-        // any gump window: draggable, right-click-closable, click-capturing
-        // over its whole area. Only the root carries GlobalZIndex (threaded to
-        // descendants by LayoutSystem).
+        // Root is an invisible window anchor at the GUMP ORIGIN (x,y) sized to the
+        // full content extent. The background resizepic (if any) is a normal child
+        // at its own (rx,ry), so every control lands at its true gump-local coord
+        // relative to this frame. It carries NO hit surface of its own: gestures
+        // hit the actual sprite children (resizepic frame pixel-perfect via the
+        // 9-slice mask, gumppics, text) and walk up to this UIMovable root —
+        // matching legacy ResizePic.Contains, where a click on a transparent
+        // corner/gap passes through instead of the whole rect capturing it. A
+        // whole-bbox None surface here would defeat that pixel-perfect mask.
+        // Only the root carries GlobalZIndex (threaded to descendants).
         if (maxRight > 0f && maxBottom > 0f)
         {
             commands.Entity(rootId)
@@ -799,8 +801,6 @@ internal readonly struct ServerGumpPlugin : IPlugin
                     Width = Val.Px(maxRight),
                     Height = Val.Px(maxBottom),
                 })
-                .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.None, Hue = Vector3.UnitZ } })
-                .Insert(Interaction.None)
                 .Insert<UIMovable>()
                 .Insert(new GlobalZIndex(z));
         }

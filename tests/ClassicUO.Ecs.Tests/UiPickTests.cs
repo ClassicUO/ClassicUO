@@ -5,6 +5,7 @@ using TinyEcs.Bevy;
 using TinyEcs.Bevy.UI;
 using Xunit;
 using XnaVector2 = Microsoft.Xna.Framework.Vector2;
+using ClayColor = Clay.Color;
 
 namespace ClassicUO.Ecs.Tests;
 
@@ -317,6 +318,45 @@ public class UiPickTests
         Assert.Equal(inner, inside.Entity);
     }
 
+    // Integration test through the REAL Clay layout: a window with a bare
+    // Overflow.Scroll container holding tall content. A click well below the
+    // window must NOT grab it via the content that overflows the viewport.
+    // (Unit test above hand-builds ComputedNode; this one exercises the actual
+    // layout + ComputedNode write, which is where a bare scroll container with
+    // no render command of its own would otherwise have no clip box.)
+    [Fact]
+    public void Scroll_overflow_not_grabbable_below_window_through_layout()
+    {
+        var app = new App();
+        app.AddPlugin(new UiPlugin { LogicalSize = new Vector2(800, 600) });
+        var w = app.GetWorld();
+
+        var root = w.Entity()
+            .Set(new Node { PositionType = PositionType.Absolute, Left = Val.Px(50), Top = Val.Px(50), Width = Val.Px(200), Height = Val.Px(100) })
+            .Set<UIMovable>()
+            .Set(new GlobalZIndex(0))
+            .Set(new BackgroundColor(new ClayColor(40, 40, 40, 255))).ID;
+        var outer = w.Entity()
+            .Set(new Node { PositionType = PositionType.Absolute, Left = Val.Px(10), Top = Val.Px(10), Width = Val.Px(180), Height = Val.Px(50), Overflow = Overflow.Scroll })
+            .Set(new ScrollPosition()).ID;                 // bare scroll viewport (no own paint)
+        var inner = w.Entity()
+            .Set(new Node { Width = Val.Px(180), Height = Val.Px(300) })  // overflows the 50px viewport
+            .Set(new BackgroundColor(new ClayColor(200, 0, 0, 255))).ID;
+        w.AddChild(root, outer);
+        w.AddChild(outer, inner);
+
+        app.Update();   // Clay layout + ComputedNode write
+
+        // Below the window (root bottom = 150) but within the inner's overflow.
+        var below = UiPick.Topmost(new XnaVector2(120, 250), null, Rendered(app), Parents(app));
+        var owner = UiPick.MovableRoot(below.Entity, Movables(app), Parents(app));
+        Assert.NotEqual(root, owner);   // overflow must not be a grab handle outside the window
+
+        // Inside the viewport: still resolves to the window.
+        var inside = UiPick.Topmost(new XnaVector2(120, 75), null, Rendered(app), Parents(app));
+        Assert.Equal(root, UiPick.MovableRoot(inside.Entity, Movables(app), Parents(app)));
+    }
+
     private sealed class RepushLatest { public ulong Root, Outer, Inner; }
 
     // Faithful re-push repro: each frame despawn the previous gump root and
@@ -348,6 +388,35 @@ public class UiPickTests
         var l = app.GetResource<RepushLatest>();
         Assert.Equal(l.Outer, (ulong)w.GetParent(l.Inner));
         Assert.Equal(l.Root, (ulong)w.GetParent(l.Outer));
+    }
+
+    // Server-gump shape: a UIMovable root that carries NO render surface of its
+    // own (the old whole-bbox None hit was removed for pixel-perfect parity). It
+    // must be hittable ONLY through its painting children — a click on a child
+    // walks up to the root (so drag / click-capture claim it), but a click on the
+    // root's empty area is NOT a hit (it passes through to the world / window
+    // behind instead of the whole rect trapping it).
+    [Fact]
+    public void Bare_movable_root_only_hit_via_its_painting_children()
+    {
+        var app = new App();
+        var w = app.GetWorld();
+        var root = w.Entity()
+            .Set(new Node())          // bare: no UiCustom/Text/Bg, no ComputedNode
+            .Set<UIMovable>()
+            .Set(new GlobalZIndex(0)).ID;
+        var child = Element(w, 0, 0, 50, 50, 2);   // paints (solid hit), covers only the top-left
+        w.AddChild(root, child);
+
+        // Over the painting child -> resolves up to the root (claim/drag target).
+        var onChild = UiPick.Topmost(new XnaVector2(25, 25), null, Rendered(app), Parents(app));
+        Assert.Equal(child, onChild.Entity);
+        Assert.Equal(root, UiPick.MovableRoot(onChild.Entity, Movables(app), Parents(app)));
+
+        // Over the root's empty area (no child) -> NO hit: nothing of the window
+        // traps the click, so it passes through (the trespass-vs-no-trespass line).
+        var onGap = UiPick.Topmost(new XnaVector2(150, 150), null, Rendered(app), Parents(app));
+        Assert.False(onGap.Found);
     }
 
     // A bare layout node paints nothing — it must not be a hit, or a window's

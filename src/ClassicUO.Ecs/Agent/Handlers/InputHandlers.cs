@@ -53,6 +53,22 @@ internal static class InputHandlers
         d.Register("debug.openPopup", DebugOpenPopup);
         d.Register("debug.openSplit", DebugOpenSplit);
         d.Register("debug.openServerGump", DebugOpenServerGump);
+        d.Register("debug.dumpLayout", DebugDumpLayout);
+    }
+
+    // Test-only: toggle "print the UI element stack under each left-click" (set
+    // {"enable": false} to turn off; default toggles on). Output goes to the
+    // client console as [Layout] lines — topmost element first — for inspecting
+    // the pixel-perfect hit-test against the real layout.
+    public static JsonRpcResponse DebugDumpLayout(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        var dump = ctx.Runtime.GetResource<DebugLayoutDump>();
+        bool enable = !dump.DumpOnClick;
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object
+            && p.TryGetProperty("enable", out var ee) && (ee.ValueKind == JsonValueKind.True || ee.ValueKind == JsonValueKind.False))
+            enable = ee.GetBoolean();
+        dump.DumpOnClick = enable;
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["dumpOnClick"] = enable } };
     }
 
     // Test-only: spawn a NOTICE-style server gump (resizepic frame + scrollable
