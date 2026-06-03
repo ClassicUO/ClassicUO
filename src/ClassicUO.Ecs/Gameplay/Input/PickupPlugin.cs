@@ -68,7 +68,7 @@ internal readonly struct PickupPlugin : IPlugin
                 // world-claim bail rely on a UI entity in the latch). Occlusion
                 // — an item sitting behind a front window — falls out of
                 // topmost-by-paint-order, so the old per-item z-gate is gone.
-                var hit = UiPick.Topmost(pos, assets.Value, rendered);
+                var hit = UiPick.Topmost(pos, assets.Value, rendered, parents);
                 ulong topUi = 0;
                 if (hit.Found)
                 {

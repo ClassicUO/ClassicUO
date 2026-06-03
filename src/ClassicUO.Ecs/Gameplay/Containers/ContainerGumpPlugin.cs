@@ -184,7 +184,7 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         // container. Occlusion (an item behind a front window, a container
         // behind a paperdoll) falls out of "topmost by paint order" for free —
         // no per-item z-gate needed.
-        var hit = UiPick.Topmost(pos, assets.Value, rendered);
+        var hit = UiPick.Topmost(pos, assets.Value, rendered, parents);
         ulong topItem = 0, topWindow = 0;
         if (hit.Found)
         {

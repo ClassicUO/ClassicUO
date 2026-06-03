@@ -188,7 +188,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> allRenderedQ,
         Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movablesQ,
         Query<Data<TinyEcs.Parent>> parentsQ)
-        => UiPick.MovableRoot(UiPick.Topmost(pos, assets, allRenderedQ).Entity, movablesQ, parentsQ);
+        => UiPick.MovableRoot(UiPick.Topmost(pos, assets, allRenderedQ, parentsQ).Entity, movablesQ, parentsQ);
 
     private static void DespawnSubtree(
         Commands commands,
@@ -293,7 +293,7 @@ internal readonly struct WindowDragPlugin : IPlugin
             // (not just movable roots) is what lets the drag start on a window's
             // opaque child where its own bg is transparent — the paperdoll body
             // and arch interior, a container's slot art, etc.
-            var hit = UiPick.Topmost(pos, assets.Value, rendered);
+            var hit = UiPick.Topmost(pos, assets.Value, rendered, parents);
             if (!hit.Found) return;
 
             // Pickup owns the gesture when the topmost hit is a liftable thing

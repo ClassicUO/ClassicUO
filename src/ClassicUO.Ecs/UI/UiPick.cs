@@ -52,6 +52,19 @@ internal static class UiPick
         Vector2 pos,
         AssetsServer assets,
         Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered)
+        => Topmost(pos, assets, rendered, null);
+
+    // `parents` (optional) enables overflow-clip: an element inside an ancestor
+    // with Overflow.Scroll/Clip is only hittable within that ancestor's box —
+    // matching the scissor the renderer applies. Without it a scrollable text
+    // run's full-content bbox (taller than its viewport) would be grab-able past
+    // the window edge. Pass it from gesture systems (drag/pickup/close); the
+    // tooltip path may skip it (overflow text has no serial → no tooltip anyway).
+    public static UiHit Topmost(
+        Vector2 pos,
+        AssetsServer assets,
+        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
+        Query<Data<TinyEcs.Parent>> parents)
     {
         var hit = UiHit.None;
         foreach (var (ent, computed, node, custom, bg, text) in rendered)
@@ -68,10 +81,35 @@ internal static class UiPick
             var render = custom.IsValid() ? custom.Ref.Render() : null;
             var bb = computed.Ref;
             if (!UiHitTest.PixelHit(assets, render, bb, pos)) continue;
+            if (parents != null && ClippedOutByAncestor(ent.Ref, pos, rendered, parents)) continue;
             if (bb.PaintOrder >= hit.PaintOrder)
                 hit = new UiHit(ent.Ref, bb.PaintOrder);
         }
         return hit;
+    }
+
+    // True when `pos` falls outside the box of any Overflow.Scroll/Clip ancestor
+    // of `entity` — i.e. the element is clipped away there and shouldn't be hit.
+    private static bool ClippedOutByAncestor(
+        ulong entity,
+        Vector2 pos,
+        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
+        Query<Data<TinyEcs.Parent>> parents)
+    {
+        ulong cur = entity;
+        for (int i = 0; i < 32 && parents.Contains(cur); i++)
+        {
+            var (_, p) = parents.Get(cur);
+            cur = (ulong)p.Ref.Id;
+            if (cur == 0 || !rendered.Contains(cur)) continue;
+            var (_, comp, node, _, _, _) = rendered.Get(cur);
+            if (node.Ref.Overflow == Overflow.Visible) continue;
+            var b = comp.Ref;
+            if (pos.X < b.Position.X || pos.Y < b.Position.Y
+                || pos.X >= b.Position.X + b.Size.X || pos.Y >= b.Position.Y + b.Size.Y)
+                return true;
+        }
+        return false;
     }
 
     // Walk the Parent chain from `entity` up to the nearest UIMovable window root

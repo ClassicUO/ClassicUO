@@ -289,6 +289,34 @@ public class UiPickTests
         Assert.Equal(rootB, (ulong)w.GetParent(outerB));
     }
 
+    // A scrollable text run keeps its full-content bbox (taller than the scroll
+    // viewport). UiPick must clip it to the Overflow.Scroll ancestor's box, or
+    // the overflow is grab-able past the window edge.
+    [Fact]
+    public void Topmost_clips_overflowing_child_to_scroll_ancestor()
+    {
+        var app = new App();
+        var w = app.GetWorld();
+        var root = Element(w, 0, 0, 100, 200, 1);
+        MakeMovable(w, root);
+        // scroll viewport: 100x50
+        var outer = w.Entity()
+            .Set(new Node { Overflow = Overflow.Scroll })
+            .Set(new UiCustom { Data = null })
+            .Set(new ComputedNode { Position = new Vector2(0, 0), Size = new Vector2(100, 50), PaintOrder = 2 }).ID;
+        // content overflows to 200 tall
+        var inner = Element(w, 0, 0, 100, 200, 3);
+        w.AddChild(root, outer);
+        w.AddChild(outer, inner);
+
+        // Inside inner's full bbox but BELOW the viewport -> clipped, not the inner.
+        var below = UiPick.Topmost(new XnaVector2(50, 120), null, Rendered(app), Parents(app));
+        Assert.NotEqual(inner, below.Entity);
+        // Inside the viewport -> inner is the topmost hit.
+        var inside = UiPick.Topmost(new XnaVector2(50, 30), null, Rendered(app), Parents(app));
+        Assert.Equal(inner, inside.Entity);
+    }
+
     private sealed class RepushLatest { public ulong Root, Outer, Inner; }
 
     // Faithful re-push repro: each frame despawn the previous gump root and
