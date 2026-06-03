@@ -766,10 +766,38 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             // Fix direction for animation
             (var dir, var mirror) = FixDirection(animation.Ref.Direction);
 
-            // Process each equipment layer
-            for (int j = -1; j < Constants.USED_LAYER_COUNT; j++)
+            // Equipment draw-order via the shared PaperdollOrder algorithm (same
+            // source as the paperdoll gump + main's in-world views): pick a base
+            // table by arms/torso AnimID, apply per-graphic reorder rules, filter,
+            // then reposition the cloak by facing direction. altTorsoTable gates
+            // the female/gargoyle chest-under variant — derived from the body
+            // graphic (gargoyle bodies 0x029A/0x029B only exist on CV >= 7000).
+            ushort bodyGfx = graphic.Ref.Value;
+            bool altTorso = bodyGfx == 0x0191 || bodyGfx == 0x0193 || bodyGfx == 0x025D
+                         || bodyGfx == 0x029A || bodyGfx == 0x029B || bodyGfx == 0x02B7;
+
+            Span<ushort> equipGfx = stackalloc ushort[PaperdollOrder.N];
+            equipGfx.Clear();
+            for (int l = (int)Layer.OneHanded; l <= (int)Layer.Legs; l++)
             {
-                var layer = j == -1 ? Layer.Mount : LayerOrder.UsedLayers[(int)animation.Ref.Direction & 0x7, j];
+                var le = slots.Ref[(Layer)l];
+                if (!le.IsValid() || !qLayers.Contains(le)) continue;
+                var (lg, _) = qLayers.Get(le);
+                var lgfx = lg.Ref.Value;
+                if (lgfx != 0) equipGfx[l] = tileDataCache.StaticData[lgfx].AnimID;
+            }
+
+            Span<Layer> rawOrder = stackalloc Layer[PaperdollOrder.N];
+            PaperdollOrder.Build(equipGfx, altTorso, rawOrder);
+            Span<Layer> drawOrder = stackalloc Layer[PaperdollOrder.N];
+            int layerCount = PaperdollOrder.Filter(rawOrder, includeBackpack: false, drawOrder);
+            layerCount = PaperdollOrder.ApplyDirectionCloak(drawOrder, layerCount, (byte)((int)animation.Ref.Direction & 0x7));
+
+            // Process each equipment layer — Mount first (j == -1), then the
+            // PaperdollOrder result back-to-front.
+            for (int j = -1; j < layerCount; j++)
+            {
+                var layer = j == -1 ? Layer.Mount : drawOrder[j];
                 var layerEnt = slots.Ref[layer];
 
                 // Skip invalid or hidden layers

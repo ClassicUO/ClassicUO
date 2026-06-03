@@ -35,37 +35,6 @@ namespace ClassicUO.Ecs;
 
 internal readonly struct PaperdollPlugin : IPlugin
 {
-    // PaperDollInteractable._layerOrder (the non-quiver variant). Used to
-    // stack equipment gumps on top of the body sprite in the same z-order
-    // main draws them. Quiver-fix variant is skipped for the port — the
-    // visual diff only matters when the player wears a cloak-with-quiver.
-    private static readonly GameLayer[] s_layerOrder =
-    {
-        GameLayer.Cloak,
-        GameLayer.Shirt,
-        GameLayer.Pants,
-        GameLayer.Shoes,
-        GameLayer.Legs,
-        GameLayer.Arms,
-        GameLayer.Torso,
-        GameLayer.Tunic,
-        GameLayer.Ring,
-        GameLayer.Bracelet,
-        GameLayer.Face,
-        GameLayer.Gloves,
-        GameLayer.Skirt,
-        GameLayer.Robe,
-        GameLayer.Waist,
-        GameLayer.Necklace,
-        GameLayer.Hair,
-        GameLayer.Beard,
-        GameLayer.Earrings,
-        GameLayer.Helmet,
-        GameLayer.OneHanded,
-        GameLayer.TwoHanded,
-        GameLayer.Talisman,
-    };
-
     // Equipment slot frame positions, mirroring main's BuildGump: left column
     // (9 slots) at x=2, right column (6 slots) at x=162, each 21px apart from
     // y=70. Each slot draws a tiled bg + 0x2344 border frame; the equipped
@@ -626,8 +595,32 @@ internal readonly struct PaperdollPlugin : IPlugin
 
         if (!slots.HasValue) return;
 
-        foreach (var layer in s_layerOrder)
+        // Equipment draw-order via the shared PaperdollOrder algorithm (same as
+        // the in-world views and main's PaperDollInteractable): pick a base
+        // table by arms/torso AnimID, apply per-graphic reorder rules, then
+        // paint back-to-front. gfx[layer] = the item's tile AnimID — the rules
+        // are keyed on the gump/equip display id, not the world tile graphic.
+        bool isGargoyle = Races.IsGargoyle(gameCtx.ClientVersion, mobileGraphic);
+
+        Span<ushort> equipGfx = stackalloc ushort[PaperdollOrder.N];
+        equipGfx.Clear();
+        for (int l = (int)GameLayer.OneHanded; l <= (int)GameLayer.Legs; l++)
         {
+            var le = slots.Value[(GameLayer)l];
+            if (le == 0 || !itemQ.Contains(le)) continue;
+            var (_, lg, _) = itemQ.Get(le);
+            var lgfx = lg.Ref.Value;
+            if (lgfx != 0 && lgfx < tileData.Length) equipGfx[l] = tileData[lgfx].AnimID;
+        }
+
+        Span<GameLayer> rawOrder = stackalloc GameLayer[PaperdollOrder.N];
+        PaperdollOrder.Build(equipGfx, isFemale || isGargoyle, rawOrder);
+        Span<GameLayer> drawOrder = stackalloc GameLayer[PaperdollOrder.N];
+        int orderCount = PaperdollOrder.Filter(rawOrder, includeBackpack: false, drawOrder);
+
+        for (int oi = 0; oi < orderCount; oi++)
+        {
+            var layer = drawOrder[oi];
             var itemEnt = slots.Value[layer];
             if (itemEnt == 0) continue;
             if (!itemQ.Contains(itemEnt)) continue;
