@@ -320,6 +320,18 @@ readonly struct NetworkPlugin : IPlugin
                 packetHeaderOffset += sizeof(ushort);
             }
 
+            // A valid packet is at least its header (1-byte id, or 3 bytes for a
+            // variable-length packet). A smaller declared length means a corrupt /
+            // desynced stream — slicing the payload would throw (negative length)
+            // and a 0 length would spin forever (Dequeue(0) never drains). Stop
+            // parsing this drain instead of crashing; mirrors legacy's break-on-
+            // invalid in PacketHandlers.GetPacketInfo.
+            if (packetLen < packetHeaderOffset)
+            {
+                Console.WriteLine($"[Net] malformed packet 0x{packetId:X2}: len {packetLen} < header {packetHeaderOffset}; stopping parse (stream desync)");
+                break;
+            }
+
             if (buffer.Value.Length < packetLen)
             {
                 Console.WriteLine("needs more data for packet 0x{0:X2}", packetId);
