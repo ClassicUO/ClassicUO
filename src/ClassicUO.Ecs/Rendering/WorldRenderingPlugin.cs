@@ -733,6 +733,12 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         var tileDataCache = fileManager.Value.TileData;
         var animations = assetsServer.Value.Animations;
 
+        // Equipment draw-order scratch — allocated once and reused per entity
+        // (stackalloc inside the loop would grow the stack each iteration).
+        Span<ushort> equipGfx = stackalloc ushort[PaperdollOrder.N];
+        Span<Layer> rawOrder = stackalloc Layer[PaperdollOrder.N];
+        Span<Layer> drawOrder = stackalloc Layer[PaperdollOrder.N];
+
         foreach (var (entity, slots, offset, pos, graphic, _, steps, animation) in queryEquipmentSlots)
         {
             // Early filtering
@@ -776,7 +782,6 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             bool altTorso = bodyGfx == 0x0191 || bodyGfx == 0x0193 || bodyGfx == 0x025D
                          || bodyGfx == 0x029A || bodyGfx == 0x029B || bodyGfx == 0x02B7;
 
-            Span<ushort> equipGfx = stackalloc ushort[PaperdollOrder.N];
             equipGfx.Clear();
             for (int l = (int)Layer.OneHanded; l <= (int)Layer.Legs; l++)
             {
@@ -787,9 +792,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 if (lgfx != 0) equipGfx[l] = tileDataCache.StaticData[lgfx].AnimID;
             }
 
-            Span<Layer> rawOrder = stackalloc Layer[PaperdollOrder.N];
             PaperdollOrder.Build(equipGfx, altTorso, rawOrder);
-            Span<Layer> drawOrder = stackalloc Layer[PaperdollOrder.N];
             int layerCount = PaperdollOrder.Filter(rawOrder, includeBackpack: false, drawOrder);
             layerCount = PaperdollOrder.ApplyDirectionCloak(drawOrder, layerCount, (byte)((int)animation.Ref.Direction & 0x7));
 
