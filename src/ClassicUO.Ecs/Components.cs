@@ -131,7 +131,7 @@ struct PlayerData
     public short LowerReagentCost, SpellDamageInc, FasterCastRecovery, FasterCasting, LowerManaCost;
 }
 
-[InlineArray(0x1D + 1)]
+[InlineArray(EquipmentSlots.LayerCount)]
 struct EquipmentArray
 {
     private ulong _a;
@@ -139,6 +139,8 @@ struct EquipmentArray
 
 struct EquipmentSlots
 {
+    public const int LayerCount = 54;
+
     private EquipmentArray _array;
 
     [UnscopedRef]
@@ -150,7 +152,7 @@ struct EquipmentSlots
     // Changed<EquipmentSlots> misfire on every benign mobile-update packet).
     public bool ContentEquals(in EquipmentSlots other)
     {
-        for (int i = 0; i <= 0x1D; i++)
+        for (int i = 0; i < LayerCount; i++)
             if (_array[i] != other._array[i])
                 return false;
         return true;

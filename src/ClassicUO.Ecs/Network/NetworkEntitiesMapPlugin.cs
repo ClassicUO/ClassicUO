@@ -31,7 +31,7 @@ internal readonly struct NetworkEntitiesMapPlugin : IPlugin
                 Query<Data<NetworkSerial>> query
             ) =>
             {
-                for (var layer = Layer.Invalid + 1; layer <= Layer.Bank; ++layer)
+                for (var layer = Layer.Invalid + 1; (int)layer < EquipmentSlots.LayerCount; ++layer)
                 {
                     var id = trigger.Component[layer];
 

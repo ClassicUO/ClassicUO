@@ -104,7 +104,7 @@ internal readonly struct ContainersPlugin : IPlugin
         foreach (var (mob, slots) in equipQ)
         {
             bool changed = false;
-            for (var layer = Layer.Invalid + 1; layer <= Layer.Bank; ++layer)
+            for (var layer = Layer.Invalid + 1; (int)layer < EquipmentSlots.LayerCount; ++layer)
             {
                 var slotEnt = slots.Ref[layer];
                 if (slotEnt == 0 || !serialQ.Contains(slotEnt)) continue;
