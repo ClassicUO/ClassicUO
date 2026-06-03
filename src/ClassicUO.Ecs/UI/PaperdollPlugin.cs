@@ -466,10 +466,36 @@ internal readonly struct PaperdollPlugin : IPlugin
             }
         }
 
-        // Title label (39, 262), font 1, hue 0x0386. Bevy.UI's Text node
-        // doesn't expose font 1 directly — use the default font for now.
+        // Title label (39, 262): ASCII font 1, hue 0x0386, maxWidth 185 — matches
+        // OOP PaperdollGump's `new Label("", false, 0x0386, 185, font: 1)`. Uses a
+        // WrappedText custom node (pre-wrapped via FontsLoader at maxWidth) rather
+        // than a plain Bevy.UI Text label: Clay's word-wrap doesn't drive the UO
+        // atlas, so long titles must be wrapped at spawn and the node sized to the
+        // measured height.
         var titleText = title?.Trim() ?? string.Empty;
-        var titleEnt = builder.AddLabel(commands, titleText, new Vector2(39, 262), new Vector2(185, 18));
+        const int titleW = 185;
+        var (_, titleH) = UoFontRenderer.Measure(titleText, font: 1, titleW, isHtml: false, 0, htmlBg: false, ascii: true);
+        var titleEnt = commands.Spawn()
+            .Insert(new Node
+            {
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(39), Top = Val.Px(262),
+                Width = Val.Px(titleW), Height = Val.Px(Math.Max(titleH, 18)),
+            })
+            .Insert(new UiCustom
+            {
+                Data = new UOCustomRender
+                {
+                    Kind = UOCustomKind.WrappedText,
+                    Hue = Vector3.UnitZ,
+                    Text = titleText,
+                    TextFont = 1,
+                    TextHue = 0x0386,
+                    WrapWidth = titleW,
+                    IsHtml = false,
+                    TextAscii = true,
+                }
+            });
         commands.AddChild(root.Id, titleEnt.Id);
     }
 
@@ -540,44 +566,61 @@ internal readonly struct PaperdollPlugin : IPlugin
         // down + centers, never upscales).
         foreach (var (slLayer, sx, sy) in s_slotLayout)
         {
-            var slotBg = builder.AddGumpTiled(commands, 0x243A, Vector3.UnitZ, new Vector2(sx, sy), new Vector2(19, 20))
-                .Insert(new PaperdollBodyChild { WindowEntity = rootId });
-            commands.AddChild(rootId, slotBg.Id, childIdx++);
-
+            // Resolve the equipped item (art + serial) up front so the slot bg
+            // and frame can carry it too: the tooltip fires for the whole 19x20
+            // slot square (bg/frame/icon all resolve the same item), not just the
+            // item icon's opaque pixels (OOP shows it anywhere over the slot).
+            ushort slotArtId = 0;
+            Vector3 slotArtHue = Vector3.UnitZ;
+            uint slotItemSerial = 0;
             if (slots.HasValue)
             {
                 var slotItemEnt = slots.Value[slLayer];
                 if (slotItemEnt != 0 && itemQ.Contains(slotItemEnt) && itemSerialQ.Contains(slotItemEnt))
                 {
                     var (_, sig, sih) = itemQ.Get(slotItemEnt);
-                    var artId = sig.Ref.Value;
-                    if (artId != 0)
+                    if (sig.Ref.Value != 0)
                     {
-                        var artHue = sih.IsValid() ? ToShaderHue((ushort)(sih.Ref.Value & 0x3FFF)) : Vector3.UnitZ;
+                        slotArtId = sig.Ref.Value;
+                        slotArtHue = sih.IsValid() ? ToShaderHue((ushort)(sih.Ref.Value & 0x3FFF)) : Vector3.UnitZ;
                         var (_, slNs) = itemSerialQ.Get(slotItemEnt);
-                        // No Interaction component: PickupPlugin's latch reads
-                        // bbox+PixelHit directly via equipUiQ — Interaction is
-                        // unused. Adding it makes Bevy.UI's InteractionSystem
-                        // route hovers/presses to this icon, which steals
-                        // UiPointerDown from buttons/chrome when the icon's
-                        // bbox+opaque-pixel overlaps theirs.
-                        var icon = builder.AddArtSized(commands, artId, artHue, new Vector2(sx, sy), new Vector2(19, 20))
-                            .Insert(new PaperdollBodyChild { WindowEntity = rootId })
-                            .Insert(new PaperdollEquipUI
-                            {
-                                ItemSerial = slNs.Ref.Value,
-                                Layer = slLayer,
-                                MobileSerial = serial,
-                                WindowEntity = rootId,
-                            });
-                        commands.AddChild(rootId, icon.Id, childIdx++);
+                        slotItemSerial = slNs.Ref.Value;
                     }
                 }
             }
 
+            var slotBg = builder.AddGumpTiled(commands, 0x243A, Vector3.UnitZ, new Vector2(sx, sy), new Vector2(19, 20))
+                .Insert(new PaperdollBodyChild { WindowEntity = rootId })
+                .Insert(new PaperdollSlot { MobileSerial = serial, Layer = slLayer, ItemSerial = slotItemSerial });
+            commands.AddChild(rootId, slotBg.Id, childIdx++);
+
+            if (slotArtId != 0)
+            {
+                // No Interaction component: PickupPlugin's latch reads
+                // bbox+PixelHit directly via equipUiQ — Interaction is
+                // unused. Adding it makes Bevy.UI's InteractionSystem
+                // route hovers/presses to this icon, which steals
+                // UiPointerDown from buttons/chrome when the icon's
+                // bbox+opaque-pixel overlaps theirs.
+                var icon = builder.AddArtSized(commands, slotArtId, slotArtHue, new Vector2(sx, sy), new Vector2(19, 20))
+                    .Insert(new PaperdollBodyChild { WindowEntity = rootId })
+                    .Insert(new PaperdollEquipUI
+                    {
+                        ItemSerial = slotItemSerial,
+                        Layer = slLayer,
+                        MobileSerial = serial,
+                        WindowEntity = rootId,
+                    })
+                    // Same slot serial as bg/frame so the tooltip resolves via the
+                    // single PaperdollSlot query regardless of which slot element
+                    // is the topmost hit.
+                    .Insert(new PaperdollSlot { MobileSerial = serial, Layer = slLayer, ItemSerial = slotItemSerial });
+                commands.AddChild(rootId, icon.Id, childIdx++);
+            }
+
             var slotFrame = builder.AddGump(commands, 0x2344, Vector3.UnitZ, new Vector2(sx, sy))
                 .Insert(new PaperdollBodyChild { WindowEntity = rootId })
-                .Insert(new PaperdollSlot { MobileSerial = serial, Layer = slLayer });
+                .Insert(new PaperdollSlot { MobileSerial = serial, Layer = slLayer, ItemSerial = slotItemSerial });
             commands.AddChild(rootId, slotFrame.Id, childIdx++);
         }
 
@@ -727,6 +770,9 @@ internal struct PaperdollSlot
 {
     public uint MobileSerial;
     public GameLayer Layer;
+    // Serial of the item occupying this slot (0 = empty). Lets the tooltip fire
+    // for the whole slot square (bg + frame carry it), not just the item icon.
+    public uint ItemSerial;
 }
 
 // Tag on the body sprite + each equipment overlay sprite. Refresh system

@@ -212,6 +212,7 @@ internal sealed class GumpBuilder
                     Kind = UOCustomKind.Art,
                     AssetId = id,
                     Hue = hue,
+                    ArtRealBounds = true,
                 }
             });
     }

@@ -391,6 +391,35 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                 ref readonly var info = ref assets.Arts.GetArt(custom.AssetId);
                 if (info.Texture != null && info.UV.Width > 0 && info.UV.Height > 0)
                 {
+                    // Slot art (paperdoll equipment): crop the source to the art's
+                    // real (non-transparent) bounds and centre that region in the
+                    // node box — native size when it fits, scaled to the box when
+                    // larger. Mirrors OOP PaperdollGump.ItemGumpFixed exactly so a
+                    // small icon (e.g. a ring) sits centred, not in the corner.
+                    if (custom.ArtRealBounds)
+                    {
+                        var rb = assets.Arts.GetRealArtBounds(custom.AssetId);
+                        if (rb.Width > 0 && rb.Height > 0)
+                        {
+                            int boxW = bb.Width  > 0 ? (int)bb.Width  : rb.Width;
+                            int boxH = bb.Height > 0 ? (int)bb.Height : rb.Height;
+                            int dW = rb.Width  < boxW ? rb.Width  : boxW;
+                            int dH = rb.Height < boxH ? rb.Height : boxH;
+                            int oX = rb.Width  < boxW ? (boxW >> 1) - (dW >> 1) : 0;
+                            int oY = rb.Height < boxH ? (boxH >> 1) - (dH >> 1) : 0;
+                            b.Draw(
+                                info.Texture,
+                                new Rectangle((int)bb.X + oX, (int)bb.Y + oY, dW, dH),
+                                new Rectangle(info.UV.X + rb.X, info.UV.Y + rb.Y, rb.Width, rb.Height),
+                                custom.Hue,
+                                0f,
+                                Vector2.Zero,
+                                SpriteEffects.None,
+                                cmd.ZIndex);
+                            break;
+                        }
+                    }
+
                     // Size rule for slot-clamped item art:
                     //   * item bounds > slot in either dim → fill slot bounds
                     //     exactly (no aspect preserve; UO item art is roughly
@@ -483,7 +512,8 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                     (int)bb.X,
                     (int)bb.Y,
                     cmd.ZIndex,
-                    custom.TextCenter ? ClassicUO.Assets.TEXT_ALIGN_TYPE.TS_CENTER : ClassicUO.Assets.TEXT_ALIGN_TYPE.TS_LEFT);
+                    custom.TextCenter ? ClassicUO.Assets.TEXT_ALIGN_TYPE.TS_CENTER : ClassicUO.Assets.TEXT_ALIGN_TYPE.TS_LEFT,
+                    custom.TextAscii);
                 break;
 
             case UOCustomKind.None:

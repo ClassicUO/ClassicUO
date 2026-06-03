@@ -390,6 +390,13 @@ internal sealed class UOCustomRender
     // to mirror legacy ItemGump.Draw's stacked-item visual (Amount > 1 &&
     // ItemData.IsStackable).
     public bool Stacked;
+    // For UOCustomKind.Art in a fixed slot box (paperdoll equipment): crop the
+    // source to the art's real (non-transparent) bounds and centre that region
+    // in the node box, drawing at native size when it fits — mirrors OOP
+    // PaperdollGump.ItemGumpFixed (Arts.GetRealArtBounds). Without it the full
+    // sprite incl. transparent margins is fit to the box, so the visible art
+    // sits off-centre.
+    public bool ArtRealBounds;
     // For UOCustomKind.MiniMap: the per-frame baked radar+dots texture. Owned
     // and updated by MiniMapPlugin's bake system; the renderer just draws it
     // over the bg gump. Null until the first bake.
@@ -403,6 +410,10 @@ internal sealed class UOCustomRender
     public ushort TextHue;
     public int WrapWidth;
     public bool IsHtml;
+    // Render the wrapped run with the UO ASCII gump fonts (FontsLoader.ASCII)
+    // instead of the unicode set — matches OOP Label(isunicode: false). The hue
+    // is baked per pixel from TextHue.
+    public bool TextAscii;
     public uint HtmlStartColor;
     public bool HtmlBg;
     // Center each wrapped line within WrapWidth (legacy tooltip uses TS_CENTER).

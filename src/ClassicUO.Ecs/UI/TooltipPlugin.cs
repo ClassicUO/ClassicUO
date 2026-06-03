@@ -170,7 +170,7 @@ internal readonly struct TooltipPlugin : IPlugin
         Query<Data<NetworkSerial>> netQ,
         Query<Data<Notoriety>> notoQ,
         Query<Data<ContainerItemUI>> contQ,
-        Query<Data<PaperdollEquipUI>> equipQ,
+        Query<Data<PaperdollSlot>> slotQ,
         Query<Data<ComputedNode, Node, UiCustom>, Filter<Optional<UiCustom>>> rendered,
         Query<Data<Node>, With<TooltipRoot>> rootQ,
         Query<Data<TinyEcs.Children>> childrenQ)
@@ -188,7 +188,9 @@ internal readonly struct TooltipPlugin : IPlugin
         if (hit.Found)
         {
             if (contQ.Contains(hit.Entity)) { var (_, c) = contQ.Get(hit.Entity); serial = c.Ref.Serial; }
-            else if (equipQ.Contains(hit.Entity)) { var (_, e) = equipQ.Get(hit.Entity); serial = e.Ref.ItemSerial; }
+            // Slot bg / frame / icon all carry the equipped item's serial, so the
+            // tooltip fires anywhere over the slot square, not only the icon art.
+            else if (slotQ.Contains(hit.Entity)) { var (_, sl) = slotQ.Get(hit.Entity); serial = sl.Ref.ItemSerial; }
         }
         // entity 0 is the null/sentinel id — Contains(0) can resolve to a stale
         // archetype entry, so the tooltip would show for "nothing" hovered.

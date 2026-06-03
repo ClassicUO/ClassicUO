@@ -392,10 +392,21 @@ internal static class UoFontRenderer
         bool htmlBg,
         int x, int y,
         float layerDepth,
-        TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT)
+        TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT,
+        bool ascii = false)
     {
         if (string.IsNullOrEmpty(text) || UoFontRuntime.Fonts == null || UoFontRuntime.Atlas == null)
             return;
+
+        // ASCII gump text bakes the UO hue per pixel (partial-hue and all) into
+        // the glyph and draws it neutral — pixel-exact vs OOP RenderedText. The
+        // hue rides in asciiHue; the draw tint is white (baked colour unchanged).
+        if (ascii)
+        {
+            var asciiLayout = GetLayout(text, font, ascii: true, isHtml: false, 0xFFFFFFFF, htmlBg: false, maxWidth, align);
+            DrawGlyphs(batcher, asciiLayout, font, isUnicode: false, isHtml: false, asciiHue: hue, XnaColor.White, x, y, layerDepth);
+            return;
+        }
 
         // HTML carries its own per-segment colours (drawn neutral). Plain
         // wrapped text (croppedtext/text) is a white glyph tinted by the UO
@@ -433,12 +444,12 @@ internal static class UoFontRenderer
     // Measure a wrapped block (no draw). Builds + caches the layout so the
     // subsequent DrawWrapped is a cache hit. Returns the content (width, height)
     // used to size the scrollable inner node.
-    public static (int Width, int Height) Measure(string text, byte font, int maxWidth, bool isHtml, uint htmlStartColor, bool htmlBg, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT)
+    public static (int Width, int Height) Measure(string text, byte font, int maxWidth, bool isHtml, uint htmlStartColor, bool htmlBg, TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT, bool ascii = false)
     {
         if (string.IsNullOrEmpty(text) || UoFontRuntime.Fonts == null)
             return (0, 0);
 
-        var layout = GetLayout(text, font, ascii: false, isHtml, htmlStartColor, htmlBg, maxWidth, align);
+        var layout = GetLayout(text, font, ascii, isHtml, htmlStartColor, htmlBg, maxWidth, align);
         return (layout.Width, layout.Height);
     }
 
