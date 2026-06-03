@@ -385,42 +385,14 @@ internal readonly struct LoginScreenPlugin : IPlugin
             .Insert<LoginScene>()
             .Observe((On<CheckboxChanged> trig, Res<Settings> s) => s.Value.AutoLogin = trig.Event.Checked);
         mainMenu.AddChild(autologinCheck);
-
-        var autologinLabel = commands.Spawn()
-            .Insert<LoginScene>()
-            .Insert(new Node
-            {
-                PositionType = PositionType.Absolute,
-                Left = Val.Px(170),
-                Top = Val.Px(419),
-                Width = Val.Auto,
-                Height = Val.Auto,
-            })
-            .Insert(new Text("Autologin"))
-            .Insert(checkboxFont)
-            .Insert(new TextColor(checkboxColor));
-        mainMenu.AddChild(autologinLabel);
+        AddCheckboxLabel(commands, mainMenu, "Autologin", new XnaVector2(170, 419), checkboxFont, checkboxColor, autologinCheck.Id);
 
         var saveAccountCheck = gumpBuilder.Value.AddCheckbox(
             commands, settings.Value.SaveAccount, new XnaVector2(240, 417), hue: XnaVector3.UnitZ)
             .Insert<LoginScene>()
             .Observe((On<CheckboxChanged> trig, Res<Settings> s) => s.Value.SaveAccount = trig.Event.Checked);
         mainMenu.AddChild(saveAccountCheck);
-
-        var saveAccountLabel = commands.Spawn()
-            .Insert<LoginScene>()
-            .Insert(new Node
-            {
-                PositionType = PositionType.Absolute,
-                Left = Val.Px(260),
-                Top = Val.Px(419),
-                Width = Val.Auto,
-                Height = Val.Auto,
-            })
-            .Insert(new Text("Save Account"))
-            .Insert(checkboxFont)
-            .Insert(new TextColor(checkboxColor));
-        mainMenu.AddChild(saveAccountLabel);
+        AddCheckboxLabel(commands, mainMenu, "Save Account", new XnaVector2(260, 419), checkboxFont, checkboxColor, saveAccountCheck.Id);
     }
 
     // Lay out a textbox's content as a left-anchored flex row holding the
@@ -465,6 +437,38 @@ internal readonly struct LoginScreenPlugin : IPlugin
         row.AddChild(text);
         row.AddChild(caret);
         field.AddChild(row);
+    }
+
+    // Caption next to a checkbox that toggles it on click, so the checkbox +
+    // its label read as one control (legacy Checkbox bundles the label). The
+    // label forwards to the checkbox the same way CheckboxPlugin does on a
+    // direct hit: flip Checked + emit CheckboxChanged on the checkbox entity
+    // (its persist observer + the sprite swap both key off that).
+    private static void AddCheckboxLabel(Commands commands, EntityCommands parent, string text, XnaVector2 pos, TextFont font, ClayColor color, ulong checkboxId)
+    {
+        var label = commands.Spawn()
+            .Insert<LoginScene>()
+            .Insert(new Node
+            {
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(pos.X),
+                Top = Val.Px(pos.Y),
+                Width = Val.Auto,
+                Height = Val.Auto,
+            })
+            .Insert(new Text(text))
+            .Insert(font)
+            .Insert(new TextColor(color))
+            .Insert(Interaction.None)
+            .Insert<UiContainsByBounds>();
+        label.Observe((On<UiClick> _, Commands cmd, Query<Data<Checkbox>> boxes) =>
+        {
+            if (!boxes.Contains(checkboxId)) return;
+            var (_, cb) = boxes.Get(checkboxId);
+            cb.Ref.Checked = !cb.Ref.Checked;
+            cmd.Entity(checkboxId).EmitTrigger(new CheckboxChanged { Checked = cb.Ref.Checked }, propagate: true);
+        });
+        parent.AddChild(label);
     }
 
     private static void DeleteMenu(
