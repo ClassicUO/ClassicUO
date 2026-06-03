@@ -436,6 +436,12 @@ internal readonly struct LoginScreenPlugin : IPlugin
     // the "highlight" the legacy StbTextBox draws via DrawCaret.
     private static void AddFieldContent(Commands commands, EntityCommands field, EntityCommands text, ulong textId)
     {
+        // The row is absolutely positioned, so in Clay it is a *floating*
+        // element that captures the pointer over the text glyphs and blocks
+        // the field behind it. The text/caret aren't interactive, so a click
+        // on the text would otherwise hit nothing. Make the row itself focus
+        // the field (Interaction.None + UiContainsByBounds), so clicking the
+        // written text highlights the field just like clicking empty space.
         var row = commands.Spawn()
             .Insert<LoginScene>()
             .Insert(new Node
@@ -447,7 +453,10 @@ internal readonly struct LoginScreenPlugin : IPlugin
                 AlignItems = AlignItems.Center,
                 Width = Val.Auto,
                 Height = Val.Auto,
-            });
+            })
+            .Insert(Interaction.None)
+            .Insert<UiContainsByBounds>();
+        row.Observe((On<UiPointerDown> _, ResMut<FocusedInput> focused) => focused.Value.Entity = textId);
 
         var caret = commands.Spawn()
             .Insert<LoginScene>()
