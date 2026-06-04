@@ -57,7 +57,13 @@ internal readonly struct ServerGumpPlugin : IPlugin
         // child shows only when CurrentPage == N. CurrentPage defaults to 1 (OOP
         // Gump.Update forces ActivePage 0 → 1) so a gump's `page 1` block (if
         // any) is part of the initial view alongside page 0.
-        Action<Query<Data<ServerGumpChild, Node>>, Query<Data<ServerGump>>> syncFn =
+        // Excludes the text-field caret/selection overlays: their Display is
+        // owned by TextEditPlugin.PositionOverlays (focus + blink). Forcing a
+        // page-0 child to Flex here would override that and show a caret on
+        // EVERY textentry field, not just the focused one. They're children of
+        // the field row (a normal ServerGumpChild), so a page switch still hides
+        // them via the parent's Display cascade.
+        Action<Query<Data<ServerGumpChild, Node>, Filter<Without<TextEditCaret>, Without<TextEditSelection>>>, Query<Data<ServerGump>>> syncFn =
             (childQ, gumpQ) =>
             {
                 foreach (var (_, child, node) in childQ)
