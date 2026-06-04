@@ -17,11 +17,13 @@ namespace ClassicUO.Renderer.Arts
         private readonly Rectangle[] _realArtBounds;
         private readonly ArtLoader _artLoader;
         private readonly HuesLoader _huesLoader;
+        private readonly GraphicsDevice _device;
 
         public Art(ArtLoader artLoader, HuesLoader huesLoader, GraphicsDevice device)
         {
             _artLoader = artLoader;
             _huesLoader = huesLoader;
+            _device = device;
             _atlas = new TextureAtlas(device, 4096, 4096, SurfaceFormat.Color);
             _spriteInfos = new SpriteInfo[_artLoader.File.Entries.Length];
             _realArtBounds = new Rectangle[_spriteInfos.Length];
@@ -209,6 +211,77 @@ namespace ClassicUO.Renderer.Arts
             {
                 ArrayPool<uint>.Shared.Return(rentedBuffer);
             } 
+        }
+
+        // Software-cursor twin of CreateCursorSurfacePtr (the SDL hardware-cursor
+        // path): returns a standalone Texture2D with the cursor art's marker
+        // pixels stripped, plus the hotspot. Drawing the atlas sub-rect directly
+        // can't strip these — the markers are baked into the shared atlas — so the
+        // ECS software cursor (GameCursorPlugin) uses this cleaned texture instead
+        // of a 1px UV inset, which only catches markers on the literal outer ring
+        // and leaves a stray blue/green edge line when the art has transparent
+        // padding around the marker ring. Cleared exactly like the SDL path:
+        // black markers (0xFF000000) and green hotspot markers (0xFF00FF00)
+        // anywhere, plus the whole first/last row and column. customHue is baked
+        // in when non-zero (felucca tint); 0 leaves the art untinted for the
+        // shader to hue. Caller owns the returned texture (cache + dispose).
+        public Texture2D CreateCursorTexture(int index, ushort customHue, out int hotX, out int hotY)
+        {
+            hotX = hotY = 0;
+
+            var artInfo = _artLoader.GetArt((uint)(index + 0x4000));
+            if (artInfo.Pixels.IsEmpty)
+                return null;
+
+            int w = artInfo.Width;
+            int h = artInfo.Height;
+            var buf = new uint[w * h];
+            artInfo.Pixels.CopyTo(buf);
+
+            for (int y = 0; y < h; y++)
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    int idx = y * w + x;
+                    uint pixel = buf[idx];
+
+                    if (pixel == 0)
+                        continue;
+
+                    if (pixel == 0xFF_00_00_00)
+                    {
+                        buf[idx] = 0;
+                        continue;
+                    }
+
+                    if (pixel == 0xFF_00_FF_00)
+                    {
+                        if (x == 0) hotY = y;
+                        if (y == 0) hotX = x;
+                        buf[idx] = 0;
+                        continue;
+                    }
+
+                    if (x == 0 || y == 0 || x == w - 1 || y == h - 1)
+                    {
+                        buf[idx] = 0;
+                        continue;
+                    }
+
+                    if (customHue > 0)
+                    {
+                        Color c = default;
+                        c.PackedValue = pixel;
+                        buf[idx] = HuesHelper.Color16To32(
+                            _huesLoader.GetColor16(HuesHelper.ColorToHue(c), customHue)
+                        ) | 0xFF_00_00_00;
+                    }
+                }
+            }
+
+            var tex = new Texture2D(_device, w, h, false, SurfaceFormat.Color);
+            tex.SetData(buf);
+            return tex;
         }
 
         // Cursor hotspot: UO cursor art encodes its click point as a green

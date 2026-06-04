@@ -10,9 +10,9 @@
 //   war mode            -> the 0x2053-row graphics instead of 0x206A-row
 //   felucca (Map != 0)  -> normal graphics tinted with hue 0x0033
 //
-// Drag-hand (index 8), loading (13) and text-input (14) cursors are not wired
-// yet — those states aren't tracked in the ECS. They fall back to the neutral
-// hand, which is what the cursor showed before this plugin existed.
+// Drag-hand (index 8) and text-input (14) are wired (DragGate / the TextInput
+// marker on editable fields). Loading (13) is not tracked in the ECS yet and
+// falls back to the neutral hand.
 //
 // Render ordering mirrors CursorPlugin/TargetingPlugin: UiRenderStage,
 // .After("cuo:gui_rendering"), single-threaded, before Stage.Last (Present).
@@ -75,9 +75,10 @@ internal readonly struct GameCursorPlugin : IPlugin
         Query<Data<ServerFlags>, With<Player>> playerFlagsQ,
         Query<Data<GameScreenPlugin.GameWindowUI>> gameWindowQ,
         Query<Data<TextInput>> textInputQ,
+        Query<Data<Interaction>> interactiveQ,
         Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>,
             Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
-        Query<Data<TinyEcs.Parent>> parents)
+        Query<Data<TinyEcs.Children>> children)
     {
         bool inGame = state.Value.Current == GameState.GameScreen;
 
@@ -94,9 +95,26 @@ internal readonly struct GameCursorPlugin : IPlugin
         int war = warMode ? 1 : 0;
         var mousePos = mouseCtx.Value.Position;
 
-        // Topmost UI element under the cursor — drives text-input and over-world
-        // tests below. Same pixel-perfect hit-test every gump gesture uses.
-        var hit = UiPick.Topmost(mousePos, assets.Value, rendered, parents);
+        // Topmost UI element under the cursor — drives the over-world test below.
+        // Same pixel-perfect hit-test every gump gesture uses.
+        var hit = UiPick.Topmost(mousePos, assets.Value, rendered);
+
+        // MouseOverControl analog for the text-input test. The editable field's
+        // frame is a hollow nine-patch (transparent interior) made hittable with
+        // UiContainsByBounds — Clay's InteractionSystem honours that and flags the
+        // single topmost interactive element Hovered/Pressed each frame, whereas
+        // UiPick.Topmost is pixel-perfect and would fall straight through the
+        // transparent middle to the window behind. So text-input keys off Hovered,
+        // exactly like legacy AssignGraphicByState reads UIManager.MouseOverControl.
+        ulong hovered = 0;
+        foreach (var (e, inter) in interactiveQ)
+        {
+            if (inter.Ref == Interaction.Hovered || inter.Ref == Interaction.Pressed)
+            {
+                hovered = e.Ref;
+                break;
+            }
+        }
 
         // State -> cursor index, mirroring main's GameCursor.AssignGraphicByState
         // priority: targeting > dragging > text-input > world-direction > neutral
@@ -110,7 +128,7 @@ internal readonly struct GameCursorPlugin : IPlugin
         {
             index = 8; // drag/grab hand
         }
-        else if (hit.Found && IsTextInput(hit.Entity, textInputQ, parents))
+        else if (hovered != 0 && IsTextInput(hovered, textInputQ, children))
         {
             index = 14; // text-input I-beam
         }
@@ -134,22 +152,24 @@ internal readonly struct GameCursorPlugin : IPlugin
         DrawCursor(batch.Value, assets.Value, game.Value, cursorState.Value, gameCtx.Value, mousePos, graphic, warMode, inGame);
     }
 
-    // The cursor hit may land on a child of the text field (its text glyphs or
-    // the blinking caret), not the node that carries the TextInput marker —
-    // walk up the parent chain like UiPick.MovableRoot does.
+    // `hovered` is the interactive element Clay flagged this frame — the editable
+    // field's hittable frame (the nine-patch input box / split-menu value row that
+    // carries UiContainsByBounds). The TextInput marker, though, sits on the
+    // text-glyph entity nested under that frame (field -> content row -> glyph),
+    // so a field is "text input" when the hovered frame, or anything in its
+    // subtree, carries TextInput. Subtrees here are tiny (row + glyph + caret);
+    // depth-capped against a malformed child link.
     private static bool IsTextInput(
         ulong entity,
         Query<Data<TextInput>> textInputQ,
-        Query<Data<TinyEcs.Parent>> parents)
+        Query<Data<TinyEcs.Children>> children,
+        int depth = 0)
     {
-        ulong cur = entity;
-        for (int i = 0; i < 32 && cur != 0; i++)
-        {
-            if (textInputQ.Contains(cur)) return true;
-            if (!parents.Contains(cur)) return false;
-            var (_, parent) = parents.Get(cur);
-            cur = (ulong)parent.Ref.Id;
-        }
+        if (textInputQ.Contains(entity)) return true;
+        if (depth >= 8 || !children.Contains(entity)) return false;
+        var (_, kids) = children.Get(entity);
+        foreach (var cid in kids.Ref)
+            if (IsTextInput(cid, textInputQ, children, depth + 1)) return true;
         return false;
     }
 
@@ -164,11 +184,9 @@ internal readonly struct GameCursorPlugin : IPlugin
         bool warMode,
         bool inGame)
     {
-        ref readonly var sprite = ref assets.Arts.GetArt(graphic);
-        if (sprite.Texture == null)
+        var (texture, hotX, hotY) = cursorState.Cursor(assets.Arts, graphic);
+        if (texture == null)
             return;
-
-        var (hotX, hotY) = cursorState.Hotspot(assets.Arts, graphic);
 
         // Trammel-ruleset tint (main: Map != 0 && !war -> hue 0x0033). Use
         // GetHueVector — it subtracts 1 from the hue index for the shader, so a
@@ -178,27 +196,18 @@ internal readonly struct GameCursorPlugin : IPlugin
             ? ShaderHueTranslator.GetHueVector(0x0033)
             : Vector3.UnitZ;
 
-        // Inset the source by 1px to clip the green/black hotspot+edge markers
-        // baked into the cursor art (main does the same with BORDER_SIZE = 1).
-        var uv = sprite.UV;
-        uv.X += 1;
-        uv.Y += 1;
-        uv.Width -= 2;
-        uv.Height -= 2;
-
         var dpi = game.DpiScale;
         if (dpi <= 0f) dpi = 1f;
         b.Begin(null, Matrix.CreateScale(dpi));
-        // PointClamp always (not Linear at fractional DPI): the cursor art has a
-        // marker ring at its outer edge that the 1px source inset removes, but
-        // linear sampling would bleed that ring's colour back across the inset
-        // boundary — a faint blue/green line on the top/left edges.
+        // PointClamp keeps the art crisp at fractional DPI. The texture is already
+        // marker-cleaned (CreateCursorTexture strips the green/black/edge ring),
+        // so it's drawn whole — no UV inset, no edge-bleed line to suppress.
         b.SetSampler(SamplerState.PointClamp);
 
         b.Draw(
-            sprite.Texture,
+            texture,
             new Vector2(mousePos.X - hotX, mousePos.Y - hotY),
-            uv,
+            new Rectangle(0, 0, texture.Width, texture.Height),
             hue,
             0f,
             Vector2.Zero,
@@ -212,22 +221,25 @@ internal readonly struct GameCursorPlugin : IPlugin
     }
 }
 
-// Per-cursor hotspot cache. The green-marker scan touches raw art pixels, so
-// it's done once per graphic and memoised. 0x2053..0x2079 is the full cursor
-// range; the dictionary stays tiny (<= 32 entries).
+// Per-cursor texture cache. CreateCursorTexture touches raw art pixels and
+// allocates a Texture2D, so it's done once per graphic and memoised.
+// 0x2053..0x2079 is the full cursor range; the dictionary stays tiny
+// (<= 32 entries) and lives for the app lifetime.
 internal sealed class GameCursorState
 {
-    private readonly System.Collections.Generic.Dictionary<ushort, (int X, int Y)> _hotspots = new();
+    private readonly System.Collections.Generic.Dictionary<ushort, (Texture2D Texture, int X, int Y)> _cursors = new();
 
-    public (int X, int Y) Hotspot(ClassicUO.Renderer.Arts.Art arts, ushort graphic)
+    public (Texture2D Texture, int X, int Y) Cursor(ClassicUO.Renderer.Arts.Art arts, ushort graphic)
     {
-        if (!_hotspots.TryGetValue(graphic, out var hs))
+        if (!_cursors.TryGetValue(graphic, out var c))
         {
-            arts.GetCursorHotspot(graphic, out int hx, out int hy);
-            hs = (hx, hy);
-            _hotspots[graphic] = hs;
+            // customHue 0: felucca tint is applied by the shader at draw time,
+            // not baked, so one texture per graphic covers trammel + felucca.
+            var tex = arts.CreateCursorTexture(graphic, 0, out int hx, out int hy);
+            c = (tex, hx, hy);
+            _cursors[graphic] = c;
         }
 
-        return hs;
+        return c;
     }
 }
