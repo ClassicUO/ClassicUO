@@ -667,7 +667,7 @@ internal readonly struct ServerGumpPlugin : IPlugin
                 if (gparams.Count >= 8 &&
                     int.TryParse(gparams[1], out var tx) && int.TryParse(gparams[2], out var ty) &&
                     int.TryParse(gparams[3], out var tw) && int.TryParse(gparams[4], out var th) &&
-                    ushort.TryParse(gparams[5], out var thue) &&
+                    ushort.TryParse(gparams[5], out _) &&
                     ushort.TryParse(gparams[6], out var entryId) &&
                     int.TryParse(gparams[7], out var lid))
                 {
@@ -689,9 +689,12 @@ internal readonly struct ServerGumpPlugin : IPlugin
                             Left = Val.Px(tx), Top = Val.Px(ty),
                             Width = Val.Px(tw), Height = Val.Px(th),
                         });
+                    // Unicode font -> the TextColor is a literal RGB tint; white
+                    // keeps the typed text readable (the textentry hue param is a
+                    // UO hue index, not RGB, so it can't be used directly here).
                     var entryFont = new TextFont { FontId = UoFontRuntime.DefaultFont, Size = 18 };
                     var glyphId = GuiPlugin.SpawnTextField(
-                        commands, frame, new Vector2(2, 2), entryFont, thue, text, masked: false,
+                        commands, frame, new Vector2(2, 2), entryFont, new ClayColor(255, 255, 255, 255), text, masked: false,
                         decorate: e => e.Insert(new ServerGumpChild { RootEntity = capRoot, Page = capPage, Group = capGroup }));
                     commands.Entity(glyphId).Insert(new ServerGumpTextEntry { RootEntity = capRoot, EntryId = entryId });
                     childId = frame.Id;

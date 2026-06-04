@@ -29,6 +29,7 @@ internal sealed class ChatField
 {
     public ulong Bar;
     public ulong Glyph;
+    public bool Attached;
 }
 
 // Marks the chat bar + its sub-entities so they're torn down on leaving the
@@ -48,7 +49,7 @@ internal readonly struct ChatPlugin : IPlugin
 
         var spawnFn = SpawnChatField;
         var despawnFn = DespawnChatField;
-        var positionFn = PositionChatBar;
+        var attachFn = AttachChatToWindow;
         var keepFocusFn = KeepChatFocused;
         var submitFn = SubmitChat;
 
@@ -56,12 +57,15 @@ internal readonly struct ChatPlugin : IPlugin
             .AddSystem(spawnFn).OnEnter(GameState.GameScreen).Build()
             .AddSystem(despawnFn).OnExit(GameState.GameScreen).Build()
 
-            // Pin the bar to the bottom of the logical viewport each frame (a
-            // root Node can't anchor with Bottom/Percent, so its absolute pixel
-            // box is recomputed from the live surface — also follows resizes).
-            .AddSystem(positionFn)
+            // Parent the bar under the game-window UI node once both exist (both
+            // spawn deferred on entering the scene, so this can't run at spawn).
+            // As a child of the viewport it anchors bottom-left with Bottom +
+            // Percent width against the window's real box — that's the chat
+            // living "inside the game window" like legacy SystemChatControl.
+            .AddSystem(attachFn)
             .InStage(Stage.PreUpdate)
-            .RunIf((Res<State<GameState>> s) => s.Value.Current == GameState.GameScreen)
+            .RunIf((Res<State<GameState>> s, Res<ChatField> f)
+                => s.Value.Current == GameState.GameScreen && f.Value.Bar != 0 && !f.Value.Attached)
             .Build()
 
             // Chat is the default keyboard sink in-game: whenever no live text
@@ -90,13 +94,12 @@ internal readonly struct ChatPlugin : IPlugin
         ResMut<ChatField> field,
         ResMut<FocusedInput> focused)
     {
-        // Translucent bar, the bounds-hittable focus region. It's an absolute
-        // root whose pixel box PositionChatBar pins to the viewport bottom each
-        // frame (a root can't anchor with Bottom/Percent — those resolve against
-        // a missing parent and collapse to 0). GlobalZIndex lifts it above the
-        // world window (z 0, opaque) and threads to the glyph/caret; gumps bump
-        // higher z so they still stack over the bar. SpawnTextField hangs the
-        // editable glyph + caret off it.
+        // Translucent bar pinned to the bottom-left of the game-window viewport.
+        // It anchors with Bottom + Percent width, which only resolve once it's a
+        // child of the window node (AttachChatToWindow does that) — as a root
+        // those collapse to 0. Rendered as a child of the viewport, after the
+        // world image, so it sits over the world; gumps are separate higher-z
+        // roots and still stack over it.
         var bar = commands.Spawn()
             .Insert(new Node
             {
@@ -104,17 +107,18 @@ internal readonly struct ChatPlugin : IPlugin
                 FlexDirection = FlexDirection.Row,
                 AlignItems = AlignItems.Center,
                 Left = Val.Px(0),
-                Top = Val.Px(0),
-                Width = Val.Px(0),
+                Bottom = Val.Px(BottomInset),
+                Width = Val.Percent(100),
                 Height = Val.Px(BarHeight),
             })
             .Insert(new BackgroundColor(new ClayColor(0, 0, 0, 180)))
-            .Insert(new GlobalZIndex(100))
             .Insert<ChatUi>();
 
+        // Unicode font -> white RGB tint (a packed UO hue would read as RGB and
+        // black the text out).
         var font = new TextFont { FontId = UoFontRuntime.DefaultFont, Size = 18 };
         var glyphId = GuiPlugin.SpawnTextField(
-            commands, bar, new Vector2(LeftMargin, 2), font, 0, string.Empty, masked: false,
+            commands, bar, new Vector2(LeftMargin, 2), font, new ClayColor(255, 255, 255, 255), string.Empty, masked: false,
             decorate: e => e.Insert<ChatUi>());
 
         field.Value.Bar = bar.Id;
@@ -122,22 +126,20 @@ internal readonly struct ChatPlugin : IPlugin
         focused.Value.Entity = glyphId;
     }
 
-    // Recompute the bar's absolute box from the live logical surface so it spans
-    // the width and sits at the bottom (UiSurface.LogicalSize is the Clay layout
-    // space). In-place Node mutation — no Commands needed.
-    private static void PositionChatBar(
-        Res<ChatField> field,
-        Res<TinyEcs.Bevy.UI.UiSurface> surface,
-        Query<Data<Node>> nodes)
+    // Make the bar a child of the game-window viewport node so it lives inside
+    // the game window. Runs until the window node exists (deferred spawn), then
+    // latches via Attached.
+    private static void AttachChatToWindow(
+        Commands commands,
+        ResMut<ChatField> field,
+        Query<Data<GameScreenPlugin.GameWindowUI>> windowQ)
     {
-        var bar = field.Value.Bar;
-        if (bar == 0 || !nodes.Contains(bar)) return;
-
-        var size = surface.Value.LogicalSize;
-        var (_, n) = nodes.Get(bar);
-        n.Ref.Left = Val.Px(0);
-        n.Ref.Top = Val.Px(size.Y - BarHeight - BottomInset);
-        n.Ref.Width = Val.Px(size.X);
+        foreach (var (ent, _) in windowQ)
+        {
+            commands.AddChild(ent.Ref, field.Value.Bar);
+            field.Value.Attached = true;
+            return;
+        }
     }
 
     private static void DespawnChatField(
@@ -147,7 +149,9 @@ internal readonly struct ChatPlugin : IPlugin
     {
         foreach (var (ent, _) in chatUiQ)
             commands.Entity(ent.Ref).Despawn();
+        field.Value.Bar = 0;
         field.Value.Glyph = 0;
+        field.Value.Attached = false;
     }
 
     private static void KeepChatFocused(

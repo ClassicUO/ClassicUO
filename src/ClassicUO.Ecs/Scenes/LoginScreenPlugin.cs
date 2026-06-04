@@ -211,7 +211,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
             new XnaVector2(218, 283), new XnaVector2(210, 30))
             .Insert<LoginScene>();
         var usernameTextId = GuiPlugin.SpawnTextField(
-            commands, usernameField, new XnaVector2(4, 4), loginFieldFont, 0,
+            commands, usernameField, new XnaVector2(4, 4), loginFieldFont, UoFontRuntime.AsciiHue(0),
             settings.Value.Username ?? string.Empty, masked: false,
             decorate: e => e.Insert<LoginScene>());
         commands.Entity(usernameTextId).Insert<UsernameInput>();
@@ -233,7 +233,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
             new XnaVector2(218, 283 + 50), new XnaVector2(210, 30))
             .Insert<LoginScene>();
         var passwordTextId = GuiPlugin.SpawnTextField(
-            commands, passwordField, new XnaVector2(4, 4), loginFieldFont, 0,
+            commands, passwordField, new XnaVector2(4, 4), loginFieldFont, UoFontRuntime.AsciiHue(0),
             decrypted, masked: true,
             decorate: e => e.Insert<LoginScene>());
         commands.Entity(passwordTextId).Insert<PasswordInput>();

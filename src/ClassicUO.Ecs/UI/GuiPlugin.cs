@@ -496,19 +496,23 @@ internal readonly struct GuiPlugin : IPlugin
         EntityCommands frame,
         Vector2 contentOffset,
         TextFont font,
-        ushort hue,
+        Clay.Color color,
         string initial,
         bool masked,
         System.Action<EntityCommands> decorate = null,
         char maskChar = '*')
     {
+        // `color` semantics follow the font kind (see UoFontRuntime): an ASCII
+        // font (FontId | AsciiFlag) wants a PACKED hue (UoFontRuntime.AsciiHue);
+        // a unicode font wants a literal RGB tint (white = no tint). Passing a
+        // packed hue to a unicode field reads as RGB and blacks the text out.
         frame.Insert(Interaction.None).Insert<UiContainsByBounds>();
 
         var glyph = commands.Spawn()
             .Insert(new Node { Width = Val.Auto, Height = Val.Auto })
             .Insert(new Text(masked ? string.Empty : (initial ?? string.Empty)))
             .Insert(font)
-            .Insert(new TextColor(UoFontRuntime.AsciiHue(hue)))
+            .Insert(new TextColor(color))
             .Insert<TextInput>()
             .Insert<EditableText>();
         if (masked)
@@ -520,7 +524,7 @@ internal readonly struct GuiPlugin : IPlugin
             .Insert(new Node { Width = Val.Auto, Height = Val.Auto })
             .Insert(new Text(string.Empty))
             .Insert(font)
-            .Insert(new TextColor(UoFontRuntime.AsciiHue(hue)))
+            .Insert(new TextColor(color))
             .Insert(new TextCaret { Target = glyphId });
         decorate?.Invoke(caret);
 
