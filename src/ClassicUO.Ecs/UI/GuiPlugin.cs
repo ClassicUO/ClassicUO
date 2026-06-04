@@ -159,24 +159,15 @@ internal readonly struct GuiPlugin : IPlugin
             .Build();
         // Mirror MaskedText.Value into Text as mask chars before layout reads Text.
         app.AddSystem(Stage.PreUpdate, syncMaskedTextFn);
-        // Blink the caret glyph of the focused text input (any TextCaret entity).
+        // Blink the flex caret glyph of bespoke fields (split number box, skills
+        // rename) that still use TextCaret. EditableText fields get a measured
+        // caret + selection from TextEditPlugin instead.
         app.AddSystem(Stage.PreUpdate, caretBlinkFn);
 
-        // Global editor for the focused text field. Every consumer that opts in
-        // with EditableText (login, chat, server-gump entries) gets char append /
-        // backspace here, so there's one editing path instead of one per gump.
-        // RunIf gates on a focused EditableText entity + pending chars, so it
-        // never competes with the bespoke readers (split number box, skills
-        // rename) — those fields don't carry EditableText.
-        Action<EventReader<CharInputEvent>, Res<FocusedInput>,
-            Query<Data<Text>, Filter<With<EditableText>, Without<MaskedText>>>,
-            Query<Data<MaskedText>, Filter<With<EditableText>>>> editFocusedFn = EditFocusedTextField;
-        app.AddSystem(editFocusedFn)
-            .InStage(Stage.Update)
-            .RunIf((EventReader<CharInputEvent> r, Res<FocusedInput> f,
-                    Query<Data<EditableText>> editableQ)
-                => r.HasEvents && f.Value.Entity != 0 && editableQ.Contains(f.Value.Entity))
-            .Build();
+        // stb_textedit-backed editor for EditableText fields (login, chat,
+        // server-gump entries): caret index, selection, arrows, click/drag,
+        // Ctrl+A/C/X/V/Z. Bespoke fields opt out by not carrying EditableText.
+        app.AddPlugin<TextEditPlugin>();
 
 #if AGENT_BUILD
         // Harness diagnostic: when debug.dumpLayout enables it, every left-click
@@ -429,58 +420,6 @@ internal readonly struct GuiPlugin : IPlugin
             text.Ref.Value = (caret.Ref.Target == focusEnt && on) ? "_" : string.Empty;
     }
 
-    // Append / backspace typed chars into the focused EditableText entity. A
-    // MaskedText field (password) updates its hidden Value and lets
-    // SyncMaskedText mirror the mask chars into Text; a plain field edits Text
-    // directly. \n/\t/\r are not text edits (newline/tab/enter — submit is the
-    // consumer's job, e.g. ChatPlugin's enter handler).
-    private static void EditFocusedTextField(
-        EventReader<CharInputEvent> reader,
-        Res<FocusedInput> focused,
-        Query<Data<Text>, Filter<With<EditableText>, Without<MaskedText>>> textQuery,
-        Query<Data<MaskedText>, Filter<With<EditableText>>> maskedQuery)
-    {
-        var focusEnt = focused.Value.Entity;
-        if (focusEnt == 0) return;
-
-        bool masked = maskedQuery.Contains(focusEnt);
-        bool plain = !masked && textQuery.Contains(focusEnt);
-        if (!masked && !plain) return;
-
-        foreach (var ev in reader.Read())
-        {
-            var ch = ev.Value;
-            if (ch == '\n' || ch == '\t' || ch == '\r') continue;
-
-            if (masked)
-            {
-                (_, var mt) = maskedQuery.Get(focusEnt);
-                if (ch == '\b')
-                {
-                    if (!string.IsNullOrEmpty(mt.Ref.Value))
-                        mt.Ref.Value = mt.Ref.Value[..^1];
-                }
-                else
-                {
-                    mt.Ref.Value = (mt.Ref.Value ?? string.Empty) + ch;
-                }
-            }
-            else
-            {
-                (_, var t) = textQuery.Get(focusEnt);
-                if (ch == '\b')
-                {
-                    if (!string.IsNullOrEmpty(t.Ref.Value))
-                        t.Ref.Value = t.Ref.Value[..^1];
-                }
-                else
-                {
-                    t.Ref.Value = (t.Ref.Value ?? string.Empty) + ch;
-                }
-            }
-        }
-    }
-
     // Builds a focusable, bounds-hittable editable text field on top of an
     // already-spawned frame entity (the caller owns the background: a nine-patch
     // gump, a translucent bar, or nothing). Mirrors the login/split layout: a
@@ -520,16 +459,32 @@ internal readonly struct GuiPlugin : IPlugin
         decorate?.Invoke(glyph);
         ulong glyphId = glyph.Id;
 
-        // Fixed Height so toggling the caret glyph ""<->"_" can't change the
-        // flex row's cross-size and nudge the text's Y (the "_" measures taller
-        // than an empty run). font.Size is <= the text's line height, so the row
-        // height stays driven by the text and the caret rides along centered.
+        // Selection highlight behind the glyphs and a caret bar over them, both
+        // absolute and positioned each frame by TextEditPlugin.PositionOverlays
+        // (measured from the cursor / selection indices). Added selection-first
+        // so it paints under the text; caret last so it paints on top.
+        var selection = commands.Spawn()
+            .Insert(new Node
+            {
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(0), Top = Val.Px(0),
+                Width = Val.Px(0), Height = Val.Px(font.Size),
+                Display = Display.None,
+            })
+            .Insert(new BackgroundColor(new Clay.Color(70, 110, 180, 120)))
+            .Insert(new TextEditSelection { Target = glyphId });
+        decorate?.Invoke(selection);
+
         var caret = commands.Spawn()
-            .Insert(new Node { Width = Val.Auto, Height = Val.Px(font.Size) })
-            .Insert(new Text(string.Empty))
-            .Insert(font)
-            .Insert(new TextColor(color))
-            .Insert(new TextCaret { Target = glyphId });
+            .Insert(new Node
+            {
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(0), Top = Val.Px(0),
+                Width = Val.Px(2), Height = Val.Px(font.Size),
+                Display = Display.None,
+            })
+            .Insert(new BackgroundColor(color))
+            .Insert(new TextEditCaret { Target = glyphId });
         decorate?.Invoke(caret);
 
         var row = commands.Spawn()
@@ -547,6 +502,7 @@ internal readonly struct GuiPlugin : IPlugin
             .Insert<UiContainsByBounds>();
         decorate?.Invoke(row);
         row.Observe((On<UiPointerDown> _, ResMut<FocusedInput> focused) => focused.Value.Entity = glyphId);
+        row.AddChild(selection);
         row.AddChild(glyph);
         row.AddChild(caret);
 
