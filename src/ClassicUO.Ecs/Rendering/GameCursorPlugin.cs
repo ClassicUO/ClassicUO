@@ -119,12 +119,26 @@ internal readonly struct GameCursorPlugin : IPlugin
         // State -> cursor index, mirroring main's GameCursor.AssignGraphicByState
         // priority: targeting > dragging > text-input > world-direction > neutral
         // hand. (Loading is not tracked in ECS.)
+        // Drag-hand latch: a window-drag gesture latches gate.Mode on the press
+        // edge (mutex against other drag handlers), but legacy only shows the
+        // grab hand once the cursor has actually MOVED from the press origin
+        // (UIManager.AttemptDragControl: _isDraggingControl flips only when
+        // delta != Point.Zero). Mirror that — hold the neutral/direction cursor
+        // on a stationary press, switch to the hand once movement begins, and
+        // keep it latched until the gesture ends (DraggingOffset can read zero
+        // mid-drag when the mouse pauses).
+        bool gateDragging = dragGate.Value.Mode != ActiveDrag.None;
+        if (!gateDragging)
+            cursorState.Value.DragHandLatched = false;
+        else if (mouseCtx.Value.DraggingOffset != Vector2.Zero)
+            cursorState.Value.DragHandLatched = true;
+
         int index;
         if (targeting.Value.IsTargeting)
         {
             index = 12; // targeting reticle
         }
-        else if (dragGate.Value.Mode != ActiveDrag.None)
+        else if (gateDragging && cursorState.Value.DragHandLatched)
         {
             index = 8; // drag/grab hand
         }
@@ -228,6 +242,11 @@ internal readonly struct GameCursorPlugin : IPlugin
 internal sealed class GameCursorState
 {
     private readonly System.Collections.Generic.Dictionary<ushort, (Texture2D Texture, int X, int Y)> _cursors = new();
+
+    // Latched true once a drag gesture has actually moved the cursor (see
+    // RenderGameCursor); gates the grab-hand graphic so a stationary press
+    // keeps the neutral/direction cursor, matching legacy UIManager.IsDragging.
+    public bool DragHandLatched;
 
     public (Texture2D Texture, int X, int Y) Cursor(ClassicUO.Renderer.Arts.Art arts, ushort graphic)
     {
