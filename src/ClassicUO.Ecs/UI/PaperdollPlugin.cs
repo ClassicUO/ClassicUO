@@ -671,7 +671,12 @@ internal readonly struct PaperdollPlugin : IPlugin
                     Layer = layer,
                     MobileSerial = serial,
                     WindowEntity = rootId,
-                });
+                })
+                // Same PaperdollSlot the slot squares carry, so TooltipPlugin's
+                // slotQ resolves the worn item's OPL when hovering the body art
+                // (TrackAndRender is at its 16-param cap — no room for a separate
+                // PaperdollEquipUI query).
+                .Insert(new PaperdollSlot { MobileSerial = serial, Layer = layer, ItemSerial = itemNs.Ref.Value });
             }
             commands.AddChild(rootId, equipPic.Id, childIdx++);
         }
@@ -714,7 +719,9 @@ internal readonly struct PaperdollPlugin : IPlugin
                              {
                                  ItemSerial = bpNs.Ref.Value,
                                  MobileSerial = serial,
-                             });
+                             })
+                             // Tooltip via slotQ (same as slots/equipment overlays).
+                             .Insert(new PaperdollSlot { MobileSerial = serial, Layer = GameLayer.Backpack, ItemSerial = bpNs.Ref.Value });
                     }
                     commands.AddChild(rootId, bpPic.Id, childIdx++);
                 }
