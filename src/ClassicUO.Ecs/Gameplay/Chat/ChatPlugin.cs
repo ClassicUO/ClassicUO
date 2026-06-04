@@ -54,6 +54,7 @@ internal readonly struct ChatPlugin : IPlugin
         var sizeFn = SizeChatBar;
         var claimFn = ClaimChatSelection;
         var keepFocusFn = KeepChatFocused;
+        var worldClickFocusFn = FocusChatOnWorldClick;
         var submitFn = SubmitChat;
 
         app
@@ -90,6 +91,15 @@ internal readonly struct ChatPlugin : IPlugin
             .AddSystem(keepFocusFn)
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> s) => s.Value.Current == GameState.GameScreen)
+            .Build()
+
+            // A click into the game world returns focus to chat (so a focused
+            // server-gump textentry releases it). The press-once edge is read
+            // this frame; chat carries TextInput so keepFocus then leaves it.
+            .AddSystem(worldClickFocusFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> s, Res<ChatField> f)
+                => s.Value.Current == GameState.GameScreen && f.Value.Glyph != 0)
             .Build()
 
             // Enter submits the chat line. Per-char editing is handled by
@@ -218,6 +228,43 @@ internal readonly struct ChatPlugin : IPlugin
         if (bar == 0 || !nodes.Contains(bar)) return;
         var (_, n) = nodes.Get(bar);
         n.Ref.Width = Val.Px(camera.Value.Bounds.Width);
+    }
+
+    // A left-press that lands on the game world (the viewport node, or empty
+    // space — not on any gump/field) returns keyboard focus to chat. Without
+    // this a focused server-gump textentry keeps focus (and its caret) after you
+    // click away into the scene, because it carries TextInput so KeepChatFocused
+    // won't reclaim from it. Mirrors legacy SystemChatControl grabbing focus when
+    // the world is clicked.
+    private static void FocusChatOnWorldClick(
+        Res<MouseContext> mouse,
+        Res<AssetsServer> assets,
+        ResMut<FocusedInput> focused,
+        Res<ChatField> field,
+        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
+        Query<Data<TinyEcs.Parent>> parents,
+        Query<Data<GameScreenPlugin.GameWindowUI>> gameWindowQ)
+    {
+        if (!mouse.Value.IsPressedOnce(MouseButtonType.Left)) return;
+        var glyph = field.Value.Glyph;
+        if (glyph == 0) return;
+
+        var hit = UiPick.Topmost(mouse.Value.Position, assets.Value, rendered, parents);
+
+        // Over the world when nothing is hit, or the topmost hit is the game
+        // viewport (or a descendant of it — the chat bar lives inside the
+        // viewport, but a press there is handled by the field/bar's own claim).
+        bool overWorld = !hit.Found;
+        for (ulong cur = hit.Entity; !overWorld && cur != 0;)
+        {
+            if (gameWindowQ.Contains(cur)) { overWorld = true; break; }
+            if (!parents.Contains(cur)) break;
+            var (_, p) = parents.Get(cur);
+            cur = (ulong)p.Ref.Id;
+        }
+
+        if (overWorld)
+            focused.Value.Entity = glyph;
     }
 
     private static void KeepChatFocused(
