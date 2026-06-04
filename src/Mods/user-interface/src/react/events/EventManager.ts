@@ -81,7 +81,16 @@ export class EventManager {
    */
   dispatch(event: UIEvent) {
     if (typeof event.eventId !== 'number') return;
-    this.eventListeners.get(event.eventId)?.(event);
+    const listener = this.eventListeners.get(event.eventId);
+    if (!listener) return;
+    // onChange / onTextChanged handlers take the new value string, every other
+    // handler takes the UIEvent. Branch on the listener's registered type so
+    // the host's UIEvent.value reaches the editable-field callback.
+    if (listener[EventListenerBrandSymbol].eventType === EventType.OnTextChanged) {
+      (listener as unknown as (value: string) => void)(event.value ?? '');
+    } else {
+      listener(event);
+    }
   }
 }
 

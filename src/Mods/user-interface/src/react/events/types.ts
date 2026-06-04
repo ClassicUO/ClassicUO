@@ -27,6 +27,7 @@ export const ReactEventTypeMap = {
     onDragging: EventType.OnDragging,
     onKeyPressed: EventType.OnKeyPressed,
     onKeyReleased: EventType.OnKeyReleased,
+    onTextChanged: EventType.OnTextChanged,
   } satisfies Record<EventName, EventType>),
   // Aliases, based on browser names
   onMouseDown: EventType.OnMousePressed,
@@ -40,6 +41,9 @@ export const ReactEventTypeMap = {
   onFocus: EventType.OnMouseEnter,
   onBlur: EventType.OnMouseLeave,
   onMouseDoubleClick: EventType.OnMouseDoubleClick,
+  // Editable text field value changes (textinput). Dispatched with the new
+  // string in UIEvent.value; EventManager hands it to the handler directly.
+  onChange: EventType.OnTextChanged,
 };
 
 export const ReactEventNames = Object.keys(ReactEventTypeMap) as EventName[];
@@ -61,6 +65,8 @@ export type ReactEventHandlerProps = {
   onDragging?: (event: UIEvent) => void;
   onKeyPressed?: (event: UIEvent) => void;
   onKeyReleased?: (event: UIEvent) => void;
+  // Editable text fields: receives the new value string (not a UIEvent).
+  onTextChanged?: (value: string) => void;
   onFocus?: (event: UIEvent) => void;
   onBlur?: (event: UIEvent) => void;
   onClick?: (event: UIEvent) => void;

@@ -165,6 +165,8 @@ export enum EventType {
 
   OnKeyPressed,
   OnKeyReleased,
+
+  OnTextChanged,
 }
 
 export enum Keys {

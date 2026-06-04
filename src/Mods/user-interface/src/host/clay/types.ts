@@ -203,6 +203,12 @@ export interface TextProxy {
   fontId: number;
   fontSize: number;
   color: ColorProxy;
+  // Editable turns the node into a focusable text field (host shared editor).
+  // The guest gets edits via an OnTextChanged listener (UIEvent.value). Send
+  // `value` only when controlled; an uncontrolled field must stop resending it
+  // after mount or it clobbers what the user types. masked renders as '*'.
+  editable?: boolean;
+  masked?: boolean;
 }
 
 export interface UORenderProxy {
@@ -254,6 +260,8 @@ export interface UIEvent {
   wheel?: number;
   mouseButton?: MouseButtonType;
   key?: Keys;
+  // OnTextChanged: the editable field's new text value.
+  value?: string;
 }
 
 export interface Graphic {

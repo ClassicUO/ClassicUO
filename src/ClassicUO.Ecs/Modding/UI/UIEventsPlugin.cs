@@ -1,8 +1,10 @@
+using System;
 using System.Collections.Generic;
 using ClassicUO.Ecs.Modding.Input;
 using TinyEcs;
 using TinyEcs.Bevy;
 using TinyEcs.Bevy.UI;
+using ClayColor = Clay.Color;
 
 namespace ClassicUO.Ecs.Modding.UI;
 
@@ -22,6 +24,7 @@ internal readonly struct UIEventsPlugin : IPlugin
     {
         app.AddResource(new ModListeners());
         app.AddResource(new PendingUiEvents());
+        app.AddResource(new ModTextValues());
 
         // UiClick = press+release on the same element => onClick (OnMouseReleased).
         app.AddObserver<On<UiClick>, Res<ModListeners>, ResMut<PendingUiEvents>, ParentQuery>(
@@ -74,6 +77,114 @@ internal readonly struct UIEventsPlugin : IPlugin
         // layout pass (UiPreLayoutStage).
         var promoteFn = PromoteModRoots;
         app.AddSystem(promoteFn).InStage(UiPlugin.UiPreLayoutStage).Build();
+
+        // Editable mod text nodes (TextProxy.Editable) reuse the host's shared
+        // stb editor (TextEditPlugin): Api.cs tags the glyph with TextInput +
+        // EditableText + TextFieldGeom + ModEditable. The three pieces the editor
+        // can't infer from a flat node we add here: focus-on-click, the caret +
+        // selection overlay children, and OnTextChanged back to the guest.
+
+        // Click an editable node -> give it keyboard focus + seed the caret click,
+        // exactly like SpawnTextField's per-field UiPointerDown observer.
+        app.AddObserver<On<UiPointerDown>, Query<Data<ModEditable>>, ResMut<FocusedInput>, ResMut<ActiveTextEdit>>(
+            (t, editables, focused, edit) =>
+            {
+                if (!editables.Contains(t.EntityId))
+                    return;
+                focused.Value.Entity = t.EntityId;
+                edit.Value.PendingClickEntity = t.EntityId;
+                edit.Value.PendingClickX = t.Event.Position.X;
+            });
+
+        var setupEditFn = SetupModEditable;
+        app.AddSystem(setupEditFn).InStage(Stage.PreUpdate).Build();
+
+        // Detect user edits (TextEditPlugin.WriteBack ran in Update) and ship one
+        // OnTextChanged per changed field. Before the hover boundary so the event
+        // drains the same frame.
+        var reportEditFn = ReportModTextChanges;
+        app.AddSystem(reportEditFn).InStage(Stage.Last).Before("modHoverBoundary").Build();
+    }
+
+    // Spawn the caret bar + selection highlight for each editable node once and
+    // parent them to the node, mirroring SpawnTextField. PositionOverlays
+    // (TextEditPlugin) shows/places them while the node holds focus.
+    private static void SetupModEditable(
+        Query<Data<ModEditable, TextFont, TextColor>, Without<ModEditableReady>> pending,
+        Commands commands)
+    {
+        foreach (var (e, _, font, color) in pending)
+        {
+            var glyphId = e.Ref;
+            float h = font.Ref.Size;
+
+            var selection = commands.Spawn()
+                .Insert(new Node
+                {
+                    PositionType = PositionType.Absolute,
+                    Left = Val.Px(0), Top = Val.Px(0),
+                    Width = Val.Px(0), Height = Val.Px(h),
+                    Display = Display.None,
+                })
+                .Insert(new BackgroundColor(new ClayColor(70, 110, 180, 120)))
+                .Insert(new TextEditSelection { Target = glyphId });
+
+            var caret = commands.Spawn()
+                .Insert(new Node
+                {
+                    PositionType = PositionType.Absolute,
+                    Left = Val.Px(0), Top = Val.Px(0),
+                    Width = Val.Px(2), Height = Val.Px(h),
+                    Display = Display.None,
+                })
+                .Insert(new BackgroundColor(color.Ref.Value))
+                .Insert(new TextEditCaret { Target = glyphId });
+
+            commands.Entity(glyphId)
+                .AddChild(selection.Id)
+                .AddChild(caret.Id)
+                .Insert<ModEditableReady>();
+        }
+    }
+
+    // Fire OnTextChanged whenever a field's live value diverges from the last
+    // value host + guest agreed on (the same ModTextValues entry Api.cs writes
+    // when the guest sets the value). User edits land in Text/MaskedText via
+    // WriteBack; this turns them into a guest event.
+    private static void ReportModTextChanges(
+        Query<Data<ModEditable, PluginEntity>> editables,
+        Query<Data<Text>> textQ,
+        Query<Data<MaskedText>> maskedQ,
+        Res<ModListeners> listeners,
+        ResMut<PendingUiEvents> pending,
+        ResMut<ModTextValues> agreed)
+    {
+        foreach (var (e, ed, _) in editables)
+        {
+            var id = e.Ref;
+            string value;
+            if (ed.Ref.Masked && maskedQ.Contains(id))
+            {
+                var (_, mt) = maskedQ.Get(id);
+                value = mt.Ref.Value ?? string.Empty;
+            }
+            else if (textQ.Contains(id))
+            {
+                var (_, txt) = textQ.Get(id);
+                value = txt.Ref.Value ?? string.Empty;
+            }
+            else
+            {
+                continue;
+            }
+
+            if (agreed.Value.TryGetValue(id, out var prev) && string.Equals(prev, value, StringComparison.Ordinal))
+                continue;
+            agreed.Value[id] = value;
+
+            foreach (var l in listeners.Value.Match(id, InputEventType.OnTextChanged))
+                pending.Value.Items.Add((l.Mod, new UIEvent(InputEventType.OnTextChanged, id, l.EventId, Value: value)));
+        }
     }
 
     private const int ModRootZ = 100;
@@ -236,3 +347,17 @@ internal sealed class PendingUiEvents
 {
     public readonly List<(Mod Mod, UIEvent Ev)> Items = new();
 }
+
+// On a mod node whose text was flagged editable (TextProxy.Editable). Drives the
+// mod-only editor extras (focus-on-click, overlay spawn, OnTextChanged). The
+// generic editing (caret index, selection, clipboard) comes from TextEditPlugin
+// off the TextInput + EditableText markers Api.cs also adds.
+internal struct ModEditable { public bool Masked; }
+
+// Guard so the caret + selection overlays are spawned once per editable node.
+internal struct ModEditableReady;
+
+// The last text value host and guest agree on, per editable node. Api.cs writes
+// it when the guest sets a (changed) value; ReportModTextChanges writes it on a
+// user edit and only fires OnTextChanged when the live value diverges from it.
+internal sealed class ModTextValues : Dictionary<ulong, string> { }

@@ -13,5 +13,7 @@ internal record struct UIEvent(
     float? Y = null,
     float? Wheel = null,
     MouseButtonType? MouseButton = null,
-    Keys? Key = null
+    Keys? Key = null,
+    // OnTextChanged: the editable field's new text value.
+    string Value = null
 );

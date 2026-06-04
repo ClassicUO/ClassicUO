@@ -224,7 +224,14 @@ export function createElement(type: string, props: unknown, id: number): UINode 
     .with({ type: 'textinput' }, (data) => ({
       id,
       node: buildNode({ padding: data.props.padding }, data.props.floating, data.props.size ?? { width: 50, height: 25 }),
-      text: text(data.props.placeholder ?? '', data.props.textStyle),
+      // Editable field driven by the host shared editor. `value` is the
+      // controlled text (placeholder has no host equivalent yet, so it's only
+      // a mount-time fallback). password -> masked '*'.
+      text: {
+        ...text(data.props.value ?? data.props.placeholder ?? '', data.props.textStyle),
+        editable: true,
+        masked: data.props.password ?? false,
+      },
       interactive: true,
       movable: false,
       z: zIndexOf(data.props.floating),

@@ -14,4 +14,8 @@ enum InputEventType
 
     OnKeyPressed,
     OnKeyReleased,
+
+    // Fires when the user edits an `editable` text node (UIEvent.Value carries
+    // the new text). The guest registers it like any other listener.
+    OnTextChanged,
 }

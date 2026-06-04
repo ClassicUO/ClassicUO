@@ -10,14 +10,6 @@ using System.Collections.Generic;
 
 namespace ClassicUO.Ecs.Modding.UI;
 
-internal enum ClayWidgetType
-{
-    None,
-    Button,
-    TextInput,
-    TextFragment,
-}
-
 // ValType: 0 = Auto, 1 = Px, 2 = Percent (matches TinyEcs.Bevy.UI.ValType).
 internal record struct ValProxy(byte Type, float Value);
 
@@ -51,7 +43,13 @@ internal record struct NodeProxy(
     float AspectRatio
 );
 
-internal record struct TextProxy(string Value, ushort FontId, ushort FontSize, ColorProxy Color);
+// Editable: turn the node into a focusable text field driven by the shared host
+// editor (caret, selection, arrows, Ctrl+A/C/X/V/Z) — see Api.cs cuo_ui_node.
+// The guest gets edits via an OnTextChanged UI event (UIEvent.Value). Masked
+// renders the value as '*'. Contract for editable nodes: send `Value` only when
+// the guest controls it (controlled input); an uncontrolled field must stop
+// resending Value after mount or it clobbers what the user types.
+internal record struct TextProxy(string Value, ushort FontId, ushort FontSize, ColorProxy Color, bool Editable, bool Masked);
 
 // UO custom render: Kind matches UOCustomKind; Hue is a Vector3 (X/Y/Z).
 internal record struct UORenderProxy(byte Kind, uint AssetId, float HueX, float HueY, float HueZ);

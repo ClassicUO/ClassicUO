@@ -169,7 +169,41 @@ internal static class Api
 
                     if (n.Text is { } t)
                     {
-                        ent.Set(new Text(t.Value));
+                        if (t.Editable)
+                        {
+                            // Tag the node as the shared editor's glyph: TextInput
+                            // (I-beam cursor + "a field is focused"), EditableText
+                            // (opt into the stb_textedit-backed editor), TextFieldGeom
+                            // (mouse caret origin — the node is its own frame, no
+                            // offset) and Interaction so it's clickable to focus.
+                            // UIEventsPlugin adds the focus-on-click + caret/selection
+                            // overlays + OnTextChanged reporting off the ModEditable tag.
+                            ent.Set(new ModEditable { Masked = t.Masked });
+                            ent.Set<TextInput>();
+                            ent.Set<EditableText>();
+                            ent.Set(new TextFieldGeom { Frame = ent.ID, OffsetX = 0 });
+                            ent.Set(Interaction.None);
+
+                            // Apply the guest's value only when it differs from the
+                            // last value host and guest agreed on (a controlled
+                            // update). Equal means the guest is echoing back what the
+                            // user typed — leave the live buffer alone so the edit
+                            // isn't clobbered each re-render.
+                            var agreed = app.GetResource<ModTextValues>();
+                            var incoming = t.Value ?? string.Empty;
+                            if (!agreed.TryGetValue(ent.ID, out var cur) || !string.Equals(cur, incoming, StringComparison.Ordinal))
+                            {
+                                agreed[ent.ID] = incoming;
+                                if (t.Masked)
+                                    ent.Set(new MaskedText { Value = incoming, MaskChar = '*' });
+                                else
+                                    ent.Set(new Text(incoming));
+                            }
+                        }
+                        else
+                        {
+                            ent.Set(new Text(t.Value));
+                        }
                         ent.Set(new TextFont { FontId = t.FontId, Size = t.FontSize });
                         ent.Set(new TextColor(ToColor(t.Color)));
                     }
