@@ -87,6 +87,14 @@ internal readonly struct ServerGumpPlugin : IPlugin
             };
         app.AddSystem(applyPageFn).InStage(Stage.Update).Build();
 
+        // checkertrans dim: set the render alpha of each element a checkertrans
+        // tagged (see the command handler) to 0.5, once, then drop the tag.
+        // Custom sprites carry alpha in UOCustomRender.Hue.Z. Runs in
+        // PostUpdate, after the gump's deferred spawn has applied, before
+        // UiRenderStage reads the hue.
+        var dimFn = ApplyCheckerTransDim;
+        app.AddSystem(dimFn).InStage(Stage.PostUpdate).Build();
+
         // Tear down every server gump on logout (return to login screen). No
         // per-gump systems run outside GameScreen, so without this the roots +
         // children linger as orphan Nodes drawn over the login screen.
@@ -258,6 +266,26 @@ internal readonly struct ServerGumpPlugin : IPlugin
         commands.Entity(e).Despawn();
     }
 
+    // A checkertrans tagged this child as overlapping, so set its alpha to 0.5
+    // and drop the tag. Legacy ApplyTrans assigns child.Alpha = 0.5 ABSOLUTELY,
+    // so set the hue vector's Z (the shader alpha) to 0.5 — idempotent, so a
+    // re-run before the deferred tag removal applies can't compound it to 0.25.
+    // (Text alpha isn't dimmed — UO ASCII gump glyphs bake the hue per pixel and
+    // ignore vertex alpha; checkertrans targets the tiled background, with text
+    // declared after it anyway.)
+    private static void ApplyCheckerTransDim(
+        Commands commands,
+        Query<Data<UiCustom>, With<CheckerTransDim>> dimmedQ)
+    {
+        foreach (var (ent, custom) in dimmedQ)
+        {
+            var render = custom.Ref.Render();
+            if (render != null)
+                render.Hue.Z = 0.5f;
+            commands.Entity(ent.Ref).Remove<CheckerTransDim>();
+        }
+    }
+
     private static void SpawnOnB0(
         On<PacketReceived<OnOpenGumpPacket_0xB0>> trig,
         Commands commands,
@@ -403,6 +431,13 @@ internal readonly struct ServerGumpPlugin : IPlugin
         bool nomove = false;
         float maxRight = 0f;
         float maxBottom = 0f;
+
+        // Children placed so far, with gump-local bounds + page. checkertrans
+        // (legacy ApplyTrans) reads this to find the PRIOR siblings it overlaps
+        // and dims them to 50% alpha — it iterates only what's been added when
+        // the command is reached, so a checkertrans never affects controls
+        // declared after it.
+        var placed = new List<(ulong Id, int X, int Y, int W, int H, int Page)>();
 
         for (var cnt = 0; cnt < cmdList.Count; cnt++)
         {
@@ -790,13 +825,26 @@ internal readonly struct ServerGumpPlugin : IPlugin
             }
             else if (Eq(entry, "checkertrans"))
             {
-                // checkertrans x y w h — translucent overlay (50% alpha rect).
-                // OOP applies alpha to children overlapping the rect; we
-                // approximate with a translucent black BackgroundColor box.
+                // checkertrans x y w h. Two effects, both applied:
+                //   1) legacy ApplyTrans — every PRIOR child overlapping this
+                //      rect (same page or page 0) is set to 50% alpha, so the
+                //      panel underneath goes see-through;
+                //   2) a translucent black 0.5 box over the rect for the
+                //      darkened-glass look.
                 if (gparams.Count >= 5 &&
                     int.TryParse(gparams[1], out var cx) && int.TryParse(gparams[2], out var cy) &&
                     int.TryParse(gparams[3], out var cw) && int.TryParse(gparams[4], out var ch))
                 {
+                    int cx2 = cx + cw, cy2 = cy + ch;
+                    foreach (var pe in placed)
+                    {
+                        if (pe.Page != 0 && pe.Page != page) continue;
+                        bool overlap = cx < pe.X + pe.W && pe.X < cx2
+                                    && cy < pe.Y + pe.H && pe.Y < cy2;
+                        if (overlap)
+                            commands.Entity(pe.Id).Insert<CheckerTransDim>();
+                    }
+
                     childId = commands.Spawn()
                         .Insert(new Node
                         {
@@ -825,6 +873,10 @@ internal readonly struct ServerGumpPlugin : IPlugin
                 // set above; the sync system flips Display in-place on the
                 // existing Node component instead.
                 commands.AddChild(rootId, childId);
+
+                // Record bounds + page so a later checkertrans can find and dim
+                // this child if it overlaps (legacy ApplyTrans).
+                placed.Add((childId, cx0, cy0, cw0, ch0, page));
 
                 // Track gump-local extent so the root container has a real
                 // hit-test surface for drag / right-click-close. Width=Auto
@@ -1241,6 +1293,11 @@ internal struct ServerGumpChild
     public int Page;
     public int Group;
 }
+
+// Tag inserted by the checkertrans command on every prior child it overlaps
+// (legacy ApplyTrans). ApplyCheckerTransDim sets the element's render alpha to
+// 0.5 once and removes the tag.
+internal struct CheckerTransDim;
 
 // On a textentry field's glyph entity (the one SpawnTextField returns and the
 // global editor mutates). On a gump-response button click, every entry whose
