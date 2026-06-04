@@ -41,6 +41,11 @@ internal sealed class ActiveTextEdit : ITextEditHandler
     // observer because the raw mouse button is consumed by the focus interaction.
     public ulong PendingClickEntity;
     public float PendingClickX;
+
+    // True only while a left-drag that *began* on this field is in progress. Gates
+    // the drag-select branch so holding the button down after a press that started
+    // outside the field (anywhere else on screen) doesn't extend the selection.
+    public bool MouseSelecting;
     public readonly TextEditState State = new(singleLine: true);
     public readonly StringBuilder Buffer = new();
 
@@ -169,12 +174,16 @@ internal readonly struct TextEditPlugin : IPlugin
         var (_, frameCn) = computedQ.Get(geom.Ref.Frame);
         float glyphLogicalX = frameCn.Ref.Position.X + geom.Ref.OffsetX;
 
+        if (!mouse.Value.IsPressed(MouseButtonType.Left))
+            a.MouseSelecting = false;
+
         if (a.PendingClickEntity == a.Entity)
         {
             a.PendingClickEntity = 0;
+            a.MouseSelecting = true;
             TextEdit.Click(a, a.State, a.PendingClickX - glyphLogicalX, 0);
         }
-        else if (mouse.Value.IsPressed(MouseButtonType.Left))
+        else if (a.MouseSelecting && mouse.Value.IsPressed(MouseButtonType.Left))
         {
             TextEdit.Drag(a, a.State, mouse.Value.Position.X - glyphLogicalX, 0);
         }
