@@ -27,6 +27,7 @@ internal sealed class ChatOptions
 // entity (the one that holds keyboard focus and the typed Text); 0 before spawn.
 internal sealed class ChatField
 {
+    public ulong Bar;
     public ulong Glyph;
 }
 
@@ -47,12 +48,21 @@ internal readonly struct ChatPlugin : IPlugin
 
         var spawnFn = SpawnChatField;
         var despawnFn = DespawnChatField;
+        var positionFn = PositionChatBar;
         var keepFocusFn = KeepChatFocused;
         var submitFn = SubmitChat;
 
         app
             .AddSystem(spawnFn).OnEnter(GameState.GameScreen).Build()
             .AddSystem(despawnFn).OnExit(GameState.GameScreen).Build()
+
+            // Pin the bar to the bottom of the logical viewport each frame (a
+            // root Node can't anchor with Bottom/Percent, so its absolute pixel
+            // box is recomputed from the live surface — also follows resizes).
+            .AddSystem(positionFn)
+            .InStage(Stage.PreUpdate)
+            .RunIf((Res<State<GameState>> s) => s.Value.Current == GameState.GameScreen)
+            .Build()
 
             // Chat is the default keyboard sink in-game: whenever no live text
             // field holds focus (nothing focused, or the focused entity was
@@ -80,21 +90,26 @@ internal readonly struct ChatPlugin : IPlugin
         ResMut<ChatField> field,
         ResMut<FocusedInput> focused)
     {
-        // Translucent bar pinned to the viewport's bottom-left, spanning the
-        // width (Left+Right = 0). It's the bounds-hittable focus region; the
-        // shared SpawnTextField hangs the editable glyph + caret off it.
+        // Translucent bar, the bounds-hittable focus region. It's an absolute
+        // root whose pixel box PositionChatBar pins to the viewport bottom each
+        // frame (a root can't anchor with Bottom/Percent — those resolve against
+        // a missing parent and collapse to 0). GlobalZIndex lifts it above the
+        // world window (z 0, opaque) and threads to the glyph/caret; gumps bump
+        // higher z so they still stack over the bar. SpawnTextField hangs the
+        // editable glyph + caret off it.
         var bar = commands.Spawn()
             .Insert(new Node
             {
                 PositionType = PositionType.Absolute,
-                Left = Val.Px(0),
-                Right = Val.Px(0),
-                Bottom = Val.Px(BottomInset),
-                Height = Val.Px(BarHeight),
                 FlexDirection = FlexDirection.Row,
                 AlignItems = AlignItems.Center,
+                Left = Val.Px(0),
+                Top = Val.Px(0),
+                Width = Val.Px(0),
+                Height = Val.Px(BarHeight),
             })
             .Insert(new BackgroundColor(new ClayColor(0, 0, 0, 180)))
+            .Insert(new GlobalZIndex(100))
             .Insert<ChatUi>();
 
         var font = new TextFont { FontId = UoFontRuntime.DefaultFont, Size = 18 };
@@ -102,8 +117,27 @@ internal readonly struct ChatPlugin : IPlugin
             commands, bar, new Vector2(LeftMargin, 2), font, 0, string.Empty, masked: false,
             decorate: e => e.Insert<ChatUi>());
 
+        field.Value.Bar = bar.Id;
         field.Value.Glyph = glyphId;
         focused.Value.Entity = glyphId;
+    }
+
+    // Recompute the bar's absolute box from the live logical surface so it spans
+    // the width and sits at the bottom (UiSurface.LogicalSize is the Clay layout
+    // space). In-place Node mutation — no Commands needed.
+    private static void PositionChatBar(
+        Res<ChatField> field,
+        Res<TinyEcs.Bevy.UI.UiSurface> surface,
+        Query<Data<Node>> nodes)
+    {
+        var bar = field.Value.Bar;
+        if (bar == 0 || !nodes.Contains(bar)) return;
+
+        var size = surface.Value.LogicalSize;
+        var (_, n) = nodes.Get(bar);
+        n.Ref.Left = Val.Px(0);
+        n.Ref.Top = Val.Px(size.Y - BarHeight - BottomInset);
+        n.Ref.Width = Val.Px(size.X);
     }
 
     private static void DespawnChatField(
