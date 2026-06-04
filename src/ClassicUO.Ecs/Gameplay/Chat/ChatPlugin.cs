@@ -2,6 +2,7 @@ using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Input;
+using ClassicUO.Renderer;
 using ClassicUO.Network;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
@@ -50,6 +51,7 @@ internal readonly struct ChatPlugin : IPlugin
         var spawnFn = SpawnChatField;
         var despawnFn = DespawnChatField;
         var attachFn = AttachChatToWindow;
+        var sizeFn = SizeChatBar;
         var keepFocusFn = KeepChatFocused;
         var submitFn = SubmitChat;
 
@@ -66,6 +68,16 @@ internal readonly struct ChatPlugin : IPlugin
             .InStage(Stage.PreUpdate)
             .RunIf((Res<State<GameState>> s, Res<ChatField> f)
                 => s.Value.Current == GameState.GameScreen && f.Value.Bar != 0 && !f.Value.Attached)
+            .Build()
+
+            // Stretch the bar to the viewport width each frame. Percent(100) on
+            // an absolute child collapses to 0 (so the translucent bg rect would
+            // be zero-width and invisible), so set an explicit pixel width from
+            // the camera viewport (logical px, the Clay layout space).
+            .AddSystem(sizeFn)
+            .InStage(Stage.PreUpdate)
+            .RunIf((Res<State<GameState>> s, Res<ChatField> f)
+                => s.Value.Current == GameState.GameScreen && f.Value.Bar != 0)
             .Build()
 
             // Chat is the default keyboard sink in-game: whenever no live text
@@ -108,7 +120,7 @@ internal readonly struct ChatPlugin : IPlugin
                 AlignItems = AlignItems.Center,
                 Left = Val.Px(0),
                 Bottom = Val.Px(BottomInset),
-                Width = Val.Percent(100),
+                Width = Val.Px(0), // set by SizeChatBar to the viewport width
                 Height = Val.Px(BarHeight),
             })
             .Insert(new BackgroundColor(new ClayColor(0, 0, 0, 180)))
@@ -152,6 +164,19 @@ internal readonly struct ChatPlugin : IPlugin
         field.Value.Bar = 0;
         field.Value.Glyph = 0;
         field.Value.Attached = false;
+    }
+
+    // Stretch the bar to the viewport width (camera.Bounds is logical px, the
+    // same space Val.Px feeds into). In-place Node mutation — no Commands.
+    private static void SizeChatBar(
+        Res<ChatField> field,
+        Res<Camera> camera,
+        Query<Data<Node>> nodes)
+    {
+        var bar = field.Value.Bar;
+        if (bar == 0 || !nodes.Contains(bar)) return;
+        var (_, n) = nodes.Get(bar);
+        n.Ref.Width = Val.Px(camera.Value.Bounds.Width);
     }
 
     private static void KeepChatFocused(
