@@ -520,8 +520,12 @@ internal readonly struct GuiPlugin : IPlugin
         decorate?.Invoke(glyph);
         ulong glyphId = glyph.Id;
 
+        // Fixed Height so toggling the caret glyph ""<->"_" can't change the
+        // flex row's cross-size and nudge the text's Y (the "_" measures taller
+        // than an empty run). font.Size is <= the text's line height, so the row
+        // height stays driven by the text and the caret rides along centered.
         var caret = commands.Spawn()
-            .Insert(new Node { Width = Val.Auto, Height = Val.Auto })
+            .Insert(new Node { Width = Val.Auto, Height = Val.Px(font.Size) })
             .Insert(new Text(string.Empty))
             .Insert(font)
             .Insert(new TextColor(color))
