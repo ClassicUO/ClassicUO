@@ -142,9 +142,11 @@ internal readonly struct GuiPlugin : IPlugin
             ResMut<UiClayContext>,
             Res<AssetsServer>,
             Query<Data<ScrollPosition>>,
-            Query<Data<ComputedNode, UiCustom, GlobalZIndex>, Filter<With<UIMovable>>>,
+            Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>>,
+            Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>>,
             Query<Data<TinyEcs.Parent>>,
-            Query<Data<GlobalZIndex>>> routeWheelFn = RouteWheelToScrollable;
+            Query<Data<GlobalZIndex>>,
+            Query<Empty, With<GameScreenPlugin.GameWindowUI>>> routeWheelFn = RouteWheelToScrollable;
         app.AddSystem(Stage.First, routeWheelFn);
         // Must run after InteractionSystem.PostLayout writes Hovered/Pressed,
         // before UiRenderStage reads UOCustomRender.AssetId.
@@ -273,9 +275,11 @@ internal readonly struct GuiPlugin : IPlugin
         ResMut<UiClayContext> ctx,
         Res<AssetsServer> assets,
         Query<Data<ScrollPosition>> scrollPosQ,
-        Query<Data<ComputedNode, UiCustom, GlobalZIndex>, Filter<With<UIMovable>>> movableQ,
+        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
+        Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movableQ,
         Query<Data<TinyEcs.Parent>> parentQ,
-        Query<Data<GlobalZIndex>> zQ)
+        Query<Data<GlobalZIndex>> zQ,
+        Query<Empty, With<GameScreenPlugin.GameWindowUI>> gameWindowQ)
     {
         var wheel = mouseCtx.Value.Wheel;
         if (Math.Abs(wheel) < 0.001f) return;
@@ -307,18 +311,33 @@ internal readonly struct GuiPlugin : IPlugin
             maxY = data.MaxScrollY;
         }
 
-        // Topmost movable gump under the cursor (pixel-hit so transparent
-        // sprite corners don't capture the wheel). Tracks the HIGHEST window z
-        // — a non-scroll gump stacked above the scrollable one must capture the
-        // wheel so it doesn't fall through to scroll the gump behind it.
+        // Is the cursor over ANY UI? UiPick.Topmost scans all rendered elements
+        // (window roots AND their opaque children — a paperdoll body, container
+        // item, button — sitting over a window's transparent interior), so an
+        // opaque child over the window's hollow region still counts as "over a
+        // gump". A root-only pixel loop missed those and let the camera zoom.
+        // The owning window's GlobalZIndex (via MovableRoot) is the gump z used
+        // to arbitrate scroll fall-through below; a non-movable HUD hit blocks
+        // zoom too but carries no window z (stays int.MinValue).
+        // The game-window panel itself is a fullscreen BackgroundColor node, so
+        // UiPick.Topmost reports a hit on it across the whole viewport. That hit
+        // is the WORLD view, not a gump — the wheel must reach the camera there.
+        // It's drawn first (lowest PaintOrder), so any real gump over it wins
+        // Topmost; a hit ON it means the cursor is over bare game world.
         int topGumpZ = int.MinValue;
-        foreach (var (_, computed, custom, z) in movableQ)
+        var uiHit = UiPick.Topmost(pos, assets.Value, rendered, parentQ);
+        bool overUi = uiHit.Found && !gameWindowQ.Contains(uiHit.Entity);
+        if (overUi)
         {
-            if (!UiHitTest.PixelHit(assets.Value, custom.Ref.Render(), computed.Ref, pos)) continue;
-            if (z.Ref.Value > topGumpZ) topGumpZ = z.Ref.Value;
+            var root = UiPick.MovableRoot(uiHit.Entity, movableQ, parentQ);
+            if (root != 0)
+            {
+                var (_, _, z) = movableQ.Get(root);
+                topGumpZ = z.Ref.Value;
+            }
         }
 
-        bool overGump = topGumpZ != int.MinValue || topScroll != 0;
+        bool overGump = overUi || topScroll != 0;
         if (!overGump) return;
 
         // Kill Clay's native ScrollDelta (we drive scroll via the component)
