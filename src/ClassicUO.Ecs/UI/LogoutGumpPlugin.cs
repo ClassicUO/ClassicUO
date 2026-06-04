@@ -15,7 +15,6 @@ using TinyEcs;
 using TinyEcs.Bevy;
 using TinyEcs.Bevy.UI;
 using TinyEcs.Bevy.UI.Widgets;
-using ClayColor = Clay.Color;
 
 namespace ClassicUO.Ecs;
 
@@ -76,9 +75,11 @@ internal readonly struct LogoutGumpPlugin : IPlugin
             .Insert<LogoutGumpWindow>();
         var rootId = root.Id;
 
+        // Matches QuestionGump's Label(message, isunicode:false, hue:0x0386, font:1):
+        // ASCII font 1 with the hue baked per pixel (UoFontRuntime.AsciiHue).
         var label = builder.AddLabel(commands, "Quit\nUltima Online?", new Vector2(33, 30), new Vector2(165, 40))
-            .Insert(new TextFont { FontId = 1, Size = 12 })
-            .Insert(new TextColor(ClayColor.White));
+            .Insert(new TextFont { FontId = (ushort)(1 | UoFontRuntime.AsciiFlag), Size = 12 })
+            .Insert(new TextColor(UoFontRuntime.AsciiHue(0x0386)));
         commands.AddChild(rootId, label.Id);
 
         var cancel = builder.AddButton(commands, (CancelN, CancelP, CancelO), Vector3.UnitZ, new Vector2(37, 75));
