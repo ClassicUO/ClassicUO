@@ -445,7 +445,11 @@ internal readonly struct GuiPlugin : IPlugin
         // font (FontId | AsciiFlag) wants a PACKED hue (UoFontRuntime.AsciiHue);
         // a unicode font wants a literal RGB tint (white = no tint). Passing a
         // packed hue to a unicode field reads as RGB and blacks the text out.
-        frame.Insert(Interaction.None).Insert<UiContainsByBounds>();
+        // UINoWindowDrag on every hittable part so a press on the field never
+        // latches a window move — that frees the press+drag gesture for caret
+        // placement / text selection (a field inside a UIMovable gump would
+        // otherwise drag the gump instead of selecting).
+        frame.Insert(Interaction.None).Insert<UiContainsByBounds>().Insert<UINoWindowDrag>();
 
         var glyph = commands.Spawn()
             .Insert(new Node { Width = Val.Auto, Height = Val.Auto })
@@ -453,7 +457,11 @@ internal readonly struct GuiPlugin : IPlugin
             .Insert(font)
             .Insert(new TextColor(color))
             .Insert<TextInput>()
-            .Insert<EditableText>();
+            .Insert<EditableText>()
+            .Insert<UINoWindowDrag>()
+            // Text origin for mouse caret/selection: TextEditPlugin reads the
+            // frame's ComputedNode (logical = scaled / DpiScale) + OffsetX.
+            .Insert(new TextFieldGeom { Frame = frame.Id, OffsetX = contentOffset.X });
         if (masked)
             glyph.Insert(new MaskedText { Value = initial ?? string.Empty, MaskChar = maskChar });
         decorate?.Invoke(glyph);
@@ -472,6 +480,7 @@ internal readonly struct GuiPlugin : IPlugin
                 Display = Display.None,
             })
             .Insert(new BackgroundColor(new Clay.Color(70, 110, 180, 120)))
+            .Insert<UINoWindowDrag>()
             .Insert(new TextEditSelection { Target = glyphId });
         decorate?.Invoke(selection);
 
@@ -484,6 +493,7 @@ internal readonly struct GuiPlugin : IPlugin
                 Display = Display.None,
             })
             .Insert(new BackgroundColor(color))
+            .Insert<UINoWindowDrag>()
             .Insert(new TextEditCaret { Target = glyphId });
         decorate?.Invoke(caret);
 
@@ -499,14 +509,28 @@ internal readonly struct GuiPlugin : IPlugin
                 Height = Val.Auto,
             })
             .Insert(Interaction.None)
-            .Insert<UiContainsByBounds>();
+            .Insert<UiContainsByBounds>()
+            .Insert<UINoWindowDrag>();
         decorate?.Invoke(row);
-        row.Observe((On<UiPointerDown> _, ResMut<FocusedInput> focused) => focused.Value.Entity = glyphId);
+        // Press records the click for caret placement (TextEditPlugin applies it
+        // after focus syncs); the raw button is consumed by the focus interaction
+        // before a plain mouse system would see it.
+        row.Observe((On<UiPointerDown> t, ResMut<FocusedInput> focused, ResMut<ActiveTextEdit> edit) =>
+        {
+            focused.Value.Entity = glyphId;
+            edit.Value.PendingClickEntity = glyphId;
+            edit.Value.PendingClickX = t.Event.Position.X;
+        });
         row.AddChild(selection);
         row.AddChild(glyph);
         row.AddChild(caret);
 
-        frame.Observe((On<UiPointerDown> _, ResMut<FocusedInput> focused) => focused.Value.Entity = glyphId);
+        frame.Observe((On<UiPointerDown> t, ResMut<FocusedInput> focused, ResMut<ActiveTextEdit> edit) =>
+        {
+            focused.Value.Entity = glyphId;
+            edit.Value.PendingClickEntity = glyphId;
+            edit.Value.PendingClickX = t.Event.Position.X;
+        });
         frame.AddChild(row);
 
         return glyphId;

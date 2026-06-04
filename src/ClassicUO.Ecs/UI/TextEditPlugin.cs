@@ -35,6 +35,12 @@ internal sealed class ActiveTextEdit : ITextEditHandler
     public ushort FontId;
     public bool Masked;
     public char MaskChar = '*';
+
+    // A press on a field records (entity, logical screen-x) here via its
+    // UiPointerDown observer; RouteMouse converts it to a caret position. Via the
+    // observer because the raw mouse button is consumed by the focus interaction.
+    public ulong PendingClickEntity;
+    public float PendingClickX;
     public readonly TextEditState State = new(singleLine: true);
     public readonly StringBuilder Buffer = new();
 
@@ -62,18 +68,22 @@ internal sealed class ActiveTextEdit : ITextEditHandler
 
     public void LayoutRow(out TextEditRow row, int lineStartIndex)
     {
-        // Single-line: the whole buffer is one row.
+        // Single-line: the whole buffer is one row. YMax must be > 0 (and > the
+        // click y, which we always pass as 0) or stb's Click can't locate the row
+        // — a zero-height row contains no point, so the caret never moves.
         float w = WidthUpTo(Buffer.Length);
         row = new TextEditRow
         {
             X0 = 0,
             X1 = w,
-            BaselineYDelta = 0,
+            BaselineYDelta = LineHeight,
             YMin = 0,
-            YMax = 0,
+            YMax = LineHeight,
             NumChars = Buffer.Length,
         };
     }
+
+    private float LineHeight => UoFontRenderer.MeasureFont("Wg", FontId, int.MaxValue, allowHtml: false).Height is var h && h > 0 ? h : 20;
 
     public bool InsertChars(int index, ReadOnlySpan<char> chars)
     {
@@ -83,6 +93,12 @@ internal sealed class ActiveTextEdit : ITextEditHandler
 
     public void DeleteChars(int index, int count) => Buffer.Remove(index, count);
 }
+
+// On a field's glyph: how to find the text's logical screen origin for mouse
+// caret/selection. Frame's ComputedNode.Position is in scaled px (logical *
+// DpiScale); divide by DpiScale and add OffsetX (the content row's logical
+// left) to get the glyph's logical x.
+internal struct TextFieldGeom { public ulong Frame; public float OffsetX; }
 
 // Marker on the caret bar overlay of a SpawnTextField field. Target = the glyph
 // entity (FocusedInput target). PositionTextEditOverlays shows + positions it
@@ -102,6 +118,8 @@ internal readonly struct TextEditPlugin : IPlugin
             Query<Data<Text>, Filter<With<EditableText>, Without<MaskedText>>>,
             Query<Data<MaskedText>, Filter<With<EditableText>>>,
             Query<Data<TextFont>, With<EditableText>>> syncFn = SyncActiveEditor;
+        Action<Res<MouseContext>, ResMut<ActiveTextEdit>,
+            Query<Data<ComputedNode>>, Query<Data<TextFieldGeom>>> mouseFn = RouteMouse;
         Action<Res<KeyboardContext>, ResMut<ActiveTextEdit>> keysFn = RouteKeys;
         Action<EventReader<CharInputEvent>, ResMut<ActiveTextEdit>> charsFn = RouteChars;
         Action<ResMut<ActiveTextEdit>,
@@ -116,9 +134,50 @@ internal readonly struct TextEditPlugin : IPlugin
         // keys, route chars, write the buffer back to the field's Text.
         app.AddSystem(syncFn).InStage(Stage.PreUpdate).Build();
         app.AddSystem(overlayFn).InStage(Stage.PreUpdate).Build();
+        app.AddSystem(mouseFn).InStage(Stage.Update).Build();
         app.AddSystem(keysFn).InStage(Stage.Update).Build();
         app.AddSystem(charsFn).InStage(Stage.Update).Build();
         app.AddSystem(writeBackFn).InStage(Stage.Update).Build();
+    }
+
+    // Mouse caret placement + drag-select. A press recorded by the field's
+    // observer (PendingClick) sets the caret at the clicked glyph; holding +
+    // moving extends the selection. localX is in the glyph's logical text space:
+    // ComputedNode.Position, the mouse, and the handler's measured widths are
+    // all logical px, so the glyph origin is just the frame's x + the content
+    // row's left offset.
+    private static void RouteMouse(
+        Res<MouseContext> mouse,
+        ResMut<ActiveTextEdit> edit,
+        Query<Data<ComputedNode>> computedQ,
+        Query<Data<TextFieldGeom>> geomQ)
+    {
+        var a = edit.Value;
+        if (a.Entity == 0 || !geomQ.Contains(a.Entity))
+        {
+            a.PendingClickEntity = 0;
+            return;
+        }
+
+        var (_, geom) = geomQ.Get(a.Entity);
+        if (!computedQ.Contains(geom.Ref.Frame))
+        {
+            a.PendingClickEntity = 0;
+            return;
+        }
+
+        var (_, frameCn) = computedQ.Get(geom.Ref.Frame);
+        float glyphLogicalX = frameCn.Ref.Position.X + geom.Ref.OffsetX;
+
+        if (a.PendingClickEntity == a.Entity)
+        {
+            a.PendingClickEntity = 0;
+            TextEdit.Click(a, a.State, a.PendingClickX - glyphLogicalX, 0);
+        }
+        else if (mouse.Value.IsPressed(MouseButtonType.Left))
+        {
+            TextEdit.Drag(a, a.State, mouse.Value.Position.X - glyphLogicalX, 0);
+        }
     }
 
     // Keep ActiveTextEdit pointed at the focused EditableText field: (re)load the

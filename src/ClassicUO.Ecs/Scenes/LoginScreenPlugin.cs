@@ -217,12 +217,10 @@ internal readonly struct LoginScreenPlugin : IPlugin
         commands.Entity(usernameTextId).Insert<UsernameInput>();
         mainMenu.AddChild(usernameField);
 
-        // Parity with main's LoginGump: auto-focus username field on entry
-        // when empty (LoginGump calls SetKeyboardFocus on the account box).
-        if (string.IsNullOrEmpty(settings.Value.Username))
-        {
-            focused.Value.Entity = usernameTextId;
-        }
+        // Parity with main's LoginGump: focus the account box on entry (it calls
+        // SetKeyboardFocus there). Always focus it so a field — and therefore a
+        // caret — is always present, not only when the username is empty.
+        focused.Value.Entity = usernameTextId;
 
         // Real password kept in MaskedText.Value; SyncMaskedText (GuiPlugin)
         // mirrors it into Text as mask chars before the renderer sees it.

@@ -52,6 +52,7 @@ internal readonly struct ChatPlugin : IPlugin
         var despawnFn = DespawnChatField;
         var attachFn = AttachChatToWindow;
         var sizeFn = SizeChatBar;
+        var claimFn = ClaimChatSelection;
         var keepFocusFn = KeepChatFocused;
         var submitFn = SubmitChat;
 
@@ -91,13 +92,22 @@ internal readonly struct ChatPlugin : IPlugin
             .RunIf((Res<State<GameState>> s) => s.Value.Current == GameState.GameScreen)
             .Build()
 
-            // Enter submits the chat line. Per-char editing is handled globally
-            // by GuiPlugin.EditFocusedTextField (the chat glyph opts in via the
-            // EditableText marker SpawnTextField adds).
+            // Enter submits the chat line. Per-char editing is handled by
+            // TextEditPlugin (the chat glyph opts in via the EditableText marker).
             .AddSystem(submitFn)
             .InStage(Stage.Update)
             .RunIf((Res<KeyboardContext> kb, Res<NetClient> net)
                 => net.Value.IsConnected && kb.Value.IsPressedOnce(Keys.Enter))
+            .Build()
+
+            // Claim SelectedEntity while the cursor is over the chat bar so world
+            // click / movement / pickup systems bail — otherwise clicks on the bar
+            // fall through to the game scene (the bar isn't a UIMovable, so
+            // WindowDragPlugin's claim skips it). Stage.Last like that claim.
+            .AddSystem(claimFn)
+            .InStage(Stage.Last)
+            .RunIf((Res<State<GameState>> s, Res<ChatField> f)
+                => s.Value.Current == GameState.GameScreen && f.Value.Bar != 0)
             .Build();
     }
 
@@ -164,6 +174,37 @@ internal readonly struct ChatPlugin : IPlugin
         field.Value.Bar = 0;
         field.Value.Glyph = 0;
         field.Value.Attached = false;
+    }
+
+    // While the cursor is over any part of the chat UI, claim SelectedEntity at
+    // float.MaxValue (bypassViewport) so the world/pickup/movement systems treat
+    // the click as "over UI" and bail — mirrors WindowDragPlugin's movable claim,
+    // but the chat bar isn't a UIMovable so it needs its own. Uses the shared
+    // UiPick hit-test + a walk up to the ChatUi-tagged subtree.
+    private static void ClaimChatSelection(
+        Res<MouseContext> mouse,
+        Res<SelectedEntity> selected,
+        Res<AssetsServer> assets,
+        Res<ChatField> field,
+        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
+        Query<Data<TinyEcs.Parent>> parents,
+        Query<Data<ChatUi>> chatUiQ)
+    {
+        var hit = UiPick.Topmost(mouse.Value.Position, assets.Value, rendered, parents);
+        if (!hit.Found) return;
+
+        ulong cur = hit.Entity;
+        for (int i = 0; i < 16 && cur != 0; i++)
+        {
+            if (chatUiQ.Contains(cur))
+            {
+                selected.Value.Set(field.Value.Bar, float.MaxValue, bypassViewport: true);
+                return;
+            }
+            if (!parents.Contains(cur)) return;
+            var (_, p) = parents.Get(cur);
+            cur = (ulong)p.Ref.Id;
+        }
     }
 
     // Stretch the bar to the viewport width (camera.Bounds is logical px, the
