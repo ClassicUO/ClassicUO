@@ -270,7 +270,14 @@ internal readonly struct PaperdollPlugin : IPlugin
             commands.AddChild(root.Id, btnOptions.Id);
 
             var btnLogout = builder.AddButton(commands, (0x07D9, 0x07DA, 0x07DB), Vector3.UnitZ, new Vector2(185, 44 + 27 * 2));
-            btnLogout.Observe((On<UiClick> _, Res<NetClient> net) => net.Value.Send_LogoutNotification());
+            btnLogout.Observe((On<UiClick> _,
+                               Commands cmd,
+                               Res<GumpBuilder> gb,
+                               Res<AssetsServer> a,
+                               Res<UiZCounter> z,
+                               Res<UiSurface> surf,
+                               Query<Data<LogoutGumpWindow>> existing) =>
+                LogoutGumpPlugin.OpenOrFocus(cmd, gb.Value, a.Value, z.Value, surf.Value, existing));
             commands.AddChild(root.Id, btnLogout.Id);
 
             // Quests button (CV >= 500A — assume so). 0xD7 with subcommand

@@ -87,6 +87,22 @@ internal readonly struct ServerGumpPlugin : IPlugin
             };
         app.AddSystem(applyPageFn).InStage(Stage.Update).Build();
 
+        // Tear down every server gump on logout (return to login screen). No
+        // per-gump systems run outside GameScreen, so without this the roots +
+        // children linger as orphan Nodes drawn over the login screen.
+        Action<Commands, Query<Data<ServerGump>>, Query<Data<ServerGumpChild>>, Query<Data<TinyEcs.Children>>, ResMut<ServerGumpRegistry>> teardownFn =
+            (cmd, rootsQ, childrenTagQ, childrenQ, registry) =>
+            {
+                foreach (var (ent, _) in rootsQ)
+                    DespawnSubtree(cmd, ent.Ref, childrenQ);
+                // Defensive: drop any child whose root was already despawned
+                // (e.g. a server close mid-frame) so none survive the exit.
+                foreach (var (ent, _) in childrenTagQ)
+                    cmd.Entity(ent.Ref).Despawn();
+                registry.Value.ByGumpId.Clear();
+            };
+        app.AddSystem(teardownFn).OnExit(GameState.GameScreen).Build();
+
         // Slide each scrollbar thumb to match its text container's live scroll
         // offset. LayoutSystem writes ScrollPosition.OffsetY post-layout from
         // Clay's ScrollContainerData; we read it here (PostUpdate) and set the
@@ -229,6 +245,17 @@ internal readonly struct ServerGumpPlugin : IPlugin
                 anchor.Value.OffsetY0 + delta * (anchor.Value.MaxScroll / anchor.Value.Travel),
                 0f, anchor.Value.MaxScroll);
         }
+    }
+
+    private static void DespawnSubtree(Commands commands, ulong e, Query<Data<TinyEcs.Children>> childrenQ)
+    {
+        if (childrenQ.Contains(e))
+        {
+            var (_, kids) = childrenQ.Get(e);
+            foreach (var cid in kids.Ref)
+                DespawnSubtree(commands, cid, childrenQ);
+        }
+        commands.Entity(e).Despawn();
     }
 
     private static void SpawnOnB0(

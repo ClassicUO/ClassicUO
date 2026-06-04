@@ -316,7 +316,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             Res<UOFileManager>,
             EventWriter<TextOverheadEvent>,
             EventWriter<SystemMessageEvent>>(OnClilocMessageAffix);
-        Stub<OnLogoutRequestPacket_0xD1>(app);
+        // 0xD1 reply is handled by LogoutGumpPlugin (client-initiated logout).
         Stub<OnUpdateCharacterAltPacket_0xD2>(app);
         Stub<OnOpenBookAltPacket_0xD4>(app);
         app.AddObserver<On<PacketReceived<OnMegaClilocPacket_0xD6>>,
