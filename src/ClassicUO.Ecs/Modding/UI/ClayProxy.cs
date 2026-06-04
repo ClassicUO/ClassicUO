@@ -1,7 +1,10 @@
-// TODO: migrate to Bevy.UI
-// The old Clay_cs-based proxy types are gone. This file is kept so the JSON
-// source generator and modding host stubs still compile. The plugin/UI bridge
-// for WASM mods will be rebuilt on top of TinyEcs.Bevy.UI later.
+// Wire schema for the modding UI bridge (cuo_ui_node).
+//
+// Option B: the mod's reconciler speaks TinyEcs.Bevy.UI vocabulary directly, so
+// these proxies mirror the engine's UI primitives 1:1 and the host stores them
+// near-verbatim (see Api.cs cuo_ui_node). Kept JSON-friendly (plain fields,
+// camelCase via ModdingJsonContext) and decoupled from the engine structs so a
+// renderer/layout change doesn't silently reshape the mod ABI.
 
 using System.Collections.Generic;
 
@@ -15,9 +18,67 @@ internal enum ClayWidgetType
     TextFragment,
 }
 
-internal record struct UINodeProxy(ulong Id, ClayWidgetType WidgetType = ClayWidgetType.None, bool Movable = false);
+// ValType: 0 = Auto, 1 = Px, 2 = Percent (matches TinyEcs.Bevy.UI.ValType).
+internal record struct ValProxy(byte Type, float Value);
+
+internal record struct RectProxy(ValProxy Left, ValProxy Right, ValProxy Top, ValProxy Bottom);
+
+// RGBA, 0-255 convention (Clay.Color).
+internal record struct ColorProxy(float R, float G, float B, float A);
+
+// Mirrors TinyEcs.Bevy.UI.Node. Enum fields are bytes matching the engine enums
+// (Display/PositionType/Overflow/FlexDirection/JustifyContent/AlignItems).
+internal record struct NodeProxy(
+    byte Display,
+    byte PositionType,
+    byte Overflow,
+    byte FlexDirection,
+    byte JustifyContent,
+    byte AlignItems,
+    ValProxy Width,
+    ValProxy Height,
+    ValProxy MinWidth,
+    ValProxy MinHeight,
+    ValProxy MaxWidth,
+    ValProxy MaxHeight,
+    ValProxy Left,
+    ValProxy Top,
+    ValProxy Right,
+    ValProxy Bottom,
+    RectProxy Padding,
+    RectProxy Border,
+    ValProxy Gap,
+    float AspectRatio
+);
+
+internal record struct TextProxy(string Value, ushort FontId, ushort FontSize, ColorProxy Color);
+
+// UO custom render: Kind matches UOCustomKind; Hue is a Vector3 (X/Y/Z).
+internal record struct UORenderProxy(byte Kind, uint AssetId, float HueX, float HueY, float HueZ);
+
+// UO button graphics per Interaction state. The host UpdateUOButtonsState system
+// swaps UOCustomRender.AssetId between these by hover/press.
+internal record struct UOButtonProxy(ushort Normal, ushort Over, ushort Pressed);
+
+internal record struct UINodeProxy(
+    ulong Id,
+    NodeProxy Node,
+    ColorProxy? BackgroundColor,
+    ColorProxy? BorderColor,
+    float? BorderRadius,
+    TextProxy? Text,
+    UORenderProxy? Uo,
+    bool Interactive,
+    bool Movable,
+    // GlobalZIndex. Root (parentless) nodes need this to layer over the world
+    // scene — see reference_ecs_root_node_layout; LayoutSystem threads it down.
+    int? Z,
+    UOButtonProxy? Button
+);
+
+internal record struct UINodeRelation(ulong Child, ulong Parent, int Index);
 
 internal record struct UINodes(
     List<UINodeProxy> Nodes,
-    Dictionary<ulong, ulong> Relations
+    List<UINodeRelation> Relations
 );

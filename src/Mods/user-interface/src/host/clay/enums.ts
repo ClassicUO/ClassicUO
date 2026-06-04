@@ -4,6 +4,64 @@ export enum AssetType {
   Animation = 2,
 }
 
+// ---- TinyEcs.Bevy.UI vocabulary (mirrors the engine enums) ----
+// The reconciler emits nodes in this vocab; the host stores them near-verbatim
+// (see ClayProxy.cs / Api.cs cuo_ui_node).
+
+export enum ValType {
+  Auto = 0,
+  Px = 1,
+  Percent = 2,
+}
+
+export enum Display {
+  Flex = 0,
+  None = 1,
+}
+
+export enum PositionType {
+  Relative = 0,
+  Absolute = 1,
+}
+
+export enum Overflow {
+  Visible = 0,
+  Clip = 1,
+  Scroll = 2,
+}
+
+export enum FlexDirection {
+  Row = 0,
+  Column = 1,
+}
+
+export enum JustifyContent {
+  Start = 0,
+  Center = 1,
+  End = 2,
+}
+
+export enum AlignItems {
+  Start = 0,
+  Center = 1,
+  End = 2,
+}
+
+// Matches UOCustomKind in GuiPlugin.cs (NOT the same numbering as
+// ClayUOCommandType — map via uoKindFromCommand()).
+export enum UOCustomKind {
+  Gump = 0,
+  GumpNinePatch = 1,
+  GumpTiled = 2,
+  Art = 3,
+  Land = 4,
+  Animation = 5,
+  MiniMap = 6,
+  None = 7,
+  WrappedText = 8,
+  GumpSlice = 9,
+}
+
 export enum CompressionType {
   None = 0,
   Zlib = 1,

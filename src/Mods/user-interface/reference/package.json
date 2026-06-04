@@ -1,0 +1,20 @@
+{
+  "name": "user-interface-reference",
+  "private": true,
+  "version": "0.0.0",
+  "description": "react-dom reference rendering of the mod's design system — ground-truth behaviour to diff against the cuo-ecs mod (custom reconciler + Clay.NET).",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "serve": "node build.mjs && npx --yes http-server dist -p 4321 -c-1"
+  },
+  "dependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.0",
+    "esbuild": "^0.25.8"
+  }
+}

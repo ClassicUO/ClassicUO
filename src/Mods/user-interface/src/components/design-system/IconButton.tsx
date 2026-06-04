@@ -92,16 +92,20 @@ export const IconButton: React.FC<IconButtonProps> = ({
     }
   }, [disabled, onClick]);
 
-  // Calculate icon positioning - center by default with optional offset
-  const iconFloating: ClayFloatingElementConfig = {
-    ...floating,
-    offset: {
-      x: size.width / 2 - size.width / 2 / 2 + iconOffset.x,
-      y: size.height / 2 - size.height / 2 / 2 + iconOffset.y,
-    },
-    attachTo: floating?.attachTo ?? FloatingAttachToElement.Parent,
-    clipTo: floating?.clipTo ?? FloatingClipToElement.AttachedParent,
-  };
+  // Only float when the caller explicitly positions the button; otherwise it
+  // flows (sized to `size`) in its container. Forcing floating made every icon
+  // absolute at its parent origin, so they overlapped / escaped their cells.
+  const iconFloating: ClayFloatingElementConfig | undefined = floating
+    ? {
+        ...floating,
+        offset: {
+          x: (floating.offset?.x ?? 0) + iconOffset.x,
+          y: (floating.offset?.y ?? 0) + iconOffset.y,
+        },
+        attachTo: floating.attachTo ?? FloatingAttachToElement.Parent,
+        clipTo: floating.clipTo ?? FloatingClipToElement.AttachedParent,
+      }
+    : undefined;
 
   const Tag = icon.type === 'gump' ? Gump : Art;
 

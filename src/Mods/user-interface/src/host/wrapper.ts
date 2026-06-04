@@ -64,28 +64,26 @@ export class HostWrapper {
   }
 
   static setNode(data: UINode | UINodes): void {
-    const json = JSON.stringify('id' in data ? { nodes: [data], relations: {} } : data, null, 2);
-    // console.log("setNode", json);
+    // Parenting goes through cuo_add_entity_to_parent, so per-node setNode
+    // sends an empty relations list.
+    const payload: UINodes = 'id' in data ? { nodes: [data], relations: [] } : data;
+    const json = JSON.stringify(payload);
     const memIn = Memory.fromString(json);
     this.functions.cuo_ui_node(memIn.offset);
   }
 
   static addEventListener(event: UIEvent): number {
-    const json = JSON.stringify(event);
-    const memIn = Memory.fromString(json);
-    console.log('HostWrapper:addEventListener', json);
+    const memIn = Memory.fromString(JSON.stringify(event));
     return this.functions.cuo_ui_add_event_listener(memIn.offset) as number;
   }
 
   static removeEventListener(event: UIEvent): number {
-    const json = JSON.stringify(event);
-    const memIn = Memory.fromString(json);
+    const memIn = Memory.fromString(JSON.stringify(event));
     return this.functions.cuo_ui_remove_event_listener(memIn.offset) as number;
   }
 
   static spawnEntity(): number {
-    const id = this.functions.cuo_ecs_spawn_entity() as number;
-    return id;
+    return this.functions.cuo_ecs_spawn_entity() as number;
   }
 
   static deleteEntity(id: number): void {
@@ -93,7 +91,6 @@ export class HostWrapper {
   }
 
   static addEntityToParent(entityId: number, parentId: number, index: number = -1): void {
-    console.log('addEntityToParent', entityId, parentId, index);
     this.functions.cuo_add_entity_to_parent(entityId, parentId, index);
   }
 
@@ -107,16 +104,5 @@ export class HostWrapper {
   static sendEvents(events: PluginMessages): void {
     const memIn = Memory.fromString(JSON.stringify(events));
     this.functions.cuo_send_events(memIn.offset);
-  }
-}
-
-// TODO: Implement Zlib compression
-export class Zlib {
-  static compress(data: Uint8Array): Uint8Array {
-    return data;
-  }
-
-  static uncompress(data: Uint8Array): Uint8Array {
-    return data;
   }
 }

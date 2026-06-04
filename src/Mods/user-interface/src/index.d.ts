@@ -28,5 +28,6 @@ declare module 'extism:host' {
     cuo_ecs_delete_entity(id: I64): void;
     cuo_add_entity_to_parent(id: I64, parentId: I64, index: I64): void;
     cuo_send_events(ptr: I64): void;
+    cuo_ecs_query(ptr: I64): I64;
   }
 }

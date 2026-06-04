@@ -84,6 +84,9 @@ export interface GumpProps extends BaseElementProps {
   size?: ClaySize;
   padding?: ClayPadding;
   childAlignment?: ClayChildAlignment;
+  // When set, the gump is sized via layout (e.g. content-fit ninePatch) instead
+  // of the fixed `size`. Takes precedence over size/direction/childAlignment.
+  layout?: ClayLayoutConfig;
 }
 
 // Button component props

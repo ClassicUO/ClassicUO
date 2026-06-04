@@ -118,6 +118,19 @@ internal sealed class UoFontTextMeasurer : Clay.ITextMeasurer
         // already inserts '\n' between lines; GetHeightUnicode counts them.
         return new Clay.Dimensions(w, h == 0 ? fontSize : h);
     }
+
+    // Width-constrained measure used by Clay's layout pass to reflow text that
+    // overflows its container. MeasureFont wraps at maxWidth, returns the widest
+    // wrapped line + total height, and caches the layout so the matching
+    // UoFontRenderer.Draw at the same width is a hit (Draw re-wraps identically).
+    public Clay.Dimensions MeasureTextWrapped(ReadOnlySpan<char> text, ushort fontId, ushort fontSize, ushort letterSpacing, float maxWidth)
+    {
+        if (UoFontRuntime.Fonts == null || text.IsEmpty || maxWidth <= 0)
+            return MeasureText(text, fontId, fontSize, letterSpacing);
+
+        var (w, h) = UoFontRenderer.MeasureFont(text.ToString(), fontId, (int)maxWidth);
+        return new Clay.Dimensions(w, h == 0 ? fontSize : h);
+    }
 }
 
 // Glyph-atlas drawer for Bevy.UI Text render commands. Caches the parsed

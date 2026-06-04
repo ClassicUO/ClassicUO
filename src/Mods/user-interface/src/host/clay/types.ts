@@ -151,19 +151,97 @@ export interface UOButtonWidgetProxy {
   over: number;
 }
 
+// ---- Wire schema for cuo_ui_node (mirrors host ClayProxy.cs) ----
+// Option B: the reconciler speaks TinyEcs.Bevy.UI vocabulary. createElement
+// maps the component (Clay-ish) props into these shapes.
+
+export interface ValProxy {
+  type: number; // ValType
+  value: number;
+}
+
+export interface RectProxy {
+  left: ValProxy;
+  right: ValProxy;
+  top: ValProxy;
+  bottom: ValProxy;
+}
+
+// RGBA 0-255 (Clay.Color convention on the host).
+export interface ColorProxy {
+  r: number;
+  g: number;
+  b: number;
+  a: number;
+}
+
+export interface NodeProxy {
+  display: number; // Display
+  positionType: number; // PositionType
+  overflow: number; // Overflow
+  flexDirection: number; // FlexDirection
+  justifyContent: number; // JustifyContent
+  alignItems: number; // AlignItems
+  width: ValProxy;
+  height: ValProxy;
+  minWidth: ValProxy;
+  minHeight: ValProxy;
+  maxWidth: ValProxy;
+  maxHeight: ValProxy;
+  left: ValProxy;
+  top: ValProxy;
+  right: ValProxy;
+  bottom: ValProxy;
+  padding: RectProxy;
+  border: RectProxy;
+  gap: ValProxy;
+  aspectRatio: number;
+}
+
+export interface TextProxy {
+  value: string;
+  fontId: number;
+  fontSize: number;
+  color: ColorProxy;
+}
+
+export interface UORenderProxy {
+  kind: number; // UOCustomKind
+  assetId: number;
+  hueX: number;
+  hueY: number;
+  hueZ: number;
+}
+
+export interface UOButtonStateProxy {
+  normal: number;
+  over: number;
+  pressed: number;
+}
+
 export interface UINode {
   id: number;
-  config: ClayElementDecl;
-  uoConfig?: ClayUOCommandData;
-  textConfig?: UIText;
-  uoButton?: UOButtonWidgetProxy;
-  widgetType?: ClayWidgetType;
-  movable?: boolean;
+  node: NodeProxy;
+  backgroundColor?: ColorProxy;
+  borderColor?: ColorProxy;
+  borderRadius?: number;
+  text?: TextProxy;
+  uo?: UORenderProxy;
+  interactive: boolean;
+  movable: boolean;
+  z?: number; // GlobalZIndex
+  button?: UOButtonStateProxy; // per-state gump graphics (host swaps on hover/press)
+}
+
+export interface UINodeRelation {
+  child: number;
+  parent: number;
+  index: number;
 }
 
 export interface UINodes {
   nodes: UINode[];
-  relations: Record<number, number>;
+  relations: UINodeRelation[];
 }
 
 export interface UIEvent {

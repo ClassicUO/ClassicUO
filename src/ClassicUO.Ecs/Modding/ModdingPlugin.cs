@@ -32,6 +32,10 @@ internal readonly struct ModdingPlugin : IPlugin
 {
     public void Build(App app)
     {
+        // Host functions reach resources + world through the App; register it
+        // as a resource so SetupMods can capture it for the Extism user-data.
+        app.AddResource(app);
+
         var setupModsFn = SetupMods;
         var modInitFn = ModInitialize;
         var modUpdateFn = ModUpdate;
@@ -43,10 +47,19 @@ internal readonly struct ModdingPlugin : IPlugin
 
             .AddObserver(modInitFn)
 
-            .AddSystem(Stage.Update, modUpdateFn)
+            // SingleThreaded: host functions invoked from inside Plugin.Call
+            // (on_update / on_event) mutate TinyEcs.World directly (Api.cs), so
+            // these systems must not share a parallel batch with any system
+            // touching the same data. on_init runs in the observer below, which
+            // already fires serially at a sync point.
+            .AddSystem(modUpdateFn)
+            .InStage(Stage.Update)
+            .SingleThreaded()
+            .Build()
 
             .AddSystem(modEventsFn)
             .InStage(Stage.Update)
+            .SingleThreaded()
             .RunIf((EventReader<HostMessage> reader) => reader.HasEvents)
             .Build()
 
@@ -71,15 +84,16 @@ internal readonly struct ModdingPlugin : IPlugin
 
     private static void SetupMods(
         Commands commands,
-        Res<NetClient> network,
-        Res<Settings> settings,
-        Res<NetworkEntitiesMap> networkEntities
+        Res<App> appRes,
+        Res<Settings> settings
     )
     {
+        var app = appRes.Value;
+
         Extism.Sdk.Plugin.ConfigureFileLogging("stdout", LogLevel.Info);
         Console.WriteLine("extism version: {0}", Extism.Sdk.Plugin.ExtismVersion());
         var requiredFunctions = new[] { "on_init", "on_update", "on_event" };
-return;
+
         foreach (var path in settings.Value.Plugins)
         {
             var isUrl = Uri.TryCreate(path, UriKind.Absolute, out var uri);
@@ -93,19 +107,7 @@ return;
             Mod mod = null;
             var modRef = new WeakReference<Mod>(mod);
 
-            HostFunction[] functions =
-            [
-                // ..Api.Functions(modRef, schedState),
-                // ..bind<Graphic>("entity_graphic", networkEntities.Value),
-                // ..bind<Hue>("entity_hue", networkEntities.Value),
-                // ..bind<Facing>("entity_direction", networkEntities.Value),
-                // ..bind<WorldPosition>("entity_position", networkEntities.Value),
-                // ..bind<MobAnimation>("entity_animation", networkEntities.Value),
-                // ..bind<ServerFlags>("entity_flags", networkEntities.Value),
-                // ..bind<Hits>("entity_hp", networkEntities.Value),
-                // ..bind<Stamina>("entity_stamina", networkEntities.Value),
-                // ..bind<Mana>("entity_mana", networkEntities.Value),
-            ];
+            HostFunction[] functions = Api.Functions(modRef, app);
 
             var manifest = new Manifest(uri?.IsFile ?? true ? new PathWasmSource(path) : new UrlWasmSource(uri));
             using var compiled = new Extism.Sdk.CompiledPlugin(manifest, functions, true);
@@ -134,49 +136,6 @@ return;
 
             modRef.SetTarget(mod);
         }
-
-        // static IEnumerable<HostFunction> bind<T>(string postfix, NetworkEntitiesMap networkEntities)
-        //         where T : struct
-        // {
-        //     var ctx = (JsonTypeInfo<T>)ModdingJsonContext.Default.GetTypeInfo(typeof(T));
-        //     yield return serializeProps("cuo_get_" + postfix, networkEntities, ctx);
-        //     yield return deserializeProps("cuo_set_" + postfix, networkEntities, ctx);
-        //     yield break;
-        //
-        //
-        //     static HostFunction serializeProps(string name, NetworkEntitiesMap networkEntities, JsonTypeInfo<T> ctx)
-        //     {
-        //         ArgumentNullException.ThrowIfNull(ctx);
-        //
-        //         return HostFunction.FromMethod(name, null, (CurrentPlugin p, long offset) =>
-        //         {
-        //             var serial = p.ReadBytes(offset).As<uint>();
-        //             var ent = networkEntities.Get(serial);
-        //             if (ent == 0 || !ent.Has<T>())
-        //                 return p.WriteString("{}");
-        //
-        //             var json = JsonSerializer.Serialize(ent.Get<T>(), ctx);
-        //             return p.WriteString(json);
-        //         });
-        //     }
-        //
-        //     static HostFunction deserializeProps(string name, NetworkEntitiesMap networkEntities, JsonTypeInfo<T> ctx)
-        //     {
-        //         ArgumentNullException.ThrowIfNull(ctx);
-        //
-        //         return HostFunction.FromMethod(name, null, (CurrentPlugin p, long keyOffset, long valueOffset) =>
-        //         {
-        //             var serial = p.ReadBytes(keyOffset).As<uint>();
-        //             var ent = networkEntities.Get(serial);
-        //             if (ent == 0)
-        //                 return;
-        //
-        //             var value = p.ReadBytes(valueOffset);
-        //             var val = JsonSerializer.Deserialize(value, ctx);
-        //             ent.Set(val);
-        //         });
-        //     }
-        // }
     }
 
     private static void ModInitialize(OnAdd<WasmMod> trigger, Commands commands)

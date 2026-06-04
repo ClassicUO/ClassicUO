@@ -1,13 +1,12 @@
 import { createContext } from 'react';
 import createReconciler, { type ReactContext } from 'react-reconciler';
 import { DefaultEventPriority, NoEventPriority } from 'react-reconciler/constants.js';
-import { ClayWidgetType, HostWrapper } from '~/host';
+import { HostWrapper } from '~/host';
 import { shallowDiffKeys } from '~/support';
-import { TextStyle } from '~/ui/theme';
 import { ClayElement, ClayElementNames } from '../elements';
 import { applyEvents, EventManager } from '../events';
 import { ClayContainer } from './container';
-import { createElement } from './createElement';
+import { createElement, createTextFragment } from './createElement';
 
 type Props = Record<string, unknown>;
 type HostContext = object;
@@ -24,7 +23,6 @@ export function getClayReconciler(events: EventManager) {
   const prepareForCommit = () => null;
 
   const resetAfterCommit = (_container: ClayContainer) => {
-    // container.render();
   };
 
   const createInstance = (
@@ -34,7 +32,6 @@ export function getClayReconciler(events: EventManager) {
     _hostContext: HostContext,
     _internalHandle: unknown,
   ) => {
-    // console.log("createInstance", type);
     const instanceId = HostWrapper.spawnEntity();
 
     const node = createElement(type, props, instanceId);
@@ -62,12 +59,7 @@ export function getClayReconciler(events: EventManager) {
   ) => {
     const id = HostWrapper.spawnEntity();
 
-    const node = {
-      id,
-      config: {},
-      textConfig: { value: text, textConfig: TextStyle.default },
-      widgetType: ClayWidgetType.TextFragment,
-    };
+    const node = createTextFragment(id, text);
 
     HostWrapper.setNode(node);
 
@@ -81,11 +73,6 @@ export function getClayReconciler(events: EventManager) {
   };
 
   const appendInitialChild = (parent: ClayElement, child: ClayElement) => {
-    // console.log(
-    //   "appendInitialChild",
-    //   [parent.type, parent.instanceId],
-    //   [child.type, child.instanceId]
-    // );
     parent.children.push(child);
     HostWrapper.addEntityToParent(child.instanceId, parent.instanceId, -1);
   };
@@ -95,7 +82,6 @@ export function getClayReconciler(events: EventManager) {
   };
 
   const appendChild = (parent: ClayElement, child: ClayElement) => {
-    // console.log("appendChild", parent.type, child.type);
     parent.children.push(child);
     HostWrapper.addEntityToParent(child.instanceId, parent.instanceId, -1);
   };
@@ -105,21 +91,26 @@ export function getClayReconciler(events: EventManager) {
   };
 
   const removeChild = (parent: ClayElement, child: ClayElement) => {
-    // console.log("removeChild", parent.type, child.type);
     const index = parent.children.indexOf(child);
     if (index !== -1) {
       parent.children.splice(index, 1);
+      // Clear listeners for the whole subtree so they don't leak (host also
+      // drops them on delete, but keep the mod-side map in sync).
+      clearSubtreeEvents(child);
       HostWrapper.deleteEntity(child.instanceId);
     }
   };
 
+  const clearSubtreeEvents = (element: ClayElement) => {
+    events.clearEntityEvents(element.instanceId);
+    for (const c of element.children) clearSubtreeEvents(c);
+  };
+
   const removeChildFromContainer = (container: ClayContainer, child: ClayElement) => {
-    // console.log("removeChildFromContainer", child.type);
     container.removeChild(child);
   };
 
   const insertBefore = (parent: ClayElement, child: ClayElement, beforeChild: ClayElement) => {
-    // console.log("insertBefore", parent.type, child.type, beforeChild.type);
     const index = parent.children.indexOf(beforeChild);
     if (index !== -1) {
       parent.children.splice(index, 0, child);
@@ -130,7 +121,6 @@ export function getClayReconciler(events: EventManager) {
   };
 
   const commitUpdate = (instance: ClayElement, type: ClayElementNames, oldProps: Props, newProps: Props) => {
-    // console.log("commitUpdate", type, oldProps, newProps, commits++);
 
     instance.props = newProps;
     const diff = shallowDiffKeys(oldProps, newProps);
@@ -147,12 +137,11 @@ export function getClayReconciler(events: EventManager) {
   };
 
   const commitTextUpdate = (textInstance: ClayElement, _oldText: string, newText: string) => {
-    textInstance.node.textConfig.value = newText;
-    HostWrapper.setNode(textInstance.node);
+    if (textInstance.node?.text) textInstance.node.text.value = newText;
+    if (textInstance.node) HostWrapper.setNode(textInstance.node);
   };
 
   const shouldSetTextContent = (type: ClayElementNames, _props: Props) => {
-    // console.log("shouldSetTextContent", type, props);
 
     if (type.toLowerCase() === 'text-fragment') {
       return true;
@@ -162,7 +151,6 @@ export function getClayReconciler(events: EventManager) {
   };
 
   const clearContainer = (container: ClayContainer) => {
-    // console.log("clearContainer");
     return container.clear();
   };
 
@@ -213,7 +201,6 @@ export function getClayReconciler(events: EventManager) {
 
   const commitMount = (_instance: ClayElement) => {
     // mutate nodes before committing
-    // console.log("commitMount", instance.type);
   };
 
   const reconciler = createReconciler<
