@@ -493,10 +493,11 @@ internal readonly struct ServerGumpPlugin : IPlugin
                         // Gump.OnButtonClick disposes after ReplyGump — any
                         // activate button dismisses its own window (the server
                         // pushes the follow-up gump separately).
-                        btn.Observe((On<UiClick> _, Res<NetClient> net, Commands cmd, ResMut<ServerGumpRegistry> reg) =>
+                        btn.Observe((On<UiClick> _, Res<NetClient> net, Commands cmd, ResMut<ServerGumpRegistry> reg,
+                            Query<Data<ServerGumpTextEntry, Text>> entriesQ) =>
                         {
                             net.Value.Send_GumpResponse(capturedSender, capturedGumpId, capturedBtnId,
-                                Array.Empty<uint>(), Array.Empty<Tuple<ushort, string>>());
+                                Array.Empty<uint>(), CollectTextEntries(capturedRootId, entriesQ));
                             // Drop the registry entry so a later push of this
                             // gumpId never despawns this now-dead (recycled) id.
                             if (reg.Value.ByGumpId.TryGetValue(capturedGumpId, out var r) && r == capturedRootId)
@@ -660,14 +661,40 @@ internal readonly struct ServerGumpPlugin : IPlugin
             }
             else if (Eq(entry, "textentry") || Eq(entry, "textentrylimited"))
             {
+                // textentry x y width height hue entryID textID [limit]
+                // entryID (gparams[6]) is echoed back in the gump response;
+                // textID (gparams[7]) is the initial text line.
                 if (gparams.Count >= 8 &&
                     int.TryParse(gparams[1], out var tx) && int.TryParse(gparams[2], out var ty) &&
                     int.TryParse(gparams[3], out var tw) && int.TryParse(gparams[4], out var th) &&
                     ushort.TryParse(gparams[5], out var thue) &&
+                    ushort.TryParse(gparams[6], out var entryId) &&
                     int.TryParse(gparams[7], out var lid))
                 {
                     var text = SafeLine(lines, lid);
-                    childId = SpawnWrappedText(commands, new Vector2(tx, ty), new Vector2(tw, th), text, thue, false, false, isHtml: false, out _);
+
+                    // The hollow frame is the bounds-hittable focus region; the
+                    // shared SpawnTextField hangs the editable glyph + caret +
+                    // click-to-focus row off it (same primitive as the login
+                    // fields). Tag the glyph with ServerGumpTextEntry so the
+                    // gump-response button collects its value, and decorate all
+                    // sub-entities with ServerGumpChild so page visibility hides
+                    // them with the rest of the page.
+                    var capRoot = rootId; var capPage = page; var capGroup = group;
+                    var frame = commands.Spawn()
+                        .Insert(new Node
+                        {
+                            Display = Display.Flex,
+                            PositionType = PositionType.Absolute,
+                            Left = Val.Px(tx), Top = Val.Px(ty),
+                            Width = Val.Px(tw), Height = Val.Px(th),
+                        });
+                    var entryFont = new TextFont { FontId = UoFontRuntime.DefaultFont, Size = 18 };
+                    var glyphId = GuiPlugin.SpawnTextField(
+                        commands, frame, new Vector2(2, 2), entryFont, thue, text, masked: false,
+                        decorate: e => e.Insert(new ServerGumpChild { RootEntity = capRoot, Page = capPage, Group = capGroup }));
+                    commands.Entity(glyphId).Insert(new ServerGumpTextEntry { RootEntity = capRoot, EntryId = entryId });
+                    childId = frame.Id;
                     cx0 = tx; cy0 = ty; cw0 = tw; ch0 = th;
                 }
             }
@@ -700,10 +727,11 @@ internal readonly struct ServerGumpPlugin : IPlugin
                     var capRoot = rootId; var capToPage = toPage;
                     if (action != 0)
                     {
-                        btn.Observe((On<UiClick> _, Res<NetClient> net, Commands cmd, ResMut<ServerGumpRegistry> reg) =>
+                        btn.Observe((On<UiClick> _, Res<NetClient> net, Commands cmd, ResMut<ServerGumpRegistry> reg,
+                            Query<Data<ServerGumpTextEntry, Text>> entriesQ) =>
                         {
                             net.Value.Send_GumpResponse(capSender, capGumpId, capBtnId,
-                                Array.Empty<uint>(), Array.Empty<Tuple<ushort, string>>());
+                                Array.Empty<uint>(), CollectTextEntries(capRoot, entriesQ));
                             if (reg.Value.ByGumpId.TryGetValue(capGumpId, out var r) && r == capRoot)
                                 reg.Value.ByGumpId.Remove(capGumpId);
                             cmd.Entity(capRoot).Despawn();
@@ -953,6 +981,20 @@ internal readonly struct ServerGumpPlugin : IPlugin
     // `hue` is overloaded by command: a UO hue index for plain text
     // (text/croppedtext), or the HTML start colour for xmfhtmlgumpcolor/
     // xmfhtmltok (which can be 0x00FFFFFF — hence int, not ushort).
+    // Gather the (entryId, text) pairs for every textentry field belonging to
+    // the gump rooted at `rootId`, in the Tuple form Send_GumpResponse wants.
+    // Empty when the gump has no text entries.
+    private static Tuple<ushort, string>[] CollectTextEntries(
+        ulong rootId,
+        Query<Data<ServerGumpTextEntry, Text>> entriesQ)
+    {
+        var list = new List<Tuple<ushort, string>>();
+        foreach (var (_, te, t) in entriesQ)
+            if (te.Ref.RootEntity == rootId)
+                list.Add(Tuple.Create(te.Ref.EntryId, t.Ref.Value ?? string.Empty));
+        return list.Count == 0 ? Array.Empty<Tuple<ushort, string>>() : list.ToArray();
+    }
+
     private static ulong SpawnWrappedText(Commands commands, Vector2 position, Vector2 size, string text, int hue, bool hasBg, bool hasScroll, bool isHtml, out int contentHeight)
     {
         // Measure + lay out the wrapped (optionally HTML) run, then render it
@@ -1168,6 +1210,16 @@ internal struct ServerGumpChild
     public ulong RootEntity;
     public int Page;
     public int Group;
+}
+
+// On a textentry field's glyph entity (the one SpawnTextField returns and the
+// global editor mutates). On a gump-response button click, every entry whose
+// RootEntity matches the clicked gump's root is collected into the response's
+// (entryId, text) list — see CollectTextEntries.
+internal struct ServerGumpTextEntry
+{
+    public ulong RootEntity;
+    public ushort EntryId;
 }
 
 // Scrollbar slider thumb. SyncScrollThumbs reads the linked text container's

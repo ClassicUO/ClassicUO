@@ -162,6 +162,22 @@ internal readonly struct GuiPlugin : IPlugin
         // Blink the caret glyph of the focused text input (any TextCaret entity).
         app.AddSystem(Stage.PreUpdate, caretBlinkFn);
 
+        // Global editor for the focused text field. Every consumer that opts in
+        // with EditableText (login, chat, server-gump entries) gets char append /
+        // backspace here, so there's one editing path instead of one per gump.
+        // RunIf gates on a focused EditableText entity + pending chars, so it
+        // never competes with the bespoke readers (split number box, skills
+        // rename) — those fields don't carry EditableText.
+        Action<EventReader<CharInputEvent>, Res<FocusedInput>,
+            Query<Data<Text>, Filter<With<EditableText>, Without<MaskedText>>>,
+            Query<Data<MaskedText>, Filter<With<EditableText>>>> editFocusedFn = EditFocusedTextField;
+        app.AddSystem(editFocusedFn)
+            .InStage(Stage.Update)
+            .RunIf((EventReader<CharInputEvent> r, Res<FocusedInput> f,
+                    Query<Data<EditableText>> editableQ)
+                => r.HasEvents && f.Value.Entity != 0 && editableQ.Contains(f.Value.Entity))
+            .Build();
+
 #if AGENT_BUILD
         // Harness diagnostic: when debug.dumpLayout enables it, every left-click
         // prints the UI element stack under the cursor (topmost first) so the
@@ -412,6 +428,125 @@ internal readonly struct GuiPlugin : IPlugin
         foreach (var (_, text, caret) in carets)
             text.Ref.Value = (caret.Ref.Target == focusEnt && on) ? "_" : string.Empty;
     }
+
+    // Append / backspace typed chars into the focused EditableText entity. A
+    // MaskedText field (password) updates its hidden Value and lets
+    // SyncMaskedText mirror the mask chars into Text; a plain field edits Text
+    // directly. \n/\t/\r are not text edits (newline/tab/enter — submit is the
+    // consumer's job, e.g. ChatPlugin's enter handler).
+    private static void EditFocusedTextField(
+        EventReader<CharInputEvent> reader,
+        Res<FocusedInput> focused,
+        Query<Data<Text>, Filter<With<EditableText>, Without<MaskedText>>> textQuery,
+        Query<Data<MaskedText>, Filter<With<EditableText>>> maskedQuery)
+    {
+        var focusEnt = focused.Value.Entity;
+        if (focusEnt == 0) return;
+
+        bool masked = maskedQuery.Contains(focusEnt);
+        bool plain = !masked && textQuery.Contains(focusEnt);
+        if (!masked && !plain) return;
+
+        foreach (var ev in reader.Read())
+        {
+            var ch = ev.Value;
+            if (ch == '\n' || ch == '\t' || ch == '\r') continue;
+
+            if (masked)
+            {
+                (_, var mt) = maskedQuery.Get(focusEnt);
+                if (ch == '\b')
+                {
+                    if (!string.IsNullOrEmpty(mt.Ref.Value))
+                        mt.Ref.Value = mt.Ref.Value[..^1];
+                }
+                else
+                {
+                    mt.Ref.Value = (mt.Ref.Value ?? string.Empty) + ch;
+                }
+            }
+            else
+            {
+                (_, var t) = textQuery.Get(focusEnt);
+                if (ch == '\b')
+                {
+                    if (!string.IsNullOrEmpty(t.Ref.Value))
+                        t.Ref.Value = t.Ref.Value[..^1];
+                }
+                else
+                {
+                    t.Ref.Value = (t.Ref.Value ?? string.Empty) + ch;
+                }
+            }
+        }
+    }
+
+    // Builds a focusable, bounds-hittable editable text field on top of an
+    // already-spawned frame entity (the caller owns the background: a nine-patch
+    // gump, a translucent bar, or nothing). Mirrors the login/split layout: a
+    // content row (absolute, flex-row) holds the live glyph + a blinking caret;
+    // clicking the frame OR the row focuses the glyph. The returned glyph id is
+    // the focus target (FocusedInput.Entity), the entity the global
+    // EditFocusedTextField edits, and where Text/MaskedText hold the value — tag
+    // it as the caller needs (e.g. ServerGumpTextEntry). `decorate`, if given, is
+    // applied to every spawned sub-entity (row, glyph, caret) so callers can add
+    // scene/page markers (LoginScene, ServerGumpChild) that gate visibility.
+    internal static ulong SpawnTextField(
+        Commands commands,
+        EntityCommands frame,
+        Vector2 contentOffset,
+        TextFont font,
+        ushort hue,
+        string initial,
+        bool masked,
+        System.Action<EntityCommands> decorate = null,
+        char maskChar = '*')
+    {
+        frame.Insert(Interaction.None).Insert<UiContainsByBounds>();
+
+        var glyph = commands.Spawn()
+            .Insert(new Node { Width = Val.Auto, Height = Val.Auto })
+            .Insert(new Text(masked ? string.Empty : (initial ?? string.Empty)))
+            .Insert(font)
+            .Insert(new TextColor(UoFontRuntime.AsciiHue(hue)))
+            .Insert<TextInput>()
+            .Insert<EditableText>();
+        if (masked)
+            glyph.Insert(new MaskedText { Value = initial ?? string.Empty, MaskChar = maskChar });
+        decorate?.Invoke(glyph);
+        ulong glyphId = glyph.Id;
+
+        var caret = commands.Spawn()
+            .Insert(new Node { Width = Val.Auto, Height = Val.Auto })
+            .Insert(new Text(string.Empty))
+            .Insert(font)
+            .Insert(new TextColor(UoFontRuntime.AsciiHue(hue)))
+            .Insert(new TextCaret { Target = glyphId });
+        decorate?.Invoke(caret);
+
+        var row = commands.Spawn()
+            .Insert(new Node
+            {
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(contentOffset.X),
+                Top = Val.Px(contentOffset.Y),
+                FlexDirection = FlexDirection.Row,
+                AlignItems = AlignItems.Center,
+                Width = Val.Auto,
+                Height = Val.Auto,
+            })
+            .Insert(Interaction.None)
+            .Insert<UiContainsByBounds>();
+        decorate?.Invoke(row);
+        row.Observe((On<UiPointerDown> _, ResMut<FocusedInput> focused) => focused.Value.Entity = glyphId);
+        row.AddChild(glyph);
+        row.AddChild(caret);
+
+        frame.Observe((On<UiPointerDown> _, ResMut<FocusedInput> focused) => focused.Value.Entity = glyphId);
+        frame.AddChild(row);
+
+        return glyphId;
+    }
 }
 
 // FontStashSharp-backed text measurer for Bevy.UI / Clay.
@@ -546,7 +681,17 @@ internal struct UOCheckbox
 
 // Marker tags carried over from the old plugin.
 internal struct UIMovable;
+// On every editable field's glyph entity: the I-beam cursor (GameCursorPlugin)
+// and "a field is focused, chat back off" both key off this. Present on ALL
+// fields including ones with bespoke editors (split-stack number box, skills
+// group rename).
 internal struct TextInput;
+// Opt-in: the shared global editor (GuiPlugin.EditFocusedTextField) appends /
+// backspaces typed chars into THIS entity's Text (or MaskedText) when it holds
+// keyboard focus. Login, chat and server-gump text entries carry it; fields
+// with their own char readers (split number box, skills rename) deliberately
+// do NOT, so the global editor leaves them to their bespoke filtering.
+internal struct EditableText;
 
 // A caret glyph entity linked to a focusable text input (Target). CaretBlink
 // fills/clears its Text each frame based on focus + blink phase. Place it as a

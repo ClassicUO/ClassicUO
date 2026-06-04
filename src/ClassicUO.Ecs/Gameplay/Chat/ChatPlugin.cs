@@ -1,11 +1,15 @@
-﻿using System.Text;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
+using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using TinyEcs;
 using TinyEcs.Bevy;
+using TinyEcs.Bevy.UI;
+using ClayColor = Clay.Color;
 
 namespace ClassicUO.Ecs;
 
@@ -16,91 +20,145 @@ internal sealed class ChatOptions
     public ushort ChatColor { get; set; } = 0x44;
 }
 
-// Current chat input buffer. Lives as a resource (not system-local) so the
-// system-message renderer can draw the in-progress line + its translucent bar.
-internal sealed class ChatInputState
+// The in-game chat input is a real focusable UI field (built on the shared
+// SpawnTextField primitive), not a resource-backed overlay: it gets the I-beam
+// cursor on hover, a blinking caret, and the global EditFocusedTextField path
+// for typing — same as the login fields. ChatField.Glyph is the field's glyph
+// entity (the one that holds keyboard focus and the typed Text); 0 before spawn.
+internal sealed class ChatField
 {
-    public readonly StringBuilder Text = new();
+    public ulong Glyph;
 }
+
+// Marks the chat bar + its sub-entities so they're torn down on leaving the
+// game scene.
+internal struct ChatUi;
 
 internal readonly struct ChatPlugin : IPlugin
 {
+    private const int BarHeight = 22;
+    private const int BottomInset = 6;
+    private const int LeftMargin = 6;
+
     public void Build(App app)
     {
         app.AddResource(new ChatOptions());
-        app.AddResource(new ChatInputState());
+        app.AddResource(new ChatField());
 
-        app.AddSystem((
-            EventReader<CharInputEvent> reader,
-            Res<ChatInputState> input,
-            Res<UOFileManager> fileManager,
-            Res<NetClient> network,
-            Res<GameContext> gameCtx,
-            Res<Settings> settings,
-            Res<ChatOptions> chatOptions
-        ) =>
-            {
-                var sb = input.Value.Text;
-                foreach (var ev in reader.Read())
-                {
-                    if (ev.Value == '\n') continue;
-                    if (ev.Value == '\t') continue;
+        var spawnFn = SpawnChatField;
+        var despawnFn = DespawnChatField;
+        var keepFocusFn = KeepChatFocused;
+        var submitFn = SubmitChat;
 
-                    if (ev.Value == '\b')
-                    {
-                        if (sb.Length > 0)
-                            sb.Remove(sb.Length - 1, 1);
+        app
+            .AddSystem(spawnFn).OnEnter(GameState.GameScreen).Build()
+            .AddSystem(despawnFn).OnExit(GameState.GameScreen).Build()
 
-                        continue;
-                    }
+            // Chat is the default keyboard sink in-game: whenever no live text
+            // field holds focus (nothing focused, or the focused entity was
+            // despawned — e.g. a server-gump text entry closed), reclaim focus
+            // for the chat glyph so typing lands in chat. A focused split/skills/
+            // server-gump field still has its TextInput marker, so chat yields
+            // to it until it goes away.
+            .AddSystem(keepFocusFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> s) => s.Value.Current == GameState.GameScreen)
+            .Build()
 
-                    if (ev.Value == '\r')
-                    {
-                        if (sb.Length > 0)
-                        {
-                            var text = sb.ToString();
-                            var entries = fileManager.Value.Speeches.GetKeywords(text);
-
-                            if (gameCtx.Value.ClientVersion >= ClientVersion.CV_200)
-                            {
-                                network.Value.Send_UnicodeSpeechRequest(
-                                    text,
-                                    MessageType.Regular,
-                                    3,
-                                    chatOptions.Value.ChatColor,
-                                    settings.Value.Language,
-                                    entries
-                                );
-                            }
-                            else
-                            {
-                                network.Value.Send_ASCIISpeechRequest(
-                                    text,
-                                    MessageType.Regular,
-                                    3,
-                                    chatOptions.Value.ChatColor,
-                                    entries
-                                );
-                            }
-
-                            sb.Clear();
-                        }
-
-                        continue;
-                    }
-
-                    if (sb.Length < chatOptions.Value.MaxMessageLength)
-                        sb.Append(ev.Value);
-                }
-            }
-        )
-        .InStage(Stage.Update)
-            // Yield while a UI text field (e.g. a skills group-name editor) holds
-            // keyboard focus, so typed chars edit the field instead of the chat.
-            .RunIf((EventReader<CharInputEvent> reader, Res<NetClient> network,
-                    Res<FocusedInput> focused, Query<Data<SkillNameEdit>> editsQ)
-            => reader.HasEvents && network.Value.IsConnected
-               && !(focused.Value.Entity != 0 && editsQ.Contains(focused.Value.Entity)))
+            // Enter submits the chat line. Per-char editing is handled globally
+            // by GuiPlugin.EditFocusedTextField (the chat glyph opts in via the
+            // EditableText marker SpawnTextField adds).
+            .AddSystem(submitFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<KeyboardContext> kb, Res<NetClient> net)
+                => net.Value.IsConnected && kb.Value.IsPressedOnce(Keys.Enter))
             .Build();
+    }
+
+    private static void SpawnChatField(
+        Commands commands,
+        ResMut<ChatField> field,
+        ResMut<FocusedInput> focused)
+    {
+        // Translucent bar pinned to the viewport's bottom-left, spanning the
+        // width (Left+Right = 0). It's the bounds-hittable focus region; the
+        // shared SpawnTextField hangs the editable glyph + caret off it.
+        var bar = commands.Spawn()
+            .Insert(new Node
+            {
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(0),
+                Right = Val.Px(0),
+                Bottom = Val.Px(BottomInset),
+                Height = Val.Px(BarHeight),
+                FlexDirection = FlexDirection.Row,
+                AlignItems = AlignItems.Center,
+            })
+            .Insert(new BackgroundColor(new ClayColor(0, 0, 0, 180)))
+            .Insert<ChatUi>();
+
+        var font = new TextFont { FontId = UoFontRuntime.DefaultFont, Size = 18 };
+        var glyphId = GuiPlugin.SpawnTextField(
+            commands, bar, new Vector2(LeftMargin, 2), font, 0, string.Empty, masked: false,
+            decorate: e => e.Insert<ChatUi>());
+
+        field.Value.Glyph = glyphId;
+        focused.Value.Entity = glyphId;
+    }
+
+    private static void DespawnChatField(
+        Commands commands,
+        ResMut<ChatField> field,
+        Query<Data<ChatUi>> chatUiQ)
+    {
+        foreach (var (ent, _) in chatUiQ)
+            commands.Entity(ent.Ref).Despawn();
+        field.Value.Glyph = 0;
+    }
+
+    private static void KeepChatFocused(
+        Res<ChatField> field,
+        ResMut<FocusedInput> focused,
+        Query<Data<TextInput>> textInputQ)
+    {
+        var glyph = field.Value.Glyph;
+        if (glyph == 0) return;
+        // A live text field (chat itself, split number box, skills rename,
+        // server-gump entry) carries TextInput — leave focus alone. Otherwise
+        // reclaim it for chat.
+        if (focused.Value.Entity == 0 || !textInputQ.Contains(focused.Value.Entity))
+            focused.Value.Entity = glyph;
+    }
+
+    private static void SubmitChat(
+        Res<ChatField> field,
+        Res<UOFileManager> fileManager,
+        Res<NetClient> network,
+        Res<GameContext> gameCtx,
+        Res<Settings> settings,
+        Res<ChatOptions> chatOptions,
+        Query<Data<Text>> textQ)
+    {
+        var glyph = field.Value.Glyph;
+        if (glyph == 0 || !textQ.Contains(glyph)) return;
+
+        var (_, t) = textQ.Get(glyph);
+        var text = t.Ref.Value ?? string.Empty;
+        if (text.Length == 0) return;
+
+        var entries = fileManager.Value.Speeches.GetKeywords(text);
+        if (gameCtx.Value.ClientVersion >= ClientVersion.CV_200)
+        {
+            network.Value.Send_UnicodeSpeechRequest(
+                text, MessageType.Regular, 3, chatOptions.Value.ChatColor,
+                settings.Value.Language, entries);
+        }
+        else
+        {
+            network.Value.Send_ASCIISpeechRequest(
+                text, MessageType.Regular, 3, chatOptions.Value.ChatColor, entries);
+        }
+
+        t.Ref.Value = string.Empty;
     }
 }

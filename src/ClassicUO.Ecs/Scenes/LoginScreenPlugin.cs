@@ -20,7 +20,6 @@ internal readonly struct LoginScreenPlugin : IPlugin
     {
         var setupFn = Setup;
         var deleteMenuFn = DeleteMenu;
-        var typeIntoFocusedFn = TypeIntoFocused;
         var applyDpiFn = ApplyLoginScreenDpiSize;
         var updateInputHueFn = UpdateInputHue;
 
@@ -43,15 +42,9 @@ internal readonly struct LoginScreenPlugin : IPlugin
             .OnExit(GameState.LoginScreen)
             .Build()
 
-            // Drain CharInputEvent and append into the currently focused
-            // text input (Text or MaskedText, depending on which marker the
-            // entity carries). RunIf gates on the LoginScreen state so the
-            // chat plugin's chars don't accidentally land in textboxes.
-            .AddSystem(typeIntoFocusedFn)
-            .InStage(Stage.Update)
-            .RunIf((Res<State<GameState>> s, EventReader<CharInputEvent> r)
-                => s.Value.Current == GameState.LoginScreen && r.HasEvents)
-            .Build()
+            // Per-char editing of the focused field is handled globally by
+            // GuiPlugin.EditFocusedTextField (the login fields opt in via the
+            // EditableText marker SpawnTextField adds).
 
             // Mirror LoginGump.Update: focused textbox renders with hue 0x0021,
             // unfocused with hue 0 (white).
@@ -63,53 +56,6 @@ internal readonly struct LoginScreenPlugin : IPlugin
             .AddPlugin<ServerSelectionPlugin>()
             .AddPlugin<CharacterSelectionPlugin>()
             .AddPlugin<LoginErrorScreenPlugin>();
-    }
-
-    // Append CharInputEvent chars to the focused TextInput entity. If the
-    // entity has a MaskedText component (password field), update its Value
-    // and let SyncMaskedText mirror the mask chars into Text. Otherwise
-    // update Text directly.
-    private static void TypeIntoFocused(
-        EventReader<CharInputEvent> reader,
-        Res<FocusedInput> focused,
-        Query<Data<Text>, Filter<With<TextInput>, Without<MaskedText>>> textQuery,
-        Query<Data<MaskedText>, Filter<With<TextInput>>> maskedQuery)
-    {
-        var focusEnt = focused.Value.Entity;
-        if (focusEnt == 0) return;
-
-        foreach (var ev in reader.Read())
-        {
-            var ch = ev.Value;
-            if (ch == '\n' || ch == '\t') continue;
-
-            if (maskedQuery.Contains(focusEnt))
-            {
-                (_, var mt) = maskedQuery.Get(focusEnt);
-                if (ch == '\b')
-                {
-                    if (!string.IsNullOrEmpty(mt.Ref.Value))
-                        mt.Ref.Value = mt.Ref.Value[..^1];
-                }
-                else
-                {
-                    mt.Ref.Value = (mt.Ref.Value ?? string.Empty) + ch;
-                }
-            }
-            else if (textQuery.Contains(focusEnt))
-            {
-                (_, var t) = textQuery.Get(focusEnt);
-                if (ch == '\b')
-                {
-                    if (!string.IsNullOrEmpty(t.Ref.Value))
-                        t.Ref.Value = t.Ref.Value[..^1];
-                }
-                else
-                {
-                    t.Ref.Value = (t.Ref.Value ?? string.Empty) + ch;
-                }
-            }
-        }
     }
 
     // Per-frame hue toggle to match LoginGump.Update: the focused textbox
@@ -252,44 +198,23 @@ internal readonly struct LoginScreenPlugin : IPlugin
 
         mainMenu.AddChild(arrowButton);
 
-        // Username field background + text child.
+        // Username + password fields. The shared SpawnTextField builds the
+        // focusable glyph + caret + click-to-focus row on the hollow 0x0BB8
+        // frame (its interior is transparent, so UiContainsByBounds makes the
+        // whole box focusable, matching legacy's solid StbTextBox). font 5 +
+        // resting hue 0 mirror main's LoginGump StbTextBox(font:5, !unicode);
+        // UpdateInputHue swaps the focused field to 0x0021 per frame.
+        var loginFieldFont = new TextFont { FontId = (ushort)(5 | UoFontRuntime.AsciiFlag), Size = 20 };
+
         var usernameField = gumpBuilder.Value.AddGumpNinePatch(
-            commands,
-            0x0BB8,
-            XnaVector3.UnitZ,
-            new XnaVector2(218, 283),
-            new XnaVector2(210, 30))
-            .Insert<LoginScene>()
-            // Interaction.None makes the gump frame clickable so a click
-            // anywhere over the field sets the keyboard focus to the
-            // child Text entity (which is what TypeIntoFocused queries).
-            // UiContainsByBounds: 0x0BB8 is a hollow input *frame* (its
-            // interior is transparent), so pixel-perfect hit-test rejects
-            // clicks in the middle of the field. Bounds-capture makes the
-            // whole box focusable, matching legacy's solid StbTextBox.
-            .Insert(Interaction.None)
-            .Insert<UiContainsByBounds>();
-
-        var usernameText = commands.Spawn()
-            .Insert(new Node { Width = Val.Auto, Height = Val.Auto })
-            .Insert(new Text(settings.Value.Username ?? string.Empty))
-            // Parity with main's LoginGump textboxes: StbTextBox(font:5,
-            // isunicode:false) — UO ASCII font 5. TextColor carries the packed
-            // hue (0 resting); UpdateInputHue swaps it to 0x0021 on focus,
-            // matching LoginGump.Update's per-frame hue toggle.
-            .Insert(new TextFont { FontId = (ushort)(5 | UoFontRuntime.AsciiFlag), Size = 20 })
-            .Insert(new TextColor(UoFontRuntime.AsciiHue(0)))
-            .Insert<TextInput>()
-            .Insert<UsernameInput>()
+            commands, 0x0BB8, XnaVector3.UnitZ,
+            new XnaVector2(218, 283), new XnaVector2(210, 30))
             .Insert<LoginScene>();
-
-        var usernameTextId = usernameText.Id;
-        usernameField.Observe((On<UiPointerDown> _, ResMut<FocusedInput> focused) =>
-        {
-            focused.Value.Entity = usernameTextId;
-        });
-
-        AddFieldContent(commands, usernameField, usernameText, usernameTextId);
+        var usernameTextId = GuiPlugin.SpawnTextField(
+            commands, usernameField, new XnaVector2(4, 4), loginFieldFont, 0,
+            settings.Value.Username ?? string.Empty, masked: false,
+            decorate: e => e.Insert<LoginScene>());
+        commands.Entity(usernameTextId).Insert<UsernameInput>();
         mainMenu.AddChild(usernameField);
 
         // Parity with main's LoginGump: auto-focus username field on entry
@@ -299,38 +224,19 @@ internal readonly struct LoginScreenPlugin : IPlugin
             focused.Value.Entity = usernameTextId;
         }
 
-        // Password field background + text child (masked).
-        var passwordField = gumpBuilder.Value.AddGumpNinePatch(
-            commands,
-            0x0BB8,
-            XnaVector3.UnitZ,
-            new XnaVector2(218, 283 + 50),
-            new XnaVector2(210, 30))
-            .Insert<LoginScene>()
-            .Insert(Interaction.None)
-            .Insert<UiContainsByBounds>();
-
         // Real password kept in MaskedText.Value; SyncMaskedText (GuiPlugin)
         // mirrors it into Text as mask chars before the renderer sees it.
         var decrypted = Crypter.Decrypt(settings.Value.Password ?? string.Empty) ?? string.Empty;
 
-        var passwordText = commands.Spawn()
-            .Insert(new Node { Width = Val.Auto, Height = Val.Auto })
-            .Insert(new Text(string.Empty))
-            .Insert(new MaskedText { Value = decrypted, MaskChar = '*' })
-            .Insert(new TextFont { FontId = (ushort)(5 | UoFontRuntime.AsciiFlag), Size = 20 })
-            .Insert(new TextColor(UoFontRuntime.AsciiHue(0)))
-            .Insert<TextInput>()
-            .Insert<PasswordInput>()
+        var passwordField = gumpBuilder.Value.AddGumpNinePatch(
+            commands, 0x0BB8, XnaVector3.UnitZ,
+            new XnaVector2(218, 283 + 50), new XnaVector2(210, 30))
             .Insert<LoginScene>();
-
-        var passwordTextId = passwordText.Id;
-        passwordField.Observe((On<UiPointerDown> _, ResMut<FocusedInput> focused) =>
-        {
-            focused.Value.Entity = passwordTextId;
-        });
-
-        AddFieldContent(commands, passwordField, passwordText, passwordTextId);
+        var passwordTextId = GuiPlugin.SpawnTextField(
+            commands, passwordField, new XnaVector2(4, 4), loginFieldFont, 0,
+            decrypted, masked: true,
+            decorate: e => e.Insert<LoginScene>());
+        commands.Entity(passwordTextId).Insert<PasswordInput>();
         mainMenu.AddChild(passwordField);
 
         // Version text — matches main's LoginGump.ctor CV>=706400 branch:
@@ -393,50 +299,6 @@ internal readonly struct LoginScreenPlugin : IPlugin
             .Observe((On<CheckboxChanged> trig, Res<Settings> s) => s.Value.SaveAccount = trig.Event.Checked);
         mainMenu.AddChild(saveAccountCheck);
         AddCheckboxLabel(commands, mainMenu, "Save Account", new XnaVector2(260, 419), checkboxFont, checkboxColor, saveAccountCheck.Id);
-    }
-
-    // Lay out a textbox's content as a left-anchored flex row holding the
-    // value text followed by a caret. The caret is empty until the field is
-    // focused (CaretBlink), giving an empty focused field a visible cursor —
-    // the "highlight" the legacy StbTextBox draws via DrawCaret.
-    private static void AddFieldContent(Commands commands, EntityCommands field, EntityCommands text, ulong textId)
-    {
-        // The row is absolutely positioned, so in Clay it is a *floating*
-        // element that captures the pointer over the text glyphs and blocks
-        // the field behind it. The text/caret aren't interactive, so a click
-        // on the text would otherwise hit nothing. Make the row itself focus
-        // the field (Interaction.None + UiContainsByBounds), so clicking the
-        // written text highlights the field just like clicking empty space.
-        var row = commands.Spawn()
-            .Insert<LoginScene>()
-            .Insert(new Node
-            {
-                PositionType = PositionType.Absolute,
-                Left = Val.Px(4),
-                Top = Val.Px(4),
-                FlexDirection = FlexDirection.Row,
-                AlignItems = AlignItems.Center,
-                Width = Val.Auto,
-                Height = Val.Auto,
-            })
-            .Insert(Interaction.None)
-            .Insert<UiContainsByBounds>();
-        row.Observe((On<UiPointerDown> _, ResMut<FocusedInput> focused) => focused.Value.Entity = textId);
-
-        var caret = commands.Spawn()
-            .Insert<LoginScene>()
-            .Insert(new Node { Width = Val.Auto, Height = Val.Auto })
-            .Insert(new Text(string.Empty))
-            .Insert(new TextFont { FontId = (ushort)(5 | UoFontRuntime.AsciiFlag), Size = 20 })
-            .Insert(new TextColor(UoFontRuntime.AsciiHue(FocusHue)))
-            // Shared caret: GuiPlugin.CaretBlink fills/clears this glyph based
-            // on focus, so every text input that drops a TextCaret sibling gets
-            // the same blinking cursor.
-            .Insert(new TextCaret { Target = textId });
-
-        row.AddChild(text);
-        row.AddChild(caret);
-        field.AddChild(row);
     }
 
     // Caption next to a checkbox that toggles it on click, so the checkbox +
@@ -508,8 +370,6 @@ internal readonly struct LoginScreenPlugin : IPlugin
         None,
         LoginRequested
     }
-
-    private const ushort FocusHue = 0x0021;
 
     private struct LoginScene;
     private struct UsernameInput;

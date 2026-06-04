@@ -92,8 +92,6 @@ internal readonly struct SystemMessagePlugin : IPlugin
     private const int BottomInset = 6;    // keep the bar off the very viewport edge
     private const int MaxWidth = 320;     // legacy ChatLineTime RenderedText maxWidth
 
-    private static Texture2D _white;
-
     public void Build(App app)
     {
         app.AddResource(new SystemMessages());
@@ -127,7 +125,6 @@ internal readonly struct SystemMessagePlugin : IPlugin
     private static void Render(
         Res<UltimaBatcher2D> batch,
         Res<SystemMessages> msgs,
-        Res<ChatInputState> chat,
         Res<Camera> camera,
         Res<UOFileManager> files,
         Res<Time> time,
@@ -136,9 +133,7 @@ internal readonly struct SystemMessagePlugin : IPlugin
     {
         msgs.Value.Expire(time.Value.Total);
 
-        var chatText = chat.Value.Text;
-        bool chatting = chatText.Length > 0;
-        if (msgs.Value.Entries.Count == 0 && !chatting) return;
+        if (msgs.Value.Entries.Count == 0) return;
 
         sb.Value ??= new StringBuilder();
         wrapBuf.Value ??= new List<string>();
@@ -146,46 +141,9 @@ internal readonly struct SystemMessagePlugin : IPlugin
         var bounds = camera.Value.Bounds;
         b.Begin();
 
-        if (_white == null)
-        {
-            _white = new Texture2D(b.GraphicsDevice, 1, 1);
-            _white.SetData(new[] { Color.White });
-        }
-
-        var font = FontCache.GetFont(0).GetFont(FontSize);
-
-        // Chat input bar pinned to the bottom — a translucent black strip with
-        // the in-progress line, shown only while typing (legacy SystemChatControl
-        // _trans, visible when active).
+        // Leave room for the chat input field (now a Clay UI bar, ChatPlugin)
+        // pinned to the bottom — system messages stack upward from just above it.
         float barTop = bounds.Height - BottomInset - ChatBarHeight;
-        if (chatting)
-        {
-            // Solid-tint draw (the Color overload builds a SHADER_RGB_TINT hue
-            // vector — the hued GetHueVector path discards a plain white pixel).
-            // Scale a 1x1 white texture to the bar size for a translucent strip.
-            b.Draw(_white, new Vector2(0, barTop),
-                new Rectangle(0, 0, 1, 1), new Color(0, 0, 0, 180), 0f,
-                new Vector2(bounds.Width, ChatBarHeight), 0f);
-
-            sb.Value.Clear();
-            sb.Value.Append(chatText);
-            var chatColor = GetColor(files.Value.Hues, 0);
-            font.DrawText(b, sb.Value, new Vector2(LeftMargin, barTop + 2),
-                chatColor,
-                effect: FontStashSharp.FontSystemEffect.Stroked, effectAmount: 1);
-
-            // Blinking caret after the in-progress line — same ~530ms cadence as
-            // the Bevy.UI text inputs (GuiPlugin.CaretBlink). Drawn as a separate
-            // glyph, NOT appended to the input buffer, so it never reaches the
-            // speech packet (the send path reads ChatInputState.Text).
-            if ((int)(time.Value.Total / 530f) % 2 == 0)
-            {
-                var caretX = LeftMargin + font.MeasureString(sb.Value).X;
-                font.DrawText(b, "_", new Vector2(caretX, barTop + 2),
-                    chatColor,
-                    effect: FontStashSharp.FontSystemEffect.Stroked, effectAmount: 1);
-            }
-        }
 
         // System messages stack upward from just above the chat bar. Each line
         // wraps at a fixed width (legacy ChatLineTime: maxWidth 320).
