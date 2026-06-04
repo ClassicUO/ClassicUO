@@ -543,7 +543,7 @@ internal sealed class FontStashTextMeasurer : ITextMeasurer
     private const FontSystemEffect FONT_EFFECT = FontSystemEffect.Stroked;
     private const int FONT_EFFECT_AMOUNT = 1;
 
-    public Dimensions MeasureText(ReadOnlySpan<char> text, ushort fontId, ushort fontSize, ushort letterSpacing)
+    public Dimensions MeasureText(ReadOnlySpan<char> text, ushort fontId, ushort fontSize, ushort letterSpacing, float maxWidth = 0)
     {
         if (text.IsEmpty)
             return new Dimensions(0, fontSize);

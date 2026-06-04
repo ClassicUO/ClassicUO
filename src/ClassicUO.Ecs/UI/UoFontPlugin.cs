@@ -94,11 +94,22 @@ internal static class UoFontRuntime
 
 internal sealed class UoFontTextMeasurer : Clay.ITextMeasurer
 {
-    public Clay.Dimensions MeasureText(ReadOnlySpan<char> text, ushort fontId, ushort fontSize, ushort letterSpacing)
+    // maxWidth > 0 wraps via MeasureFont (widest wrapped line + total height) and
+    // caches the layout so the matching UoFontRenderer.Draw at the same width hits
+    // (Draw re-wraps identically). maxWidth <= 0 measures the run as-is — wrap
+    // already handled upstream by ServerGumpPlugin.WrapText inserts '\n' between
+    // lines, which GetHeight* counts.
+    public Clay.Dimensions MeasureText(ReadOnlySpan<char> text, ushort fontId, ushort fontSize, ushort letterSpacing, float maxWidth = 0)
     {
         var fonts = UoFontRuntime.Fonts;
         if (fonts == null || text.IsEmpty)
             return new Clay.Dimensions(0, fontSize);
+
+        if (maxWidth > 0)
+        {
+            var (ww, hh) = UoFontRenderer.MeasureFont(text.ToString(), fontId, (int)maxWidth);
+            return new Clay.Dimensions(ww, hh == 0 ? fontSize : hh);
+        }
 
         var (font, ascii) = UoFontRuntime.Resolve(fontId);
         var str = text.ToString();
@@ -113,22 +124,6 @@ internal sealed class UoFontTextMeasurer : Clay.ITextMeasurer
             w = fonts.GetWidthUnicode(font, str);
             h = fonts.GetHeightUnicode(font, str, w, TEXT_ALIGN_TYPE.TS_LEFT, 0);
         }
-        // Clay uses the measured dimensions to lay out a single text
-        // element rect. Wrap (handled upstream by ServerGumpPlugin.WrapText)
-        // already inserts '\n' between lines; GetHeightUnicode counts them.
-        return new Clay.Dimensions(w, h == 0 ? fontSize : h);
-    }
-
-    // Width-constrained measure used by Clay's layout pass to reflow text that
-    // overflows its container. MeasureFont wraps at maxWidth, returns the widest
-    // wrapped line + total height, and caches the layout so the matching
-    // UoFontRenderer.Draw at the same width is a hit (Draw re-wraps identically).
-    public Clay.Dimensions MeasureTextWrapped(ReadOnlySpan<char> text, ushort fontId, ushort fontSize, ushort letterSpacing, float maxWidth)
-    {
-        if (UoFontRuntime.Fonts == null || text.IsEmpty || maxWidth <= 0)
-            return MeasureText(text, fontId, fontSize, letterSpacing);
-
-        var (w, h) = UoFontRenderer.MeasureFont(text.ToString(), fontId, (int)maxWidth);
         return new Clay.Dimensions(w, h == 0 ? fontSize : h);
     }
 }
