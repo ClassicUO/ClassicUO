@@ -53,6 +53,7 @@ internal static class InputHandlers
         d.Register("debug.openPopup", DebugOpenPopup);
         d.Register("debug.openSplit", DebugOpenSplit);
         d.Register("debug.openServerGump", DebugOpenServerGump);
+        d.Register("debug.openTextEntryDialog", DebugOpenTextEntryDialog);
         d.Register("debug.dumpLayout", DebugDumpLayout);
     }
 
@@ -104,6 +105,32 @@ internal static class InputHandlers
         var q = ctx.Runtime.GetResource<DebugServerGumpQueue>();
         q.Pending.Add((gumpId, x, y, layout, lines));
         return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true, ["gumpId"] = gumpId } };
+    }
+
+    // Test-only: spawn the server text-entry prompt (packet 0xAB) through the
+    // real observer. Optional serial/parentId/buttonId/text/description/variant/
+    // maxLength/showCancel; defaults give a renamable-rune-style prompt.
+    public static JsonRpcResponse DebugOpenTextEntryDialog(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        uint serial = 0x40001234u; byte parentId = 0, buttonId = 0, variant = 0;
+        uint maxLength = 30; bool showCancel = true;
+        string text = "Enter a name:";
+        string description = "Name this rune.";
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object)
+        {
+            if (p.TryGetProperty("serial", out var se) && se.TryGetUInt32(out var sv)) serial = sv;
+            if (p.TryGetProperty("parentId", out var pe) && pe.TryGetInt32(out var pv)) parentId = (byte)pv;
+            if (p.TryGetProperty("buttonId", out var be) && be.TryGetInt32(out var bv)) buttonId = (byte)bv;
+            if (p.TryGetProperty("variant", out var ve) && ve.TryGetInt32(out var vv)) variant = (byte)vv;
+            if (p.TryGetProperty("maxLength", out var me) && me.TryGetUInt32(out var mv)) maxLength = mv;
+            if (p.TryGetProperty("showCancel", out var ce) && (ce.ValueKind == JsonValueKind.True || ce.ValueKind == JsonValueKind.False)) showCancel = ce.GetBoolean();
+            if (p.TryGetProperty("text", out var te) && te.ValueKind == JsonValueKind.String) text = te.GetString() ?? text;
+            if (p.TryGetProperty("description", out var de) && de.ValueKind == JsonValueKind.String) description = de.GetString() ?? description;
+        }
+
+        var q = ctx.Runtime.GetResource<DebugTextEntryDialogQueue>();
+        q.Pending.Add((serial, parentId, buttonId, text, showCancel, variant, maxLength, description));
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true, ["serial"] = serial } };
     }
 
     // Test-only: open the split-stack menu without a server item / drag. The

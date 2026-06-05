@@ -1234,6 +1234,50 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
+        public static void Send_TextEntryDialogResponse
+        (
+            this NetClient socket,
+            uint serial,
+            byte parentID,
+            byte button,
+            string text,
+            bool code
+        )
+        {
+            const byte ID = 0xAC;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt32BE(serial);
+            writer.WriteUInt8(parentID);
+            writer.WriteUInt8(button);
+            writer.WriteBool(code);
+            writer.WriteUInt16BE((ushort)(text.Length + 1));
+            writer.WriteASCII(text, text.Length + 1);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
         public static void Send_LogoutNotification(this NetClient socket)
         {
             const byte ID = 0xD1;

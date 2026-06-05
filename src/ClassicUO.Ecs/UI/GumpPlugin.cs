@@ -14,5 +14,6 @@ internal readonly struct GumpPlugin : IPlugin
         app.AddPlugin<ContainerGumpPlugin>();
         app.AddPlugin<PaperdollPlugin>();
         app.AddPlugin<ServerGumpPlugin>();
+        app.AddPlugin<TextEntryDialogPlugin>();
     }
 }
