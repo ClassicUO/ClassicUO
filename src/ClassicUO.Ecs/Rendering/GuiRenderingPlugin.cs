@@ -151,7 +151,7 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                     // post-layout button system's graphic/hue changes are
                     // already reflected here — no entity lookup, no side map.
                     if (cmd.Custom.CustomData is UOCustomRender custom)
-                        DrawCustom(b, assets.Value, in cmd, custom);
+                        DrawCustom(b, assets.Value, dumbTexture.Value.Texture!, in cmd, custom);
                     break;
                 }
 
@@ -296,12 +296,41 @@ internal readonly struct GuiRenderingPlugin : IPlugin
             0f, Vector2.One, cmd.ZIndex);
     }
 
-    private static void DrawCustom(UltimaBatcher2D b, AssetsServer assets, in RenderCommand cmd, UOCustomRender custom)
+    private static void DrawCustom(UltimaBatcher2D b, AssetsServer assets, Texture2D white, in RenderCommand cmd, UOCustomRender custom)
     {
         ref readonly var bb = ref cmd.BoundingBox;
 
         switch (custom.Kind)
         {
+            case UOCustomKind.HueGrid:
+            {
+                // Dye palette: blit one solid swatch per cell from the baked
+                // colors (the UO hue shader can't tint a plain white pixel, so
+                // ColorPickerPlugin pre-resolves each hue to RGBA), then a 2px
+                // white dot over the selected cell (mirrors legacy ColorPickerBox).
+                var colors = custom.GridColors;
+                if (colors == null || custom.GridRows <= 0 || custom.GridCols <= 0)
+                    break;
+                int rows = custom.GridRows, cols = custom.GridCols;
+                int cw = custom.CellW, ch = custom.CellH;
+                int ox = (int)bb.X, oy = (int)bb.Y;
+                for (int i = 0; i < colors.Length && i < rows * cols; i++)
+                {
+                    int r = i / cols, c = i % cols;
+                    uint p = colors[i];
+                    var col = new XnaColor((byte)(p & 0xFF), (byte)((p >> 8) & 0xFF), (byte)((p >> 16) & 0xFF), (byte)((p >> 24) & 0xFF));
+                    DrawQuad(b, white, ox + c * cw, oy + r * ch, cw, ch, col, cmd.ZIndex);
+                }
+                int si = custom.SelectedIndex;
+                if (si >= 0 && si < rows * cols)
+                {
+                    int sc = si % cols, sr = si / cols;
+                    int dx = ox + (int)(cw * (sc + 0.5f)) - 1;
+                    int dy = oy + (int)(ch * (sr + 0.5f)) - 1;
+                    DrawQuad(b, white, dx, dy, 2, 2, XnaColor.White, cmd.ZIndex);
+                }
+                break;
+            }
             case UOCustomKind.Gump:
             {
                 ref readonly var info = ref assets.Gumps.GetGump(custom.AssetId);

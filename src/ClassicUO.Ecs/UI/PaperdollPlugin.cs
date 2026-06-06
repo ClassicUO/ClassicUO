@@ -263,10 +263,15 @@ internal readonly struct PaperdollPlugin : IPlugin
             btnHelp.Observe((On<UiClick> _, Res<NetClient> net) => net.Value.Send_HelpRequest());
             commands.AddChild(root.Id, btnHelp.Id);
 
-            // Options: OOP opens OptionsGump (client-side); no ECS OptionsGump
-            // yet so the click is a no-op log.
+            // Options: OOP opens OptionsGump (client-side). The ECS OptionsGump
+            // is a small launcher window (see OptionsGumpPlugin).
             var btnOptions = builder.AddButton(commands, (0x07D6, 0x07D7, 0x07D8), Vector3.UnitZ, new Vector2(185, 44 + 27 * 1));
-            btnOptions.Observe((On<UiClick> _) => Console.WriteLine("[Paperdoll] Options clicked — no ECS OptionsGump"));
+            btnOptions.Observe((On<UiClick> _,
+                                Commands cmd,
+                                Res<UiZCounter> z,
+                                Res<UiSurface> surf,
+                                Query<Data<OptionsWindow>> existing) =>
+                OptionsGumpPlugin.OpenOrFocus(cmd, z.Value, surf.Value, existing));
             commands.AddChild(root.Id, btnOptions.Id);
 
             var btnLogout = builder.AddButton(commands, (0x07D9, 0x07DA, 0x07DB), Vector3.UnitZ, new Vector2(185, 44 + 27 * 2));

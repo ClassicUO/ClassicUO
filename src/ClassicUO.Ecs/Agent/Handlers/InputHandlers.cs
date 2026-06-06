@@ -54,6 +54,7 @@ internal static class InputHandlers
         d.Register("debug.openSplit", DebugOpenSplit);
         d.Register("debug.openServerGump", DebugOpenServerGump);
         d.Register("debug.openTextEntryDialog", DebugOpenTextEntryDialog);
+        d.Register("debug.openColorPicker", DebugOpenColorPicker);
         d.Register("debug.dumpLayout", DebugDumpLayout);
     }
 
@@ -130,6 +131,22 @@ internal static class InputHandlers
 
         var q = ctx.Runtime.GetResource<DebugTextEntryDialogQueue>();
         q.Pending.Add((serial, parentId, buttonId, text, showCancel, variant, maxLength, description));
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true, ["serial"] = serial } };
+    }
+
+    // Test-only: spawn the dye/hue picker (packet 0x95) through the real observer.
+    // Optional serial/graphic; defaults give a dyeable-item-style prompt.
+    public static JsonRpcResponse DebugOpenColorPicker(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        uint serial = 0x40001234u; ushort graphic = 0x0FAB;
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object)
+        {
+            if (p.TryGetProperty("serial", out var se) && se.TryGetUInt32(out var sv)) serial = sv;
+            if (p.TryGetProperty("graphic", out var ge) && ge.TryGetInt32(out var gv)) graphic = (ushort)gv;
+        }
+
+        var q = ctx.Runtime.GetResource<DebugColorPickerQueue>();
+        q.Pending.Add((serial, graphic));
         return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true, ["serial"] = serial } };
     }
 

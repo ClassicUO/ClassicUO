@@ -496,7 +496,15 @@ internal readonly struct TopBarPlugin : IPlugin
                 btn.Observe((On<UiClick> _) => Console.WriteLine("[TopBar] World Map — no ECS gump yet"));
                 break;
             case Buttons.Debug:
-                btn.Observe((On<UiClick> _) => Console.WriteLine("[TopBar] Debug — no ECS gump yet"));
+                // Repurposed as an Options/test window launcher (host-side gump
+                // with buttons that drive client-local features — e.g. the dye
+                // ColorPicker — that have no in-world trigger yet).
+                btn.Observe((On<UiClick> _,
+                             Commands cmd,
+                             Res<UiZCounter> z,
+                             Res<UiSurface> surf,
+                             Query<Data<OptionsWindow>> existing) =>
+                    OptionsGumpPlugin.OpenOrFocus(cmd, z.Value, surf.Value, existing));
                 break;
             case Buttons.NetStats:
                 btn.Observe((On<UiClick> _) => Console.WriteLine("[TopBar] NetStats — no ECS gump yet"));

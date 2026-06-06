@@ -270,25 +270,52 @@ internal sealed class GumpBuilder
     /// Spawn a horizontal slider over [min,max]. Builds the track + a draggable
     /// knob child; SliderPlugin positions/drags the knob and fires SliderChanged.
     /// Returns the track entity (carries the Slider component to read Value).
-    public EntityCommands AddHSlider(Commands commands, float min, float max, float value, Vector2 position, float width, Vector3 hue = default)
+    /// thumbGump != 0 renders the knob as that gump sprite (sized from the asset)
+    /// instead of the default solid-color rect.
+    public EntityCommands AddHSlider(Commands commands, float min, float max, float value, Vector2 position, float width, Vector3 hue = default, ushort thumbGump = 0)
     {
-        ref readonly var knobInfo = ref _assets.Gumps.GetGump(SliderKnob);
-        var height = knobInfo.UV.Height;
+        int knobW = 12, knobH = 16;
+        if (thumbGump != 0)
+        {
+            ref readonly var ti = ref _assets.Gumps.GetGump(thumbGump);
+            knobW = ti.UV.Width; knobH = ti.UV.Height;
+        }
 
+        // The track is an invisible custom LEAF (UOCustomKind.None: emits a Custom
+        // command, draws nothing, gets a ComputedNode + bbox hit-test). A leaf keeps
+        // its declared Px width; a plain container would FIT to its single floating
+        // child and collapse to the thumb width, leaving the thumb zero travel. The
+        // thumb is positioned absolutely by SliderPlugin (it does not rely on Clay to
+        // flow it), exactly like the scrollbar thumb under its GumpTiled-leaf track.
         var track = commands.Spawn()
-            .Insert(MakeFloatingNode(position, new Vector2(width, height)))
-            // No background sprite of its own — the recessed-bar look is the knob
-            // sliding over an empty track; None keeps the element hit-testable.
-            .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.None, AssetId = 0, Hue = hue } })
-            .Insert(new Slider { Min = min, Max = max, Value = value, ThumbLength = knobInfo.UV.Width, Orientation = ScrollbarOrientation.Horizontal })
-            .Insert(Interaction.None);
+            .Insert(MakeFloatingNode(position, new Vector2(width, knobH)))
+            .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.None } })
+            .Insert(new Slider { Min = min, Max = max, Value = value, ThumbLength = knobW, Orientation = ScrollbarOrientation.Horizontal })
+            .Insert(Interaction.None)
+            .Insert<UiContainsByBounds>()
+            // A slider lives inside movable gump windows; without this a press to
+            // drag the knob would latch the whole window instead.
+            .Insert<UINoWindowDrag>();
 
+        // SliderPlugin overwrites Width/Height/Left each frame. Default knob is a
+        // solid-color rect; thumbGump renders the classic gump sprite instead.
         var knob = commands.Spawn()
-            .Insert(MakeFloatingNode(new Vector2(0, 0), new Vector2(knobInfo.UV.Width, height)))
-            .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.Gump, AssetId = SliderKnob, Hue = hue } })
+            .Insert(MakeFloatingNode(new Vector2(0, 0), new Vector2(knobW, knobH)))
             .Insert(new SliderThumb())
             .Insert(new SliderDragState())
-            .Insert(Interaction.None);
+            .Insert(Interaction.None)
+            .Insert<UINoWindowDrag>();
+
+        if (thumbGump != 0)
+            // Z is alpha; a zero hue vector draws fully transparent. Default to opaque.
+            // UiContainsByBounds: a UiCustom leaf is otherwise hit-tested pixel-perfect
+            // (GuiPlugin.PixelHitTest); bounds-hit keeps the knob fully draggable like
+            // the solid-rect thumb (which had no UiCustom and so was always hittable).
+            knob
+                .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.Gump, AssetId = thumbGump, Hue = hue == default ? Vector3.UnitZ : hue } })
+                .Insert<UiContainsByBounds>();
+        else
+            knob.Insert(new BackgroundColor(new ClayColor(210, 215, 225, 255)));
 
         commands.AddChild(track.Id, knob.Id);
         return track;

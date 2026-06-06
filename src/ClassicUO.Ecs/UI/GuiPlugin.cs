@@ -606,6 +606,11 @@ internal enum UOCustomKind : byte
     // slice once at the box origin). Used by the resizable vendor panels
     // (top / middle-tiled / bottom slices of one tall gump).
     GumpSlice,
+    // Dye-window hue palette (legacy ColorPickerBox): a GridRows x GridCols grid
+    // of CellW x CellH solid swatches drawn from the precomputed GridColors, with
+    // a 2px white selection dot over SelectedIndex. Colors are baked by the owning
+    // plugin (it has HuesLoader); the renderer just blits quads.
+    HueGrid,
 }
 
 // Reference type (NOT an ECS component) — the instance lives in UiCustom.Data
@@ -656,6 +661,15 @@ internal sealed class UOCustomRender
     // and whether to tile it across the node box (vs draw once at the origin).
     public ushort SrcX, SrcY, SrcW, SrcH;
     public bool SliceTiled;
+
+    // For UOCustomKind.HueGrid: the swatch grid geometry + state. GridColors is
+    // the per-cell packed RGBA (row-major, length GridRows*GridCols), baked by
+    // ColorPickerPlugin from the live graduation; the renderer blits one quad per
+    // entry. SelectedIndex is the 2px-dot cell. (GridHues — the actual UO hue
+    // values — live on the plugin's ColorPickerState, not here; the renderer only
+    // needs colors.) A reference array so a graduation change mutates in place.
+    public uint[] GridColors;
+    public int GridRows, GridCols, CellW, CellH, SelectedIndex;
 
     // Tooltip serial for elements that aren't backed by a world/container item
     // but still want the hover tooltip (e.g. a dragged-out spell cast button).
