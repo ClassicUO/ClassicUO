@@ -327,7 +327,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             ResMut<ObjectPropertyLists>>(OnOplInfo);
         Stub<OnOpenCompressedGumpPacket_0xDD>(app);
         Stub<OnUpdateMobileStatusPacket_0xDE>(app);
-        Stub<OnBuffDebuffPacket_0xDF>(app);
+        // 0xDF (BuffDebuff) handled by BuffGumpPlugin.
         Stub<OnNewCharacterAnimationPacket_0xE2>(app);
         Stub<OnAddWaypointPacket_0xE5>(app);
         Stub<OnRemoveWaypointPacket_0xE6>(app);

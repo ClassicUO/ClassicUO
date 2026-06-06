@@ -67,6 +67,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
         Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movables,
         Query<Data<TinyEcs.Parent>> parents,
+        Query<Data<UiContainsByBounds>> boundsQ,
         Query<Data<ContainerWindow>> containers)
     {
         // Resolve via the SHARED pixel-perfect hit-test, same as drag/pickup, so
@@ -75,7 +76,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         // of its own (server gumps: the hit is a child resizepic/text that walks
         // up to the bare UIMovable root) — those let world clicks trespass through.
         var pos = mouse.Value.Position;
-        var hit = UiPick.Topmost(pos, assets.Value, rendered, parents);
+        var hit = UiPick.Topmost(pos, assets.Value, rendered, parents, boundsQ);
         if (!hit.Found) return;
 
         var owner = UiPick.MovableRoot(hit.Entity, movables, parents);
@@ -109,6 +110,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> allRenderedQ,
         Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movablesQ,
         Query<Data<TinyEcs.Parent>> parentsQ,
+        Query<Data<UiContainsByBounds>> boundsQ,
         Query<Data<ContainerWindow>> containerQuery,
         Query<Data<ServerGump>> serverGumpQuery,
         Query<Data<TinyEcs.Children>> childrenQ,
@@ -128,7 +130,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         // consume so the world / movement systems don't see the right press.
         if (once)
         {
-            pressTarget.Value = TopmostMovable(mouse.Value.Position, assets.Value, allRenderedQ, movablesQ, parentsQ);
+            pressTarget.Value = TopmostMovable(mouse.Value.Position, assets.Value, allRenderedQ, movablesQ, parentsQ, boundsQ);
             if (pressTarget.Value != 0)
                 mouse.Value.Consume(MouseButtonType.Right);
             return;
@@ -152,7 +154,7 @@ internal readonly struct WindowDragPlugin : IPlugin
 
             mouse.Value.Consume(MouseButtonType.Right);
 
-            if (TopmostMovable(mouse.Value.Position, assets.Value, allRenderedQ, movablesQ, parentsQ) != target)
+            if (TopmostMovable(mouse.Value.Position, assets.Value, allRenderedQ, movablesQ, parentsQ, boundsQ) != target)
                 return; // dragged off — cancel, like UiClick
 
             if (containerQuery.Contains(target))
@@ -185,8 +187,9 @@ internal readonly struct WindowDragPlugin : IPlugin
         AssetsServer assets,
         Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> allRenderedQ,
         Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movablesQ,
-        Query<Data<TinyEcs.Parent>> parentsQ)
-        => UiPick.MovableRoot(UiPick.Topmost(pos, assets, allRenderedQ, parentsQ).Entity, movablesQ, parentsQ);
+        Query<Data<TinyEcs.Parent>> parentsQ,
+        Query<Data<UiContainsByBounds>> boundsQ)
+        => UiPick.MovableRoot(UiPick.Topmost(pos, assets, allRenderedQ, parentsQ, boundsQ).Entity, movablesQ, parentsQ);
 
     private static void DespawnSubtree(
         Commands commands,
@@ -225,7 +228,8 @@ internal readonly struct WindowDragPlugin : IPlugin
         Query<Data<ContainerItemUI>> itemsQ,
         Query<Data<PaperdollEquipUI>> equipQ,
         Query<Data<UINoDrag>> noDragQ,
-        Query<Data<UINoWindowDrag>> noWindowDragChildQ)
+        Query<Data<UINoWindowDrag>> noWindowDragChildQ,
+        Query<Data<UiContainsByBounds>> boundsQ)
     {
         // IsPressed is false on the press-once frame (oldState=Released), so
         // include IsPressedOnce in the "held" check or the latch attempt
@@ -291,7 +295,7 @@ internal readonly struct WindowDragPlugin : IPlugin
             // (not just movable roots) is what lets the drag start on a window's
             // opaque child where its own bg is transparent — the paperdoll body
             // and arch interior, a container's slot art, etc.
-            var hit = UiPick.Topmost(pos, assets.Value, rendered, parents);
+            var hit = UiPick.Topmost(pos, assets.Value, rendered, parents, boundsQ);
             if (!hit.Found) return;
 
             // Pickup owns the gesture when the topmost hit is a liftable thing

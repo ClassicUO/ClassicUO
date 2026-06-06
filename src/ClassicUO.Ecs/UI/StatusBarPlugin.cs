@@ -154,7 +154,13 @@ internal readonly struct StatusBarPlugin : IPlugin
 
             // Buff-icon button (opens the buff bar). 0x7538 normal / 0x7539 over.
             var buff = builder.AddButton(commands, (BuffIconNormal, BuffIconPressed, BuffIconPressed), Vector3.UnitZ, new Vector2(40, 50));
-            buff.Observe((On<UiClick> _) => System.Console.WriteLine("[Status] buff bar — no ECS buff gump yet"));
+            buff.Observe((On<UiClick> _,
+                          Commands cmd,
+                          Res<GumpBuilder> gb,
+                          Res<UiZCounter> z,
+                          Res<PlayerBuffs> buffs,
+                          Query<Data<Node>, Filter<With<BuffGumpUI>>> rootQ) =>
+                BuffGumpPlugin.OpenOrFocus(cmd, gb.Value, z.Value, buffs.Value, rootQ));
             commands.AddChild(rootId, buff.Id);
 
             // Stat-lock toggles for Str/Dex/Int (UOP xOffset 28; y 76/102/132).

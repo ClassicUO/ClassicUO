@@ -15,7 +15,10 @@ internal static class UiHitTest
     // but over a fully-transparent pixel misses the sprite and passes through
     // to whatever is behind. Kinds without a pixel mask (tiled / nine-patch /
     // none) stay bbox-opaque.
-    public static bool PixelHit(AssetsServer assets, UOCustomRender custom, in ComputedNode bb, Vector2 pos)
+    // boundsOnly: the element opted into legacy ContainsByBounds (UiContainsByBounds) —
+    // the whole bounding box is a hit, skipping the per-kind alpha mask, so a click
+    // on a transparent interior pixel still lands on it (drag / right-click-close).
+    public static bool PixelHit(AssetsServer assets, UOCustomRender custom, in ComputedNode bb, Vector2 pos, bool boundsOnly = false)
     {
         // Stacked items (Amount > 1) draw a second sprite +5/+5 (see
         // GuiRenderingPlugin / ContainerGumpPlugin), so the pile extends 5px
@@ -27,6 +30,9 @@ internal static class UiHitTest
         if (pos.X < bb.Position.X || pos.Y < bb.Position.Y) return false;
         if (pos.X >= bb.Position.X + bb.Size.X + stackExt) return false;
         if (pos.Y >= bb.Position.Y + bb.Size.Y + stackExt) return false;
+
+        // Opted-in whole-bbox hit (UiContainsByBounds): inside the box is enough.
+        if (boundsOnly) return true;
 
         // No custom payload on the element (shouldn't happen for UO sprites) —
         // treat the whole bounding box as opaque.

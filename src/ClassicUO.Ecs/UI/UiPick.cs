@@ -52,7 +52,7 @@ internal static class UiPick
         Vector2 pos,
         AssetsServer assets,
         Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered)
-        => Topmost(pos, assets, rendered, null);
+        => Topmost(pos, assets, rendered, null, null);
 
     // `parents` (optional) enables overflow-clip: an element inside an ancestor
     // with Overflow.Scroll/Clip is only hittable within that ancestor's box —
@@ -60,16 +60,23 @@ internal static class UiPick
     // run's full-content bbox (taller than its viewport) would be grab-able past
     // the window edge. Pass it from gesture systems (drag/pickup/close); the
     // tooltip path may skip it (overflow text has no serial → no tooltip anyway).
+    // `bounds` (optional) is the set of UiContainsByBounds elements — those are
+    // hit anywhere inside their box (legacy ContainsByBounds), skipping the
+    // pixel-perfect alpha mask. Pass it from the gesture systems (drag / close /
+    // claim) so a window whose interior is transparent is still grab-able over
+    // its gaps; leave it null elsewhere (pickup / tooltip stay pixel-perfect).
     public static UiHit Topmost(
         Vector2 pos,
         AssetsServer assets,
         Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
-        Query<Data<TinyEcs.Parent>> parents)
+        Query<Data<TinyEcs.Parent>> parents,
+        Query<Data<UiContainsByBounds>> bounds = null)
     {
         var hit = UiHit.None;
         foreach (var (ent, computed, node, custom, bg, text) in rendered)
         {
             if (node.Ref.Display == Display.None) continue;
+            bool boundsOnly = bounds != null && bounds.Contains(ent.Ref);
             // Bare layout node (a container's `content` flex wrapper, a text
             // scroll wrapper): no UiCustom surface, no text glyphs, no fill — it
             // paints nothing, so it's NOT a hit. Skipping it lets the gesture
@@ -77,10 +84,10 @@ internal static class UiPick
             // instead of the whole window capturing clicks over its transparent
             // areas. A UiCustom present but with null Data is still an intentional
             // surface (None-kind drag frame) — keyed on the component, not Data.
-            if (!custom.IsValid() && !bg.IsValid() && !text.IsValid()) continue;
+            if (!boundsOnly && !custom.IsValid() && !bg.IsValid() && !text.IsValid()) continue;
             var render = custom.IsValid() ? custom.Ref.Render() : null;
             var bb = computed.Ref;
-            if (!UiHitTest.PixelHit(assets, render, bb, pos)) continue;
+            if (!UiHitTest.PixelHit(assets, render, bb, pos, boundsOnly)) continue;
             if (parents != null && ClippedOutByAncestor(ent.Ref, pos, rendered, parents)) continue;
             if (bb.PaintOrder >= hit.PaintOrder)
                 hit = new UiHit(ent.Ref, bb.PaintOrder);

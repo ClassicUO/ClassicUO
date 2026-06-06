@@ -55,6 +55,8 @@ internal static class InputHandlers
         d.Register("debug.openServerGump", DebugOpenServerGump);
         d.Register("debug.openTextEntryDialog", DebugOpenTextEntryDialog);
         d.Register("debug.openColorPicker", DebugOpenColorPicker);
+        d.Register("debug.addBuff", DebugAddBuff);
+        d.Register("debug.openBuffBar", DebugOpenBuffBar);
         d.Register("debug.dumpLayout", DebugDumpLayout);
     }
 
@@ -148,6 +150,34 @@ internal static class InputHandlers
         var q = ctx.Runtime.GetResource<DebugColorPickerQueue>();
         q.Pending.Add((serial, graphic));
         return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true, ["serial"] = serial } };
+    }
+
+    // Test-only: push a 0xDF BuffDebuff onto the player without a server spell.
+    // "iconType" is the BuffIconType (default 0x3ED NightSight); "count" 0
+    // removes that buff, >0 adds/refreshes it. BuffGumpPlugin drains this into
+    // the real 0xDF parse + observer path, so the bar opens/rebuilds exactly as
+    // it would from the network.
+    public static JsonRpcResponse DebugAddBuff(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        uint serial = 1u; ushort iconType = 0x03ED; ushort count = 1;
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object)
+        {
+            if (p.TryGetProperty("serial", out var se) && se.TryGetUInt32(out var sv)) serial = sv;
+            if (p.TryGetProperty("iconType", out var ie) && ie.TryGetInt32(out var iv)) iconType = (ushort)iv;
+            if (p.TryGetProperty("count", out var ce) && ce.TryGetInt32(out var cv)) count = (ushort)cv;
+        }
+
+        var q = ctx.Runtime.GetResource<DebugBuffQueue>();
+        q.Pending.Add((serial, iconType, count));
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["added"] = true, ["iconType"] = iconType, ["count"] = count } };
+    }
+
+    // Test-only: open the buff bar (the same OpenOrFocus the status-bar buff
+    // button calls) without driving the status UI.
+    public static JsonRpcResponse DebugOpenBuffBar(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        ctx.Runtime.GetResource<DebugBuffQueue>().OpenRequested = true;
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true } };
     }
 
     // Test-only: open the split-stack menu without a server item / drag. The
