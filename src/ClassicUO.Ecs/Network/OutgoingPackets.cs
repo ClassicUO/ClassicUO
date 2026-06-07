@@ -1374,6 +1374,42 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
+        // 0xB8 edit subcommand (0x01): push the player's edited profile body.
+        public static void Send_ProfileUpdate(this NetClient socket, uint serial, string text)
+        {
+            const byte ID = 0xB8;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt8(0x01);
+            writer.WriteUInt32BE(serial);
+            writer.WriteUInt16BE(0x01);
+            writer.WriteUInt16BE((ushort)text.Length);
+            writer.WriteUnicodeBE(text, text.Length);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
         public static void Send_GameWindowSize(this NetClient socket, uint w, uint h)
         {
             const byte ID = 0xBF;

@@ -44,6 +44,7 @@ internal readonly struct CuoPlugin : IPlugin
         app.AddPlugin<StatusBarPlugin>();
         app.AddPlugin<HealthBarPlugin>();
         app.AddPlugin<BuffGumpPlugin>();
+        app.AddPlugin<ProfileGumpPlugin>();
         app.AddPlugin<PartyPlugin>();
         app.AddPlugin<PartyGumpPlugin>();
         app.AddPlugin<SkillsGumpPlugin>();

@@ -57,6 +57,7 @@ internal static class InputHandlers
         d.Register("debug.openColorPicker", DebugOpenColorPicker);
         d.Register("debug.addBuff", DebugAddBuff);
         d.Register("debug.openBuffBar", DebugOpenBuffBar);
+        d.Register("debug.openProfile", DebugOpenProfile);
         d.Register("debug.dumpLayout", DebugDumpLayout);
     }
 
@@ -178,6 +179,30 @@ internal static class InputHandlers
     {
         ctx.Runtime.GetResource<DebugBuffQueue>().OpenRequested = true;
         return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true } };
+    }
+
+    // Test-only: open a character profile (the same 0xB8 path a server reply
+    // drives) with given header/footer/body, without needing the server.
+    public static JsonRpcResponse DebugOpenProfile(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        uint serial = 1u;
+        bool edit = false;
+        string header = "Lord British", footer = "Sosaria's finest", body =
+            "This is a sample character profile body. It is long enough to wrap across "
+          + "several lines and exercise the parchment scroll's wheel scrolling. "
+          + "Line two of the body. Line three. Line four to push past the box height.";
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object)
+        {
+            if (p.TryGetProperty("serial", out var se) && se.TryGetUInt32(out var sv)) serial = sv;
+            if (p.TryGetProperty("header", out var he) && he.ValueKind == JsonValueKind.String) header = he.GetString();
+            if (p.TryGetProperty("footer", out var fe) && fe.ValueKind == JsonValueKind.String) footer = fe.GetString();
+            if (p.TryGetProperty("body", out var be) && be.ValueKind == JsonValueKind.String) body = be.GetString();
+            if (p.TryGetProperty("edit", out var ee) && ee.ValueKind is JsonValueKind.True or JsonValueKind.False) edit = ee.GetBoolean();
+        }
+
+        var q = ctx.Runtime.GetResource<DebugProfileQueue>();
+        q.Serial = serial; q.Header = header; q.Footer = footer; q.Body = body; q.Edit = edit; q.Pending = true;
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true, ["serial"] = serial } };
     }
 
     // Test-only: open the split-stack menu without a server item / drag. The

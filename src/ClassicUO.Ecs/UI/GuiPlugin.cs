@@ -458,7 +458,9 @@ internal readonly struct GuiPlugin : IPlugin
         string initial,
         bool masked,
         System.Action<EntityCommands> decorate = null,
-        char maskChar = '*')
+        char maskChar = '*',
+        bool multiline = false,
+        int wrapWidth = 0)
     {
         // `color` semantics follow the font kind (see UoFontRuntime): an ASCII
         // font (FontId | AsciiFlag) wants a PACKED hue (UoFontRuntime.AsciiHue);
@@ -470,19 +472,58 @@ internal readonly struct GuiPlugin : IPlugin
         // otherwise drag the gump instead of selecting).
         frame.Insert(Interaction.None).Insert<UiContainsByBounds>().Insert<UINoWindowDrag>();
 
-        var glyph = commands.Spawn()
-            .Insert(new Node { Width = Val.Auto, Height = Val.Auto })
-            .Insert(new Text(masked ? string.Empty : (initial ?? string.Empty)))
-            .Insert(font)
-            .Insert(new TextColor(color))
-            .Insert<TextInput>()
-            .Insert<EditableText>()
-            .Insert<UINoWindowDrag>()
-            // Text origin for mouse caret/selection: TextEditPlugin reads the
-            // frame's ComputedNode (logical = scaled / DpiScale) + OffsetX.
-            .Insert(new TextFieldGeom { Frame = frame.Id, OffsetX = contentOffset.X });
-        if (masked)
-            glyph.Insert(new MaskedText { Value = initial ?? string.Empty, MaskChar = maskChar });
+        EntityCommands glyph;
+        if (multiline)
+        {
+            // Multiline editable: the value lives in (and renders through) a
+            // WrappedText custom that wraps at wrapWidth — TextEditPlugin reads /
+            // writes custom.Render().Text and maps caret/selection through the
+            // same wrap. No Bevy Text component (it would render single-line).
+            glyph = commands.Spawn()
+                .Insert(new Node { Width = Val.Px(wrapWidth), Height = Val.Px(font.Size) })
+                .Insert(new UiCustom
+                {
+                    Data = new UOCustomRender
+                    {
+                        Kind = UOCustomKind.WrappedText,
+                        Hue = Vector3.UnitZ,
+                        Text = initial ?? string.Empty,
+                        TextFont = (byte)font.FontId,
+                        WrapWidth = wrapWidth,
+                        IsHtml = true,
+                        HtmlStartColor = 0x010101FF, // near-black, opaque (RGBA)
+                        HtmlBg = false,
+                    },
+                })
+                .Insert(font)
+                .Insert<TextInput>()
+                .Insert<EditableText>()
+                .Insert<UINoWindowDrag>()
+                // WrappedText has no UiHitTest.PixelHit case, so UiPick can't pixel-
+                // hit the glyph and falls through to the window bg under the text —
+                // a drag-to-select then moves the window instead. Bounds-hit the
+                // glyph rect so UiPick returns it (UINoWindowDrag → drag yields to
+                // the field's own caret/selection gesture in RouteMouse).
+                .Insert<UiContainsByBounds>()
+                .Insert(new MultilineText { WrapWidth = wrapWidth })
+                .Insert(new TextFieldGeom { Frame = frame.Id, OffsetX = contentOffset.X });
+        }
+        else
+        {
+            glyph = commands.Spawn()
+                .Insert(new Node { Width = Val.Auto, Height = Val.Auto })
+                .Insert(new Text(masked ? string.Empty : (initial ?? string.Empty)))
+                .Insert(font)
+                .Insert(new TextColor(color))
+                .Insert<TextInput>()
+                .Insert<EditableText>()
+                .Insert<UINoWindowDrag>()
+                // Text origin for mouse caret/selection: TextEditPlugin reads the
+                // frame's ComputedNode (logical = scaled / DpiScale) + OffsetX.
+                .Insert(new TextFieldGeom { Frame = frame.Id, OffsetX = contentOffset.X });
+            if (masked)
+                glyph.Insert(new MaskedText { Value = initial ?? string.Empty, MaskChar = maskChar });
+        }
         decorate?.Invoke(glyph);
         ulong glyphId = glyph.Id;
 
@@ -516,8 +557,13 @@ internal readonly struct GuiPlugin : IPlugin
             .Insert(new TextEditCaret { Target = glyphId });
         decorate?.Invoke(caret);
 
-        var row = commands.Spawn()
-            .Insert(new Node
+        // Single-line: absolute row at the content offset (overlays sit on top).
+        // Multiline: a FLOWING row so it (and its growing glyph) is clipped and
+        // scrolled by the frame's Overflow.Scroll — an absolute row would escape
+        // the scroll clip and spill past the box.
+        var rowNode = multiline
+            ? new Node { FlexDirection = FlexDirection.Row, AlignItems = AlignItems.Start, Width = Val.Auto, Height = Val.Auto }
+            : new Node
             {
                 PositionType = PositionType.Absolute,
                 Left = Val.Px(contentOffset.X),
@@ -526,7 +572,9 @@ internal readonly struct GuiPlugin : IPlugin
                 AlignItems = AlignItems.Center,
                 Width = Val.Auto,
                 Height = Val.Auto,
-            })
+            };
+        var row = commands.Spawn()
+            .Insert(rowNode)
             .Insert(Interaction.None)
             .Insert<UiContainsByBounds>()
             .Insert<UINoWindowDrag>();
@@ -539,6 +587,7 @@ internal readonly struct GuiPlugin : IPlugin
             focused.Value.Entity = glyphId;
             edit.Value.PendingClickEntity = glyphId;
             edit.Value.PendingClickX = t.Event.Position.X;
+            edit.Value.PendingClickY = t.Event.Position.Y;
         });
         row.AddChild(selection);
         row.AddChild(glyph);
@@ -549,6 +598,7 @@ internal readonly struct GuiPlugin : IPlugin
             focused.Value.Entity = glyphId;
             edit.Value.PendingClickEntity = glyphId;
             edit.Value.PendingClickX = t.Event.Position.X;
+            edit.Value.PendingClickY = t.Event.Position.Y;
         });
         frame.AddChild(row);
 
@@ -656,6 +706,19 @@ internal sealed class UOCustomRender
     public bool HtmlBg;
     // Center each wrapped line within WrapWidth (legacy tooltip uses TS_CENTER).
     public bool TextCenter;
+    // Text-selection highlight range (char indices into Text) for an editable
+    // WrappedText field. SelEnd > SelStart draws a per-visual-line highlight rect
+    // behind the glyphs — set by TextEditPlugin only on the focused multiline
+    // field, -1/-1 otherwise. Multi-row selections render here (one rect per line)
+    // because the single Bevy.UI overlay node can only cover one row.
+    public int SelStart = -1;
+    public int SelEnd = -1;
+    // Caret bar for an editable WrappedText field, drawn in-content (so it scrolls
+    // and clips with the glyphs when the field is in an Overflow.Scroll box, where
+    // an absolute overlay node would escape the clip). Set by TextEditPlugin on the
+    // focused multiline field only; CaretOn carries the blink phase.
+    public bool CaretOn;
+    public float CaretX, CaretY, CaretH;
 
     // For UOCustomKind.GumpSlice: source sub-rectangle within the gump sprite,
     // and whether to tile it across the node box (vs draw once at the origin).
@@ -713,6 +776,11 @@ internal struct TextInput;
 // with their own char readers (split number box, skills rename) deliberately
 // do NOT, so the global editor leaves them to their bespoke filtering.
 internal struct EditableText;
+
+// Opt-in on an editable glyph: it's a MULTILINE field — the value renders through
+// a WrappedText custom (not Bevy Text), the stb editor runs non-single-line so
+// Enter inserts '\n', and the caret/selection map through the WrapWidth wrap.
+internal struct MultilineText { public int WrapWidth; }
 
 // A caret glyph entity linked to a focusable text input (Target). CaretBlink
 // fills/clears its Text each frame based on focus + blink phase. Place it as a

@@ -529,6 +529,16 @@ internal readonly struct GuiRenderingPlugin : IPlugin
             }
 
             case UOCustomKind.WrappedText:
+                // Text-selection highlight behind the glyphs: one rect per visual
+                // line (multi-row selections the single overlay node can't draw).
+                if (custom.SelEnd > custom.SelStart)
+                {
+                    var selColor = new XnaColor(70, 110, 180, 120);
+                    foreach (var (rx, ry, rw, rh) in UoFontRenderer.SelectionRects(
+                        custom.Text, custom.TextFont, custom.WrapWidth, custom.IsHtml,
+                        custom.HtmlStartColor, custom.HtmlBg, custom.SelStart, custom.SelEnd))
+                        DrawQuad(b, white, (int)(bb.X + rx), (int)(bb.Y + ry), (int)rw, (int)rh, selColor, cmd.ZIndex);
+                }
                 UoFontRenderer.DrawWrapped(
                     b,
                     custom.Text,
@@ -543,6 +553,11 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                     cmd.ZIndex,
                     custom.TextCenter ? ClassicUO.Assets.TEXT_ALIGN_TYPE.TS_CENTER : ClassicUO.Assets.TEXT_ALIGN_TYPE.TS_LEFT,
                     custom.TextAscii);
+                // Caret bar on top of the glyphs (in-content so it scrolls/clips
+                // with the text inside a scroll box).
+                if (custom.CaretOn)
+                    DrawQuad(b, white, (int)(bb.X + custom.CaretX), (int)(bb.Y + custom.CaretY),
+                        2, (int)MathF.Max(1, custom.CaretH), new XnaColor(0, 0, 0, 255), cmd.ZIndex);
                 break;
 
             case UOCustomKind.None:

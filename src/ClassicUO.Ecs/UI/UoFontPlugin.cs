@@ -499,7 +499,131 @@ internal static class UoFontRenderer
         return (layout.Width, layout.Height);
     }
 
+    // Wrap a unicode run to maxWidth and return one entry per visual line:
+    // (Start = buffer index the line begins at, Count = chars on the line incl a
+    // trailing space/newline, Width px, Height px). Goes through the SAME GetLayout
+    // the renderer uses (incl. HTML mode), so a caret/selection mapped through
+    // these lines — and the per-line height the caret stacks by — match the drawn
+    // glyphs exactly. The multiline editor field renders HTML (for its near-black
+    // text colour), and HTML mode changes per-line MaxHeight; measuring plain here
+    // made the caret drift up a few px per line. Used by TextEditPlugin.
+    public static System.Collections.Generic.List<(int Start, int Count, int Width, int Height)> WrapLines(
+        string text, ushort fontId, int maxWidth, bool isHtml = false, uint htmlStartColor = 0xFFFFFFFF, bool htmlBg = false)
+    {
+        var lines = new System.Collections.Generic.List<(int, int, int, int)>();
+        if (UoFontRuntime.Fonts == null)
+            return lines;
+
+        var (font, _) = UoFontRuntime.Resolve(fontId);
+        text ??= string.Empty;
+        var layout = GetLayout(text, font, ascii: false, isHtml, htmlStartColor, htmlBg, maxWidth);
+        int start = 0;
+        for (var ptr = layout.Info; ptr != null; ptr = ptr.Next)
+        {
+            lines.Add((start, ptr.CharCount, ptr.Width, ptr.MaxHeight));
+            start += ptr.CharCount;
+        }
+        return lines;
+    }
+
+    // Per-visual-line highlight rects for a selection [selStart,selEnd) over a
+    // wrapped run, in text-local px (X,Y from the text's top-left). Mirrors the
+    // caret math: PLAIN wrap drives the char-index→line membership + x widths
+    // (raw-buffer indices), the HTML wrap (what's drawn) drives the Y pitch + row
+    // height, so the rects sit exactly under the glyphs. Used to paint multi-row
+    // text selection, which a single overlay rect can't cover.
+    public static System.Collections.Generic.List<(float X, float Y, float W, float H)> SelectionRects(
+        string text, ushort fontId, int maxWidth, bool isHtml, uint htmlStartColor, bool htmlBg, int selStart, int selEnd)
+    {
+        var rects = new System.Collections.Generic.List<(float, float, float, float)>();
+        if (selEnd <= selStart || string.IsNullOrEmpty(text) || UoFontRuntime.Fonts == null)
+            return rects;
+
+        // selStart/selEnd come from the live editor while `text` is the field's
+        // rendered string, which lags one frame (WriteBack runs after the system
+        // that stamps the range) — clamp to text length so a just-deleted tail
+        // can't drive Substring past the end.
+        int len = text.Length;
+        int ss = Math.Clamp(selStart, 0, len);
+        int se = Math.Clamp(selEnd, 0, len);
+        if (se <= ss) return rects;
+
+        var lines = WrapLines(text, fontId, maxWidth);
+        var rlines = isHtml ? WrapLines(text, fontId, maxWidth, isHtml, htmlStartColor, htmlBg) : lines;
+        float lh = MeasureFont("Wg", fontId, int.MaxValue, allowHtml: false).Height is var mh && mh > 0 ? mh : 20;
+        float y = 0;
+        for (int i = 0; i < lines.Count; i++)
+        {
+            var ln = lines[i];
+            int ls = Math.Clamp(ln.Start, 0, len);
+            int le = Math.Clamp(ln.Start + ln.Count, ls, len);
+            float rh = (i < rlines.Count ? rlines[i].Height : ln.Height) is var h && h > 0 ? h : lh;
+            int a = Math.Clamp(Math.Max(ss, ls), ls, le);
+            int b = Math.Clamp(Math.Min(se, le), ls, le);
+            if (b > a)
+            {
+                float x0 = a > ls ? MeasureFont(text.Substring(ls, a - ls), fontId, int.MaxValue, allowHtml: false).Width : 0;
+                float x1 = MeasureFont(text.Substring(ls, b - ls), fontId, int.MaxValue, allowHtml: false).Width;
+                rects.Add((x0, y, MathF.Max(1, x1 - x0), rh));
+            }
+            y += rh;
+        }
+        return rects;
+    }
+
+    private static readonly System.Collections.Generic.Dictionary<ushort, (float Top, float Height)> _caretMetrics = new();
+
+    // Caret bar geometry for a font: the visible glyph INK extent within a line,
+    // NOT the line cell. The cell (what MeasureFont returns) carries top leading
+    // and — for the ASCII fonts — a tall transparent-padded bitmap, so a caret
+    // sized to it floats well above/below the text. Scan the actual glyph pixels of
+    // a cap + a descender for the inked rows (BearingY + first/last lit row); Top =
+    // where the cap ink begins, Height = cap-ink-top to descender-ink-bottom. Cached
+    // per font (RenderSingleGlyph* allocates, so this runs once).
+    public static (float Top, float Height) CaretMetrics(ushort fontId)
+    {
+        if (_caretMetrics.TryGetValue(fontId, out var m))
+            return m;
+
+        var fonts = UoFontRuntime.Fonts;
+        var (font, ascii) = UoFontRuntime.Resolve(fontId);
+        int top = int.MaxValue, bottom = int.MinValue;
+        if (fonts != null)
+        {
+            foreach (char c in "WQgy")
+            {
+                var gi = ascii
+                    ? fonts.RenderSingleGlyphASCII(font, c)
+                    : fonts.RenderSingleGlyphUnicode(font, c, hasBorder: false, isSolid: false);
+                if (gi.Data == null || gi.Width <= 0 || gi.Height <= 0) continue;
+                int inkTop = -1, inkBot = -1;
+                for (int y = 0; y < gi.Height; y++)
+                {
+                    bool lit = false;
+                    for (int x = 0; x < gi.Width; x++)
+                        if (gi.Data[y * gi.Width + x] != 0) { lit = true; break; }
+                    if (!lit) continue;
+                    if (inkTop < 0) inkTop = y;
+                    inkBot = y;
+                }
+                if (inkTop < 0) continue;
+                int gt = gi.BearingY + inkTop;
+                int gb = gi.BearingY + inkBot + 1;
+                if (gt < top) top = gt;
+                if (gb > bottom) bottom = gb;
+            }
+        }
+        if (top == int.MaxValue)
+        {
+            top = 0;
+            bottom = (int)MeasureFont("Wg", fontId, int.MaxValue, allowHtml: false).Height;
+        }
+        m = (top, Math.Max(1, bottom - top));
+        _caretMetrics[fontId] = m;
+        return m;
+    }
+
     // Released on full UI rebuild (e.g. logout). The atlas itself persists
     // (glyphs are reusable); only the per-string layout cache is cleared.
-    public static void Clear() => _layouts.Clear();
+    public static void Clear() { _layouts.Clear(); _caretMetrics.Clear(); }
 }
