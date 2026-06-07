@@ -241,10 +241,10 @@ readonly struct InGamePacketsPlugin : IPlugin
             Res<NetworkEntitiesMap>>(OnUpdateHits);
 
         app.AddObserver<On<PacketReceived<OnLockFeaturesPacket_0xB9_Pre60142>>,
-            Res<UOFileManager>>(OnLockFeaturesPre);
+            Res<UOFileManager>, ResMut<GameContext>>(OnLockFeaturesPre);
 
         app.AddObserver<On<PacketReceived<OnLockFeaturesPacket_0xB9_Post60142>>,
-            Res<UOFileManager>>(OnLockFeaturesPost);
+            Res<UOFileManager>, ResMut<GameContext>>(OnLockFeaturesPost);
 
         app.AddObserver<On<PacketReceived<OnCustomHousePacket_0xD8>>,
             Commands,
@@ -1310,16 +1310,20 @@ readonly struct InGamePacketsPlugin : IPlugin
 
     static void OnLockFeaturesPre(
         On<PacketReceived<OnLockFeaturesPacket_0xB9_Pre60142>> trig,
-        Res<UOFileManager> fileManager)
+        Res<UOFileManager> fileManager,
+        ResMut<GameContext> gameCtx)
     {
+        gameCtx.Value.LockedFeatures = trig.Event.Packet.Flags;
         var conv = ComputeBodyConvFlags(trig.Event.Packet.Flags);
         fileManager.Value.Animations.ProcessBodyConvDef(conv);
     }
 
     static void OnLockFeaturesPost(
         On<PacketReceived<OnLockFeaturesPacket_0xB9_Post60142>> trig,
-        Res<UOFileManager> fileManager)
+        Res<UOFileManager> fileManager,
+        ResMut<GameContext> gameCtx)
     {
+        gameCtx.Value.LockedFeatures = trig.Event.Packet.Flags;
         var conv = ComputeBodyConvFlags(trig.Event.Packet.Flags);
         fileManager.Value.Animations.ProcessBodyConvDef(conv);
     }

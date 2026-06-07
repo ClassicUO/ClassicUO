@@ -53,6 +53,7 @@ internal readonly struct CuoPlugin : IPlugin
         app.AddPlugin<VendorGumpPlugin>();
         app.AddPlugin<TradingGumpPlugin>();
         app.AddPlugin<MenuGumpPlugin>();
+        app.AddPlugin<CombatBookGumpPlugin>();
         app.AddPlugin<SplitMenuPlugin>();
         app.AddPlugin<PopupMenuPlugin>();
         app.AddPlugin<TooltipPlugin>();
@@ -95,6 +96,9 @@ struct GameContext
     public ClientFlags Protocol;
     public CharacterListFlags ClientFeatures;
     public ClientVersion ClientVersion;
+    // Server-locked feature flags (0xB9). Combat-ability use checks AOS here to
+    // pick the modern 0xD7 path vs the pre-AOS stun/disarm requests.
+    public ClassicUO.Game.Data.LockedFeatureFlags LockedFeatures;
     public int MaxObjectsDistance;
     // Last server-pushed season (0=Spring, 1=Summer, 2=Fall, 3=Winter,
     // 4=Desolation) and the music index that came with it. Set by the

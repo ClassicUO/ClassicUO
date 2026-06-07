@@ -426,15 +426,21 @@ internal readonly struct PaperdollPlugin : IPlugin
         }
 
         // Combat / racial-abilities book gump-pics. OOP fires on left
-        // double-click. Combat at (156, 200) when ClientFeatures.PaperdollBooks.
-        // Racial at (23, 200) when CV >= 7000. ECS has no AbilitiesBookGump /
-        // RacialAbilitiesBookGump so the click logs only.
+        // double-click. Combat at (156, 200) when ClientFeatures.PaperdollBooks
+        // opens the CombatBookGump. Racial at (23, 200) when CV >= 7000 — ECS has
+        // no RacialAbilitiesBookGump yet so that one still logs only.
         if (showBooks)
         {
             var combatBook = builder.AddGump(commands, 0x2B34, Vector3.UnitZ, new Vector2(156, 200))
-                .Insert(Interaction.None);
-            combatBook.Observe((On<UiDoubleClick> _) =>
-                Console.WriteLine("[Paperdoll] Combat book clicked — no ECS AbilitiesBook"));
+                .Insert(Interaction.None).Insert<UINoWindowDrag>();
+            combatBook.Observe((On<UiDoubleClick> _,
+                Commands cmd,
+                Res<GumpBuilder> b,
+                Res<AssetsServer> a,
+                Res<UiZCounter> z,
+                Res<GameContext> ctx,
+                Query<Data<CombatBookWindow>> existingQ) =>
+                CombatBookGumpPlugin.OpenOrFocus(cmd, b.Value, a.Value, z.Value, ctx.Value, existingQ));
             commands.AddChild(root.Id, combatBook.Id);
 
             if (showRacialBook)

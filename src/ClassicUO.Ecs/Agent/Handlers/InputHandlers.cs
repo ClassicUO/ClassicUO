@@ -61,6 +61,7 @@ internal static class InputHandlers
         d.Register("debug.openTrade", DebugOpenTrade);
         d.Register("debug.tradeUpdate", DebugTradeUpdate);
         d.Register("debug.openMenu", DebugOpenMenu);
+        d.Register("debug.openCombatBook", DebugOpenCombatBook);
         d.Register("debug.dumpLayout", DebugDumpLayout);
     }
 
@@ -246,6 +247,14 @@ internal static class InputHandlers
         var q = ctx.Runtime.GetResource<DebugTradeQueue>();
         q.Pending.Add(new DebugTradeQueue.Req { Type = type, Serial = serial, Id1 = id1, Id2 = id2, Gold = gold, Platinum = plat });
         return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["updated"] = true, ["type"] = type } };
+    }
+
+    // Test-only: open the combat (weapon abilities) book. No server packet —
+    // mirrors the macro/hotkey entry point.
+    public static JsonRpcResponse DebugOpenCombatBook(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        ctx.Runtime.GetResource<DebugCombatBookQueue>().OpenRequested = true;
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true } };
     }
 
     // Test-only: open an old-style 0x7C menu without a server prompt. {"gray":

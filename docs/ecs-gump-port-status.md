@@ -17,6 +17,7 @@ Last updated: 2026-06-07.
 | HealthBarGump | `UI/HealthBarPlugin.cs` |
 | JournalGump / ResizableJournal | `UI/JournalPlugin.cs` |
 | MenuGump / GrayMenuGump (0x7C) | `UI/MenuGumpPlugin.cs` |
+| CombatBookGump + UseAbilityButtonGump | `UI/CombatBookGumpPlugin.cs` (+ `Game/Data/Ability.cs`) |
 | MiniMapGump | `UI/MiniMapPlugin.cs` |
 | OptionsGump | `UI/OptionsGumpPlugin.cs` (partial) |
 | PaperdollGump | `UI/PaperdollPlugin.cs` |
@@ -46,10 +47,9 @@ Last updated: 2026-06-07.
 - **NameOverheadGump** + NameOverHeadHandlerGump — names floating over mobiles.
 - **QuestArrowGump** — quest pointer arrow (0xBA parsed, no arrow).
 - **Macros** — MacroGump, MacroButtonGump.
-- **Action buttons** — UseAbilityButtonGump, UseSpellButtonGump, SkillButtonGump (draggable hotbar buttons).
+- **Action buttons** — UseSpellButtonGump, SkillButtonGump (draggable hotbar buttons; UseAbilityButton now done with the combat book).
 - **CounterBarGump** — item counters.
 - **InfoBarGump** — custom stat bar.
-- **CombatBookGump**.
 - **RacialAbilitiesBookGump** — paperdoll has a stub ("no ECS RacialAbilitiesBook").
 - **BulletinBoardGump** — 0x71 parsed, no board UI.
 - **HouseCustomizationGump** — house design mode (large).

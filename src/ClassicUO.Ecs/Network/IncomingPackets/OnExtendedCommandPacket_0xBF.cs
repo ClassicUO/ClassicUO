@@ -88,6 +88,8 @@ internal struct OnExtendedCommandPacket_0xBF : IPacket
     public byte? DamageAmount { get; private set; }
     public ushort? SpellIconSpell { get; private set; }
     public bool? SpellIconActive { get; private set; }
+    // Subcommand 0x21: server cleared all queued special moves.
+    public bool ClearAbilities { get; private set; }
     public CharacterSpeedType? CharacterSpeedMode { get; private set; }
     public bool? IsFemale { get; private set; }
     public RaceType? Race { get; private set; }
@@ -127,6 +129,7 @@ internal struct OnExtendedCommandPacket_0xBF : IPacket
         DamageAmount = null;
         SpellIconSpell = null;
         SpellIconActive = null;
+        ClearAbilities = false;
         CharacterSpeedMode = null;
         IsFemale = null;
         Race = null;
@@ -341,6 +344,12 @@ internal struct OnExtendedCommandPacket_0xBF : IPacket
                     Y = reader.ReadUInt16BE(),
                     Z = reader.ReadInt8()
                 };
+                break;
+
+            case 0x21:
+                // Server cleared all queued special moves — combat book / ability
+                // buttons drop the queued (0x80) tint.
+                ClearAbilities = true;
                 break;
 
             case 0x22:

@@ -278,6 +278,107 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
+        // Modern (AOS) special-move toggle (0xD7 action 0x19). idx = ability
+        // index (1-based) or 0 to clear. Mirrors legacy Send_UseCombatAbility.
+        public static void Send_UseCombatAbility(this NetClient socket, uint playerSerial, byte idx)
+        {
+            const byte ID = 0xD7;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt32BE(playerSerial);
+            writer.WriteUInt16BE(0x19);
+            writer.WriteUInt32BE(0);
+            writer.WriteUInt8(idx);
+            writer.WriteUInt8(0x0A);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
+        // Pre-AOS primary special move (0xBF subcommand 0x09).
+        public static void Send_StunRequest(this NetClient socket)
+        {
+            const byte ID = 0xBF;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt16BE(0x09);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
+        // Pre-AOS secondary special move (0xBF subcommand 0x0A).
+        public static void Send_DisarmRequest(this NetClient socket)
+        {
+            const byte ID = 0xBF;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt16BE(0x0A);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
         public static void Send_DoubleClick(this NetClient socket, uint serial)
         {
             const byte ID = 0x06;
