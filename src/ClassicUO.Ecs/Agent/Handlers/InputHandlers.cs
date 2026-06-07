@@ -58,6 +58,8 @@ internal static class InputHandlers
         d.Register("debug.addBuff", DebugAddBuff);
         d.Register("debug.openBuffBar", DebugOpenBuffBar);
         d.Register("debug.openProfile", DebugOpenProfile);
+        d.Register("debug.openTrade", DebugOpenTrade);
+        d.Register("debug.tradeUpdate", DebugTradeUpdate);
         d.Register("debug.dumpLayout", DebugDumpLayout);
     }
 
@@ -203,6 +205,46 @@ internal static class InputHandlers
         var q = ctx.Runtime.GetResource<DebugProfileQueue>();
         q.Serial = serial; q.Header = header; q.Footer = footer; q.Body = body; q.Edit = edit; q.Pending = true;
         return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true, ["serial"] = serial } };
+    }
+
+    // Test-only: open the secure-trade window (0x6F type 0) without a real trade
+    // partner. SpawnTradeGump is called directly so the entity-existence guard is
+    // bypassed. Optional serial/id1/id2/name.
+    public static JsonRpcResponse DebugOpenTrade(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        uint serial = 0x40000001u, id1 = 0x40000002u, id2 = 0x40000003u;
+        string name = "Lord British";
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object)
+        {
+            if (p.TryGetProperty("serial", out var se) && se.TryGetUInt32(out var sv)) serial = sv;
+            if (p.TryGetProperty("id1", out var i1) && i1.TryGetUInt32(out var v1)) id1 = v1;
+            if (p.TryGetProperty("id2", out var i2) && i2.TryGetUInt32(out var v2)) id2 = v2;
+            if (p.TryGetProperty("name", out var ne) && ne.ValueKind == JsonValueKind.String) name = ne.GetString() ?? name;
+        }
+
+        var q = ctx.Runtime.GetResource<DebugTradeQueue>();
+        q.Pending.Add(new DebugTradeQueue.Req { Type = 0, Serial = serial, Id1 = id1, Id2 = id2, Name = name });
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true, ["serial"] = serial } };
+    }
+
+    // Test-only: drive an open trade's accept (type 2) / his-gold (3) / my-gold
+    // (4) state. Replays the 0x6F observer path.
+    public static JsonRpcResponse DebugTradeUpdate(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        byte type = 2; uint serial = 0x40000001u, id1 = 0, id2 = 0, gold = 0, plat = 0;
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object)
+        {
+            if (p.TryGetProperty("type", out var te) && te.TryGetInt32(out var tv)) type = (byte)tv;
+            if (p.TryGetProperty("serial", out var se) && se.TryGetUInt32(out var sv)) serial = sv;
+            if (p.TryGetProperty("id1", out var i1) && i1.TryGetUInt32(out var v1)) id1 = v1;
+            if (p.TryGetProperty("id2", out var i2) && i2.TryGetUInt32(out var v2)) id2 = v2;
+            if (p.TryGetProperty("gold", out var ge) && ge.TryGetUInt32(out var gv)) gold = gv;
+            if (p.TryGetProperty("platinum", out var pe) && pe.TryGetUInt32(out var pv)) plat = pv;
+        }
+
+        var q = ctx.Runtime.GetResource<DebugTradeQueue>();
+        q.Pending.Add(new DebugTradeQueue.Req { Type = type, Serial = serial, Id1 = id1, Id2 = id2, Gold = gold, Platinum = plat });
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["updated"] = true, ["type"] = type } };
     }
 
     // Test-only: open the split-stack menu without a server item / drag. The

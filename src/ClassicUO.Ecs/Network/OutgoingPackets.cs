@@ -117,6 +117,91 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
+        // Secure-trade reply. code 1 = cancel the trade, code 2 = set my accept
+        // state to `state`. Mirrors legacy Send_TradeResponse.
+        public static void Send_TradeResponse(this NetClient socket, uint serial, int code, bool state)
+        {
+            const byte ID = 0x6F;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            if (code == 1)
+            {
+                writer.WriteUInt8(0x01);
+                writer.WriteUInt32BE(serial);
+            }
+            else if (code == 2)
+            {
+                writer.WriteUInt8(0x02);
+                writer.WriteUInt32BE(serial);
+                writer.WriteUInt32BE((uint)(state ? 1 : 0));
+            }
+            else
+            {
+                writer.Dispose();
+
+                return;
+            }
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
+        // Secure-trade gold/platinum update (sub-action 3). Mirrors legacy
+        // Send_TradeUpdateGold.
+        public static void Send_TradeUpdateGold(this NetClient socket, uint serial, uint gold, uint platinum)
+        {
+            const byte ID = 0x6F;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt8(0x03);
+            writer.WriteUInt32BE(serial);
+            writer.WriteUInt32BE(gold);
+            writer.WriteUInt32BE(platinum);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
         public static void Send_DoubleClick(this NetClient socket, uint serial)
         {
             const byte ID = 0x06;

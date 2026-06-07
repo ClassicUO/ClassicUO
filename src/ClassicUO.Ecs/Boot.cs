@@ -51,6 +51,7 @@ internal readonly struct CuoPlugin : IPlugin
         app.AddPlugin<LogoutGumpPlugin>();
         app.AddPlugin<SpellbookGumpPlugin>();
         app.AddPlugin<VendorGumpPlugin>();
+        app.AddPlugin<TradingGumpPlugin>();
         app.AddPlugin<SplitMenuPlugin>();
         app.AddPlugin<PopupMenuPlugin>();
         app.AddPlugin<TooltipPlugin>();
