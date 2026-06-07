@@ -202,6 +202,82 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
+        // Icon-menu (0x7C menuid != 0) selection reply. code = item index (1-based);
+        // 0 = cancel. Mirrors legacy Send_MenuResponse.
+        public static void Send_MenuResponse(this NetClient socket, uint serial, ushort graphic, int code, ushort itemGraphic, ushort itemHue)
+        {
+            const byte ID = 0x7D;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt32BE(serial);
+            writer.WriteUInt16BE(graphic);
+
+            if (code != 0)
+            {
+                writer.WriteUInt16BE((ushort)code);
+                writer.WriteUInt16BE(itemGraphic);
+                writer.WriteUInt16BE(itemHue);
+            }
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
+        // Gray-menu (0x7C menuid == 0) selection reply. code = radio index
+        // (1-based); 0 = cancel. Mirrors legacy Send_GrayMenuResponse.
+        public static void Send_GrayMenuResponse(this NetClient socket, uint serial, ushort graphic, ushort code)
+        {
+            const byte ID = 0x7D;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt32BE(serial);
+            writer.WriteUInt16BE(graphic);
+            writer.WriteUInt16BE(code);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
         public static void Send_DoubleClick(this NetClient socket, uint serial)
         {
             const byte ID = 0x06;

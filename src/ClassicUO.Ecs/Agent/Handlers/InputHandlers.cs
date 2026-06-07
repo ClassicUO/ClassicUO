@@ -60,6 +60,7 @@ internal static class InputHandlers
         d.Register("debug.openProfile", DebugOpenProfile);
         d.Register("debug.openTrade", DebugOpenTrade);
         d.Register("debug.tradeUpdate", DebugTradeUpdate);
+        d.Register("debug.openMenu", DebugOpenMenu);
         d.Register("debug.dumpLayout", DebugDumpLayout);
     }
 
@@ -245,6 +246,42 @@ internal static class InputHandlers
         var q = ctx.Runtime.GetResource<DebugTradeQueue>();
         q.Pending.Add(new DebugTradeQueue.Req { Type = type, Serial = serial, Id1 = id1, Id2 = id2, Gold = gold, Platinum = plat });
         return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["updated"] = true, ["type"] = type } };
+    }
+
+    // Test-only: open an old-style 0x7C menu without a server prompt. {"gray":
+    // true} builds the resizepic radio menu; otherwise the icon menu. Optional
+    // serial/menuId/name; default items are a couple of reagent icons / text rows.
+    public static JsonRpcResponse DebugOpenMenu(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        uint serial = 0x40005001u; ushort menuId = 0x1234; string name = "Choose an option";
+        bool gray = false;
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object)
+        {
+            if (p.TryGetProperty("serial", out var se) && se.TryGetUInt32(out var sv)) serial = sv;
+            if (p.TryGetProperty("menuId", out var me) && me.TryGetInt32(out var mv)) menuId = (ushort)mv;
+            if (p.TryGetProperty("name", out var ne) && ne.ValueKind == JsonValueKind.String) name = ne.GetString() ?? name;
+            if (p.TryGetProperty("gray", out var ge) && ge.ValueKind is JsonValueKind.True or JsonValueKind.False) gray = ge.GetBoolean();
+        }
+
+        // Icon entries: leading u16 = item graphic (nonzero). Gray entries: leading
+        // u16 = 0, then text. Mirrors the 0x7C wire body (id+len stripped by dispatch).
+        (ushort g, ushort hue, string text)[] items = gray
+            ? new (ushort, ushort, string)[] { (0, 0, "First choice"), (0, 0, "Second choice"), (0, 0, "Third choice") }
+            : new (ushort, ushort, string)[] { (0x0F7A, 0, "Black Pearl"), (0x0F7B, 0, "Blood Moss"), (0x0F84, 0, "Garlic") };
+
+        var buf = new List<byte>();
+        void U8(int v) => buf.Add((byte)v);
+        void U16(int v) { buf.Add((byte)(v >> 8)); buf.Add((byte)v); }
+        void U32(uint v) { buf.Add((byte)(v >> 24)); buf.Add((byte)(v >> 16)); buf.Add((byte)(v >> 8)); buf.Add((byte)v); }
+        void Ascii(string s) { U8(s.Length); foreach (var c in s) buf.Add((byte)c); }
+
+        U32(serial); U16(menuId); Ascii(name); U8(items.Length);
+        foreach (var (g, hue, text) in items) { U16(g); U16(hue); Ascii(text); }
+
+        var pkt = new OnOpenMenuPacket_0x7C();
+        pkt.Fill(new ClassicUO.IO.StackDataReader(System.Runtime.InteropServices.CollectionsMarshal.AsSpan(buf)));
+        ctx.Runtime.GetResource<DebugMenuQueue>().Pending.Add(pkt);
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true, ["gray"] = gray } };
     }
 
     // Test-only: open the split-stack menu without a server item / drag. The
