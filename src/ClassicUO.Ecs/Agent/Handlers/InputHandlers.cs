@@ -62,6 +62,7 @@ internal static class InputHandlers
         d.Register("debug.tradeUpdate", DebugTradeUpdate);
         d.Register("debug.openMenu", DebugOpenMenu);
         d.Register("debug.openCombatBook", DebugOpenCombatBook);
+        d.Register("debug.openRacialBook", DebugOpenRacialBook);
         d.Register("debug.dumpLayout", DebugDumpLayout);
     }
 
@@ -255,6 +256,27 @@ internal static class InputHandlers
     {
         ctx.Runtime.GetResource<DebugCombatBookQueue>().OpenRequested = true;
         return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true } };
+    }
+
+    // Test-only: open the racial-abilities book. Optional {"race":
+    // "human"|"elf"|"gargoyle"} (default gargoyle, to exercise the flying icon).
+    public static JsonRpcResponse DebugOpenRacialBook(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        var race = ClassicUO.Game.Data.RaceType.GARGOYLE;
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object
+            && p.TryGetProperty("race", out var re) && re.ValueKind == JsonValueKind.String)
+        {
+            race = re.GetString()?.ToLowerInvariant() switch
+            {
+                "human" => ClassicUO.Game.Data.RaceType.HUMAN,
+                "elf" => ClassicUO.Game.Data.RaceType.ELF,
+                _ => ClassicUO.Game.Data.RaceType.GARGOYLE,
+            };
+        }
+        var q = ctx.Runtime.GetResource<DebugRacialBookQueue>();
+        q.Race = race;
+        q.OpenRequested = true;
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true, ["race"] = race.ToString() } };
     }
 
     // Test-only: open an old-style 0x7C menu without a server prompt. {"gray":

@@ -124,6 +124,10 @@ struct PlayerData
 
     public bool IsFemale;
 
+    // Player race (status packet Type >= 5). Drives the racial-abilities book's
+    // ability set / icons. 0 (unset) is treated as Human.
+    public RaceType Race;
+
     // AOS extended stats (status packet Type >= 6) — used by the modern status gump.
     public short MaxPhysicalRes, MaxFireRes, MaxColdRes, MaxPoisonRes, MaxEnergyRes;
     public short DefenseChanceInc, MaxDefenseChanceInc;

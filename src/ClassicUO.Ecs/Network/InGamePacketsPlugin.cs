@@ -1182,6 +1182,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                 EnergyRes = packet.EnergyResistance.GetValueOrDefault(),
                 ThithingPoints = packet.TithingPoints.GetValueOrDefault(),
                 IsFemale = packet.IsFemale.GetValueOrDefault(),
+                Race = packet.Race.HasValue ? (RaceType)packet.Race.Value : RaceType.HUMAN,
                 MaxPhysicalRes = packet.MaxPhysicalResistance.GetValueOrDefault(),
                 MaxFireRes = packet.MaxFireResistance.GetValueOrDefault(),
                 MaxColdRes = packet.MaxColdResistance.GetValueOrDefault(),

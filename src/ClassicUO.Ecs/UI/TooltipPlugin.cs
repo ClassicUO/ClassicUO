@@ -41,14 +41,15 @@ internal sealed class ObjectPropertyLists
         public uint Revision;
         public string Name;   // first cliloc line (the object name)
         public string Data;   // remaining property lines, '\n'-joined
+        public int MaxWidth;  // wrap width (legacy SetTooltip maxWidth); 0 = default
     }
 
     private readonly Dictionary<uint, Entry> _map = new();
     private readonly HashSet<uint> _requested = new();
 
-    public void Add(uint serial, uint revision, string name, string data)
+    public void Add(uint serial, uint revision, string name, string data, int maxWidth = 0)
     {
-        _map[serial] = new Entry { Revision = revision, Name = name, Data = data };
+        _map[serial] = new Entry { Revision = revision, Name = name, Data = data, MaxWidth = maxWidth };
         _requested.Remove(serial);
     }
 
@@ -253,7 +254,8 @@ internal readonly struct TooltipPlugin : IPlugin
         {
             HideBox(commands, state, childrenQ);
 
-            var (w, h) = UoFontRenderer.Measure(html, font: 1, MaxWidth, isHtml: true, htmlStartColor: 0xFFFFFFFF, htmlBg: false, align: TEXT_ALIGN_TYPE.TS_CENTER);
+            int wrapWidth = entry.MaxWidth > 0 ? entry.MaxWidth : MaxWidth;
+            var (w, h) = UoFontRenderer.Measure(html, font: 1, wrapWidth, isHtml: true, htmlStartColor: 0xFFFFFFFF, htmlBg: false, align: TEXT_ALIGN_TYPE.TS_CENTER);
             if (w <= 0 || h <= 0)
                 return;
 
@@ -293,7 +295,7 @@ internal readonly struct TooltipPlugin : IPlugin
                         Text = html,
                         TextFont = 1,
                         TextHue = 0,
-                        WrapWidth = MaxWidth,
+                        WrapWidth = wrapWidth,
                         IsHtml = true,
                         HtmlStartColor = 0xFFFFFFFF,
                         HtmlBg = false,

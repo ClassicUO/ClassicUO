@@ -379,6 +379,41 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
+        // Toggle gargoyle flight (0xBF subcommand 0x32). Mirrors legacy
+        // Send_ToggleGargoyleFlying.
+        public static void Send_ToggleGargoyleFlying(this NetClient socket)
+        {
+            const byte ID = 0xBF;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt16BE(0x32);
+            writer.WriteUInt16BE(0x01);
+            writer.WriteUInt32BE(0);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
         public static void Send_DoubleClick(this NetClient socket, uint serial)
         {
             const byte ID = 0x06;
