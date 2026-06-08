@@ -70,6 +70,14 @@ internal readonly struct PaperdollPlugin : IPlugin
             .OnExit(GameState.GameScreen)
             .Build();
 
+        // Profile / party / book scroll gump-pics render behind the paperdoll
+        // body, so Clay's bounds Interaction can't route their double-clicks
+        // (body bbox covers them). Resolve via UiPick (pixel-perfect): the body's
+        // transparent corner pixels pass the hit through to the scroll.
+        var scrollFn = ScrollDClick;
+        app.AddSystem(scrollFn).InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> s) => s.Value.Current == GameState.GameScreen).Build();
+
         // Backpack double-click. Bevy.UI synthesizes UiDoubleClick from
         // two UiClick events within UiClayContext.DoubleClickWindow on the
         // same entity; this observer just routes that to Send_DoubleClick
@@ -246,6 +254,49 @@ internal readonly struct PaperdollPlugin : IPlugin
                 IsPlayer = isPlayer,
             });
 
+        // Combat / racial-abilities book + profile / party scroll gump-pics.
+        // OOP fires on left double-click. Combat at (156, 200) when
+        // ClientFeatures.PaperdollBooks; racial at (23, 200) when CV >= 7000;
+        // profile/party at the bottom-left (0x07D2).
+        //
+        // Added BEFORE the body so the scroll art renders behind the body /
+        // equipment overlays (legacy paint order) — see BehindBodyScrollCount,
+        // which inserts the body just after these. Because they sit behind the
+        // body, Clay's bounds-based Interaction (the body's bbox covers them)
+        // can't route their clicks, so they carry PaperdollScrollUI and are
+        // resolved by ScrollDClick via UiPick (pixel-perfect — the body's
+        // transparent corner pixels pass the click through). Keep this add order
+        // (combat, racial, profile, party) in sync with BehindBodyScrollCount.
+        if (showBooks)
+        {
+            var combatBook = builder.AddGump(commands, 0x2B34, Vector3.UnitZ, new Vector2(156, 200))
+                .Insert(new PaperdollScrollUI { Kind = ScrollKind.CombatBook });
+            commands.AddChild(root.Id, combatBook.Id);
+
+            if (showRacialBook)
+            {
+                var racialBook = builder.AddGump(commands, 0x2B28, Vector3.UnitZ, new Vector2(23, 200))
+                    .Insert(new PaperdollScrollUI { Kind = ScrollKind.RacialBook });
+                commands.AddChild(root.Id, racialBook.Id);
+            }
+        }
+
+        {
+            int profileX = 25;
+            if (showRacialBook) profileX += 14;
+            var profilePic = builder.AddGump(commands, 0x07D2, Vector3.UnitZ, new Vector2(profileX, 196))
+                .Insert(new PaperdollScrollUI { Kind = ScrollKind.Profile, Serial = serial });
+            commands.AddChild(root.Id, profilePic.Id);
+
+            if (isPlayer)
+            {
+                int partyX = profileX + 14;
+                var partyPic = builder.AddGump(commands, 0x07D2, Vector3.UnitZ, new Vector2(partyX, 196))
+                    .Insert(new PaperdollScrollUI { Kind = ScrollKind.Party });
+                commands.AddChild(root.Id, partyPic.Id);
+            }
+        }
+
         // Body, equipment overlays, and the equipment-slot frames + item icons
         // are all built here (and rebuilt by the equip observer). Slots live in
         // BuildBodyAndOverlays so the bg→icon→frame paint order is stable and
@@ -386,73 +437,6 @@ internal readonly struct PaperdollPlugin : IPlugin
             commands.AddChild(root.Id, virtuePic.Id);
         }
 
-        // Profile gump (0x07D2) — both player and other. OOP fires on left
-        // double-click. Shifted +14 if the racial-abilities book is showing.
-        {
-            var capturedSerial = serial;
-            int profileX = 25;
-            if (showRacialBook) profileX += 14;
-            var profilePic = builder.AddGump(commands, 0x07D2, Vector3.UnitZ, new Vector2(profileX, 196))
-                .Insert(Interaction.None);
-            profilePic.Observe((On<UiDoubleClick> _, Res<NetClient> net) =>
-            {
-                net.Value.Send_ProfileRequest(capturedSerial);
-            });
-            commands.AddChild(root.Id, profilePic.Id);
-
-            if (isPlayer)
-            {
-                // Party manifest gump (0x07D2 again, second slot). OOP opens
-                // PartyGump on left double-click.
-                int partyX = profileX + 14;
-                var partyPic = builder.AddGump(commands, 0x07D2, Vector3.UnitZ, new Vector2(partyX, 196))
-                    .Insert(Interaction.None);
-                partyPic.Observe((On<UiDoubleClick> _,
-                                  Commands cmd,
-                                  Res<GumpBuilder> gb,
-                                  Res<AssetsServer> a,
-                                  Res<UiZCounter> z,
-                                  Res<PartyState> party,
-                                  Res<GameContext> ctx,
-                                  Res<NetworkEntitiesMap> map,
-                                  Query<Data<EntityName>> names,
-                                  Query<Data<PartyManifestWindow>> existing) =>
-                {
-                    PartyGumpPlugin.OpenOrFocus(cmd, gb.Value, a.Value, z.Value, party.Value,
-                        ctx.Value.PlayerSerial, map.Value, names, existing);
-                });
-                commands.AddChild(root.Id, partyPic.Id);
-            }
-        }
-
-        // Combat / racial-abilities book gump-pics. OOP fires on left
-        // double-click. Combat at (156, 200) when ClientFeatures.PaperdollBooks
-        // opens the CombatBookGump. Racial at (23, 200) when CV >= 7000 — ECS has
-        // no RacialAbilitiesBookGump yet so that one still logs only.
-        if (showBooks)
-        {
-            var combatBook = builder.AddGump(commands, 0x2B34, Vector3.UnitZ, new Vector2(156, 200))
-                .Insert(Interaction.None).Insert<UINoWindowDrag>();
-            combatBook.Observe((On<UiDoubleClick> _,
-                Commands cmd,
-                Res<GumpBuilder> b,
-                Res<AssetsServer> a,
-                Res<UiZCounter> z,
-                Res<GameContext> ctx,
-                Query<Data<CombatBookWindow>> existingQ) =>
-                CombatBookGumpPlugin.OpenOrFocus(cmd, b.Value, a.Value, z.Value, ctx.Value, existingQ));
-            commands.AddChild(root.Id, combatBook.Id);
-
-            if (showRacialBook)
-            {
-                var racialBook = builder.AddGump(commands, 0x2B28, Vector3.UnitZ, new Vector2(23, 200))
-                    .Insert(Interaction.None);
-                racialBook.Observe((On<UiDoubleClick> _) =>
-                    Console.WriteLine("[Paperdoll] Racial book clicked — no ECS RacialAbilitiesBook"));
-                commands.AddChild(root.Id, racialBook.Id);
-            }
-        }
-
         // Title label (39, 262): ASCII font 1, hue 0x0386, maxWidth 185 — matches
         // OOP PaperdollGump's `new Label("", false, 0x0386, 185, font: 1)`. Uses a
         // WrappedText custom node (pre-wrapped via FontsLoader at maxWidth) rather
@@ -484,6 +468,66 @@ internal readonly struct PaperdollPlugin : IPlugin
                 }
             });
         commands.AddChild(root.Id, titleEnt.Id);
+    }
+
+    // Pixel-perfect double-click dispatch for the scroll gump-pics behind the
+    // body. UiPick.Topmost over the raw mouse passes through the body's
+    // transparent corner pixels to the scroll, then we fire the OOP action by
+    // kind. Mirrors HealthBarPlugin.WindowInteractions' UiPick double-click.
+    private static void ScrollDClick(
+        Commands commands,
+        Res<MouseContext> mouse,
+        Res<AssetsServer> assets,
+        Res<NetClient> net,
+        Res<GumpBuilder> builder,
+        Res<UiZCounter> zCounter,
+        Res<GameContext> gameCtx,
+        Res<PartyState> party,
+        Res<NetworkEntitiesMap> map,
+        PaperdollScrollParams p)
+    {
+        if (!mouse.Value.IsPressedDouble(Input.MouseButtonType.Left)) return;
+
+        var hit = UiPick.Topmost(mouse.Value.Position, assets.Value, p.Rendered);
+        if (!hit.Found || !p.Scrolls.Contains(hit.Entity)) return;
+
+        var (_, sc) = p.Scrolls.Get(hit.Entity);
+        switch (sc.Ref.Kind)
+        {
+            case ScrollKind.Profile:
+                net.Value.Send_ProfileRequest(sc.Ref.Serial);
+                break;
+            case ScrollKind.Party:
+                PartyGumpPlugin.OpenOrFocus(commands, builder.Value, assets.Value, zCounter.Value,
+                    party.Value, gameCtx.Value.PlayerSerial, map.Value, p.Names, p.PartyWindows);
+                break;
+            case ScrollKind.CombatBook:
+                CombatBookGumpPlugin.OpenOrFocus(commands, builder.Value, assets.Value, zCounter.Value,
+                    gameCtx.Value, p.CombatBooks);
+                break;
+            case ScrollKind.RacialBook:
+                var race = RaceType.HUMAN;
+                foreach (var (_, pd) in p.Player) { race = pd.Ref.Race; break; }
+                RacialBookGumpPlugin.OpenOrFocus(commands, builder.Value, assets.Value, zCounter.Value,
+                    race, p.RacialBooks);
+                break;
+        }
+    }
+
+    // Number of scroll gump-pics BuildWindow adds at the front of root.Children
+    // before the body (combat book, racial book, profile, party). Must match the
+    // adds in BuildWindow exactly — it's the start index for the body subtree so
+    // the body paints over the scrolls. Profile is always present; party only for
+    // the player; the books gate on PaladinNecromancer tooltips + client version.
+    private static int BehindBodyScrollCount(GameContext gameCtx, uint serial)
+    {
+        bool isPlayer = serial == gameCtx.PlayerSerial;
+        bool showBooks = (gameCtx.ClientFeatures & CharacterListFlags.CLF_PALADIN_NECROMANCER_TOOLTIPS) != 0 && isPlayer;
+        bool showRacialBook = showBooks && gameCtx.ClientVersion >= ClientVersion.CV_7000;
+        return 1                              // profile (player + other)
+             + (isPlayer ? 1 : 0)             // party manifest
+             + (showBooks ? 1 : 0)            // combat book
+             + (showRacialBook ? 1 : 0);      // racial book
     }
 
     // Body sprite + equipment overlays. Split out from BuildWindow so the
@@ -530,15 +574,15 @@ internal readonly struct PaperdollPlugin : IPlugin
         var bodyId = ResolveBodyGraphic(mobileGraphic, isFemale);
         if (bodyId == 0) return;
 
-        // AddChild at increasing indices starting from 0 so body children land
-        // at the FRONT of root.Children. On initial spawn root has no children
-        // yet — TinyEcs's AddChild appends when index >= count, so insertion
-        // degrades to append. On rebuild (despawn-then-respawn after equip)
-        // root.Children already holds the chrome (buttons / virtue pic / profile
-        // / title); inserting at the front keeps body+overlays UNDER those in
-        // paint order so wide gumps (cloaks/robes) can't visually or
-        // hit-test-wise cover the x=185 button column.
-        int childIdx = 0;
+        // Body children insert just AFTER the scroll gump-pics (combat / racial
+        // book, profile, party), which BuildWindow adds first so they occupy the
+        // front of root.Children. Inserting body after them puts the body +
+        // equipment overlays ON TOP of the scroll art (legacy paint order) while
+        // still UNDER the appended chrome (buttons / virtue / title) — so wide
+        // gumps (cloaks/robes) can't cover the x=185 button column. On rebuild
+        // the scrolls persist at the front, so the same start index re-lands the
+        // body between scrolls and chrome.
+        int childIdx = BehindBodyScrollCount(gameCtx, serial);
 
         var bodyHue = ToShaderHue(mobileHue);
         var body = builder.AddGump(commands, bodyId, bodyHue, new Vector2(8, 19))
@@ -779,6 +823,45 @@ internal struct PaperdollWindow
 {
     public uint Serial;
     public bool IsPlayer;
+}
+
+internal enum ScrollKind : byte { Profile, Party, CombatBook, RacialBook }
+
+// Tag on the profile / party / combat-book / racial-book scroll gump-pics.
+// These render BEHIND the paperdoll body, so Clay's bounds-based Interaction
+// can't route their double-clicks (the body's bbox covers them). ScrollDClick
+// resolves them via UiPick (pixel-perfect — the body's transparent corner
+// pixels pass the hit through) and fires the action by Kind. Serial is the
+// paperdoll's mobile serial (used only by the profile request).
+internal struct PaperdollScrollUI
+{
+    public ScrollKind Kind;
+    public uint Serial;
+}
+
+// Queries for ScrollDClick, bundled so the system stays under the param-arity
+// limit. Rendered is the UiPick element set; the rest resolve the scroll under
+// the cursor and the open/focus targets for each scroll action.
+internal sealed class PaperdollScrollParams : CompositeSystemParam
+{
+    public readonly Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> Rendered;
+    public readonly Query<Data<PaperdollScrollUI>> Scrolls;
+    public readonly Query<Data<EntityName>> Names;
+    public readonly Query<Data<PlayerData>, With<Player>> Player;
+    public readonly Query<Data<CombatBookWindow>> CombatBooks;
+    public readonly Query<Data<RacialBookWindow>> RacialBooks;
+    public readonly Query<Data<PartyManifestWindow>> PartyWindows;
+
+    public PaperdollScrollParams()
+    {
+        Rendered     = Add(new Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>>());
+        Scrolls      = Add(new Query<Data<PaperdollScrollUI>>());
+        Names        = Add(new Query<Data<EntityName>>());
+        Player       = Add(new Query<Data<PlayerData>, With<Player>>());
+        CombatBooks  = Add(new Query<Data<CombatBookWindow>>());
+        RacialBooks  = Add(new Query<Data<RacialBookWindow>>());
+        PartyWindows = Add(new Query<Data<PartyManifestWindow>>());
+    }
 }
 
 // Carried by each of the 15 equipment slot frames. Future UpdateSlots
