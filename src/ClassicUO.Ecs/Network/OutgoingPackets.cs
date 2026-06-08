@@ -379,6 +379,40 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
+        // Tip / notice scroll navigation (0xA7). id = the tip serial; flag 0 =
+        // previous, 1 = next. Mirrors legacy Send_TipRequest.
+        public static void Send_TipRequest(this NetClient socket, ushort id, byte flag)
+        {
+            const byte ID = 0xA7;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt16BE(id);
+            writer.WriteUInt8(flag);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
         // Toggle gargoyle flight (0xBF subcommand 0x32). Mirrors legacy
         // Send_ToggleGargoyleFlying.
         public static void Send_ToggleGargoyleFlying(this NetClient socket)

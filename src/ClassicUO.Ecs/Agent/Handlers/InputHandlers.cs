@@ -63,6 +63,7 @@ internal static class InputHandlers
         d.Register("debug.openMenu", DebugOpenMenu);
         d.Register("debug.openCombatBook", DebugOpenCombatBook);
         d.Register("debug.openRacialBook", DebugOpenRacialBook);
+        d.Register("debug.openTip", DebugOpenTip);
         d.Register("debug.dumpLayout", DebugDumpLayout);
     }
 
@@ -277,6 +278,29 @@ internal static class InputHandlers
         q.Race = race;
         q.OpenRequested = true;
         return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true, ["race"] = race.ToString() } };
+    }
+
+    // Test-only: open a tip / notice scroll without a server packet. {"flag": 0}
+    // (default) is a tip-of-the-day with prev/next arrows; any other non-1 flag
+    // is a notice. Optional {"text": "...", "serial": N}.
+    public static JsonRpcResponse DebugOpenTip(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        byte flag = 0;
+        uint serial = 1;
+        string text = "This is a tip of the day. Drag the bottom knob to resize the scroll, "
+            + "use the arrows to browse, right-click to close.";
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object)
+        {
+            if (p.TryGetProperty("flag", out var fe) && fe.TryGetByte(out var f)) flag = f;
+            if (p.TryGetProperty("serial", out var se) && se.TryGetUInt32(out var s)) serial = s;
+            if (p.TryGetProperty("text", out var te) && te.ValueKind == JsonValueKind.String) text = te.GetString() ?? text;
+        }
+        var q = ctx.Runtime.GetResource<DebugTipQueue>();
+        q.Flag = flag;
+        q.Serial = serial;
+        q.Text = text;
+        q.Pending = true;
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true, ["flag"] = flag } };
     }
 
     // Test-only: open an old-style 0x7C menu without a server prompt. {"gray":

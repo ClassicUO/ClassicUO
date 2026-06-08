@@ -300,7 +300,7 @@ readonly struct InGamePacketsPlugin : IPlugin
         Stub<OnAsciiPromptPacket_0x9A>(app);
         Stub<OnSellListPacket_0x9E>(app);
         Stub<OnOpenUrlPacket_0xA5>(app);
-        Stub<OnWindowTipPacket_0xA6>(app);
+        // 0xA6 (tip / notice scroll) is handled by TipNoticeGumpPlugin.
         Stub<OnAttackEntityPacket_0xAA>(app);
         Stub<OnTextEntryDialogPacket_0xAB>(app);
         Stub<OnShowDeathActionPacket_0xAF>(app);
