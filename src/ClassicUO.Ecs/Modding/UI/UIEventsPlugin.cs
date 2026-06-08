@@ -191,6 +191,7 @@ internal readonly struct UIEventsPlugin : IPlugin
 
     private static void PromoteModRoots(
         Query<Data<Node, PluginEntity>, Without<Parent>> roots,
+        Query<Data<UIMovable>> movableQ,
         Res<UiSurface> surface,
         Commands commands,
         Local<HashSet<ulong>> zApplied)
@@ -198,17 +199,31 @@ internal readonly struct UIEventsPlugin : IPlugin
         var size = surface.Value.LogicalSize;
         foreach (var (e, node, _) in roots)
         {
-            if (node.Ref.Width.Type == ValType.Percent)
-                node.Ref.Width = Val.Px(size.X);
-            if (node.Ref.Height.Type == ValType.Percent)
-                node.Ref.Height = Val.Px(size.Y);
+            // A movable mod root (a gump window) owns its own position and is
+            // dragged by WindowDragPlugin — pinning it to the viewport origin
+            // each frame would fight the drag and make its spawn position
+            // non-deterministic. Only give it Absolute + a z so it floats over
+            // the host UI; leave Left/Top (and size) as the mod set them.
+            var movable = movableQ.Contains(e.Ref);
+
+            if (!movable)
+            {
+                if (node.Ref.Width.Type == ValType.Percent)
+                    node.Ref.Width = Val.Px(size.X);
+                if (node.Ref.Height.Type == ValType.Percent)
+                    node.Ref.Height = Val.Px(size.Y);
+            }
 
             // Absolute is required for GlobalZIndex to apply (Clay z-sorts only
             // floating elements); otherwise the mod renders in tree order and
-            // ends up under the host UI. Anchor at the viewport origin.
+            // ends up under the host UI.
             node.Ref.PositionType = PositionType.Absolute;
-            node.Ref.Left = Val.Px(0);
-            node.Ref.Top = Val.Px(0);
+            if (!movable)
+            {
+                // Non-movable full-screen canvas roots anchor at the origin.
+                node.Ref.Left = Val.Px(0);
+                node.Ref.Top = Val.Px(0);
+            }
 
             if (zApplied.Value.Add(e.Ref))
                 commands.Entity(e.Ref).Insert(new GlobalZIndex(ModRootZ));

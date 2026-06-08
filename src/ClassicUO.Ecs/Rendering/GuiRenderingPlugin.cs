@@ -563,8 +563,26 @@ internal readonly struct GuiRenderingPlugin : IPlugin
             case UOCustomKind.None:
                 // Invisible hit/drag surface — draws nothing on purpose.
                 break;
-            case UOCustomKind.Land:
             case UOCustomKind.Animation:
+            {
+                // Mobile animation player: AssetId = body graphic, AnimAction =
+                // group, AnimDir = stored direction (0..4), AnimFrame = frame
+                // (wrapped). The frame is centered in the node box.
+                byte dir = (byte)Math.Clamp((int)custom.AnimDir, 0, 4);
+                var frames = assets.Animations.GetAnimationFrames(
+                    (ushort)custom.AssetId, custom.AnimAction, dir, out _, out _);
+                if (frames.IsEmpty)
+                    break;
+                ref readonly var frame = ref frames[custom.AnimFrame % frames.Length];
+                if (frame.Texture == null)
+                    break;
+                int dx = (int)bb.X + ((int)bb.Width - frame.UV.Width) / 2;
+                int dy = (int)bb.Y + ((int)bb.Height - frame.UV.Height) / 2;
+                b.Draw(frame.Texture, new Vector2(dx, dy), frame.UV, custom.Hue, cmd.ZIndex);
+                break;
+            }
+
+            case UOCustomKind.Land:
                 // Not yet implemented.
                 break;
         }

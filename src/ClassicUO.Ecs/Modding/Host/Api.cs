@@ -216,6 +216,9 @@ internal static class Api
                                 Kind = (UOCustomKind)uo.Kind,
                                 AssetId = uo.AssetId,
                                 Hue = new Vector3(uo.HueX, uo.HueY, uo.HueZ),
+                                AnimAction = uo.AnimAction,
+                                AnimDir = uo.AnimDir,
+                                AnimFrame = uo.AnimFrame,
                             }
                         });
 
@@ -223,7 +226,13 @@ internal static class Api
                         ent.Set(new GlobalZIndex(z));
 
                     if (n.Button is { } btn)
+                    {
                         ent.Set(new UOButton { Normal = btn.Normal, Over = btn.Over, Pressed = btn.Pressed });
+                        // A button inside a movable mod window must reach its own
+                        // UiClick, not latch a window drag on press (WindowDragPlugin
+                        // .Drag yields the gesture on this marker).
+                        ent.Set<UINoWindowDrag>();
+                    }
 
                     if (n.Interactive)
                         ent.Set(Interaction.None);

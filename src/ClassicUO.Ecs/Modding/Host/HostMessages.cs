@@ -26,6 +26,8 @@ namespace ClassicUO.Ecs.Modding.Host;
 [JsonDerivedType(typeof(ContainerOpened), nameof(ContainerOpened))]
 [JsonDerivedType(typeof(ContainerClosed), nameof(ContainerClosed))]
 [JsonDerivedType(typeof(ContainerItemAdded), nameof(ContainerItemAdded))]
+
+[JsonDerivedType(typeof(CustomEvent), nameof(CustomEvent))]
 internal interface HostMessage
 {
     internal record struct MouseMove(float X, float Y) : HostMessage;
@@ -49,6 +51,12 @@ internal interface HostMessage
     internal record struct ContainerOpened(uint Serial, ushort Graphic) : HostMessage;
     internal record struct ContainerClosed(uint Serial) : HostMessage;
     internal record struct ContainerItemAdded(uint ContainerSerial, uint Serial, ushort Graphic, int Amount, int X, int Y, int GridIndex, ushort Hue) : HostMessage;
+
+    // Generic host→mod channel. Topic names the view-model (e.g. "skills",
+    // "paperdoll"); Json carries its mod-defined payload. Lets a gump's data feed
+    // be added without a new sealed variant + host recompile — the "core owns
+    // data, mod owns UI" split publishes through this. Mods filter by Topic.
+    internal record struct CustomEvent(string Topic, string Json) : HostMessage;
 }
 
 internal record struct HostMessages(IEnumerable<HostMessage> Messages);

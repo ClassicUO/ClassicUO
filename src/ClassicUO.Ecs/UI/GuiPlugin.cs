@@ -674,6 +674,13 @@ internal sealed class UOCustomRender
     public UOCustomKind Kind;
     public uint AssetId;
     public Vector3 Hue;
+    // For UOCustomKind.Animation: AssetId is the mobile body graphic, and these
+    // pick the frame to draw — animation group/action, stored direction (0..4),
+    // and frame index (wrapped modulo the group's frame count). A mod animation
+    // player advances AnimFrame over time and re-sends the node.
+    public byte AnimAction;
+    public byte AnimDir;
+    public int AnimFrame;
     // When true the renderer draws the same sprite a second time at +5/+5
     // to mirror legacy ItemGump.Draw's stacked-item visual (Amount > 1 &&
     // ItemData.IsStackable).

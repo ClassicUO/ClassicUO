@@ -76,6 +76,7 @@ internal readonly struct ModdingPlugin : IPlugin
                 .Build();
         }
 
+
         app.AddPlugin<InputPlugin>();
         app.AddPlugin<TextPlugin>();
         app.AddPlugin<UIEventsPlugin>();
@@ -235,6 +236,13 @@ internal readonly struct ModdingPlugin : IPlugin
                         network.Value.Send_SelectServer(serverLoginRequest.Index);
                     }
 
+                    break;
+
+                // Generic mod-driven intent. A real handler dispatches on Topic
+                // (e.g. "logout" -> disconnect, "skill.use" -> send packet). Here
+                // it logs to prove the mod->host round-trip closes.
+                case PluginMessage.CustomAction custom:
+                    Console.WriteLine("[mod-custom] topic={0} json={1}", custom.Topic, custom.Json);
                     break;
             }
         }

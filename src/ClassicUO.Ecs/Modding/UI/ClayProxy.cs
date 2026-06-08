@@ -52,7 +52,10 @@ internal record struct NodeProxy(
 internal record struct TextProxy(string Value, ushort FontId, ushort FontSize, ColorProxy Color, bool Editable, bool Masked);
 
 // UO custom render: Kind matches UOCustomKind; Hue is a Vector3 (X/Y/Z).
-internal record struct UORenderProxy(byte Kind, uint AssetId, float HueX, float HueY, float HueZ);
+// AnimAction/AnimDir/AnimFrame drive UOCustomKind.Animation (mobile player):
+// group, stored direction (0..4), frame index. Default 0 for non-animation nodes.
+internal record struct UORenderProxy(byte Kind, uint AssetId, float HueX, float HueY, float HueZ,
+    byte AnimAction, byte AnimDir, int AnimFrame);
 
 // UO button graphics per Interaction state. The host UpdateUOButtonsState system
 // swaps UOCustomRender.AssetId between these by hover/press.
