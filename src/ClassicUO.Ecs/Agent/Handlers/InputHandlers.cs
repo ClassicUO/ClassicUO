@@ -64,6 +64,7 @@ internal static class InputHandlers
         d.Register("debug.openCombatBook", DebugOpenCombatBook);
         d.Register("debug.openRacialBook", DebugOpenRacialBook);
         d.Register("debug.openTip", DebugOpenTip);
+        d.Register("debug.openMessageBox", DebugOpenMessageBox);
         d.Register("debug.dumpLayout", DebugDumpLayout);
     }
 
@@ -301,6 +302,24 @@ internal static class InputHandlers
         q.Text = text;
         q.Pending = true;
         return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true, ["flag"] = flag } };
+    }
+
+    // Test-only: open a message box. {"cancel": true} adds a Cancel button;
+    // optional {"message","w","h"}.
+    public static JsonRpcResponse DebugOpenMessageBox(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        var q = ctx.Runtime.GetResource<DebugMessageBoxQueue>();
+        q.Width = 250; q.Height = 150; q.Cancel = false;
+        q.Message = "Are you sure you want to do this?";
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object)
+        {
+            if (p.TryGetProperty("message", out var me) && me.ValueKind == JsonValueKind.String) q.Message = me.GetString() ?? q.Message;
+            if (p.TryGetProperty("cancel", out var ce) && ce.ValueKind is JsonValueKind.True or JsonValueKind.False) q.Cancel = ce.GetBoolean();
+            if (p.TryGetProperty("w", out var we) && we.TryGetInt32(out var w)) q.Width = w;
+            if (p.TryGetProperty("h", out var he) && he.TryGetInt32(out var h)) q.Height = h;
+        }
+        q.Pending = true;
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true, ["cancel"] = q.Cancel } };
     }
 
     // Test-only: open an old-style 0x7C menu without a server prompt. {"gray":
