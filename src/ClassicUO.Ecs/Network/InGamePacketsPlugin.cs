@@ -280,7 +280,7 @@ readonly struct InGamePacketsPlugin : IPlugin
         Stub<OnSoundEffectPacket_0x54>(app);
         Stub<OnMapDataPacket_0x56>(app);
         Stub<OnWeatherPacket_0x65>(app);
-        Stub<OnBookPagesPacket_0x66>(app);
+        // 0x66 (book pages) is handled by BookGumpPlugin.
         Stub<OnPlayMusicPacket_0x6D>(app);
         Stub<OnCharacterAnimationPacket_0x6E>(app);
         Stub<OnGraphicEffectPacket_0x70>(app);
@@ -292,7 +292,7 @@ readonly struct InGamePacketsPlugin : IPlugin
         Stub<OnCorpseEquipmentPacket_0x89>(app);
         Stub<OnShowMapPacket_0x90_Pre308Z>(app);
         Stub<OnShowMapPacket_0x90_Post308Z>(app);
-        Stub<OnOpenBookPacket_0x93>(app);
+        // 0x93 (open book, old header) is handled by BookGumpPlugin.
         Stub<OnColorPickerPacket_0x95>(app);
         Stub<OnMovePlayerPacket_0x97>(app);
         Stub<OnUpdateNamePacket_0x98>(app);
@@ -318,7 +318,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             EventWriter<SystemMessageEvent>>(OnClilocMessageAffix);
         // 0xD1 reply is handled by LogoutGumpPlugin (client-initiated logout).
         Stub<OnUpdateCharacterAltPacket_0xD2>(app);
-        Stub<OnOpenBookAltPacket_0xD4>(app);
+        // 0xD4 (open book) is handled by BookGumpPlugin.
         app.AddObserver<On<PacketReceived<OnMegaClilocPacket_0xD6>>,
             Res<UOFileManager>,
             ResMut<GameContext>,

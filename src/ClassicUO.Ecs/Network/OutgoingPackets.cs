@@ -2458,5 +2458,160 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
+        // 0x66 — request a book page (wire pages are 1-based). The server
+        // replies with a 0x66 carrying that page's lines. Mirrors legacy
+        // Send_BookPageDataRequest.
+        public static void Send_BookPageDataRequest(this NetClient socket, uint serial, ushort page)
+        {
+            const byte ID = 0x66;
+            int length = socket.PacketsTable.GetPacketLength(ID);
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+            if (length < 0)
+                writer.WriteZero(2);
+
+            writer.WriteUInt32BE(serial);
+            writer.WriteUInt16BE(0x01);
+            writer.WriteUInt16BE(page);
+            writer.WriteUInt16BE(0xFFFF);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
+        // 0x66 — push one edited page (UTF8 lines, each null-terminated, plus a
+        // trailing null). Mirrors legacy Send_BookPageData.
+        public static void Send_BookPageData(this NetClient socket, uint serial, string[] text, int page)
+        {
+            const byte ID = 0x66;
+            int length = socket.PacketsTable.GetPacketLength(ID);
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+            if (length < 0)
+                writer.WriteZero(2);
+
+            writer.WriteUInt32BE(serial);
+            writer.WriteUInt16BE(0x01);
+            writer.WriteUInt16BE((ushort)page);
+            writer.WriteUInt16BE((ushort)text.Length);
+
+            for (int i = 0; i < text.Length; ++i)
+            {
+                if (!string.IsNullOrEmpty(text[i]))
+                {
+                    string t = text[i].Replace("\n", "");
+
+                    if (t.Length > 0)
+                    {
+                        byte[] buffer = ArrayPool<byte>.Shared.Rent(Encoding.UTF8.GetMaxByteCount(t.Length));
+                        try
+                        {
+                            int written = Encoding.UTF8.GetBytes(t, 0, t.Length, buffer, 0);
+                            writer.Write(buffer.AsSpan(0, written));
+                        }
+                        finally
+                        {
+                            ArrayPool<byte>.Shared.Return(buffer);
+                        }
+                    }
+                }
+
+                writer.WriteUInt8(0x00);
+            }
+
+            writer.WriteUInt8(0x00);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
+        // 0xD4 — book title/author update (length-prefixed UTF8 strings, the
+        // post-2.0 header shape). Mirrors legacy Send_BookHeaderChanged.
+        public static void Send_BookHeaderChanged(this NetClient socket, uint serial, string title, string author)
+        {
+            const byte ID = 0xD4;
+            int length = socket.PacketsTable.GetPacketLength(ID);
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+            if (length < 0)
+                writer.WriteZero(2);
+
+            writer.WriteUInt32BE(serial);
+            writer.WriteUInt8(0x00);
+            writer.WriteUInt8(0x00);
+            writer.WriteUInt16BE(0);
+            int titleLength = Encoding.UTF8.GetByteCount(title);
+            writer.WriteUInt16BE((ushort)titleLength);
+            writer.WriteUTF8(title, titleLength);
+            int authorLength = Encoding.UTF8.GetByteCount(author);
+            writer.WriteUInt16BE((ushort)authorLength);
+            writer.WriteUTF8(author, authorLength);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
+        // 0x93 — book title/author update, fixed-size header (for books the
+        // server opened with the old 0x93). Mirrors legacy Send_BookHeaderChanged_Old.
+        public static void Send_BookHeaderChanged_Old(this NetClient socket, uint serial, string title, string author)
+        {
+            const byte ID = 0x93;
+            int length = socket.PacketsTable.GetPacketLength(ID);
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+            if (length < 0)
+                writer.WriteZero(2);
+
+            writer.WriteUInt32BE(serial);
+            writer.WriteUInt8(0x00);
+            writer.WriteUInt8(0x01);
+            writer.WriteUInt16BE(0);
+            writer.WriteUTF8(title, 60);
+            writer.WriteUTF8(author, 30);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
     }
 }

@@ -64,6 +64,7 @@ internal static class InputHandlers
         d.Register("debug.openCombatBook", DebugOpenCombatBook);
         d.Register("debug.openRacialBook", DebugOpenRacialBook);
         d.Register("debug.openTip", DebugOpenTip);
+        d.Register("debug.openBook", DebugOpenBook);
         d.Register("debug.openMessageBox", DebugOpenMessageBox);
         d.Register("debug.dumpLayout", DebugDumpLayout);
     }
@@ -302,6 +303,36 @@ internal static class InputHandlers
         q.Text = text;
         q.Pending = true;
         return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true, ["flag"] = flag } };
+    }
+
+    // Test-only: open a book gump without a server packet. Optional
+    // {"pages": N, "editable": bool, "title", "author", "serial"}; sample page
+    // text is streamed in via a synthetic 0x66 unless {"empty": true}.
+    public static JsonRpcResponse DebugOpenBook(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        var q = ctx.Runtime.GetResource<DebugBookQueue>();
+        q.Serial = 0x40001234u;
+        q.Editable = true;
+        q.PageCount = 6;
+        q.Title = "The Tale of Caveman";
+        q.Author = "Ugg";
+        bool empty = false;
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object)
+        {
+            if (p.TryGetProperty("serial", out var se) && se.TryGetUInt32(out var s)) q.Serial = s;
+            if (p.TryGetProperty("pages", out var pe) && pe.TryGetUInt16(out var n)) q.PageCount = n;
+            if (p.TryGetProperty("editable", out var ee) && ee.ValueKind is JsonValueKind.True or JsonValueKind.False) q.Editable = ee.GetBoolean();
+            if (p.TryGetProperty("title", out var te) && te.ValueKind == JsonValueKind.String) q.Title = te.GetString() ?? q.Title;
+            if (p.TryGetProperty("author", out var ae) && ae.ValueKind == JsonValueKind.String) q.Author = ae.GetString() ?? q.Author;
+            if (p.TryGetProperty("empty", out var me) && me.ValueKind is JsonValueKind.True or JsonValueKind.False) empty = me.GetBoolean();
+        }
+        q.PageLines = empty ? null : new List<List<string>>
+        {
+            new() { "Long ago, before the", "shards were sundered,", "a caveman found a", "blank book and a", "quill.", "", "He began to write." },
+            new() { "Page two holds the", "middle of the tale:", "many mammoths,", "much snow." },
+        };
+        q.PendingOpen = true;
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true, ["pages"] = q.PageCount, ["editable"] = q.Editable } };
     }
 
     // Test-only: open a message box. {"cancel": true} adds a Cancel button;
