@@ -583,8 +583,35 @@ internal readonly struct GuiRenderingPlugin : IPlugin
             }
 
             case UOCustomKind.Land:
-                // Not yet implemented.
+            {
+                // Land tile (ART block < 0x4000): a 44x44 diamond. Fit to the node
+                // box when it exceeds it, else draw native-size centered — same
+                // size rule as Art so the asset IDE can frame either kind.
+                ref readonly var info = ref assets.Arts.GetLand(custom.AssetId);
+                if (info.Texture == null || info.UV.Width <= 0 || info.UV.Height <= 0)
+                    break;
+                float lw = info.UV.Width;
+                float lh = info.UV.Height;
+                float lbw = bb.Width  > 0 ? bb.Width  : lw;
+                float lbh = bb.Height > 0 ? bb.Height : lh;
+                float ldw, ldh;
+                if (lw > lbw || lh > lbh) { ldw = lbw; ldh = lbh; }
+                else { ldw = lw; ldh = lh; }
+                b.Draw(
+                    info.Texture,
+                    new Rectangle(
+                        (int)(bb.X + (lbw - ldw) * 0.5f),
+                        (int)(bb.Y + (lbh - ldh) * 0.5f),
+                        (int)ldw,
+                        (int)ldh),
+                    info.UV,
+                    custom.Hue,
+                    0f,
+                    Vector2.Zero,
+                    SpriteEffects.None,
+                    cmd.ZIndex);
                 break;
+            }
         }
     }
 

@@ -6,7 +6,6 @@
     <AssemblyName>cuo-ecs</AssemblyName>
     <RootNamespace>ClassicUO</RootNamespace>
     <PublishAot>true</PublishAot>
-    <PlatformTarget>x64</PlatformTarget>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,6 +21,14 @@
   <PropertyGroup Condition="'$(Configuration)'=='Debug'">
     <OutputPath>$(ProjectDir)..\..\bin\Debug\</OutputPath>
     <DefineConstants>$(DefineConstants)TRACE</DefineConstants>
+  </PropertyGroup>
+
+  <!-- Agent dev-loop flavor (opt-in via -p:AGENT_BUILD=true). Enables the
+       JSON-RPC AgentServerPlugin gated by #if AGENT_BUILD (Boot.cs + Agent/).
+       Unlike the legacy client this keeps the cuo-ecs assembly name + output
+       path; launch bin/Debug/net10.0/cuo-ecs.dll directly for the harness. -->
+  <PropertyGroup Condition="'$(AGENT_BUILD)' == 'true'">
+    <DefineConstants>$(DefineConstants);AGENT_BUILD</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

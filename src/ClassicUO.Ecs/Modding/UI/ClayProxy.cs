@@ -74,7 +74,12 @@ internal record struct UINodeProxy(
     // GlobalZIndex. Root (parentless) nodes need this to layer over the world
     // scene — see reference_ecs_root_node_layout; LayoutSystem threads it down.
     int? Z,
-    UOButtonProxy? Button
+    UOButtonProxy? Button,
+    // Opt this node out of window-drag latching (WindowDragPlugin yields the
+    // gesture on UINoWindowDrag) so an interactive control inside a movable mod
+    // window reaches its own UiClick. Buttons/editable fields get this implicitly;
+    // set it for plain interactive nodes (tabs, list rows, sliders).
+    bool NoDrag
 );
 
 internal record struct UINodeRelation(ulong Child, ulong Parent, int Index);

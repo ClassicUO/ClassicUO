@@ -183,6 +183,10 @@ internal static class Api
                             ent.Set<EditableText>();
                             ent.Set(new TextFieldGeom { Frame = ent.ID, OffsetX = 0 });
                             ent.Set(Interaction.None);
+                            // A text field inside a movable mod window must focus on
+                            // press, not latch a window drag (WindowDragPlugin.Drag
+                            // yields the gesture on this marker — same as buttons).
+                            ent.Set<UINoWindowDrag>();
 
                             // Apply the guest's value only when it differs from the
                             // last value host and guest agreed on (a controlled
@@ -236,6 +240,8 @@ internal static class Api
 
                     if (n.Interactive)
                         ent.Set(Interaction.None);
+                    if (n.NoDrag)
+                        ent.Set<UINoWindowDrag>();
                     if (n.Movable)
                         ent.Set<UIMovable>();
                 }
