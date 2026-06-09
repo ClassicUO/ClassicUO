@@ -109,14 +109,50 @@ internal readonly struct UIEventsPlugin : IPlugin
     // Spawn the caret bar + selection highlight for each editable node once and
     // parent them to the node, mirroring SpawnTextField. PositionOverlays
     // (TextEditPlugin) shows/places them while the node holds focus.
+    //
+    // Unlike a host field — where the overlays live in a zero-padding row whose
+    // origin IS the text origin — a mod field is one flat node carrying box
+    // styling AND the text, so Clay insets the rendered glyphs by the node's
+    // padding and vertical alignment. The overlay offsets bridge that gap (a
+    // caret at Left=textWidth was landing padding-left short of the glyphs).
     private static void SetupModEditable(
-        Query<Data<ModEditable, TextFont, TextColor>, Without<ModEditableReady>> pending,
+        Query<Data<ModEditable, TextFont, TextColor, Node>, Without<ModEditableReady>> pending,
         Commands commands)
     {
-        foreach (var (e, _, font, color) in pending)
+        foreach (var (e, _, font, color, node) in pending)
         {
             var glyphId = e.Ref;
             float h = font.Ref.Size;
+
+            float padLeft = MathF.Max(0, node.Ref.Padding.Left.Value);
+            float padRight = MathF.Max(0, node.Ref.Padding.Right.Value);
+            float padTop = MathF.Max(0, node.Ref.Padding.Top.Value);
+            float padBottom = MathF.Max(0, node.Ref.Padding.Bottom.Value);
+            // The overlays are absolute children — Clay's clip doesn't scissor
+            // floating elements — so bound them to the content right/bottom
+            // edges (0 = unbounded when the node isn't fixed-size).
+            float maxX = node.Ref.Width.Type == ValType.Px
+                ? MathF.Max(0, node.Ref.Width.Value - padRight)
+                : 0;
+            float maxY = node.Ref.Height.Type == ValType.Px
+                ? MathF.Max(0, node.Ref.Height.Value - padBottom)
+                : 0;
+            // Vertical inset of the text cell inside the content box, matching
+            // Clay's cross-axis alignment. Only resolvable for a fixed Px height
+            // (mod inputs are); auto-sized nodes hug the text, inset 0.
+            float offY = padTop;
+            float cell = UoFontRenderer.MeasureFont("Wg", font.Ref.FontId, int.MaxValue, allowHtml: false).Height;
+            if (node.Ref.Height.Type == ValType.Px && cell > 0)
+            {
+                float inner = node.Ref.Height.Value - padTop - padBottom;
+                if (inner > cell)
+                    offY = padTop + node.Ref.AlignItems switch
+                    {
+                        AlignItems.Center => (inner - cell) / 2f,
+                        AlignItems.End => inner - cell,
+                        _ => 0f,
+                    };
+            }
 
             var selection = commands.Spawn()
                 .Insert(new Node
@@ -127,7 +163,7 @@ internal readonly struct UIEventsPlugin : IPlugin
                     Display = Display.None,
                 })
                 .Insert(new BackgroundColor(new ClayColor(70, 110, 180, 120)))
-                .Insert(new TextEditSelection { Target = glyphId });
+                .Insert(new TextEditSelection { Target = glyphId, OffsetX = padLeft, OffsetY = offY, MaxX = maxX, MaxY = maxY });
 
             var caret = commands.Spawn()
                 .Insert(new Node
@@ -138,7 +174,7 @@ internal readonly struct UIEventsPlugin : IPlugin
                     Display = Display.None,
                 })
                 .Insert(new BackgroundColor(color.Ref.Value))
-                .Insert(new TextEditCaret { Target = glyphId });
+                .Insert(new TextEditCaret { Target = glyphId, OffsetX = padLeft, OffsetY = offY, MaxX = maxX, MaxY = maxY });
 
             commands.Entity(glyphId)
                 .AddChild(selection.Id)

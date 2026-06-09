@@ -187,11 +187,18 @@ internal struct TextFieldGeom { public ulong Frame; public float OffsetX; }
 
 // Marker on the caret bar overlay of a SpawnTextField field. Target = the glyph
 // entity (FocusedInput target). PositionTextEditOverlays shows + positions it
-// only while its field is the active editor.
-internal struct TextEditCaret { public ulong Target; }
+// only while its field is the active editor. OffsetX/OffsetY shift the bar from
+// the overlay parent's origin to the rendered text's origin — zero for host
+// fields (the overlay's parent row IS the text origin), the padding/centering
+// inset for mod fields, where the overlay parents to the padded node itself.
+// MaxX/MaxY (parent-local, 0 = unbounded) hide/clip the overlay past the
+// field's content right/bottom edge: the overlay is an ABSOLUTE child, and
+// Clay's ClipContent doesn't scissor floating elements, so a caret past a
+// clipped field's box would float over whatever sits right of (or below) it.
+internal struct TextEditCaret { public ulong Target; public float OffsetX, OffsetY, MaxX, MaxY; }
 
 // Marker on the selection-highlight overlay. Target = the glyph entity.
-internal struct TextEditSelection { public ulong Target; }
+internal struct TextEditSelection { public ulong Target; public float OffsetX, OffsetY, MaxX, MaxY; }
 
 internal readonly struct TextEditPlugin : IPlugin
 {
@@ -475,13 +482,29 @@ internal readonly struct TextEditPlugin : IPlugin
                 continue;
             }
             var (cx, cy) = a.CaretXY(a.State.Cursor);
+            float caretX = cx + caret.Ref.OffsetX;
+            if (caret.Ref.MaxX > 0 && caretX > caret.Ref.MaxX)
+            {
+                node.Ref.Display = Display.None;
+                continue;
+            }
             // Size the bar to the glyph ink (cap-top to descender), not the full
             // font cell / font.Size — the cell's top leading made the caret overshoot
             // above the text. Same metric the multiline (renderer) caret uses.
             var (caretTop, caretH) = UoFontRenderer.CaretMetrics(a.FontId);
+            float caretY = cy + caretTop + caret.Ref.OffsetY;
+            if (caret.Ref.MaxY > 0)
+            {
+                if (caretY >= caret.Ref.MaxY)
+                {
+                    node.Ref.Display = Display.None;
+                    continue;
+                }
+                caretH = MathF.Min(caretH, caret.Ref.MaxY - caretY);
+            }
             node.Ref.Display = on ? Display.Flex : Display.None;
-            node.Ref.Left = Val.Px(cx);
-            node.Ref.Top = Val.Px(cy + caretTop);
+            node.Ref.Left = Val.Px(caretX);
+            node.Ref.Top = Val.Px(caretY);
             node.Ref.Height = Val.Px(caretH);
         }
 
@@ -497,10 +520,31 @@ internal readonly struct TextEditPlugin : IPlugin
             }
             var (x0, y0) = a.CaretXY(s0);
             var (x1, _) = a.CaretXY(s1);
+            float selLeft = x0 + sel.Ref.OffsetX;
+            float selRight = x1 + sel.Ref.OffsetX;
+            if (sel.Ref.MaxX > 0)
+            {
+                selRight = MathF.Min(selRight, sel.Ref.MaxX);
+                if (selLeft >= selRight)
+                {
+                    node.Ref.Display = Display.None;
+                    continue;
+                }
+            }
+            float selTop = y0 + sel.Ref.OffsetY;
+            if (sel.Ref.MaxY > 0)
+            {
+                if (selTop >= sel.Ref.MaxY)
+                {
+                    node.Ref.Display = Display.None;
+                    continue;
+                }
+                node.Ref.Height = Val.Px(MathF.Min(a.LineHeight, sel.Ref.MaxY - selTop));
+            }
             node.Ref.Display = Display.Flex;
-            node.Ref.Left = Val.Px(x0);
-            node.Ref.Top = Val.Px(y0);
-            node.Ref.Width = Val.Px(MathF.Max(1, x1 - x0));
+            node.Ref.Left = Val.Px(selLeft);
+            node.Ref.Top = Val.Px(selTop);
+            node.Ref.Width = Val.Px(MathF.Max(1, selRight - selLeft));
         }
 
         // Multiline: stamp the selection range + caret onto the focused field's

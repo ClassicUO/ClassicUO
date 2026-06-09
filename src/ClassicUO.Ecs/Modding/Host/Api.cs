@@ -157,7 +157,8 @@ internal static class Api
                     // Id 0 = let the host allocate (used when a mod builds a node
                     // without a prior cuo_ecs_spawn_entity round-trip).
                     var ent = n.Id == 0 ? world.Entity() : world.Entity(n.Id);
-                    ent.Set(ToNode(n.Node));
+                    var nodeVal = ToNode(n.Node);
+                    ent.Set(nodeVal);
                     ent.Set(new PluginEntity(mod));
 
                     if (n.BackgroundColor is { } bg)
@@ -174,14 +175,26 @@ internal static class Api
                             // Tag the node as the shared editor's glyph: TextInput
                             // (I-beam cursor + "a field is focused"), EditableText
                             // (opt into the stb_textedit-backed editor), TextFieldGeom
-                            // (mouse caret origin — the node is its own frame, no
-                            // offset) and Interaction so it's clickable to focus.
-                            // UIEventsPlugin adds the focus-on-click + caret/selection
-                            // overlays + OnTextChanged reporting off the ModEditable tag.
+                            // (mouse caret origin — the node is its own frame, but the
+                            // text renders inset by the node's left padding, so click→
+                            // caret mapping must offset by it) and Interaction so it's
+                            // clickable to focus. UIEventsPlugin adds the focus-on-click
+                            // + caret/selection overlays + OnTextChanged reporting off
+                            // the ModEditable tag.
                             ent.Set(new ModEditable { Masked = t.Masked });
                             ent.Set<TextInput>();
                             ent.Set<EditableText>();
-                            ent.Set(new TextFieldGeom { Frame = ent.ID, OffsetX = 0 });
+                            ent.Set(new TextFieldGeom { Frame = ent.ID, OffsetX = MathF.Max(0, nodeVal.Padding.Left.Value) });
+                            // Single-line semantics: never wrap (the caret math
+                            // measures one line; wrapped glyphs would diverge from
+                            // it) and scissor the overflow to the box instead of
+                            // spilling over neighbouring UI.
+                            ent.Set(new TextWrap(TextWrapKind.None));
+                            if (nodeVal.Overflow == Overflow.Visible)
+                            {
+                                nodeVal.Overflow = Overflow.Clip;
+                                ent.Set(nodeVal);
+                            }
                             ent.Set(Interaction.None);
                             // A text field inside a movable mod window must focus on
                             // press, not latch a window drag (WindowDragPlugin.Drag
