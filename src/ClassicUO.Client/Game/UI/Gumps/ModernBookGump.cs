@@ -163,7 +163,7 @@ namespace ClassicUO.Game.UI.Gumps
                 156,
                 IsNewBook,
                 FontStyle.ExtraHeight,
-                134
+                0x01B5
             )
             {
                 X = 0,
