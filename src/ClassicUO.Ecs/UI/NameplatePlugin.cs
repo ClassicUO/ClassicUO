@@ -178,8 +178,8 @@ internal readonly struct NameplatePlugin : IPlugin
             Res<NameplateState> state,
             Query<Data<NameplateMenuCheck, Checkbox>> checksQ) =>
         {
-            if (!checksQ.Contains(trig.EntityId)) return;
-            var (_, check, _) = checksQ.Get(trig.EntityId);
+            if (!checksQ.TryGet(trig.EntityId, out var row)) return;
+            var (_, check, _) = row;
             bool on = trig.Event.Checked;
 
             switch (check.Ref.Kind)
@@ -231,9 +231,9 @@ internal readonly struct NameplatePlugin : IPlugin
         bool active = state.Value.IsToggled || ctrlShift;
 
         // Persist the menu's dragged position.
-        if (state.Value.MenuEntity != 0 && menuQ.Contains(state.Value.MenuEntity))
+        if (state.Value.MenuEntity != 0 && menuQ.TryGet(state.Value.MenuEntity, out var menuRow))
         {
-            var (_, node) = menuQ.Get(state.Value.MenuEntity);
+            var (_, node) = menuRow;
             if (node.Ref.Left.Type == ValType.Px)
                 state.Value.MenuPos = new Vector2(node.Ref.Left.Value, node.Ref.Top.Value);
         }
@@ -261,8 +261,8 @@ internal readonly struct NameplatePlugin : IPlugin
 
     private static void SetMenuVisible(Query<Data<Node>, Filter<With<NameplateMenuWindow>>> menuQ, ulong menu, bool visible)
     {
-        if (menu == 0 || !menuQ.Contains(menu)) return;
-        var (_, node) = menuQ.Get(menu);
+        if (menu == 0 || !menuQ.TryGet(menu, out var row)) return;
+        var (_, node) = row;
         node.Ref.Display = visible ? Display.Flex : Display.None;
     }
 
@@ -480,13 +480,14 @@ internal readonly struct NameplatePlugin : IPlugin
 
         foreach (var (plateEnt, plate, node) in platesQ)
         {
-            if (!entitiesMap.Value.TryGet(plate.Ref.Serial, out var gameEnt) || !gameQ.Contains(gameEnt))
+            if (!entitiesMap.Value.TryGet(plate.Ref.Serial, out var gameEnt)
+                || !gameQ.TryGet(gameEnt, out var gameRow))
             {
                 node.Ref.Display = Display.None;
                 continue;
             }
 
-            var (_, worldPos, offset, notoriety, hits, name, graphic, amount, equip, flags) = gameQ.Get(gameEnt);
+            var (_, worldPos, offset, notoriety, hits, name, graphic, amount, equip, flags) = gameRow;
 
             // Name: mobiles from EntityName (status reply), items from OPL
             // with tiledata fallback (legacy SetName).
@@ -497,9 +498,9 @@ internal readonly struct NameplatePlugin : IPlugin
                     graphic.Ref.Value,
                     amount.IsValid() ? amount.Ref.Value : 1);
 
-                if (!string.IsNullOrEmpty(resolved) && textQ.Contains(plate.Ref.TextEntity))
+                if (!string.IsNullOrEmpty(resolved) && textQ.TryGet(plate.Ref.TextEntity, out var textRow))
                 {
-                    var (_, text, _) = textQ.Get(plate.Ref.TextEntity);
+                    var (_, text, _) = textRow;
                     text.Ref.Value = TruncateToPlate(resolved);
                     plate.Ref.HasName = true;
                 }
@@ -516,10 +517,10 @@ internal readonly struct NameplatePlugin : IPlugin
             }
 
             // HP bar fill (legacy HitsPercentage thresholds).
-            if (plate.Ref.FillEntity != 0 && hits.IsValid() && rectQ.Contains(plate.Ref.FillEntity))
+            if (plate.Ref.FillEntity != 0 && hits.IsValid() && rectQ.TryGet(plate.Ref.FillEntity, out var fillRow))
             {
                 int pct = hits.Ref.MaxValue > 0 ? hits.Ref.Value * 100 / hits.Ref.MaxValue : 0;
-                var (_, fillNode, fillBg) = rectQ.Get(plate.Ref.FillEntity);
+                var (_, fillNode, fillBg) = fillRow;
                 fillNode.Ref.Width = Val.Percent(pct);
                 fillBg.Ref.Value =
                     pct >= 80 ? new ClayColor(0, 128, 0, 255)        // Green
@@ -642,16 +643,16 @@ internal readonly struct NameplatePlugin : IPlugin
     {
         // Background: legacy hued AlphaBlendControl over a black texture —
         // the hue shader maps black to the gradient's darkest cell.
-        if (rectQ.Contains(rootEnt))
+        if (rectQ.TryGet(rootEnt, out var bgRow))
         {
-            var (_, _, bg) = rectQ.Get(rootEnt);
+            var (_, _, bg) = bgRow;
             var dark = UnpackHue(hues.GetPolygoneColor(4, (ushort)(hue + 1)));
             bg.Ref.Value = new ClayColor(dark.R, dark.G, dark.B, 178);
         }
         // Text: bright hue cell, same convention as ServerGumpPlugin labels.
-        if (textQ.Contains(plate.TextEntity))
+        if (textQ.TryGet(plate.TextEntity, out var colorRow))
         {
-            var (_, _, color) = textQ.Get(plate.TextEntity);
+            var (_, _, color) = colorRow;
             var bright = UnpackHue(hues.GetPolygoneColor(30, (ushort)(hue + 1)));
             color.Ref.Value = new ClayColor(bright.R, bright.G, bright.B, 255);
         }
@@ -700,7 +701,8 @@ internal readonly struct NameplatePlugin : IPlugin
         var plateEnt = PlateRoot(hit.Entity, platesQ, parents);
         if (plateEnt == 0) return;
 
-        var (_, plate) = platesQ.Get(plateEnt);
+        if (!platesQ.TryGet(plateEnt, out var plateRow)) return;
+        var (_, plate) = plateRow;
         if (!entitiesMap.Value.TryGet(plate.Ref.Serial, out var gameEnt)) return;
 
         selected.Value.Set(gameEnt, float.MaxValue, bypassViewport: true);
@@ -753,9 +755,9 @@ internal readonly struct NameplatePlugin : IPlugin
 
             var hit = UiPick.Topmost(mouse.Value.Position, assets.Value, rendered, parents);
             if (!hit.Found || PlateRoot(hit.Entity, platesQ, parents) != target) return;
-            if (!platesQ.Contains(target)) return;
+            if (!platesQ.TryGet(target, out var plateRow)) return;
 
-            var (_, plate) = platesQ.Get(target);
+            var (_, plate) = plateRow;
             state.Value.Closed.Add(plate.Ref.Serial);
             state.Value.Plates.Remove(plate.Ref.Serial);
             UiHierarchy.DespawnSubtree(commands, target, childrenQ);
@@ -809,9 +811,9 @@ internal readonly struct NameplatePlugin : IPlugin
 
             var hit = UiPick.Topmost(mouse.Value.Position, assets.Value, rendered, parents);
             if (!hit.Found || PlateRoot(hit.Entity, platesQ, parents) != target) return;
-            if (!platesQ.Contains(target)) return;
+            if (!platesQ.TryGet(target, out var plateRow)) return;
 
-            var (_, plate) = platesQ.Get(target);
+            var (_, plate) = plateRow;
             st.PendingClickSerial = plate.Ref.Serial;
             st.PendingClickDeadline = time.Value.Total + DoubleClickWindow;
         }
