@@ -303,8 +303,6 @@ readonly struct InGamePacketsPlugin : IPlugin
         Stub<OnOpenGumpPacket_0xB0>(app);
         Stub<OnChatMessagePacket_0xB2>(app);
         // 0xB8 (CharacterProfile) handled by ProfileGumpPlugin.
-        Stub<OnQuestPointerPacket_0xBA_Pre7090>(app);
-        Stub<OnQuestPointerPacket_0xBA_Post7090>(app);
         Stub<OnGraphicEffectC0Packet_0xC0>(app);
         Stub<OnUnicodePromptPacket_0xC2>(app);
         Stub<OnGraphicEffectC7Packet_0xC7>(app);

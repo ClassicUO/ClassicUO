@@ -71,6 +71,7 @@ internal static class InputHandlers
         d.Register("debug.dumpLayout", DebugDumpLayout);
         d.Register("debug.nameplates", DebugNameplates);
         d.Register("debug.say", DebugSay);
+        d.Register("debug.questArrow", DebugQuestArrow);
     }
 
     // Test-only: flip the nameplate "stay active" toggle (synthetic input
@@ -112,6 +113,23 @@ internal static class InputHandlers
             MessageType = ClassicUO.Game.Data.MessageType.Regular,
         });
         return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["said"] = text } };
+    }
+
+    // Test-only: show/hide a quest arrow without a server quest. Defaults to
+    // a target a few tiles north-east of spawn; pass x/y/serial/display.
+    public static JsonRpcResponse DebugQuestArrow(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        uint serial = 1; bool display = true; int x = 0, y = 0;
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object)
+        {
+            if (p.TryGetProperty("serial", out var se) && se.TryGetUInt32(out var sv)) serial = sv;
+            if (p.TryGetProperty("display", out var de)) display = de.ValueKind != JsonValueKind.False;
+            if (p.TryGetProperty("x", out var xe) && xe.TryGetInt32(out var xv)) x = xv;
+            if (p.TryGetProperty("y", out var ye) && ye.TryGetInt32(out var yv)) y = yv;
+        }
+        var st = ctx.Runtime.GetResource<QuestArrowState>();
+        st.Pending.Add((serial, display, (ushort)x, (ushort)y));
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["queued"] = true } };
     }
 
     // Test-only: open a bulletin board (0x71 type 0 + a few type 1 summaries)

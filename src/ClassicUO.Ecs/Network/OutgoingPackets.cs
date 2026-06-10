@@ -315,6 +315,40 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
+        // Click on the quest arrow (0xBF subcommand 0x07). rightClick=true is
+        // the legacy "dismiss/abandon" prompt path.
+        public static void Send_ClickQuestArrow(this NetClient socket, bool rightClick)
+        {
+            const byte ID = 0xBF;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt16BE(0x07);
+            writer.WriteBool(rightClick);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
         // Pre-AOS primary special move (0xBF subcommand 0x09).
         public static void Send_StunRequest(this NetClient socket)
         {
