@@ -142,7 +142,62 @@ internal readonly struct VendorGumpPlugin : IPlugin
         // query builds on the entering-GameScreen frame and crash in GrowSlots.
         var warmFn = WarmComponentTypes;
         app.AddSystem(warmFn).InStage(Stage.Startup).Build();
+
+#if AGENT_BUILD
+        app.AddResource(new DebugVendorBuyQueue());
+        Action<Commands, Res<DebugVendorBuyQueue>, Res<NetworkEntitiesMap>, ResMut<VendorStore>, EventWriter<VendorOpenedEvent>> drainDebugFn = DrainDebugBuy;
+        app.AddSystem(Stage.First, drainDebugFn);
+#endif
     }
+
+#if AGENT_BUILD
+    // Drains debug.openVendor {isBuy:true}: seeds the same entity graph the
+    // 0x1A equip + 0x3C container-content + 0x74 buy-list packets build (vendor
+    // mobile with a ShopBuyRestock-layer container holding priced item
+    // entities), then fires the open event. Mobile-range serials exercise the
+    // animation icon path (stable-master stock).
+    private static void DrainDebugBuy(
+        Commands commands,
+        Res<DebugVendorBuyQueue> q,
+        Res<NetworkEntitiesMap> map,
+        ResMut<VendorStore> store,
+        EventWriter<VendorOpenedEvent> opened)
+    {
+        if (!q.Value.Pending) return;
+        q.Value.Pending = false;
+
+        const uint vendorSerial = 0x0000BEEF; // mobile range
+        var container = map.Value.GetOrCreate(commands, 0x4000BFF0);
+        container.Insert(new Graphic { Value = SortGraphic });
+
+        var vendor = map.Value.GetOrCreate(commands, vendorSerial);
+        var slots = default(EquipmentSlots);
+        slots[Layer.ShopBuyRestock] = container.Id;
+        vendor.Insert(slots);
+
+        Span<(uint Serial, ushort Graphic, ushort Amount, uint Price, string Name)> entries =
+        [
+            (0x00000F31, 0x00C8, 3, 500, "a horse"),     // mobile serial -> anim icon
+            (0x00000F32, 0x00DC, 2, 350, "a llama"),     // mobile serial -> anim icon
+            (0x4000F330, 0x13B2, 5, 220, "a bow"),       // item serial   -> art icon
+            (0x4000F331, 0x0EED, 250, 1, "gold coin"),
+        ];
+        ushort x = 0;
+        foreach (ref readonly var e in entries)
+        {
+            var item = map.Value.GetOrCreate(commands, e.Serial);
+            item.Insert(new Graphic { Value = e.Graphic })
+                .Insert(new Hue())
+                .Insert(new Amount { Value = e.Amount })
+                .Insert(new ContainerSlotPosition { X = x++ })
+                .Insert(new VendorListing { Price = e.Price, RawName = e.Name });
+            commands.AddChild(container.Id, item.Id);
+        }
+
+        store.Value.Revision++;
+        opened.Send(new VendorOpenedEvent(vendorSerial, true));
+    }
+#endif
 
     private static void WarmComponentTypes(Commands commands)
     {
@@ -453,7 +508,7 @@ internal readonly struct VendorGumpPlugin : IPlugin
             {
                 int chosen = win.Ref.Txn.TryGetValue(it.Serial, out var c) ? c : 0;
                 int avail = it.Amount - chosen;
-                BuildShopRow(commands, builder.Value, assets.Value, win.Ref.ShopList, rootId, it, avail, shopW);
+                BuildShopRow(commands, builder.Value, assets.Value, files.Value, win.Ref.ShopList, rootId, it, avail, shopW, win.Ref.IsBuy);
             }
 
             foreach (var kv in win.Ref.Txn)
@@ -528,7 +583,7 @@ internal readonly struct VendorGumpPlugin : IPlugin
     // One shop row, matching legacy ShopItem: a full-width divider line, then a
     // flowing [icon | wrapped name | Avail] block. The row auto-sizes to the
     // wrapped name height so the scroll content height is correct.
-    private static void BuildShopRow(Commands commands, GumpBuilder builder, AssetsServer assets, ulong list, ulong rootId, VendorEntry it, int avail, int width)
+    private static void BuildShopRow(Commands commands, GumpBuilder builder, AssetsServer assets, UOFileManager files, ulong list, ulong rootId, VendorEntry it, int avail, int width, bool isBuy)
     {
         uint serial = it.Serial;
         var row = commands.Spawn()
@@ -558,7 +613,7 @@ internal readonly struct VendorGumpPlugin : IPlugin
 
         var icon = commands.Spawn()
             .Insert(new Node { Width = Val.Px(44), Height = Val.Px(44) })
-            .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.Art, AssetId = it.Graphic, Hue = ShaderHueTranslator.GetHueVector(it.Hue, partial: false, alpha: 1f) } })
+            .Insert(new UiCustom { Data = ShopIconRender(assets, files, it, isBuy) })
             .Insert(Interaction.None).Insert<UiNoWindowDrag>().Insert<UiContainsByBounds>()
             .Insert(new VendorShopRow { Window = rootId, Serial = serial });
         commands.AddChild(inner.Id, icon.Id);
@@ -578,6 +633,45 @@ internal readonly struct VendorGumpPlugin : IPlugin
             .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.WrappedText, Hue = Vector3.UnitZ, Text = avail.ToString(), TextFont = 1, TextHue = 0x0219, WrapWidth = 28, IsHtml = false } });
         commands.AddChild(inner.Id, amt.Id);
     }
+
+    // A buy-gump entry whose serial is a mobile (animal trainer stock) renders
+    // the body's Stand animation frame, not item art (legacy ShopItem.
+    // AddToRenderLists). Hue comes from the anim data; partial-hue from tiledata
+    // like legacy. Sell lists and items keep the art path.
+    private static UOCustomRender ShopIconRender(AssetsServer assets, UOFileManager files, in VendorEntry it, bool isBuy)
+    {
+        if (isBuy && SerialHelper.IsMobile(it.Serial))
+        {
+            ushort body = it.Graphic >= assets.Animations.MaxAnimationCount ? (ushort)0 : it.Graphic;
+            byte group = StandGroup(assets, files, body);
+            assets.Animations.GetAnimationFrames(body, group, 1, out ushort hue, out _);
+            return new UOCustomRender
+            {
+                Kind = UOCustomKind.Animation,
+                AssetId = body,
+                Hue = ShaderHueTranslator.GetHueVector(hue, files.TileData.StaticData[it.Graphic].IsPartialHue, 1f),
+                AnimAction = group,
+                AnimDir = 1,
+                AnimFrame = 0,
+            };
+        }
+
+        return new UOCustomRender
+        {
+            Kind = UOCustomKind.Art,
+            AssetId = it.Graphic,
+            Hue = ShaderHueTranslator.GetHueVector(it.Hue, files.TileData.StaticData[it.Graphic].IsPartialHue, 1f),
+        };
+    }
+
+    private static byte StandGroup(AssetsServer assets, UOFileManager files, ushort graphic)
+        => files.Animations.GetGroupIndex(graphic, assets.Animations.GetAnimType(graphic)) switch
+        {
+            AnimationGroups.Low => (byte)LowAnimationGroup.Stand,
+            AnimationGroups.High => (byte)HighAnimationGroup.Stand,
+            AnimationGroups.People => (byte)PeopleAnimationGroup.Stand,
+            _ => 0,
+        };
 
     private static void BuildTxnRow(Commands commands, GumpBuilder builder, ulong list, ulong rootId, VendorEntry it, int amount)
     {

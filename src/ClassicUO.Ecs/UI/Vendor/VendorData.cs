@@ -81,3 +81,12 @@ internal struct VendorScrollButton { public ulong List; public int Dir; }
 
 // Bottom-center drag handle that resizes the body height.
 internal struct VendorResizeHandle { public ulong Window; }
+
+#if AGENT_BUILD
+// Harness-only: debug.openVendor {isBuy:true} sets Pending; the drain system in
+// VendorGumpPlugin seeds the buy entity graph and fires the open event.
+internal sealed class DebugVendorBuyQueue
+{
+    public bool Pending;
+}
+#endif

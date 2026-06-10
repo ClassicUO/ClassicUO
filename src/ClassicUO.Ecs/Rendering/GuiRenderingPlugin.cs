@@ -576,9 +576,29 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                 ref readonly var frame = ref frames[custom.AnimFrame % frames.Length];
                 if (frame.Texture == null)
                     break;
-                int dx = (int)bb.X + ((int)bb.Width - frame.UV.Width) / 2;
-                int dy = (int)bb.Y + ((int)bb.Height - frame.UV.Height) / 2;
-                b.Draw(frame.Texture, new Vector2(dx, dy), frame.UV, custom.Hue, cmd.ZIndex);
+                // Same size rule as Art/Land: fit to the node box when the frame
+                // exceeds it (a horse body in a 44px vendor row), else native
+                // centered. Legacy ShopItem clamps the same way (min(size, 45)).
+                float aw = frame.UV.Width;
+                float ah = frame.UV.Height;
+                float abw = bb.Width  > 0 ? bb.Width  : aw;
+                float abh = bb.Height > 0 ? bb.Height : ah;
+                float adw, adh;
+                if (aw > abw || ah > abh) { adw = abw; adh = abh; }
+                else { adw = aw; adh = ah; }
+                b.Draw(
+                    frame.Texture,
+                    new Rectangle(
+                        (int)(bb.X + (abw - adw) * 0.5f),
+                        (int)(bb.Y + (abh - adh) * 0.5f),
+                        (int)adw,
+                        (int)adh),
+                    frame.UV,
+                    custom.Hue,
+                    0f,
+                    Vector2.Zero,
+                    SpriteEffects.None,
+                    cmd.ZIndex);
                 break;
             }
 

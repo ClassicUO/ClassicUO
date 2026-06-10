@@ -468,9 +468,9 @@ internal static class InputHandlers
     }
 
     // Test-only: open a vendor gump without a server NPC. Sell mode is fully
-    // faked (store + a few entries). Buy mode just opens the buy panels (items
-    // come from the vendor's shop containers on a real server) to verify the
-    // buy art + gold label.
+    // faked (store + a few entries). Buy mode queues the VendorGumpPlugin drain,
+    // which seeds the real entity graph (shop container + priced items, incl.
+    // mobile-serial entries for the animation icon path).
     public static JsonRpcResponse DebugOpenVendor(JsonRpcRequest req, in AgentRpcContext<App> ctx)
     {
         uint serial = 0x4000BEEF;
@@ -479,18 +479,21 @@ internal static class InputHandlers
             && p.TryGetProperty("isBuy", out var bEl) && bEl.ValueKind == JsonValueKind.True)
             isBuy = true;
 
-        var store = ctx.Runtime.GetResource<VendorStore>();
-        if (!isBuy)
+        if (isBuy)
         {
-            store.SellByVendor[serial] = new System.Collections.Generic.List<VendorEntry>
-            {
-                new() { Serial = 0x4001, Graphic = 0x0EED, Hue = 0, Amount = 250, Price = 5,  Name = "Gold Coin" },
-                new() { Serial = 0x4002, Graphic = 0x0F3F, Hue = 0, Amount = 12,  Price = 18, Name = "Arrow" },
-                new() { Serial = 0x4003, Graphic = 0x13B2, Hue = 0, Amount = 1,   Price = 220, Name = "Bow" },
-                new() { Serial = 0x4004, Graphic = 0x0F0E, Hue = 0, Amount = 40,  Price = 3,  Name = "Bandage" },
-                new() { Serial = 0x4005, Graphic = 0x097F, Hue = 0, Amount = 5,   Price = 75, Name = "Leather Tunic" },
-            };
+            ctx.Runtime.GetResource<DebugVendorBuyQueue>().Pending = true;
+            return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true } };
         }
+
+        var store = ctx.Runtime.GetResource<VendorStore>();
+        store.SellByVendor[serial] = new System.Collections.Generic.List<VendorEntry>
+        {
+            new() { Serial = 0x4001, Graphic = 0x0EED, Hue = 0, Amount = 250, Price = 5,  Name = "Gold Coin" },
+            new() { Serial = 0x4002, Graphic = 0x0F3F, Hue = 0, Amount = 12,  Price = 18, Name = "Arrow" },
+            new() { Serial = 0x4003, Graphic = 0x13B2, Hue = 0, Amount = 1,   Price = 220, Name = "Bow" },
+            new() { Serial = 0x4004, Graphic = 0x0F0E, Hue = 0, Amount = 40,  Price = 3,  Name = "Bandage" },
+            new() { Serial = 0x4005, Graphic = 0x097F, Hue = 0, Amount = 5,   Price = 75, Name = "Leather Tunic" },
+        };
         store.Revision++;
         ctx.Runtime.SendEvent(new VendorOpenedEvent(serial, isBuy));
         return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true } };
