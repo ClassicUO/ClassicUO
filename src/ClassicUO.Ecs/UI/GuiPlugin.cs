@@ -42,25 +42,6 @@ internal readonly struct GuiPlugin : IPlugin
         app.AddPlugin<TinyEcs.Bevy.UI.Widgets.SliderPlugin>();
         app.AddPlugin<TinyEcs.Bevy.UI.Widgets.CheckboxPlugin>();
 
-        // Generic "click the label toggles its checkbox": any clickable entity
-        // carrying CheckboxLabel forwards a UiClick to its target checkbox the
-        // same way CheckboxPlugin handles a direct hit (flip Checked + emit
-        // CheckboxChanged on the checkbox). Lets a checkbox + caption read as a
-        // single control everywhere, not per gump.
-        app.AddObserver<On<UiClick>, Commands,
-            Query<Data<CheckboxLabel>>,
-            Query<Data<TinyEcs.Bevy.UI.Widgets.Checkbox>>>((trigger, cmd, labels, boxes) =>
-        {
-            if (!labels.Contains(trigger.EntityId)) return;
-            var (_, lbl) = labels.Get(trigger.EntityId);
-            var target = lbl.Ref.Target;
-            if (!boxes.Contains(target)) return;
-            var (_, cb) = boxes.Get(target);
-            cb.Ref.Checked = !cb.Ref.Checked;
-            cmd.Entity(target).EmitTrigger(
-                new TinyEcs.Bevy.UI.Widgets.CheckboxChanged { Checked = cb.Ref.Checked }, propagate: true);
-        });
-
         app
             .AddResource(new FocusedInput())
             .AddResource(new ImageCache())
@@ -70,8 +51,7 @@ internal readonly struct GuiPlugin : IPlugin
                 Commands commands,
                 Res<AssetsServer> assets,
                 ResMut<UiClayContext> clay,
-                Query<Data<UiCustom>> customQuery,
-                Query<Data<UiContainsByBounds>> boundsQuery) =>
+                Query<Data<UiCustom>> customQuery) =>
             {
                 var assetsServer = assets.Value;
                 commands.InsertResource(new GumpBuilder(assetsServer));
@@ -88,11 +68,8 @@ internal readonly struct GuiPlugin : IPlugin
                 // UiHitTest.PixelHit directly; this covers the Interaction path.
                 clay.Value.PixelHitTest = (entityId, pos, box) =>
                 {
-                    // Legacy ContainsByBounds: some gump roots (healthbar, status
-                    // bar) capture the whole bounding box, not pixel-perfect — so
-                    // a click on a transparent bg slot still hits the window
-                    // instead of falling through.
-                    if (boundsQuery.Contains(entityId)) return true;
+                    // UiContainsByBounds roots never reach here — InteractionSystem
+                    // skips the hook for them (lib-side check).
                     if (!customQuery.Contains(entityId)) return true;
                     var (_, customPtr) = customQuery.Get(entityId);
                     var bb = new ComputedNode
@@ -791,12 +768,6 @@ internal struct MultilineText { public int WrapWidth; }
 // fills/clears its Text each frame based on focus + blink phase. Place it as a
 // flex-row sibling after the input's Text so it follows the typed text.
 internal struct TextCaret { public ulong Target; }
-
-// Marks a clickable entity (e.g. a checkbox's caption) as a proxy for a
-// checkbox (Target). GuiPlugin's global UiClick observer toggles that checkbox
-// when this entity is clicked. The entity must be hittable itself
-// (Interaction + UiContainsByBounds / a sprite).
-internal struct CheckboxLabel { public ulong Target; }
 
 #if AGENT_BUILD
 // Harness diagnostic toggle: when DumpOnClick is set (via debug.dumpLayout),

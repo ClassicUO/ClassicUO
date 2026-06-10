@@ -300,8 +300,8 @@ internal readonly struct LoginScreenPlugin : IPlugin
     }
 
     // Caption next to a checkbox that toggles it on click, so the checkbox +
-    // its label read as one control. CheckboxLabel + GuiPlugin's global
-    // observer do the toggling generically; the label just has to be hittable
+    // its label read as one control. CheckboxLabel + CheckboxPlugin's observer
+    // (Bevy.UI) do the toggling generically; the label just has to be hittable
     // (Interaction.None + UiContainsByBounds).
     private static void AddCheckboxLabel(Commands commands, EntityCommands parent, string text, XnaVector2 pos, TextFont font, ClayColor color, ulong checkboxId)
     {
@@ -320,7 +320,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
             .Insert(new TextColor(color))
             .Insert(Interaction.None)
             .Insert<UiContainsByBounds>()
-            .Insert(new CheckboxLabel { Target = checkboxId });
+            .Insert(new TinyEcs.Bevy.UI.Widgets.CheckboxLabel { Target = checkboxId });
         parent.AddChild(label);
     }
 
