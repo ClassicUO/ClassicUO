@@ -578,7 +578,11 @@ namespace ClassicUO.Game.Scenes
                 bool cot = ProfileManager.CurrentProfile.UseCircleOfTransparency
                     && obj.TransparentTest(_world.Player.Z + 5);
 
-                if (cot && _cotGradientMode)
+                // Objects above _maxZ (or hidden roofs) are fading out via ProcessAlpha:
+                // gradient CoT must not overwrite that alpha or they never disappear.
+                bool fadingOut = obj.Z >= _maxZ || (_noDrawRoofs && itemData.IsRoof);
+
+                if (cot && _cotGradientMode && !fadingOut)
                 {
                     obj.AlphaHue = GetGradientCotAlpha(obj);
                     if (obj.AlphaHue > 0)
@@ -609,8 +613,11 @@ namespace ClassicUO.Game.Scenes
 
             CheckIfBehindATree(obj, ref itemData);
 
-            // Gradient CoT for non-mesh objects (trees, foliage, animated statics)
+            // Gradient CoT for non-mesh objects (trees, foliage, animated statics).
+            // Skip objects fading out via ProcessAlpha (above _maxZ / hidden roofs),
+            // otherwise the gradient alpha overwrites the fade and they never disappear.
             if (_cotGradientMode && ProfileManager.CurrentProfile.UseCircleOfTransparency
+                && obj.Z < _maxZ && !(_noDrawRoofs && itemData.IsRoof)
                 && obj.TransparentTest(_world.Player.Z + 5))
             {
                 obj.AlphaHue = GetGradientCotAlpha(obj);
