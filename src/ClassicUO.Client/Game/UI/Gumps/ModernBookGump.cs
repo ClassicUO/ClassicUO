@@ -23,7 +23,7 @@ namespace ClassicUO.Game.UI.Gumps
         private const int MAX_BOOK_CHARS_PER_LINE = 53;
         private const int LEFT_X = 38;
         private const int RIGHT_X = 223;
-        private const int UPPER_MARGIN = 34;
+        private const int UPPER_MARGIN = 24;
         private const int PAGE_HEIGHT = 166;
         private StbPageTextBox _bookPage;
 
@@ -163,7 +163,7 @@ namespace ClassicUO.Game.UI.Gumps
                 156,
                 IsNewBook,
                 FontStyle.ExtraHeight,
-                2
+                134
             )
             {
                 X = 0,
@@ -325,6 +325,22 @@ namespace ClassicUO.Game.UI.Gumps
                                 text[l] = BookLines[x];
                             }
 
+                            // Most servers expect at most 8 lines per page: send lines
+                            // 9-10 only when they actually contain text. Empty lines are
+                            // stored as "\n", so strip newlines before testing. Only
+                            // trailing lines are trimmed: empty lines between text stay.
+                            int lineCount = MAX_BOOK_LINES;
+
+                            while (lineCount > 8 && IsEmptyBookLine(text[lineCount - 1]))
+                            {
+                                lineCount--;
+                            }
+
+                            if (lineCount < text.Length)
+                            {
+                                Array.Resize(ref text, lineCount);
+                            }
+
                             NetClient.Socket.Send_BookPageData(LocalSerial, text, i);
                         }
                     }
@@ -338,6 +354,24 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 UIManager.SystemChat.TextBoxControl.SetKeyboardFocus();
             }
+        }
+
+        private static bool IsEmptyBookLine(string line)
+        {
+            if (string.IsNullOrEmpty(line))
+            {
+                return true;
+            }
+
+            for (int i = 0; i < line.Length; i++)
+            {
+                if (line[i] != '\n')
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public override void OnButtonClick(int buttonID)
