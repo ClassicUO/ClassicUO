@@ -90,8 +90,3 @@ internal readonly struct FnaPlugin : IPlugin
     }
 }
 
-internal sealed class Time
-{
-    public float Total { get; set; }
-    public float Frame { get; set; }
-}

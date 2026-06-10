@@ -23,7 +23,7 @@ internal struct UiContainsByBounds;
 //     inherit that z via LayoutSystem, so there is no per-sprite z and no
 //     propagation system,
 //   * is closable by right-click and movable by drag — both fall out of the
-//     UIMovable marker that WindowDragPlugin already drives.
+//     UiMovable marker that WindowDragPlugin already drives.
 // The background sprite renders through UOCustomRender (Gump kind).
 internal struct UOGumpBundle : IBundle
 {
@@ -59,7 +59,7 @@ internal struct UOGumpBundle : IBundle
             })
             .Insert(Interaction.None)
             .Insert<UOGump>()
-            .Insert<UIMovable>()
+            .Insert<UiMovable>()
             .Insert(new GlobalZIndex(ZOrder));
     }
 }

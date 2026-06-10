@@ -20,7 +20,7 @@
 // flipping the spread when it crosses to a page that isn't displayed.
 //
 // Movable / right-click-close / topmost-on-click come from the shared
-// WindowDrag infra (UIMovable root, pixel-perfect via the 0x1FE sprite).
+// WindowDrag infra (UiMovable root, pixel-perfect via the 0x1FE sprite).
 // Edited pages are flushed on page flip (like legacy SetActivePage) and on
 // close — close is detected by FlushClosed diffing a per-frame snapshot
 // against the live windows, because the despawn happens inside the shared
@@ -154,7 +154,7 @@ internal readonly struct BookGumpPlugin : IPlugin
             })
             .Insert(Interaction.None)
             .Insert<UOGump>()
-            .Insert<UIMovable>()
+            .Insert<UiMovable>()
             .Insert(new GlobalZIndex(p.ZCounter.Value.Bump()));
         var rootId = root.Id;
 

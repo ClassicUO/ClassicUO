@@ -12,7 +12,7 @@
 // infra. The tip text is read-only, wrapped, and scrolls in the middle.
 //
 // Movable / right-click-close / topmost-on-click come from the shared WindowDrag
-// infra via the pixel-perfect parchment sprites walking up to the UIMovable root.
+// infra via the pixel-perfect parchment sprites walking up to the UiMovable root.
 
 using System;
 using System.Collections.Generic;
@@ -98,7 +98,7 @@ internal readonly struct TipNoticeGumpPlugin : IPlugin
         int width = Math.Max(topW, Math.Max(midW, botW));
 
         // Bare container root (no UiCustom) so UiPick hits the parchment sprites
-        // pixel-perfectly and walks up to this UIMovable root for drag/close.
+        // pixel-perfectly and walks up to this UiMovable root for drag/close.
         var root = commands.Spawn()
             .Insert(new Node
             {
@@ -109,7 +109,7 @@ internal readonly struct TipNoticeGumpPlugin : IPlugin
             })
             .Insert(Interaction.None)
             .Insert<UOGump>()
-            .Insert<UIMovable>()
+            .Insert<UiMovable>()
             .Insert(new GlobalZIndex(p.ZCounter.Value.Bump()));
         var rootId = root.Id;
 

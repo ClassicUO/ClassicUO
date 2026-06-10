@@ -389,7 +389,7 @@ internal readonly struct GameScreenPlugin : IPlugin
         Res<GrabbedItem> grabbed,
         Local<DragAnchor> anchor,
         Single<Data<Interaction, ComputedNode>, Filter<With<GameWindowBorderUI>, With<GameScene>>> queryBorder,
-        Query<Data<ComputedNode>, Filter<With<UIMovable>>> movableQ
+        Query<Data<ComputedNode>, Filter<With<UiMovable>>> movableQ
     )
     {
         // `IsPressed` semantics in MouseContext: true only when BOTH this and
@@ -428,7 +428,7 @@ internal readonly struct GameScreenPlugin : IPlugin
             if (pos.X >= inner.X && pos.X < inner.X + inner.Width
                 && pos.Y >= inner.Y && pos.Y < inner.Y + inner.Height) return;
 
-            // Floating UIMovable windows draw above the game viewport border,
+            // Floating UiMovable windows draw above the game viewport border,
             // so if any of them sits under the cursor we let WindowDragPlugin
             // claim the gesture instead. Without this the border drag latches
             // first (registered earlier in the schedule) and the container
@@ -452,7 +452,7 @@ internal readonly struct GameScreenPlugin : IPlugin
         camera.Value.Bounds.Y = anchor.Value.Y + (int)delta.Y;
     }
 
-    private static bool CursorOverAnyMovable(Vector2 pos, Query<Data<ComputedNode>, Filter<With<UIMovable>>> q)
+    private static bool CursorOverAnyMovable(Vector2 pos, Query<Data<ComputedNode>, Filter<With<UiMovable>>> q)
     {
         foreach (var (_, computed) in q)
         {
@@ -676,7 +676,7 @@ internal struct InventoryButton;
 // Cross-system drag arbitration. First system to claim the gesture wins;
 // others see Mode != None at press-once and skip latching until release
 // clears it. Shared between GameScreenPlugin (border move/resize) and
-// WindowDragPlugin (floating UIMovable windows) so a press inside a stacked
+// WindowDragPlugin (floating UiMovable windows) so a press inside a stacked
 // container can't simultaneously start a container drag AND a viewport drag.
 internal enum ActiveDrag { None, Move, Resize, UIWindow }
 internal sealed class DragGate { public ActiveDrag Mode; }

@@ -317,7 +317,7 @@ internal readonly struct TradingGumpPlugin : IPlugin
         var myG = imAccepting ? AcceptOn : AcceptOff;
         var my = builder.AddGump(commands, myG, Vector3.UnitZ, new Vector2(myX, myY))
             .Insert(Interaction.None)
-            .Insert<UINoWindowDrag>()
+            .Insert<UiNoWindowDrag>()
             .Insert(new TradeAcceptButton { Serial = serial });
         my.Observe((On<UiClick> _,
                     Res<NetClient> net,

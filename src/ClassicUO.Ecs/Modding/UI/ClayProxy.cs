@@ -76,7 +76,7 @@ internal record struct UINodeProxy(
     int? Z,
     UOButtonProxy? Button,
     // Opt this node out of window-drag latching (WindowDragPlugin yields the
-    // gesture on UINoWindowDrag) so an interactive control inside a movable mod
+    // gesture on UiNoWindowDrag) so an interactive control inside a movable mod
     // window reaches its own UiClick. Buttons/editable fields get this implicitly;
     // set it for plain interactive nodes (tabs, list rows, sliders).
     bool NoDrag

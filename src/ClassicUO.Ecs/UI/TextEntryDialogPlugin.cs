@@ -102,7 +102,7 @@ internal readonly struct TextEntryDialogPlugin : IPlugin
         var rootId = rootCmd.Id;
 
         // Background panel — a normal child at gump-local (0,0). It owns the
-        // pixel-perfect hit surface (clicks on it walk up to the UIMovable root).
+        // pixel-perfect hit surface (clicks on it walk up to the UiMovable root).
         ref readonly var bg = ref p.Assets.Value.Gumps.GetGump(0x0474);
         int bgW = bg.UV.Width, bgH = bg.UV.Height;
         Attach(commands, rootId, p.Builder.Value.AddGump(commands, 0x0474, Vector3.UnitZ, new Vector2(0, 0)).Id);
@@ -160,8 +160,8 @@ internal readonly struct TextEntryDialogPlugin : IPlugin
         Attach(commands, rootId, cancel.Id);
 
         // Root: absolute window anchor at the gump origin sized to the bg panel.
-        // UIMovable makes it a window (right-click-close, click-capture-to-world,
-        // z-stack); UINoDrag suppresses dragging (OOP CanMove = false) while
+        // UiMovable makes it a window (right-click-close, click-capture-to-world,
+        // z-stack); UiMovableNoDrag suppresses dragging (OOP CanMove = false) while
         // keeping it a window. Only the root carries GlobalZIndex.
         commands.Entity(rootId)
             .Insert(new Node
@@ -171,8 +171,8 @@ internal readonly struct TextEntryDialogPlugin : IPlugin
                 Left = Val.Px(OriginX), Top = Val.Px(OriginY),
                 Width = Val.Px(bgW), Height = Val.Px(bgH),
             })
-            .Insert<UIMovable>()
-            .Insert<UINoDrag>()
+            .Insert<UiMovable>()
+            .Insert<UiMovableNoDrag>()
             .Insert(new GlobalZIndex(z));
     }
 

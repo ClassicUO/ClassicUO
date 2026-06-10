@@ -18,7 +18,7 @@
 //     state capture deferred until the corresponding Bevy.UI widget lands.
 //   * tooltip, itemproperty, noresize, mastergump, togglelimitgumpscale —
 //     no-op for now.
-//   * noclose / nodispose / nomove — flag the root (nomove tags UINoDrag, which
+//   * noclose / nodispose / nomove — flag the root (nomove tags UiMovableNoDrag, which
 //     suppresses drag only; the gump stays a window for close / click-capture).
 
 using System;
@@ -416,7 +416,7 @@ internal readonly struct ServerGumpPlugin : IPlugin
 
         // Root: an empty entity that only carries the ServerGump marker for
         // dedup + child despawn lookup. The first resizepic encountered below
-        // upgrades this entity with UOGumpBundle (UOCustomRender + UIMovable +
+        // upgrades this entity with UOGumpBundle (UOCustomRender + UiMovable +
         // GlobalZIndex + Node sized to the bg sprite). For gumps without a
         // resizepic, the bbox tracker installs a sized Node at the end so the
         // root still has a hit-test surface.
@@ -900,7 +900,7 @@ internal readonly struct ServerGumpPlugin : IPlugin
         // at its own (rx,ry), so every control lands at its true gump-local coord
         // relative to this frame. It carries NO hit surface of its own: gestures
         // hit the actual sprite children (resizepic frame pixel-perfect via the
-        // 9-slice mask, gumppics, text) and walk up to this UIMovable root —
+        // 9-slice mask, gumppics, text) and walk up to this UiMovable root —
         // matching legacy ResizePic.Contains, where a click on a transparent
         // corner/gap passes through instead of the whole rect capturing it. A
         // whole-bbox None surface here would defeat that pixel-perfect mask.
@@ -917,15 +917,15 @@ internal readonly struct ServerGumpPlugin : IPlugin
                     Width = Val.Px(maxRight),
                     Height = Val.Px(maxBottom),
                 })
-                .Insert<UIMovable>()
+                .Insert<UiMovable>()
                 .Insert(new GlobalZIndex(z));
         }
 
-        // nomove disables ONLY drag — keep UIMovable so the gump stays a window
-        // (right-click-close, click-capture-to-world, z-stack). Removing UIMovable
+        // nomove disables ONLY drag — keep UiMovable so the gump stays a window
+        // (right-click-close, click-capture-to-world, z-stack). Removing UiMovable
         // would make the whole gump fall through to the world (clicks ignored).
         if (nomove)
-            commands.Entity(rootId).Insert<UINoDrag>();
+            commands.Entity(rootId).Insert<UiMovableNoDrag>();
     }
 
     // Wrapped text. Clay.NET (the .NET port shipped with TinyEcs.Bevy.UI)

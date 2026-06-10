@@ -7,7 +7,7 @@
 //     `ContainerOpenedEvent` / `ContainerSlotEvent`.
 //   * Detect close on distance > MAX_CONTAINER_DIST and emit
 //     `ContainerClosedEvent`. Right-click close is handled generically in
-//     WindowDragPlugin for any UIMovable.
+//     WindowDragPlugin for any UiMovable.
 
 using System;
 using ClassicUO.Assets;

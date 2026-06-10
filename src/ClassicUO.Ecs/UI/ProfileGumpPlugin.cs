@@ -14,7 +14,7 @@
 //
 // Movable / right-click-close / topmost-on-click come from the shared WindowDrag
 // infra: the parchment sprites are pixel-perfect hit targets that walk up to the
-// UIMovable root (no whole-bbox capture — legacy ProfileGump is pixel-perfect).
+// UiMovable root (no whole-bbox capture — legacy ProfileGump is pixel-perfect).
 
 using System;
 using System.Collections.Generic;
@@ -133,7 +133,7 @@ internal readonly struct ProfileGumpPlugin : IPlugin
         // Bare container root — no UiCustom, so UiPick skips it and the gump is
         // hit pixel-perfectly through its parchment sprites (legacy ProfileGump
         // Contains), not as a whole rectangle. Drag / right-click-close still
-        // resolve via the parchment children walking up to this UIMovable root.
+        // resolve via the parchment children walking up to this UiMovable root.
         var root = commands.Spawn()
             .Insert(new Node
             {
@@ -144,7 +144,7 @@ internal readonly struct ProfileGumpPlugin : IPlugin
             })
             .Insert(Interaction.None)
             .Insert<UOGump>()
-            .Insert<UIMovable>()
+            .Insert<UiMovable>()
             .Insert(new GlobalZIndex(p.ZCounter.Value.Bump()));
         var rootId = root.Id;
 

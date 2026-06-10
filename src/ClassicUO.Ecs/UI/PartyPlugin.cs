@@ -219,7 +219,7 @@ internal readonly struct PartyPlugin : IPlugin
     }
 
     // PartyInviteGump: a translucent box with the inviter's name and
-    // Accept / Decline. Right-click-closable + draggable via UIMovable (legacy
+    // Accept / Decline. Right-click-closable + draggable via UiMovable (legacy
     // is right-click-closable only; drag is a harmless extra). Buttons fire on
     // UiClick and route to Send_PartyAccept / Send_PartyDecline.
     private static void OpenInviteGump(
@@ -251,7 +251,7 @@ internal readonly struct PartyPlugin : IPlugin
             .Insert(new BackgroundColor(new ClayColor(0, 0, 0, 204)))
             .Insert(Interaction.None)
             .Insert(new PartyInviteWindow { Inviter = inviter })
-            .Insert<UIMovable>()
+            .Insert<UiMovable>()
             .Insert<UiContainsByBounds>()
             .Insert(new GlobalZIndex(zCounter.Bump()));
         var rootId = root.Id;

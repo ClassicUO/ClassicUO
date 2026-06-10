@@ -1,9 +1,9 @@
 // Generic drag system for floating UI windows.
 //
-// Any entity tagged with `UIMovable` + carrying `Node` + `Interaction` becomes
+// Any entity tagged with `UiMovable` + carrying `Node` + `Interaction` becomes
 // draggable. Modeled after `GameScreenPlugin.DragWindow`:
 //   * Single `Drag` system runs every frame the left mouse button is held.
-//   * On first held frame: scan UIMovable+Interaction queries, latch the
+//   * On first held frame: scan UiMovable+Interaction queries, latch the
 //     entity whose Interaction is Pressed, snapshot mouse anchor + Node
 //     origin (Local<DragAnchor>).
 //   * Subsequent held frames: write `originX + delta`, `originY + delta`
@@ -41,7 +41,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         // LayoutSystem threads that z down to every descendant float at layout
         // time (an element with no z of its own inherits its ancestor's), so
         // the whole window rides one layer without per-child bookkeeping.
-        // Right-click on any UIMovable closes it. Runs in PreUpdate so it
+        // Right-click on any UiMovable closes it. Runs in PreUpdate so it
         // can consume the click before PlayerMovementPlugin (Stage.Update)
         // sees it and starts walking the player.
         // Runs every frame (PreUpdate, before PlayerMovementPlugin in Update):
@@ -51,7 +51,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         app.AddSystem(closeOnRightClickFn)
             .InStage(Stage.PreUpdate)
             .Build();
-        // Click-capture: any UIMovable under the cursor claims SelectedEntity
+        // Click-capture: any UiMovable under the cursor claims SelectedEntity
         // at float.MaxValue so world / pickup / use systems see the window
         // entity (which carries no NetworkSerial / Items / ContainerItemUI)
         // and bail. Container windows have their own item-aware claim in
@@ -65,7 +65,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         Res<SelectedEntity> selected,
         Res<AssetsServer> assets,
         Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
-        Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movables,
+        Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>> movables,
         Query<Data<TinyEcs.Parent>> parents,
         Query<Data<UiContainsByBounds>> boundsQ,
         Query<Data<ContainerWindow>> containers)
@@ -74,7 +74,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         // the claim follows the real topmost element and walks to its window root.
         // The old per-root bbox loop missed windows whose root carries no sprite
         // of its own (server gumps: the hit is a child resizepic/text that walks
-        // up to the bare UIMovable root) — those let world clicks trespass through.
+        // up to the bare UiMovable root) — those let world clicks trespass through.
         var pos = mouse.Value.Position;
         var hit = UiPick.Topmost(pos, assets.Value, rendered, parents, boundsQ);
         if (!hit.Found) return;
@@ -101,14 +101,14 @@ internal readonly struct WindowDragPlugin : IPlugin
     //   * Server-pushed gumps reply GumpResponse button 0 (OOP
     //     Gump.CloseWithRightClick → OnButtonClick(0)) and drop the registry
     //     entry, then despawn.
-    //   * Any other UIMovable is despawned in-place along with its subtree.
+    //   * Any other UiMovable is despawned in-place along with its subtree.
     private static void CloseOnRightClick(
         Commands commands,
         Res<MouseContext> mouse,
         Res<AssetsServer> assets,
         Local<ulong> pressTarget,
         Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> allRenderedQ,
-        Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movablesQ,
+        Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>> movablesQ,
         Query<Data<TinyEcs.Parent>> parentsQ,
         Query<Data<UiContainsByBounds>> boundsQ,
         Query<Data<ContainerWindow>> containerQuery,
@@ -174,36 +174,22 @@ internal readonly struct WindowDragPlugin : IPlugin
                     serverGumpRegistry.Value.ByGumpId.Remove(sg.Ref.GumpId);
             }
 
-            DespawnSubtree(commands, target, childrenQ);
+            UiHierarchy.DespawnSubtree(commands, target, childrenQ);
         }
     }
 
     // The movable window root under the cursor (0 if none): topmost rendered
-    // element resolved to its owning UIMovable root. See UiPick. Without the
+    // element resolved to its owning UiMovable root. See UiPick. Without the
     // walk-to-root a right-click on window A's content fell through to window B
     // behind it (A's root bg is transparent over its interior) and closed B.
     private static ulong TopmostMovable(
         Vector2 pos,
         AssetsServer assets,
         Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> allRenderedQ,
-        Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movablesQ,
+        Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>> movablesQ,
         Query<Data<TinyEcs.Parent>> parentsQ,
         Query<Data<UiContainsByBounds>> boundsQ)
         => UiPick.MovableRoot(UiPick.Topmost(pos, assets, allRenderedQ, parentsQ, boundsQ).Entity, movablesQ, parentsQ);
-
-    private static void DespawnSubtree(
-        Commands commands,
-        ulong entity,
-        Query<Data<TinyEcs.Children>> childrenQ)
-    {
-        if (childrenQ.Contains(entity))
-        {
-            var (_, kids) = childrenQ.Get(entity);
-            foreach (var cid in kids.Ref)
-                DespawnSubtree(commands, cid, childrenQ);
-        }
-        commands.Entity(entity).Despawn();
-    }
 
     private struct DragAnchor
     {
@@ -223,12 +209,12 @@ internal readonly struct WindowDragPlugin : IPlugin
         Res<ForcedWindowDrag> forced,
         Local<DragAnchor> anchor,
         Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
-        Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movables,
+        Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>> movables,
         Query<Data<TinyEcs.Parent>> parents,
         Query<Data<ContainerItemUI>> itemsQ,
         Query<Data<PaperdollEquipUI>> equipQ,
-        Query<Data<UINoDrag>> noDragQ,
-        Query<Data<UINoWindowDrag>> noWindowDragChildQ,
+        Query<Data<UiMovableNoDrag>> noDragQ,
+        Query<Data<UiNoWindowDrag>> noWindowDragChildQ,
         Query<Data<UiContainsByBounds>> boundsQ)
     {
         // IsPressed is false on the press-once frame (oldState=Released), so
@@ -354,26 +340,7 @@ internal readonly struct WindowDragPlugin : IPlugin
     }
 }
 
-// Monotonic z-order counter for floating UI windows. Bump on focus/spawn so
-// the most recently interacted window draws and hit-tests on top. Clamped to
-// short.MaxValue inside the layout system; a session-long counter overflow is
-// unrealistic in practice.
-internal sealed class UiZCounter
-{
-    private int _next = 1;
-    public int Bump() => _next++;
-}
-
-// Hand-off for a window that must start dragging without its own press edge —
-// set Owner to a just-spawned window root and WindowDragPlugin.Drag latches it
-// onto the held cursor on the next frame (the spawn is a deferred command).
-// Used when a healthbar is dragged off a mobile so the bar follows the mouse.
-internal sealed class ForcedWindowDrag
-{
-    public ulong Owner;
-}
-
-// Marker for an interactive child of a UIMovable window (button, toggle, resize
-// handle, checkbox) whose press must NOT latch a window drag — WindowDragPlugin
-// yields the gesture so the control's own UiClick / drag handler runs.
-internal struct UINoWindowDrag;
+// UiZCounter / ForcedWindowDrag / UiMovable / UiMovableNoDrag / UiNoWindowDrag
+// live in TinyEcs.Bevy.UI (Window.cs) — shared window vocabulary. This plugin
+// keeps the UO gesture resolution (UiPick pixel-perfect hit-testing) instead of
+// the library's Interaction-driven UiWindowPlugin.

@@ -124,11 +124,11 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
         // for a window drag — SpellbookNav drives them via a bbox poll instead
         // (claims the DragGate in PreUpdate). Right corner inset on the page.
         var left = builder.AddGump(commands, LeftCorner, Vector3.UnitZ, new Vector2(50, 8))
-            .Insert<UINoWindowDrag>().Insert(new SpellbookCorner { Window = root.Id, Dir = -1 });
+            .Insert<UiNoWindowDrag>().Insert(new SpellbookCorner { Window = root.Id, Dir = -1 });
         commands.AddChild(root.Id, left.Id);
 
         var right = builder.AddGump(commands, RightCorner, Vector3.UnitZ, new Vector2(321, 8))
-            .Insert<UINoWindowDrag>().Insert(new SpellbookCorner { Window = root.Id, Dir = 1 });
+            .Insert<UiNoWindowDrag>().Insert(new SpellbookCorner { Window = root.Id, Dir = 1 });
         commands.AddChild(root.Id, right.Id);
 
         // Circle buttons (0x08B1..0x08B8) along the bottom — jump to the index
@@ -141,7 +141,7 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
                 ushort g = (ushort)(0x08B1 + b);
                 int spread = b / 2;
                 var cb = builder.AddGump(commands, g, Vector3.UnitZ, new Vector2(bx[b], 175))
-                    .Insert(Interaction.None).Insert<UINoWindowDrag>().Insert<UiContainsByBounds>();
+                    .Insert(Interaction.None).Insert<UiNoWindowDrag>().Insert<UiContainsByBounds>();
                 cb.Observe((On<UiClick> _, Query<Data<SpellbookWindow>> wq) =>
                 {
                     foreach (var (_, w) in wq)
@@ -274,7 +274,7 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
                     ushort iconGfx = school.Icon(id);
 
                     var icon = builder.Value.AddGump(commands, iconGfx, Vector3.UnitZ, new Vector2(iconX, 40))
-                        .Insert(Interaction.None).Insert<UINoWindowDrag>().Insert<UiContainsByBounds>()
+                        .Insert(Interaction.None).Insert<UiNoWindowDrag>().Insert<UiContainsByBounds>()
                         .Insert(new SpellIconDrag { CastId = castId, Icon = iconGfx, Cliloc = SpellTooltipCliloc(castId), Name = school.Name(id) });
                     icon.Observe((On<UiDoubleClick> _, Res<NetClient> net, Res<GameContext> ctx) =>
                         net.Value.Send_CastSpell(castId, ctx.Value.ClientVersion));
@@ -338,7 +338,7 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
             .Insert(new TextFont { FontId = (ushort)(font | UoFontRuntime.AsciiFlag), Size = 12 })
             .Insert(new TextColor(UoFontRuntime.AsciiHue(SpellHue)))
             .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.None, Hue = Vector3.UnitZ } })
-            .Insert(Interaction.None).Insert<UINoWindowDrag>().Insert<UiContainsByBounds>()
+            .Insert(Interaction.None).Insert<UiNoWindowDrag>().Insert<UiContainsByBounds>()
             .Insert<SpellLabel>();
 
     private static void AddText(Commands commands, ulong parent, string s, int font, int x, int y)

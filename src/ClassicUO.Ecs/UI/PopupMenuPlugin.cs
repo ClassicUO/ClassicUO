@@ -98,7 +98,7 @@ internal readonly struct PopupMenuPlugin : IPlugin
         ResMut<PopupMenuState> state,
         Query<Data<NetworkSerial>> serialQ,
         Query<Data<ComputedNode>, With<PopupMenuRoot>> popupQ,
-        Query<Data<ComputedNode>, With<UIMovable>> movableQ)
+        Query<Data<ComputedNode>, With<UiMovable>> movableQ)
     {
         // A double-click is a use-object gesture; it cancels a pending popup.
         if (mouse.Value.IsPressedDouble(MouseButtonType.Left))

@@ -12,7 +12,7 @@
 //
 // The eyedropper button (legacy "pick from target") is rendered for fidelity but
 // inert — entity targeting isn't ported. The window is movable; the grid and
-// slider carry UINoWindowDrag so pressing them edits instead of dragging.
+// slider carry UiNoWindowDrag so pressing them edits instead of dragging.
 
 using System;
 using System.Collections.Generic;
@@ -100,7 +100,7 @@ internal readonly struct ColorPickerPlugin : IPlugin
             .Insert(new UiCustom { Data = gridRender })
             .Insert(Interaction.None)
             .Insert<UiContainsByBounds>()
-            .Insert<UINoWindowDrag>();
+            .Insert<UiNoWindowDrag>();
         var gridId = gridCmd.Id;
         commands.AddChild(rootId, gridId);
 
@@ -185,10 +185,10 @@ internal readonly struct ColorPickerPlugin : IPlugin
                 Left = Val.Px(cx), Top = Val.Px(cy),
                 Width = Val.Px(bgW), Height = Val.Px(bgH),
             })
-            // Movable (legacy CanMove=true). The grid + slider carry UINoWindowDrag
+            // Movable (legacy CanMove=true). The grid + slider carry UiNoWindowDrag
             // so a press on them edits instead of dragging; a press anywhere else
             // on the window (bg/preview/buttons) drags it.
-            .Insert<UIMovable>()
+            .Insert<UiMovable>()
             .Insert(new GlobalZIndex(z));
     }
 

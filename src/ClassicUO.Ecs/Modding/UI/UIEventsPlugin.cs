@@ -227,7 +227,7 @@ internal readonly struct UIEventsPlugin : IPlugin
 
     private static void PromoteModRoots(
         Query<Data<Node, PluginEntity>, Without<Parent>> roots,
-        Query<Data<UIMovable>> movableQ,
+        Query<Data<UiMovable>> movableQ,
         Res<UiSurface> surface,
         Commands commands,
         Local<HashSet<ulong>> zApplied)

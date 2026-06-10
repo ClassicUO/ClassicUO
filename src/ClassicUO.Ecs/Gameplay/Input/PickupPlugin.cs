@@ -39,7 +39,7 @@ internal readonly struct PickupPlugin : IPlugin
                 Res<AssetsServer> assets,
                 ResMut<LeftPressLatch> latch,
                 Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
-                Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movables,
+                Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>> movables,
                 Query<Data<TinyEcs.Parent>> parents,
                 Query<Data<ContainerItemUI>> itemsQ,
                 Query<Data<PaperdollEquipUI>> equipQ,

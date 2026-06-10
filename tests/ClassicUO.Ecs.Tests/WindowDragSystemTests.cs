@@ -39,7 +39,7 @@ public class WindowDragSystemTests
     }
 
     // Movable window root: Node (the drag target's mutable position) + a solid
-    // bbox via ComputedNode + null UiCustom + UIMovable/GlobalZIndex tags.
+    // bbox via ComputedNode + null UiCustom + UiMovable/GlobalZIndex tags.
     private static ulong SpawnWindow(World w, float left, float top, float width, float height, int paintOrder = 1)
     {
         var id = w.Entity()
@@ -51,14 +51,14 @@ public class WindowDragSystemTests
                 Size = new Vector2(width, height),
                 PaintOrder = paintOrder,
             }).ID;
-        w.Set<UIMovable>(id);
+        w.Set<UiMovable>(id);
         w.Set(id, new GlobalZIndex(0));
         return id;
     }
 
     private static int CountMovables(App app)
     {
-        var q = new Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>>();
+        var q = new Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>>();
         q.Initialize(app);
         q.Fetch(app);
         int n = 0;

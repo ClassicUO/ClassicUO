@@ -75,14 +75,14 @@ internal readonly struct GameCursorPlugin : IPlugin
         Query<Data<ServerFlags>, With<Player>> playerFlagsQ,
         Query<Data<GameScreenPlugin.GameWindowUI>> gameWindowQ,
         Query<Data<TextInput>> textInputQ,
-        // Without<UIMovable>: a window root carries Interaction (so it captures
+        // Without<UiMovable>: a window root carries Interaction (so it captures
         // clicks) and Clay flags its whole bbox Hovered, but IsTextInput walks
         // the WHOLE subtree — a gump that embeds a text field (trade gold entry)
         // would then show the I-beam over the entire window, not just the field.
         // The genuine field frame is a non-movable child that gets flagged
         // Hovered when the cursor is actually over it, so excluding roots fixes
         // the false positive without missing the real case.
-        Query<Data<Interaction>, Filter<Without<UIMovable>>> interactiveQ,
+        Query<Data<Interaction>, Filter<Without<UiMovable>>> interactiveQ,
         Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>,
             Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
         Query<Data<TinyEcs.Children>> children)

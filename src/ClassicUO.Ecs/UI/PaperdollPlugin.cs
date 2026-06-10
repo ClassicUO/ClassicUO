@@ -7,8 +7,8 @@
 // independently.
 //
 // Movability / right-click close / topmost-on-click / click-capture come
-// from the shared UIMovable infra in WindowDragPlugin — paperdoll does NOT
-// reimplement any of those (rule 4). The bg root carries the UIMovable
+// from the shared UiMovable infra in WindowDragPlugin — paperdoll does NOT
+// reimplement any of those (rule 4). The bg root carries the UiMovable
 // marker via GumpBuilder.AddGumpRoot; everything else falls out.
 //
 // Body + equipment overlays mirror PaperDollInteractable.UpdateUI: pick a
@@ -762,7 +762,7 @@ internal readonly struct PaperdollPlugin : IPlugin
                     // (Bevy.UI has no UiDoubleClick). 350ms matches main's
                     // Mouse.MOUSE_DELAY_DOUBLE_CLICK. Interaction.None on the
                     // sprite so UiClick is routed here; drag on body area
-                    // still works because UIMovable lives on root (drag latch
+                    // still works because UiMovable lives on root (drag latch
                     // reads root's Interaction, not children's).
                     var bpPic = builder.AddGump(commands, bpGump, bpHue, new Vector2(8 - bx, 19))
                         .Insert(new PaperdollBodyChild { WindowEntity = rootId });

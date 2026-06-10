@@ -120,7 +120,7 @@ internal readonly struct GuiPlugin : IPlugin
         // Sync FNA surface size + pointer state into Bevy.UI before the layout stage.
         Action<Res<GraphicsDevice>, Res<UoGame>, ResMut<UiSurface>> syncSurfaceFn = SyncSurface;
         Action<Res<MouseContext>, Res<UoGame>, ResMut<UiPointer>> syncPointerFn = SyncPointer;
-        Action<Res<Time>, Res<MouseContext>, ResMut<UiClayContext>> syncDeltaAndScrollFn = SyncDeltaAndScroll;
+        Action<Res<MouseContext>, ResMut<UiClayContext>> syncDeltaAndScrollFn = SyncDeltaAndScroll;
         Action<Query<Data<UiCustom, UOButton, Interaction>>> updateUOButtonsStateFn = UpdateUOButtonsState;
         Action<Query<Data<UiCustom, UOCheckbox, TinyEcs.Bevy.UI.Widgets.Checkbox>>> updateUOCheckboxesFn = UpdateUOCheckboxes;
         Action<Query<Data<Text, MaskedText>>> syncMaskedTextFn = SyncMaskedText;
@@ -143,7 +143,7 @@ internal readonly struct GuiPlugin : IPlugin
             Res<AssetsServer>,
             Query<Data<ScrollPosition>>,
             Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>>,
-            Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>>,
+            Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>>,
             Query<Data<TinyEcs.Parent>>,
             Query<Data<GlobalZIndex>>,
             Query<Empty, With<GameScreenPlugin.GameWindowUI>>> routeWheelFn = RouteWheelToScrollable;
@@ -181,7 +181,7 @@ internal readonly struct GuiPlugin : IPlugin
             Res<MouseContext>,
             Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>>,
             Query<Data<TinyEcs.Parent>>,
-            Query<Data<UIMovable>>> dumpFn = DumpLayoutOnClick;
+            Query<Data<UiMovable>>> dumpFn = DumpLayoutOnClick;
         app.AddSystem(Stage.Last, dumpFn);
 #endif
     }
@@ -192,7 +192,7 @@ internal readonly struct GuiPlugin : IPlugin
         Res<MouseContext> mouse,
         Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
         Query<Data<TinyEcs.Parent>> parents,
-        Query<Data<UIMovable>> movables)
+        Query<Data<UiMovable>> movables)
     {
         if (!dump.Value.DumpOnClick || !mouse.Value.IsPressedOnce(MouseButtonType.Left))
             return;
@@ -250,11 +250,11 @@ internal readonly struct GuiPlugin : IPlugin
     }
 
     private static void SyncDeltaAndScroll(
-        Res<Time> time,
         Res<MouseContext> mouseCtx,
         ResMut<UiClayContext> ctx)
     {
-        ctx.Value.DeltaTime = time.Value.Frame;
+        // Frame delta now flows through the shared Res<Time> — Bevy.UI reads it
+        // directly; only the scroll input still needs host feeding.
         ctx.Value.ScrollDelta = new System.Numerics.Vector2(0, mouseCtx.Value.Wheel * 3);
         ctx.Value.EnableDragScrolling = false;
     }
@@ -276,7 +276,7 @@ internal readonly struct GuiPlugin : IPlugin
         Res<AssetsServer> assets,
         Query<Data<ScrollPosition>> scrollPosQ,
         Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
-        Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movableQ,
+        Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>> movableQ,
         Query<Data<TinyEcs.Parent>> parentQ,
         Query<Data<GlobalZIndex>> zQ,
         Query<Empty, With<GameScreenPlugin.GameWindowUI>> gameWindowQ)
@@ -466,11 +466,11 @@ internal readonly struct GuiPlugin : IPlugin
         // font (FontId | AsciiFlag) wants a PACKED hue (UoFontRuntime.AsciiHue);
         // a unicode font wants a literal RGB tint (white = no tint). Passing a
         // packed hue to a unicode field reads as RGB and blacks the text out.
-        // UINoWindowDrag on every hittable part so a press on the field never
+        // UiNoWindowDrag on every hittable part so a press on the field never
         // latches a window move — that frees the press+drag gesture for caret
-        // placement / text selection (a field inside a UIMovable gump would
+        // placement / text selection (a field inside a UiMovable gump would
         // otherwise drag the gump instead of selecting).
-        frame.Insert(Interaction.None).Insert<UiContainsByBounds>().Insert<UINoWindowDrag>();
+        frame.Insert(Interaction.None).Insert<UiContainsByBounds>().Insert<UiNoWindowDrag>();
 
         EntityCommands glyph;
         if (multiline)
@@ -498,11 +498,11 @@ internal readonly struct GuiPlugin : IPlugin
                 .Insert(font)
                 .Insert<TextInput>()
                 .Insert<EditableText>()
-                .Insert<UINoWindowDrag>()
+                .Insert<UiNoWindowDrag>()
                 // WrappedText has no UiHitTest.PixelHit case, so UiPick can't pixel-
                 // hit the glyph and falls through to the window bg under the text —
                 // a drag-to-select then moves the window instead. Bounds-hit the
-                // glyph rect so UiPick returns it (UINoWindowDrag → drag yields to
+                // glyph rect so UiPick returns it (UiNoWindowDrag → drag yields to
                 // the field's own caret/selection gesture in RouteMouse).
                 .Insert<UiContainsByBounds>()
                 .Insert(new MultilineText { WrapWidth = wrapWidth })
@@ -517,7 +517,7 @@ internal readonly struct GuiPlugin : IPlugin
                 .Insert(new TextColor(color))
                 .Insert<TextInput>()
                 .Insert<EditableText>()
-                .Insert<UINoWindowDrag>()
+                .Insert<UiNoWindowDrag>()
                 // Text origin for mouse caret/selection: TextEditPlugin reads the
                 // frame's ComputedNode (logical = scaled / DpiScale) + OffsetX.
                 .Insert(new TextFieldGeom { Frame = frame.Id, OffsetX = contentOffset.X });
@@ -540,7 +540,7 @@ internal readonly struct GuiPlugin : IPlugin
                 Display = Display.None,
             })
             .Insert(new BackgroundColor(new Clay.Color(70, 110, 180, 120)))
-            .Insert<UINoWindowDrag>()
+            .Insert<UiNoWindowDrag>()
             .Insert(new TextEditSelection { Target = glyphId });
         decorate?.Invoke(selection);
 
@@ -553,7 +553,7 @@ internal readonly struct GuiPlugin : IPlugin
                 Display = Display.None,
             })
             .Insert(new BackgroundColor(color))
-            .Insert<UINoWindowDrag>()
+            .Insert<UiNoWindowDrag>()
             .Insert(new TextEditCaret { Target = glyphId });
         decorate?.Invoke(caret);
 
@@ -577,7 +577,7 @@ internal readonly struct GuiPlugin : IPlugin
             .Insert(rowNode)
             .Insert(Interaction.None)
             .Insert<UiContainsByBounds>()
-            .Insert<UINoWindowDrag>();
+            .Insert<UiNoWindowDrag>();
         decorate?.Invoke(row);
         // Press records the click for caret placement (TextEditPlugin applies it
         // after focus syncs); the raw button is consumed by the focus interaction
@@ -770,8 +770,6 @@ internal struct UOCheckbox
     public ushort Off, On;
 }
 
-// Marker tags carried over from the old plugin.
-internal struct UIMovable;
 // On every editable field's glyph entity: the I-beam cursor (GameCursorPlugin)
 // and "a field is focused, chat back off" both key off this. Present on ALL
 // fields including ones with bespoke editors (split-stack number box, skills
@@ -808,12 +806,6 @@ internal sealed class DebugLayoutDump
     public bool DumpOnClick;
 }
 #endif
-
-// Suppresses ONLY the drag gesture on a UIMovable window (UO `nomove` flag).
-// The window is still a window: right-click-close, click-capture-to-world,
-// pickup/cursor awareness and z-stack all key off UIMovable and keep working —
-// WindowDragPlugin.Drag is the one system that yields to this tag.
-internal struct UINoDrag;
 
 // Real text storage for masked fields (passwords). SyncMaskedText keeps
 // the sibling `Text` component populated with `MaskChar` repeated for the

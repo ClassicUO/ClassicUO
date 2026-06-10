@@ -9,9 +9,9 @@
 // MessageBoxResult { Kind, Ok } trigger and despawns the dialog. Callers react
 // by registering an observer (app.AddObserver) keyed on their Kind — no captured
 // callback (ECS rule 4: system→system interop goes through observers). Unlike
-// most gumps it is NOT UIMovable — legacy disables right-click-close
+// most gumps it is NOT UiMovable — legacy disables right-click-close
 // (CanCloseWithRightClick = false) and the dialog is fixed/centered, so it
-// carries no UIMovable marker (which would re-add the right-click-close path).
+// carries no UiMovable marker (which would re-add the right-click-close path).
 // True input-blocking modality is not ported yet.
 
 using System;

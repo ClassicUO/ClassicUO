@@ -30,7 +30,7 @@ public class UiPickTests
 
     private static void MakeMovable(World w, ulong id)
     {
-        w.Set<UIMovable>(id);
+        w.Set<UiMovable>(id);
         w.Set(id, new GlobalZIndex(0));
     }
 
@@ -68,9 +68,9 @@ public class UiPickTests
         return q;
     }
 
-    private static Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> Movables(App app)
+    private static Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>> Movables(App app)
     {
-        var q = new Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>>();
+        var q = new Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>>();
         q.Initialize(app);
         q.Fetch(app);
         return q;
@@ -178,7 +178,7 @@ public class UiPickTests
     {
         var app = new App();
         var w = app.GetWorld();
-        var loose = Element(w, 0, 0, 100, 100, 1); // no UIMovable anywhere in chain
+        var loose = Element(w, 0, 0, 100, 100, 1); // no UiMovable anywhere in chain
         Assert.Equal(0UL, UiPick.MovableRoot(loose, Movables(app), Parents(app)));
     }
 
@@ -236,7 +236,7 @@ public class UiPickTests
         Assert.Equal(root, (ulong)w.GetParent(outer));
     }
 
-    // Faithful repro: spawn via Commands like ServerGumpPlugin — root (UIMovable),
+    // Faithful repro: spawn via Commands like ServerGumpPlugin — root (UiMovable),
     // a scroll wrapper `outer` (Overflow.Scroll + ScrollPosition) parenting `inner`,
     // then add `outer` under root — and run a full update (layout + scroll sync).
     [Fact]
@@ -246,7 +246,7 @@ public class UiPickTests
         ulong root = 0, outer = 0, inner = 0;
         app.AddSystem((Commands commands) =>
         {
-            var r = commands.Spawn().Insert(new Node()).Insert<UIMovable>().Insert(new GlobalZIndex(0));
+            var r = commands.Spawn().Insert(new Node()).Insert<UiMovable>().Insert(new GlobalZIndex(0));
             var o = commands.Spawn().Insert(new Node { Overflow = Overflow.Scroll }).Insert(new ScrollPosition());
             var i = commands.Spawn().Insert(new Node());
             commands.AddChild(o.Id, i.Id);
@@ -271,14 +271,14 @@ public class UiPickTests
         var app = new App();
         var w = app.GetWorld();
 
-        var rootA = w.Entity().Set(new Node()).Set<UIMovable>().ID;
+        var rootA = w.Entity().Set(new Node()).Set<UiMovable>().ID;
         var outerA = w.Entity().Set(new Node()).ID;
         var innerA = w.Entity().Set(new Node()).ID;
         w.AddChild(outerA, innerA);
         w.AddChild(rootA, outerA);
         w.Delete(rootA); // DeleteDescendants -> frees outerA/innerA slots
 
-        var rootB = w.Entity().Set(new Node()).Set<UIMovable>().ID;
+        var rootB = w.Entity().Set(new Node()).Set<UiMovable>().ID;
         var outerB = w.Entity().Set(new Node()).ID;
         var innerB = w.Entity().Set(new Node()).ID;
         w.BeginDeferred();
@@ -333,7 +333,7 @@ public class UiPickTests
 
         var root = w.Entity()
             .Set(new Node { PositionType = PositionType.Absolute, Left = Val.Px(50), Top = Val.Px(50), Width = Val.Px(200), Height = Val.Px(100) })
-            .Set<UIMovable>()
+            .Set<UiMovable>()
             .Set(new GlobalZIndex(0))
             .Set(new BackgroundColor(new ClayColor(40, 40, 40, 255))).ID;
         var outer = w.Entity()
@@ -373,7 +373,7 @@ public class UiPickTests
         {
             if (latest.Value.Root != 0)
                 commands.Entity(latest.Value.Root).Despawn();
-            var r = commands.Spawn().Insert(new Node()).Insert<UIMovable>().Insert(new GlobalZIndex(0));
+            var r = commands.Spawn().Insert(new Node()).Insert<UiMovable>().Insert(new GlobalZIndex(0));
             var o = commands.Spawn().Insert(new Node { Overflow = Overflow.Scroll }).Insert(new ScrollPosition());
             var i = commands.Spawn().Insert(new Node());
             commands.AddChild(o.Id, i.Id);
@@ -390,7 +390,7 @@ public class UiPickTests
         Assert.Equal(l.Root, (ulong)w.GetParent(l.Outer));
     }
 
-    // Server-gump shape: a UIMovable root that carries NO render surface of its
+    // Server-gump shape: a UiMovable root that carries NO render surface of its
     // own (the old whole-bbox None hit was removed for pixel-perfect parity). It
     // must be hittable ONLY through its painting children — a click on a child
     // walks up to the root (so drag / click-capture claim it), but a click on the
@@ -403,7 +403,7 @@ public class UiPickTests
         var w = app.GetWorld();
         var root = w.Entity()
             .Set(new Node())          // bare: no UiCustom/Text/Bg, no ComputedNode
-            .Set<UIMovable>()
+            .Set<UiMovable>()
             .Set(new GlobalZIndex(0)).ID;
         var child = Element(w, 0, 0, 50, 50, 2);   // paints (solid hit), covers only the top-left
         w.AddChild(root, child);

@@ -112,7 +112,7 @@ internal readonly struct ChatPlugin : IPlugin
 
             // Claim SelectedEntity while the cursor is over the chat bar so world
             // click / movement / pickup systems bail — otherwise clicks on the bar
-            // fall through to the game scene (the bar isn't a UIMovable, so
+            // fall through to the game scene (the bar isn't a UiMovable, so
             // WindowDragPlugin's claim skips it). Stage.Last like that claim.
             .AddSystem(claimFn)
             .InStage(Stage.Last)
@@ -189,7 +189,7 @@ internal readonly struct ChatPlugin : IPlugin
     // While the cursor is over any part of the chat UI, claim SelectedEntity at
     // float.MaxValue (bypassViewport) so the world/pickup/movement systems treat
     // the click as "over UI" and bail — mirrors WindowDragPlugin's movable claim,
-    // but the chat bar isn't a UIMovable so it needs its own. Uses the shared
+    // but the chat bar isn't a UiMovable so it needs its own. Uses the shared
     // UiPick hit-test + a walk up to the ChatUi-tagged subtree.
     private static void ClaimChatSelection(
         Res<MouseContext> mouse,

@@ -6,7 +6,7 @@
 // a look / double-click is a use, neither opens a bar). The window spawns
 // centered on the press position. One window per serial (re-drag focuses).
 // Drag / right-click-close / topmost-on-click / world click-capture all fall
-// out of the shared UOGump + UIMovable infra (WindowDragPlugin) — this plugin
+// out of the shared UOGump + UiMovable infra (WindowDragPlugin) — this plugin
 // does NOT reimplement any of them.
 //
 // Layout matches the legacy non-party branch:
@@ -755,7 +755,7 @@ internal readonly struct HealthBarPlugin : IPlugin
 internal sealed class HbInteractParams : CompositeSystemParam
 {
     public readonly Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> Rendered;
-    public readonly Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> Movables;
+    public readonly Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>> Movables;
     public readonly Query<Data<TinyEcs.Parent>> Parents;
     public readonly Query<Data<HealthBarWindow>> Hb;
     public readonly Query<Data<StatusBarWindow>> Status;
@@ -767,7 +767,7 @@ internal sealed class HbInteractParams : CompositeSystemParam
     public HbInteractParams()
     {
         Rendered    = Add(new Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>>());
-        Movables    = Add(new Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>>());
+        Movables    = Add(new Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>>());
         Parents     = Add(new Query<Data<TinyEcs.Parent>>());
         Hb          = Add(new Query<Data<HealthBarWindow>>());
         Status      = Add(new Query<Data<StatusBarWindow>>());

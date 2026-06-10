@@ -174,7 +174,7 @@ internal readonly struct SkillsGumpPlugin : IPlugin
             .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.None, Hue = Vector3.UnitZ } })
             .Insert(Interaction.None)
             .Insert<UOGump>()
-            .Insert<UIMovable>()
+            .Insert<UiMovable>()
             .Insert(new GlobalZIndex(z));
         var rootId = root.Id;
 
@@ -214,12 +214,12 @@ internal readonly struct SkillsGumpPlugin : IPlugin
             .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.None, Hue = Vector3.UnitZ } })
             .Insert(new Node { PositionType = PositionType.Absolute, Left = Val.Px(ListLeft + 1), Top = Val.Px(7), Width = Val.Px(80), Height = Val.Px(16) })
             .Insert(new SkillsResetButton { Window = rootId })
-            .Insert<UINoWindowDrag>();
+            .Insert<UiNoWindowDrag>();
         commands.AddChild(rootId, reset.Id);
 
         // Content panel — a scrollable flex column (wheel + scrollbar). Rows flow
         // so the scroll range is computed from their stacked height. Interactive
-        // controls inside are sprite buttons tagged UINoWindowDrag so their clicks
+        // controls inside are sprite buttons tagged UiNoWindowDrag so their clicks
         // survive both the scroll container and the window-drag gesture.
         int parchRight = (width + midW) / 2;
         int flagW = GumpW(assets, FlagGump);
@@ -245,13 +245,13 @@ internal readonly struct SkillsGumpPlugin : IPlugin
         // slides it; FlagDrag scrolls the list when it's dragged.
         var flag = builder.AddGump(commands, FlagGump, Vector3.UnitZ, new Vector2(flagX, ListTop))
             .Insert(Interaction.None)
-            .Insert<UINoWindowDrag>();
+            .Insert<UiNoWindowDrag>();
         commands.AddChild(rootId, flag.Id);
 
         // Resize expander knob (bottom-center).
         var expander = builder.AddButton(commands, (ExpanderNormal, ExpanderPressed, ExpanderNormal), Vector3.UnitZ, new Vector2(0, 0))
             .Insert(new SkillsResizeHandle { Window = rootId })
-            .Insert<UINoWindowDrag>();
+            .Insert<UiNoWindowDrag>();
         commands.AddChild(rootId, expander.Id);
 
         // Bottom comment line + baked-text comment decoration + total label.
@@ -267,7 +267,7 @@ internal readonly struct SkillsGumpPlugin : IPlugin
 
         // New Group button.
         var newGroup = builder.AddButton(commands, (NewGroupBtn, NewGroupBtn, NewGroupBtn), Vector3.UnitZ, new Vector2(60, 0))
-            .Insert<UINoWindowDrag>()
+            .Insert<UiNoWindowDrag>()
             .Insert<UiContainsByBounds>();
         newGroup.Observe((On<UiClick> _, Res<PlayerSkills> sk, Query<Data<SkillsWindow>> wq) =>
         {
@@ -279,7 +279,7 @@ internal readonly struct SkillsGumpPlugin : IPlugin
         // ShowReal / ShowCaps checkboxes + labels.
         var realCb = builder.AddCheckbox(commands, false, new Vector2(150, 0), CheckOff, CheckOn, Vector3.UnitZ)
             .Insert(new SkillsCheck { Window = rootId, Cap = false })
-            .Insert<UINoWindowDrag>();
+            .Insert<UiNoWindowDrag>();
         commands.AddChild(rootId, realCb.Id);
         var realLbl = builder.AddLabel(commands, "Show real", new Vector2(170, 0))
             .Insert(new TextFont { FontId = 1, Size = 12 }).Insert<SkillsRealLabel>();
@@ -287,7 +287,7 @@ internal readonly struct SkillsGumpPlugin : IPlugin
 
         var capCb = builder.AddCheckbox(commands, false, new Vector2(150, 0), CheckOff, CheckOn, Vector3.UnitZ)
             .Insert(new SkillsCheck { Window = rootId, Cap = true })
-            .Insert<UINoWindowDrag>();
+            .Insert<UiNoWindowDrag>();
         commands.AddChild(rootId, capCb.Id);
         var capLbl = builder.AddLabel(commands, "Show caps", new Vector2(170, 0))
             .Insert(new TextFont { FontId = 1, Size = 12 }).Insert<SkillsCapLabel>();
@@ -431,7 +431,7 @@ internal readonly struct SkillsGumpPlugin : IPlugin
                 // receive UiClick; a sprite button does). Click toggles the group.
                 ushort arrowId = group.IsMaximized ? GroupExpanded : GroupCollapsed;
                 var arrow = builder.Value.AddButton(commands, (arrowId, arrowId, arrowId), Vector3.UnitZ)
-                    .Insert<UINoWindowDrag>()
+                    .Insert<UiNoWindowDrag>()
                     // Whole-bbox hit (legacy ContainsByBounds) — the arrow sprite
                     // has transparent corners; a click anywhere on it must toggle.
                     .Insert<UiContainsByBounds>();
@@ -455,7 +455,7 @@ internal readonly struct SkillsGumpPlugin : IPlugin
                     .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.None, Hue = Vector3.UnitZ } })
                     .Insert(Interaction.None)
                     .Insert<UiContainsByBounds>()
-                    .Insert<UINoWindowDrag>()
+                    .Insert<UiNoWindowDrag>()
                     .Insert(new SkillNameEdit { Window = rootId, GroupIndex = gi });
                 ulong nameId = name.Id;
                 name.Observe((On<UiClick> _, ResMut<FocusedInput> focused) => focused.Value.Entity = nameId);
@@ -491,7 +491,7 @@ internal readonly struct SkillsGumpPlugin : IPlugin
                     {
                         int useId = sid;
                         var use = builder.Value.AddButton(commands, (UseBtnN, UseBtnO, UseBtnO), Vector3.UnitZ)
-                            .Insert<UINoWindowDrag>();
+                            .Insert<UiNoWindowDrag>();
                         use.Observe((On<UiClick> _, Res<NetClient> net) => net.Value.Send_UseSkill(useId));
                         commands.AddChild(srow.Id, use.Id);
                     }
@@ -512,7 +512,7 @@ internal readonly struct SkillsGumpPlugin : IPlugin
                         .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.None, Hue = Vector3.UnitZ } })
                         // Drag handle: press the skill name and release over another
                         // group to move the skill there (SkillDrag).
-                        .Insert<UINoWindowDrag>()
+                        .Insert<UiNoWindowDrag>()
                         .Insert(new SkillRowDrag { Window = rootId, GroupIndex = gi, SkillId = sid });
                     commands.AddChild(srow.Id, nameLbl.Id);
 
@@ -527,7 +527,7 @@ internal readonly struct SkillsGumpPlugin : IPlugin
                     ushort lockId = val.Lock switch { Lock.Down => LockDown, Lock.Locked => LockLocked, _ => LockUp };
                     int lsid = sid;
                     var lockBtn = builder.Value.AddButton(commands, (lockId, lockId, lockId), Vector3.UnitZ)
-                        .Insert<UINoWindowDrag>();
+                        .Insert<UiNoWindowDrag>();
                     lockBtn.Observe((On<UiClick> _, Res<NetClient> net, Res<PlayerSkills> sk, Query<Data<SkillsWindow>> wq) =>
                     {
                         ref var sv = ref sk.Value.Values[lsid];

@@ -2,7 +2,7 @@
 // Picks the layout by client version: the classic StatusGumpOld (bg 0x0802) for
 // pre-AOS clients, the modern StatusGumpModern (bg 0x2A6C) for >= CV_308Z.
 // Opened from the paperdoll Status button (single instance), draggable +
-// right-click-close via the UOGump/UIMovable infra; refreshed each frame from
+// right-click-close via the UOGump/UiMovable infra; refreshed each frame from
 // the player entity.
 //
 // v1 scope vs legacy: no stat-lock togglers (no Lock data in ECS), no buff-icon

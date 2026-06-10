@@ -128,7 +128,7 @@ internal readonly struct PartyGumpPlugin : IPlugin
             })
             .Insert(Interaction.None)
             .Insert(new PartyManifestWindow { CanLoot = canLoot })
-            .Insert<UIMovable>()
+            .Insert<UiMovable>()
             .Insert<UiContainsByBounds>()
             .Insert(new GlobalZIndex(zCounter.Bump()));
 

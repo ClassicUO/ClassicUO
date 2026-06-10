@@ -10,7 +10,7 @@
 // The box is offset down-right of the cursor point so it never sits under the
 // hot pixel — that keeps it out of UiPick (which tests the exact mouse point),
 // so it can't hijack drag / right-click-close on the window behind it. It is NOT
-// a UIMovable gump: it is an ephemeral overlay this plugin fully owns and
+// a UiMovable gump: it is an ephemeral overlay this plugin fully owns and
 // despawns directly (the "don't despawn gumps yourself" rule is about
 // server/right-click-closable windows, not overlays like this or PopupMenu).
 

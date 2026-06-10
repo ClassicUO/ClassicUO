@@ -55,7 +55,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                 Width = Val.Px(Width), Height = Val.Px(Height),
             })
             .Insert(new BackgroundColor(new ClayColor(34, 34, 40, 235)))
-            .Insert<UIMovable>()
+            .Insert<UiMovable>()
             .Insert(new GlobalZIndex(z))
             .Insert(new OptionsWindow())
             .Id;
@@ -72,7 +72,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             .Insert(new TextFont { FontId = 1, Size = 14 })
             .Insert(new TextColor(new ClayColor(255, 255, 255, 255)))
             .Insert(Interaction.None)
-            .Insert<UINoWindowDrag>()
+            .Insert<UiNoWindowDrag>()
             .Id);
 
         for (var i = 0; i < s_rows.Length; i++)
@@ -87,7 +87,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                 })
                 .Insert(new BackgroundColor(new ClayColor(70, 72, 84, 255)))
                 .Insert(Interaction.None)
-                .Insert<UINoWindowDrag>();
+                .Insert<UiNoWindowDrag>();
             // Click fires on press+release inside the row.
             row.Observe((On<UiClick> _, Commands cmd, OptionsButtonParams p) => onClick(cmd, p));
 
@@ -103,7 +103,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                 .Insert(new TextFont { FontId = 1, Size = 12 })
                 .Insert(new TextColor(new ClayColor(255, 255, 255, 255)))
                 .Insert(Interaction.None)
-                .Insert<UINoWindowDrag>()
+                .Insert<UiNoWindowDrag>()
                 .Id);
 
             commands.AddChild(rootId, row.Id);

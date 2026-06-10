@@ -190,10 +190,10 @@ internal readonly struct CombatBookGumpPlugin : IPlugin
         commands.AddChild(root.Id, content.Id);
 
         var left = builder.AddGump(commands, LeftCorner, Vector3.UnitZ, new Vector2(50, 8))
-            .Insert<UINoWindowDrag>().Insert(new CombatBookCorner { Window = root.Id, Dir = -1 });
+            .Insert<UiNoWindowDrag>().Insert(new CombatBookCorner { Window = root.Id, Dir = -1 });
         commands.AddChild(root.Id, left.Id);
         var right = builder.AddGump(commands, RightCorner, Vector3.UnitZ, new Vector2(321, 8))
-            .Insert<UINoWindowDrag>().Insert(new CombatBookCorner { Window = root.Id, Dir = 1 });
+            .Insert<UiNoWindowDrag>().Insert(new CombatBookCorner { Window = root.Id, Dir = 1 });
         commands.AddChild(root.Id, right.Id);
 
         commands.Entity(root.Id).Insert(new CombatBookWindow
@@ -281,7 +281,7 @@ internal readonly struct CombatBookGumpPlugin : IPlugin
         if (idx >= 1 && idx <= AbilityData.Abilities.Length)
         {
             var icon = builder.AddGump(commands, (ushort)(AbilityIconBase + (idx - 1)), Vector3.UnitZ, new Vector2(iconX, iconY))
-                .Insert(Interaction.None).Insert<UINoWindowDrag>().Insert<UiContainsByBounds>()
+                .Insert(Interaction.None).Insert<UiNoWindowDrag>().Insert<UiContainsByBounds>()
                 .Insert(new CombatAbilityIcon { Primary = primary, Floating = false });
             icon.Observe((On<UiDoubleClick> _, Res<NetClient> net, ResMut<PlayerAbilities> a, Res<GameContext> ctx) =>
                 Use(net.Value, a.Value, ctx.Value, primary));
@@ -322,7 +322,7 @@ internal readonly struct CombatBookGumpPlugin : IPlugin
         ref readonly var def = ref AbilityData.Abilities[abilityIndex];
 
         var icon = builder.AddGump(commands, (ushort)(AbilityIconBase + abilityIndex), Vector3.UnitZ, new Vector2(62, 40))
-            .Insert(Interaction.None).Insert<UINoWindowDrag>();
+            .Insert(Interaction.None).Insert<UiNoWindowDrag>();
         commands.AddChild(content, icon.Id);
 
         // Ability name wraps at width 80 (legacy Label maxWidth 80, font 6) —
@@ -356,7 +356,7 @@ internal readonly struct CombatBookGumpPlugin : IPlugin
             .Insert(new TextFont { FontId = (ushort)(9 | UoFontRuntime.AsciiFlag), Size = 12 })
             .Insert(new TextColor(UoFontRuntime.AsciiHue(TextHue)))
             .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.None, Hue = Vector3.UnitZ } })
-            .Insert(Interaction.None).Insert<UINoWindowDrag>().Insert<UiContainsByBounds>()
+            .Insert(Interaction.None).Insert<UiNoWindowDrag>().Insert<UiContainsByBounds>()
             .Insert<CombatNameLabel>();
         lbl.Observe((On<UiClick> _, Query<Data<CombatBookWindow>> wq) =>
         {
@@ -541,7 +541,7 @@ internal readonly struct CombatBookGumpPlugin : IPlugin
     private static void Despawn(
         Commands commands,
         Query<Data<CombatBookWindow>> windowsQ,
-        Query<Data<CombatAbilityIcon>, Filter<With<UIMovable>>> floatingQ,
+        Query<Data<CombatAbilityIcon>, Filter<With<UiMovable>>> floatingQ,
         Query<Data<TinyEcs.Children>> childrenQ)
     {
         foreach (var (ent, _) in windowsQ) DespawnSubtree(commands, ent.Ref, childrenQ);

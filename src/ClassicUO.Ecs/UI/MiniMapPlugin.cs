@@ -6,7 +6,7 @@
 // (option A from the spec): a Stage.Update system does the heavy map-block walk
 // with proper Res<UOFileManager> access, the renderer just blits the texture.
 //
-// Drag / right-click-close / z-stack / pixel-hit come free from UIMovable +
+// Drag / right-click-close / z-stack / pixel-hit come free from UiMovable +
 // UOGumpBundle + the new UiHitTest.MiniMap case (shares the bg-gump mask).
 //
 // Radar = land + statics (statics read straight from the statics file per block,

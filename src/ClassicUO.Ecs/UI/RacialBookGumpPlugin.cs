@@ -136,10 +136,10 @@ internal readonly struct RacialBookGumpPlugin : IPlugin
         commands.AddChild(root.Id, content.Id);
 
         var left = builder.AddGump(commands, LeftCorner, Vector3.UnitZ, new Vector2(50, 8))
-            .Insert<UINoWindowDrag>().Insert(new RacialBookCorner { Window = root.Id, Dir = -1 });
+            .Insert<UiNoWindowDrag>().Insert(new RacialBookCorner { Window = root.Id, Dir = -1 });
         commands.AddChild(root.Id, left.Id);
         var right = builder.AddGump(commands, RightCorner, Vector3.UnitZ, new Vector2(321, 8))
-            .Insert<UINoWindowDrag>().Insert(new RacialBookCorner { Window = root.Id, Dir = 1 });
+            .Insert<UiNoWindowDrag>().Insert(new RacialBookCorner { Window = root.Id, Dir = 1 });
         commands.AddChild(root.Id, right.Id);
 
         commands.Entity(root.Id).Insert(new RacialBookWindow
@@ -261,7 +261,7 @@ internal readonly struct RacialBookGumpPlugin : IPlugin
         uint tip = SeedTooltip(files, opl, graphic, 150);
         var icon = builder.AddGump(commands, graphic, Vector3.UnitZ, new Vector2(iconX, 40))
             .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.Gump, AssetId = graphic, Hue = Vector3.UnitZ, TooltipSerial = tip } })
-            .Insert(Interaction.None).Insert<UINoWindowDrag>().Insert<UiContainsByBounds>();
+            .Insert(Interaction.None).Insert<UiNoWindowDrag>().Insert<UiContainsByBounds>();
         if (!passive)
         {
             icon.Insert(new RacialFlyingIcon { Floating = false });
@@ -288,7 +288,7 @@ internal readonly struct RacialBookGumpPlugin : IPlugin
             .Insert(new TextFont { FontId = (ushort)(9 | UoFontRuntime.AsciiFlag), Size = 12 })
             .Insert(new TextColor(UoFontRuntime.AsciiHue(TextHue)))
             .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.None, Hue = Vector3.UnitZ } })
-            .Insert(Interaction.None).Insert<UINoWindowDrag>().Insert<UiContainsByBounds>()
+            .Insert(Interaction.None).Insert<UiNoWindowDrag>().Insert<UiContainsByBounds>()
             .Insert<RacialNameLabel>();
         lbl.Observe((On<UiClick> _, Query<Data<RacialBookWindow>> wq) =>
         {
@@ -445,7 +445,7 @@ internal readonly struct RacialBookGumpPlugin : IPlugin
     private static void Despawn(
         Commands commands,
         Query<Data<RacialBookWindow>> windowsQ,
-        Query<Data<RacialFlyingIcon>, Filter<With<UIMovable>>> floatingQ,
+        Query<Data<RacialFlyingIcon>, Filter<With<UiMovable>>> floatingQ,
         Query<Data<TinyEcs.Children>> childrenQ)
     {
         foreach (var (ent, _) in windowsQ) DespawnSubtree(commands, ent.Ref, childrenQ);

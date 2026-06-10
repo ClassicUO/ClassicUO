@@ -199,7 +199,7 @@ internal static class Api
                             // A text field inside a movable mod window must focus on
                             // press, not latch a window drag (WindowDragPlugin.Drag
                             // yields the gesture on this marker — same as buttons).
-                            ent.Set<UINoWindowDrag>();
+                            ent.Set<UiNoWindowDrag>();
 
                             // Apply the guest's value only when it differs from the
                             // last value host and guest agreed on (a controlled
@@ -248,15 +248,15 @@ internal static class Api
                         // A button inside a movable mod window must reach its own
                         // UiClick, not latch a window drag on press (WindowDragPlugin
                         // .Drag yields the gesture on this marker).
-                        ent.Set<UINoWindowDrag>();
+                        ent.Set<UiNoWindowDrag>();
                     }
 
                     if (n.Interactive)
                         ent.Set(Interaction.None);
                     if (n.NoDrag)
-                        ent.Set<UINoWindowDrag>();
+                        ent.Set<UiNoWindowDrag>();
                     if (n.Movable)
-                        ent.Set<UIMovable>();
+                        ent.Set<UiMovable>();
                 }
 
                 foreach (var rel in tree.Relations)

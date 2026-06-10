@@ -153,19 +153,19 @@ internal readonly struct SplitMenuPlugin : IPlugin
             })
             .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.None, Hue = Vector3.UnitZ } })
             .Insert(Interaction.None)
-            .Insert<UIMovable>()
+            .Insert<UiMovable>()
             .Insert(new GlobalZIndex(z.Value.Bump()));
         ulong rootId = root.Id;
 
         // Background art (drag surface — left untagged so grabbing it moves the
-        // window; the interactive children below opt out via UINoWindowDrag).
+        // window; the interactive children below opt out via UiNoWindowDrag).
         var bgPic = builder.Value.AddGump(commands, Background, Vector3.UnitZ, new Vector2(0, 0))
             .Insert(Interaction.None);
         commands.AddChild(rootId, bgPic.Id);
 
-        // Slider built inline so both track and knob can carry UINoWindowDrag —
+        // Slider built inline so both track and knob can carry UiNoWindowDrag —
         // otherwise grabbing the knob latches a window move instead of dragging
-        // the slider (WindowDragPlugin yields only to UINoWindowDrag children).
+        // the slider (WindowDragPlugin yields only to UiNoWindowDrag children).
         ref readonly var knobInfo = ref assets.Value.Gumps.GetGump(GumpBuilder.SliderKnob);
         int sliderH = knobInfo.UV.Height;
         if (sliderH <= 0) sliderH = 16;
@@ -178,7 +178,7 @@ internal readonly struct SplitMenuPlugin : IPlugin
             .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.None, Hue = Vector3.UnitZ } })
             .Insert(new Slider { Min = 1, Max = max, Value = max, ThumbLength = knobInfo.UV.Width, Orientation = ScrollbarOrientation.Horizontal })
             .Insert(Interaction.None)
-            .Insert<UINoWindowDrag>();
+            .Insert<UiNoWindowDrag>();
         commands.AddChild(rootId, track.Id);
 
         var knob = commands.Spawn()
@@ -187,7 +187,7 @@ internal readonly struct SplitMenuPlugin : IPlugin
             .Insert(new SliderThumb())
             .Insert(new SliderDragState())
             .Insert(Interaction.None)
-            .Insert<UINoWindowDrag>();
+            .Insert<UiNoWindowDrag>();
         commands.AddChild(track.Id, knob.Id);
 
         // Numbers-only text box (legacy StbTextBox, font 1, hue 0x0386). The
@@ -203,7 +203,7 @@ internal readonly struct SplitMenuPlugin : IPlugin
             .Insert(textFont)
             .Insert(textColor)
             .Insert<TextInput>()
-            .Insert<UINoWindowDrag>();
+            .Insert<UiNoWindowDrag>();
         ulong textId = text.Id;
         var caret = commands.Spawn()
             .Insert(new Node { Width = Val.Auto, Height = Val.Auto })
@@ -211,7 +211,7 @@ internal readonly struct SplitMenuPlugin : IPlugin
             .Insert(textFont)
             .Insert(textColor)
             .Insert(new TextCaret { Target = textId })
-            .Insert<UINoWindowDrag>();
+            .Insert<UiNoWindowDrag>();
         var textRow = commands.Spawn()
             .Insert(new Node
             {
@@ -221,7 +221,7 @@ internal readonly struct SplitMenuPlugin : IPlugin
             })
             .Insert(Interaction.None)
             .Insert<UiContainsByBounds>()
-            .Insert<UINoWindowDrag>();
+            .Insert<UiNoWindowDrag>();
         textRow.Observe((On<UiPointerDown> _, ResMut<FocusedInput> f) => f.Value.Entity = textId);
         commands.AddChild(textRow.Id, text.Id);
         commands.AddChild(textRow.Id, caret.Id);
@@ -230,7 +230,7 @@ internal readonly struct SplitMenuPlugin : IPlugin
 
         // OK button (legacy Button 0x085d/e/f at 102,37).
         var ok = builder.Value.AddButton(commands, (OkNormal, OkPressed, OkOver), Vector3.UnitZ, new Vector2(102, 37))
-            .Insert<UINoWindowDrag>();
+            .Insert<UiNoWindowDrag>();
         commands.AddChild(rootId, ok.Id);
         ulong okId = ok.Id;
 

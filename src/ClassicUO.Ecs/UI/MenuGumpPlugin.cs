@@ -116,7 +116,7 @@ internal readonly struct MenuGumpPlugin : IPlugin
             CloseAnswered(commands, it.Ref.Serial, winQ, childrenQ);
         });
 
-        // Right-click close (WindowDragPlugin despawns the UIMovable root) -> the
+        // Right-click close (WindowDragPlugin despawns the UiMovable root) -> the
         // cancel reply, unless a selection already answered.
         app.AddObserver((
             OnRemove<MenuGumpWindow> trig,
@@ -168,7 +168,7 @@ internal readonly struct MenuGumpPlugin : IPlugin
             .Insert(new BackgroundColor(new ClayColor(0, 0, 0, 200)))
             .Insert(new ScrollPosition())
             .Insert(new MenuIconStrip { Root = rootId })
-            .Insert<UINoWindowDrag>();
+            .Insert<UiNoWindowDrag>();
         var stripId = strip.Id;
         commands.AddChild(rootId, stripId);
 
@@ -183,7 +183,7 @@ internal readonly struct MenuGumpPlugin : IPlugin
 
             var icon = builder.AddArt(commands, graphic, ShaderHueTranslator.GetHueVector(e.Hue, false, 1f, false))
                 .Insert(Interaction.None)
-                .Insert<UINoWindowDrag>()
+                .Insert<UiNoWindowDrag>()
                 .Insert(new MenuIconItem
                 {
                     Serial = p.Serial,
@@ -238,7 +238,7 @@ internal readonly struct MenuGumpPlugin : IPlugin
         {
             int y = firstRowY + i * rowStep;
             var radio = builder.AddCheckbox(commands, false, new Vector2(50, y), off: RadioOff, on: RadioOn, hue: Vector3.UnitZ)
-                .Insert<UINoWindowDrag>()
+                .Insert<UiNoWindowDrag>()
                 .Insert(new MenuRadio { Root = rootId, Index = (ushort)(i + 1) });
             commands.AddChild(rootId, radio.Id);
 
@@ -248,7 +248,7 @@ internal readonly struct MenuGumpPlugin : IPlugin
         // Cancel (0x1450) at x70, Continue (0x13B2) at x200 — legacy button order.
         var serial = p.Serial; var menuId = p.MenuId;
         var cancel = builder.AddButton(commands, (0x1450, 0x1451, 0x1450), Vector3.UnitZ, new Vector2(70, buttonsY))
-            .Insert<UINoWindowDrag>();
+            .Insert<UiNoWindowDrag>();
         cancel.Observe((On<UiClick> _, Commands cmd, Res<NetClient> net,
                         Query<Data<MenuGumpWindow>> winQ, Query<Data<TinyEcs.Children>> childrenQ) =>
         {
@@ -258,7 +258,7 @@ internal readonly struct MenuGumpPlugin : IPlugin
         commands.AddChild(rootId, cancel.Id);
 
         var cont = builder.AddButton(commands, (0x13B2, 0x13B3, 0x13B2), Vector3.UnitZ, new Vector2(200, buttonsY))
-            .Insert<UINoWindowDrag>();
+            .Insert<UiNoWindowDrag>();
         cont.Observe((On<UiClick> _, Commands cmd, Res<NetClient> net,
                       Query<Data<MenuRadio, Checkbox>> radiosQ,
                       Query<Data<MenuGumpWindow>> winQ, Query<Data<TinyEcs.Children>> childrenQ) =>
@@ -280,7 +280,7 @@ internal readonly struct MenuGumpPlugin : IPlugin
                 Left = Val.Px(200), Top = Val.Px(100),
                 Width = Val.Px(width), Height = Val.Px(height),
             })
-            .Insert<UIMovable>()
+            .Insert<UiMovable>()
             .Insert(new GlobalZIndex(zCounter.Bump()));
     }
 

@@ -261,7 +261,7 @@ internal readonly struct VendorGumpPlugin : IPlugin
         int totalW = rightX + rightW;
         int totalH = (int)(rightY + TopH + naturalMidR + RightBotH) + 8;
 
-        // Root: invisible full-bounds drag/close surface (UIMovable window).
+        // Root: invisible full-bounds drag/close surface (UiMovable window).
         var root = commands.Spawn()
             .Insert(new Node
             {
@@ -271,7 +271,7 @@ internal readonly struct VendorGumpPlugin : IPlugin
             })
             .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.None, Hue = Vector3.UnitZ } })
             .Insert(Interaction.None)
-            .Insert<UIMovable>()
+            .Insert<UiMovable>()
             .Insert(new GlobalZIndex(z.Bump()));
         ulong rootId = root.Id;
 
@@ -354,7 +354,7 @@ internal readonly struct VendorGumpPlugin : IPlugin
         // (legacy _expander at artW/2-10, leftBottom.Y+leftBottom.Height-5).
         int handleY = TopH + (int)bodyH + LeftBotH - 5;
         var handle = builder.AddGump(commands, 0x082E, Vector3.UnitZ, new Vector2(leftW / 2 - 10, handleY))
-            .Insert(Interaction.None).Insert<UINoWindowDrag>().Insert<UiContainsByBounds>()
+            .Insert(Interaction.None).Insert<UiNoWindowDrag>().Insert<UiContainsByBounds>()
             .Insert(new VendorResizeHandle { Window = rootId });
         commands.AddChild(rootId, handle.Id);
 
@@ -534,7 +534,7 @@ internal readonly struct VendorGumpPlugin : IPlugin
         var row = commands.Spawn()
             .Insert(new Node { Display = Display.Flex, FlexDirection = FlexDirection.Column, Width = Val.Px(width), Height = Val.Auto, Gap = Val.Px(2) })
             .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.None, Hue = Vector3.UnitZ } })
-            .Insert(Interaction.None).Insert<UINoWindowDrag>().Insert<UiContainsByBounds>()
+            .Insert(Interaction.None).Insert<UiNoWindowDrag>().Insert<UiContainsByBounds>()
             .Insert(new VendorShopRow { Window = rootId, Serial = serial });
         commands.AddChild(list, row.Id);
 
@@ -559,7 +559,7 @@ internal readonly struct VendorGumpPlugin : IPlugin
         var icon = commands.Spawn()
             .Insert(new Node { Width = Val.Px(44), Height = Val.Px(44) })
             .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.Art, AssetId = it.Graphic, Hue = ShaderHueTranslator.GetHueVector(it.Hue, partial: false, alpha: 1f) } })
-            .Insert(Interaction.None).Insert<UINoWindowDrag>().Insert<UiContainsByBounds>()
+            .Insert(Interaction.None).Insert<UiNoWindowDrag>().Insert<UiContainsByBounds>()
             .Insert(new VendorShopRow { Window = rootId, Serial = serial });
         commands.AddChild(inner.Id, icon.Id);
 
@@ -595,12 +595,12 @@ internal readonly struct VendorGumpPlugin : IPlugin
 
         uint serial = it.Serial;
         var plus = builder.AddGump(commands, 0x37, Vector3.UnitZ, new Vector2(190, 5))
-            .Insert(Interaction.None).Insert<UINoWindowDrag>().Insert<UiContainsByBounds>()
+            .Insert(Interaction.None).Insert<UiNoWindowDrag>().Insert<UiContainsByBounds>()
             .Insert(new VendorTxnButton { Window = rootId, Serial = serial, Dir = +1 });
         commands.AddChild(row.Id, plus.Id);
 
         var minus = builder.AddGump(commands, 0x38, Vector3.UnitZ, new Vector2(210, 5))
-            .Insert(Interaction.None).Insert<UINoWindowDrag>().Insert<UiContainsByBounds>()
+            .Insert(Interaction.None).Insert<UiNoWindowDrag>().Insert<UiContainsByBounds>()
             .Insert(new VendorTxnButton { Window = rootId, Serial = serial, Dir = -1 });
         commands.AddChild(row.Id, minus.Id);
     }
@@ -883,7 +883,7 @@ internal readonly struct VendorGumpPlugin : IPlugin
         => commands.Spawn()
             .Insert(new Node { PositionType = PositionType.Absolute, Left = Val.Px(x), Top = Val.Px(y), Width = Val.Px(w), Height = Val.Px(h) })
             .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.None, Hue = Vector3.UnitZ } })
-            .Insert(Interaction.None).Insert<UINoWindowDrag>().Insert<UiContainsByBounds>();
+            .Insert(Interaction.None).Insert<UiNoWindowDrag>().Insert<UiContainsByBounds>();
 
     private static EntityCommands AddText(Commands commands, ulong parent, string s, int font, int x, int y, ushort hue)
     {

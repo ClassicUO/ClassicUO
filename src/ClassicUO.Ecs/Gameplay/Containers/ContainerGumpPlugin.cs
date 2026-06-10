@@ -171,7 +171,7 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         Res<SelectedEntity> selected,
         Res<AssetsServer> assets,
         Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
-        Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movables,
+        Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>> movables,
         Query<Data<TinyEcs.Parent>> parents,
         Query<Data<ContainerItemUI, ComputedNode, UiCustom, Node, GlobalZIndex>> itemQuery,
         Query<Data<ContainerWindow, ComputedNode, UiCustom, GlobalZIndex>> windowQuery)
@@ -324,7 +324,7 @@ internal readonly struct ContainerGumpPlugin : IPlugin
                     Bounds = data.Bounds,
                 })
                 .Insert(new ContainerWindow { Serial = ev.Serial })
-                .Insert<UIMovable>();
+                .Insert<UiMovable>();
 
             int zBase = zCounter.Value.Bump();
             commands.Entity(ui.Id).Insert(new GlobalZIndex(zBase));

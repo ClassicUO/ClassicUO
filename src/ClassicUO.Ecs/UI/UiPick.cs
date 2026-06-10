@@ -119,13 +119,13 @@ internal static class UiPick
         return false;
     }
 
-    // Walk the Parent chain from `entity` up to the nearest UIMovable window root
+    // Walk the Parent chain from `entity` up to the nearest UiMovable window root
     // (0 if none). The topmost hit is usually a child — an item, body, button —
     // of the window the gesture actually targets. Depth-capped against a cyclic
     // or malformed parent link.
     public static ulong MovableRoot(
         ulong entity,
-        Query<Data<Node, GlobalZIndex>, Filter<With<UIMovable>>> movables,
+        Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>> movables,
         Query<Data<TinyEcs.Parent>> parents)
     {
         ulong cur = entity;

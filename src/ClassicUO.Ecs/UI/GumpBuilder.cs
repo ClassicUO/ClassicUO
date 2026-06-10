@@ -73,14 +73,14 @@ internal sealed class GumpBuilder
                 }
             })
             .Insert(Interaction.None)
-            .Insert<UIMovable>()
+            .Insert<UiMovable>()
             .Insert(new GlobalZIndex(zCounter.Bump()));
     }
 
     /// Spawn a UO gump window via UOGumpBundle. Resolves the background sprite
     /// size from assets and stamps the focus z on the root only — children
     /// added under it inherit that z at layout time (no propagation). Movable +
-    /// right-click-close come from the UIMovable marker the bundle carries.
+    /// right-click-close come from the UiMovable marker the bundle carries.
     public EntityCommands SpawnUOGump(Commands commands, ushort bgId, Vector3 hue, Vector2 position, UiZCounter zCounter)
     {
         ref readonly var gumpInfo = ref _assets.Gumps.GetGump(bgId);
@@ -253,7 +253,7 @@ internal sealed class GumpBuilder
             .Insert(Interaction.None)
             // Inside a draggable window the thumb/track press must drive the
             // scrollbar, not latch a window move.
-            .Insert<UINoWindowDrag>();
+            .Insert<UiNoWindowDrag>();
 
         var thumb = commands.Spawn()
             .Insert(MakeFloatingNode(new Vector2(0, 0), new Vector2(width, thumbInfo.UV.Height)))
@@ -261,7 +261,7 @@ internal sealed class GumpBuilder
             .Insert(new ScrollbarThumb())
             .Insert(new ScrollbarDragState())
             .Insert(Interaction.None)
-            .Insert<UINoWindowDrag>();
+            .Insert<UiNoWindowDrag>();
 
         commands.AddChild(track.Id, thumb.Id);
         return track;
@@ -295,7 +295,7 @@ internal sealed class GumpBuilder
             .Insert<UiContainsByBounds>()
             // A slider lives inside movable gump windows; without this a press to
             // drag the knob would latch the whole window instead.
-            .Insert<UINoWindowDrag>();
+            .Insert<UiNoWindowDrag>();
 
         // SliderPlugin overwrites Width/Height/Left each frame. Default knob is a
         // solid-color rect; thumbGump renders the classic gump sprite instead.
@@ -304,7 +304,7 @@ internal sealed class GumpBuilder
             .Insert(new SliderThumb())
             .Insert(new SliderDragState())
             .Insert(Interaction.None)
-            .Insert<UINoWindowDrag>();
+            .Insert<UiNoWindowDrag>();
 
         if (thumbGump != 0)
             // Z is alpha; a zero hue vector draws fully transparent. Default to opaque.
