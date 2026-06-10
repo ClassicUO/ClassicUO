@@ -111,6 +111,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>> movablesQ,
         Query<Data<TinyEcs.Parent>> parentsQ,
         Query<Data<UiContainsByBounds>> boundsQ,
+        Query<Data<UiNoRightClickClose>> noCloseQ,
         Query<Data<ContainerWindow>> containerQuery,
         Query<Data<ServerGump>> serverGumpQuery,
         Query<Data<TinyEcs.Children>> childrenQ,
@@ -156,6 +157,12 @@ internal readonly struct WindowDragPlugin : IPlugin
 
             if (TopmostMovable(mouse.Value.Position, assets.Value, allRenderedQ, movablesQ, parentsQ, boundsQ) != target)
                 return; // dragged off — cancel, like UiClick
+
+            // Opt-out windows (legacy CanCloseWithRightClick = false, e.g. the
+            // nameplate handler menu): the click is consumed (no walk-under)
+            // but the window stays.
+            if (noCloseQ.Contains(target))
+                return;
 
             if (containerQuery.Contains(target))
             {
@@ -344,3 +351,8 @@ internal readonly struct WindowDragPlugin : IPlugin
 // live in TinyEcs.Bevy.UI (Window.cs) — shared window vocabulary. This plugin
 // keeps the UO gesture resolution (UiPick pixel-perfect hit-testing) instead of
 // the library's Interaction-driven UiWindowPlugin.
+
+// Window root opt-out for the right-click-close gesture (legacy
+// CanCloseWithRightClick = false). The press is still consumed — the player
+// must not walk under the window — but the release leaves the window open.
+internal struct UiNoRightClickClose;

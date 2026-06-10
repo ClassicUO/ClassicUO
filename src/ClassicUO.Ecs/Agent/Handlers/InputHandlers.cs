@@ -69,6 +69,24 @@ internal static class InputHandlers
         d.Register("debug.openBulletinBoard", DebugOpenBulletinBoard);
         d.Register("debug.openMap", DebugOpenMap);
         d.Register("debug.dumpLayout", DebugDumpLayout);
+        d.Register("debug.nameplates", DebugNameplates);
+    }
+
+    // Test-only: flip the nameplate "stay active" toggle (synthetic input
+    // can't hold Ctrl+Shift). "menu": true also forces the handler menu
+    // visible for screenshots.
+    public static JsonRpcResponse DebugNameplates(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        bool toggled = true, menu = false;
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object)
+        {
+            if (p.TryGetProperty("toggled", out var t)) toggled = t.ValueKind == JsonValueKind.True;
+            if (p.TryGetProperty("menu", out var m)) menu = m.ValueKind == JsonValueKind.True;
+        }
+        var st = ctx.Runtime.GetResource<NameplateState>();
+        st.IsToggled = toggled;
+        st.DebugForceMenu = menu;
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["toggled"] = toggled, ["menu"] = menu } };
     }
 
     // Test-only: open a bulletin board (0x71 type 0 + a few type 1 summaries)

@@ -17,5 +17,6 @@ internal readonly struct GumpPlugin : IPlugin
         app.AddPlugin<TextEntryDialogPlugin>();
         app.AddPlugin<ColorPickerPlugin>();
         app.AddPlugin<OptionsGumpPlugin>();
+        app.AddPlugin<NameplatePlugin>();
     }
 }
