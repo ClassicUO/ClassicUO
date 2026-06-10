@@ -648,9 +648,9 @@ internal static class InputHandlers
     }
 
     // Queue typed text into AgentServerState. A per-frame system in
-    // AgentServerPlugin drains it and emits CharInputEvent via the
+    // AgentServerPlugin drains it and emits CharInput via the
     // engine's EventWriter — same channel the real keyboard path uses
-    // through TextInputEXT.TextInput → CharInputEvent. SDL_PushEvent
+    // through TextInputEXT.TextInput → CharInput. SDL_PushEvent
     // would be the more direct route but is brittle on the SDL3 path
     // where bindings forward to a native dll with a different event
     // struct layout.

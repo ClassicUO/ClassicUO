@@ -18,6 +18,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using TinyEcs;
 using TinyEcs.Bevy;
+using TinyEcs.Bevy.Input;
 using TinyEcs.Bevy.UI;
 using TinyEcs.Bevy.UI.Widgets;
 using ClayColor = Clay.Color;
@@ -546,9 +547,9 @@ internal readonly struct SkillsGumpPlugin : IPlugin
 
     // Drain typing into the focused group-name field. Enter/escape commits
     // (clears focus + rebuilds to resize the dotted line); backspace deletes.
-    // ChatPlugin yields its CharInputEvent reader while a name field is focused.
+    // ChatPlugin yields its CharInput reader while a name field is focused.
     private static void NameEditType(
-        EventReader<CharInputEvent> reader,
+        EventReader<CharInput> reader,
         Res<KeyboardContext> keyboard,
         ResMut<FocusedInput> focused,
         Res<PlayerSkills> skills,

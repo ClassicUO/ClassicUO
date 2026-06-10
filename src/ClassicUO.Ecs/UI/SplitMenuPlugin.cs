@@ -15,6 +15,7 @@ using ClassicUO.Network;
 using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
+using TinyEcs.Bevy.Input;
 using TinyEcs.Bevy.UI;
 using TinyEcs.Bevy.UI.Widgets;
 
@@ -316,7 +317,7 @@ internal readonly struct SplitMenuPlugin : IPlugin
     // reader. Non-digits are ignored (legacy NumbersOnly); the clamp lives in
     // SyncSliderText.
     private static void TypeIntoSplit(
-        EventReader<CharInputEvent> reader,
+        EventReader<CharInput> reader,
         Query<Data<SplitMenuWindow>> winQ,
         Query<Data<Text>> textQ)
     {

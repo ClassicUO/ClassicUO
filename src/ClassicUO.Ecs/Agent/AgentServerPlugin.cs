@@ -28,6 +28,7 @@ using ClassicUO.Network;
 using Microsoft.Xna.Framework.Graphics;
 using TinyEcs;
 using TinyEcs.Bevy;
+using TinyEcs.Bevy.Input;
 using TinyEcs.Bevy.UI;
 
 namespace ClassicUO.Agent;
@@ -109,10 +110,10 @@ internal readonly struct AgentServerPlugin : IPlugin
             .SingleThreaded()
             .Build();
 
-        // Drain queued synthetic-keyboard text into CharInputEvent so
+        // Drain queued synthetic-keyboard text into CharInput so
         // gameplay subscribers (chat, login-screen text input) see the
         // chars on the same channel real keyboard input uses.
-        Action<Res<AgentServerState>, EventWriter<CharInputEvent>> drainTypedFn = DrainTypedCharsSystem;
+        Action<Res<AgentServerState>, EventWriter<CharInput>> drainTypedFn = DrainTypedCharsSystem;
         app.AddSystem(drainTypedFn)
             .InStage(Stage.First)
             .SingleThreaded()
@@ -184,13 +185,13 @@ internal readonly struct AgentServerPlugin : IPlugin
 
     private static void DrainTypedCharsSystem(
         Res<AgentServerState> stateRes,
-        EventWriter<CharInputEvent> writer)
+        EventWriter<CharInput> writer)
     {
         var state = stateRes.Value!;
         while (state.PendingTypedChars.Count > 0)
         {
             var ch = state.PendingTypedChars.Dequeue();
-            writer.Send(new CharInputEvent { Value = ch });
+            writer.Send(new CharInput { Value = ch });
         }
     }
 

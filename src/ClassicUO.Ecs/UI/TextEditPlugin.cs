@@ -21,6 +21,7 @@ using Microsoft.Xna.Framework.Input;
 using StbTextEdit;
 using TinyEcs;
 using TinyEcs.Bevy;
+using TinyEcs.Bevy.Input;
 using TinyEcs.Bevy.UI;
 
 namespace ClassicUO.Ecs;
@@ -214,7 +215,7 @@ internal readonly struct TextEditPlugin : IPlugin
         Action<Res<MouseContext>, ResMut<ActiveTextEdit>,
             Query<Data<ComputedNode>>, Query<Data<TextFieldGeom>>> mouseFn = RouteMouse;
         Action<Res<KeyboardContext>, ResMut<ActiveTextEdit>> keysFn = RouteKeys;
-        Action<EventReader<CharInputEvent>, ResMut<ActiveTextEdit>> charsFn = RouteChars;
+        Action<EventReader<CharInput>, ResMut<ActiveTextEdit>> charsFn = RouteChars;
         Action<ResMut<ActiveTextEdit>,
             Query<Data<Text>, Filter<With<EditableText>, Without<MaskedText>, Without<MultilineText>>>,
             Query<Data<MaskedText>, Filter<With<EditableText>>>,
@@ -398,7 +399,7 @@ internal readonly struct TextEditPlugin : IPlugin
         // '\b' TextInput char); handling Keys.Back here too would double-delete.
     }
 
-    private static void RouteChars(EventReader<CharInputEvent> reader, ResMut<ActiveTextEdit> edit)
+    private static void RouteChars(EventReader<CharInput> reader, ResMut<ActiveTextEdit> edit)
     {
         var a = edit.Value;
         if (a.Entity == 0) return;
