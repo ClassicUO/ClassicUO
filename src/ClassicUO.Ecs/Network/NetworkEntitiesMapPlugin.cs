@@ -35,9 +35,9 @@ internal readonly struct NetworkEntitiesMapPlugin : IPlugin
                 {
                     var id = trigger.Component[layer];
 
-                    if (query.Contains(id))
+                    if (query.TryGet(id, out var serialRow))
                     {
-                        (_, var serial) = query.Get(id);
+                        (_, var serial) = serialRow;
                         _ = networkEntities.Value.Remove(serial.Ref.Value);
                     }
 

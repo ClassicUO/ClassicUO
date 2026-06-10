@@ -72,9 +72,9 @@ internal readonly struct PartyGumpPlugin : IPlugin
         foreach (var (ent, win) in windowsQ)
         {
             ulong rootId = ent.Ref;
-            if (childrenQ.Contains(rootId))
+            if (childrenQ.TryGet(rootId, out var childrenRow))
             {
-                var (_, kids) = childrenQ.Get(rootId);
+                var (_, kids) = childrenRow;
                 foreach (var cid in kids.Ref)
                     commands.Entity(cid).Despawn();
             }
@@ -229,9 +229,9 @@ internal readonly struct PartyGumpPlugin : IPlugin
                 bool newLoot = !w.Ref.CanLoot;
                 w.Ref.CanLoot = newLoot;
                 ulong rid = e.Ref;
-                if (kidsQ.Contains(rid))
+                if (kidsQ.TryGet(rid, out var kidsRow))
                 {
-                    var (_, kids) = kidsQ.Get(rid);
+                    var (_, kids) = kidsRow;
                     foreach (var c in kids.Ref)
                         cmd.Entity(c).Despawn();
                 }
@@ -302,9 +302,9 @@ internal readonly struct PartyGumpPlugin : IPlugin
     {
         if (serial == 0)
             return string.Empty;
-        if (entities.TryGet(serial, out var e) && nameQ.Contains(e))
+        if (entities.TryGet(serial, out var e) && nameQ.TryGet(e, out var nameRow))
         {
-            var (_, nameC) = nameQ.Get(e);
+            var (_, nameC) = nameRow;
             if (!string.IsNullOrEmpty(nameC.Ref.Value))
                 return nameC.Ref.Value;
         }
@@ -347,9 +347,9 @@ internal readonly struct PartyGumpPlugin : IPlugin
         foreach (var (ent, _) in windowsQ)
         {
             ulong root = ent.Ref;
-            if (childrenQ.Contains(root))
+            if (childrenQ.TryGet(root, out var rootKidsRow))
             {
-                var (_, kids) = childrenQ.Get(root);
+                var (_, kids) = rootKidsRow;
                 foreach (var cid in kids.Ref)
                     commands.Entity(cid).Despawn();
             }

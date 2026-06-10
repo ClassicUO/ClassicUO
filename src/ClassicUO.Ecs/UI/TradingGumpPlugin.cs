@@ -327,8 +327,8 @@ internal readonly struct TradingGumpPlugin : IPlugin
                     Query<Data<UiCustom>> customQ,
                     Res<GumpBuilder> b) =>
         {
-            if (!map.Value.TryGet(serial, out var en) || !windowQ.Contains(en.UiEntity)) return;
-            var (_, win) = windowQ.Get(en.UiEntity);
+            if (!map.Value.TryGet(serial, out var en) || !windowQ.TryGet(en.UiEntity, out var winRow)) return;
+            var (_, win) = winRow;
             bool next = !win.Ref.ImAccepting;
             net.Value.Send_TradeResponse(en.Id1, 2, next);
             // Optimistic local flip (legacy flips ImAccepting before sending);
@@ -354,8 +354,8 @@ internal readonly struct TradingGumpPlugin : IPlugin
         Query<Data<UiCustom>> customQ,
         bool im, bool he)
     {
-        if (!windowQ.Contains(entry.UiEntity)) return;
-        var (_, win) = windowQ.Get(entry.UiEntity);
+        if (!windowQ.TryGet(entry.UiEntity, out var winRow)) return;
+        var (_, win) = winRow;
         ApplyAcceptStateInline(commands, entry, win.Ref.IsNew, customQ, im, he, windowQ);
     }
 
@@ -367,21 +367,21 @@ internal readonly struct TradingGumpPlugin : IPlugin
         bool im, bool he,
         Query<Data<TradeWindow>> windowQ)
     {
-        if (windowQ.Contains(entry.UiEntity))
+        if (windowQ.TryGet(entry.UiEntity, out var winRow))
         {
-            var (_, win) = windowQ.Get(entry.UiEntity);
+            var (_, win) = winRow;
             win.Ref.ImAccepting = im;
             win.Ref.HeIsAccepting = he;
         }
 
-        if (entry.MyAccept != 0 && customQ.Contains(entry.MyAccept))
+        if (entry.MyAccept != 0 && customQ.TryGet(entry.MyAccept, out var myRow))
         {
-            var (_, c) = customQ.Get(entry.MyAccept);
+            var (_, c) = myRow;
             c.Ref.Render().AssetId = im ? AcceptOn : AcceptOff;
         }
-        if (entry.HisAccept != 0 && customQ.Contains(entry.HisAccept))
+        if (entry.HisAccept != 0 && customQ.TryGet(entry.HisAccept, out var hisRow))
         {
-            var (_, c) = customQ.Get(entry.HisAccept);
+            var (_, c) = hisRow;
             c.Ref.Render().AssetId = he ? AcceptOn : AcceptOff;
         }
     }
@@ -565,9 +565,9 @@ internal readonly struct TradingGumpPlugin : IPlugin
 
     private static void DespawnSubtree(Commands commands, ulong entity, Query<Data<TinyEcs.Children>> childrenQ)
     {
-        if (childrenQ.Contains(entity))
+        if (childrenQ.TryGet(entity, out var kidsRow))
         {
-            var (_, kids) = childrenQ.Get(entity);
+            var (_, kids) = kidsRow;
             foreach (var cid in kids.Ref)
                 DespawnSubtree(commands, cid, childrenQ);
         }

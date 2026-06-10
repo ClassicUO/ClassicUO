@@ -268,17 +268,17 @@ internal readonly struct TextEditPlugin : IPlugin
         float glyphLogicalX, glyphLogicalY;
         if (a.Multiline)
         {
-            if (!computedQ.Contains(a.Entity)) { a.PendingClickEntity = 0; return; }
-            var (_, glyphCn) = computedQ.Get(a.Entity);
+            if (!computedQ.TryGet(a.Entity, out var glyphRow)) { a.PendingClickEntity = 0; return; }
+            var (_, glyphCn) = glyphRow;
             glyphLogicalX = glyphCn.Ref.Position.X;
             glyphLogicalY = glyphCn.Ref.Position.Y;
         }
         else
         {
-            if (!geomQ.Contains(a.Entity)) { a.PendingClickEntity = 0; return; }
-            var (_, geom) = geomQ.Get(a.Entity);
-            if (!computedQ.Contains(geom.Ref.Frame)) { a.PendingClickEntity = 0; return; }
-            var (_, frameCn) = computedQ.Get(geom.Ref.Frame);
+            if (!geomQ.TryGet(a.Entity, out var geomRow)) { a.PendingClickEntity = 0; return; }
+            var (_, geom) = geomRow;
+            if (!computedQ.TryGet(geom.Ref.Frame, out var frameRow)) { a.PendingClickEntity = 0; return; }
+            var (_, frameCn) = frameRow;
             glyphLogicalX = frameCn.Ref.Position.X + geom.Ref.OffsetX;
             glyphLogicalY = 0;
         }
@@ -351,7 +351,7 @@ internal readonly struct TextEditPlugin : IPlugin
             a.HtmlStartColor = htmlStartColor;
             a.HtmlBg = htmlBg;
             ushort fid = UoFontRuntime.DefaultFont;
-            if (fontQ.Contains(e)) { var (_, f) = fontQ.Get(e); fid = f.Ref.FontId; }
+            if (fontQ.TryGet(e, out var fontRow)) { var (_, f) = fontRow; fid = f.Ref.FontId; }
             a.FontId = fid;
             a.Buffer.Clear();
             a.Buffer.Append(current);
@@ -437,25 +437,25 @@ internal readonly struct TextEditPlugin : IPlugin
         var value = a.Buffer.ToString();
         if (a.Multiline)
         {
-            if (multiQ.Contains(a.Entity))
+            if (multiQ.TryGet(a.Entity, out var multiRow))
             {
-                var (_, c) = multiQ.Get(a.Entity);
+                var (_, c) = multiRow;
                 if (!string.Equals(c.Ref.Render().Text, value, StringComparison.Ordinal))
                     c.Ref.Render().Text = value;
             }
         }
         else if (a.Masked)
         {
-            if (maskedQ.Contains(a.Entity))
+            if (maskedQ.TryGet(a.Entity, out var maskedRow))
             {
-                var (_, mt) = maskedQ.Get(a.Entity);
+                var (_, mt) = maskedRow;
                 if (!string.Equals(mt.Ref.Value, value, StringComparison.Ordinal))
                     mt.Ref.Value = value;
             }
         }
-        else if (textQ.Contains(a.Entity))
+        else if (textQ.TryGet(a.Entity, out var textRow))
         {
-            var (_, t) = textQ.Get(a.Entity);
+            var (_, t) = textRow;
             if (!string.Equals(t.Ref.Value, value, StringComparison.Ordinal))
                 t.Ref.Value = value;
         }

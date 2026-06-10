@@ -675,8 +675,8 @@ internal readonly struct NameplatePlugin : IPlugin
         for (int i = 0; i < 8 && cur != 0; i++)
         {
             if (platesQ.Contains(cur)) return cur;
-            if (!parents.Contains(cur)) return 0;
-            var (_, p) = parents.Get(cur);
+            if (!parents.TryGet(cur, out var parentRow)) return 0;
+            var (_, p) = parentRow;
             cur = (ulong)p.Ref.Id;
         }
         return 0;

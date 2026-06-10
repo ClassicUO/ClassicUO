@@ -281,9 +281,9 @@ internal readonly struct SplitMenuPlugin : IPlugin
     {
         foreach (var (_, win) in winQ)
         {
-            if (!sliderQ.Contains(win.Ref.Slider) || !textQ.Contains(win.Ref.Text)) continue;
-            var (_, slider) = sliderQ.Get(win.Ref.Slider);
-            var (_, text) = textQ.Get(win.Ref.Text);
+            if (!sliderQ.TryGet(win.Ref.Slider, out var sliderRow) || !textQ.TryGet(win.Ref.Text, out var textRow)) continue;
+            var (_, slider) = sliderRow;
+            var (_, text) = textRow;
 
             int sv = Math.Clamp((int)MathF.Round(slider.Ref.Value), 1, win.Ref.MaxAmount);
             string tx = text.Ref.Value ?? string.Empty;
@@ -323,9 +323,9 @@ internal readonly struct SplitMenuPlugin : IPlugin
     {
         ulong textEnt = 0;
         foreach (var (_, w) in winQ) { textEnt = w.Ref.Text; break; }
-        if (textEnt == 0 || !textQ.Contains(textEnt)) return;
+        if (textEnt == 0 || !textQ.TryGet(textEnt, out var textRow)) return;
 
-        var (_, text) = textQ.Get(textEnt);
+        var (_, text) = textRow;
         foreach (var ev in reader.Read())
         {
             char ch = ev.Value;
@@ -391,13 +391,13 @@ internal readonly struct SplitMenuPlugin : IPlugin
         Query<Data<Node>> nodeQ,
         Query<Data<TinyEcs.Children>> childrenQ)
     {
-        if (!winQ.Contains(rootId)) return;
-        var (_, w) = winQ.Get(rootId);
+        if (!winQ.TryGet(rootId, out var winRow)) return;
+        var (_, w) = winRow;
 
         int amount = w.Ref.MaxAmount;
-        if (sliderQ.Contains(w.Ref.Slider))
+        if (sliderQ.TryGet(w.Ref.Slider, out var sliderRow))
         {
-            var (_, s) = sliderQ.Get(w.Ref.Slider);
+            var (_, s) = sliderRow;
             amount = (int)MathF.Round(s.Ref.Value);
         }
         amount = Math.Clamp(amount, 1, w.Ref.MaxAmount);
@@ -421,9 +421,9 @@ internal readonly struct SplitMenuPlugin : IPlugin
         grabbed.OriginalGridIndex = w.Ref.OriginalGridIndex;
         grabbed.OriginalFromSlot = w.Ref.OriginalFromSlot;
 
-        if (w.Ref.SourceUiEntity != 0 && nodeQ.Contains(w.Ref.SourceUiEntity))
+        if (w.Ref.SourceUiEntity != 0 && nodeQ.TryGet(w.Ref.SourceUiEntity, out var nodeRow))
         {
-            var (_, node) = nodeQ.Get(w.Ref.SourceUiEntity);
+            var (_, node) = nodeRow;
             node.Ref.Display = Display.None;
         }
 
@@ -440,9 +440,9 @@ internal readonly struct SplitMenuPlugin : IPlugin
 
     private static void DespawnSubtree(Commands commands, ulong e, Query<Data<TinyEcs.Children>> childrenQ)
     {
-        if (childrenQ.Contains(e))
+        if (childrenQ.TryGet(e, out var kidsRow))
         {
-            var (_, kids) = childrenQ.Get(e);
+            var (_, kids) = kidsRow;
             foreach (var cid in kids.Ref) DespawnSubtree(commands, cid, childrenQ);
         }
         commands.Entity(e).Despawn();

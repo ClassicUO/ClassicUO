@@ -188,24 +188,24 @@ internal readonly struct TooltipPlugin : IPlugin
         var hit = UiPick.Topmost(pos, assets.Value, rendered);
         if (hit.Found)
         {
-            if (contQ.Contains(hit.Entity)) { var (_, c) = contQ.Get(hit.Entity); serial = c.Ref.Serial; }
+            if (contQ.TryGet(hit.Entity, out var contRow)) { var (_, c) = contRow; serial = c.Ref.Serial; }
             // Slot bg / frame / icon all carry the equipped item's serial, so the
             // tooltip fires anywhere over the slot square, not only the icon art.
-            else if (slotQ.Contains(hit.Entity)) { var (_, sl) = slotQ.Get(hit.Entity); serial = sl.Ref.ItemSerial; }
+            else if (slotQ.TryGet(hit.Entity, out var slotRow)) { var (_, sl) = slotRow; serial = sl.Ref.ItemSerial; }
             // Non-item elements (e.g. a dragged spell cast button) carry a synthetic
             // tooltip serial on their render payload, pre-seeded in the OPL store.
-            else if (rendered.Contains(hit.Entity))
+            else if (rendered.TryGet(hit.Entity, out var renderedRow))
             {
-                var (_, _, _, uc, _, _) = rendered.Get(hit.Entity);
+                var (_, _, _, uc, _, _) = renderedRow;
                 if (uc.IsValid() && uc.Ref.Render() is { TooltipSerial: not 0 } r)
                     serial = r.TooltipSerial;
             }
         }
         // entity 0 is the null/sentinel id — Contains(0) can resolve to a stale
         // archetype entry, so the tooltip would show for "nothing" hovered.
-        if (serial == 0 && selected.Value.Entity != 0 && worldQ.Contains(selected.Value.Entity))
+        if (serial == 0 && selected.Value.Entity != 0 && worldQ.TryGet(selected.Value.Entity, out var worldRow))
         {
-            var (_, s, n) = worldQ.Get(selected.Value.Entity);
+            var (_, s, n) = worldRow;
             serial = s.Ref.Value;
             // Mobile names are coloured by notoriety (legacy ReadProperties).
             if (n.IsValid())
@@ -393,9 +393,9 @@ internal readonly struct TooltipPlugin : IPlugin
 
     private static void DespawnSubtree(Commands commands, ulong e, Query<Data<TinyEcs.Children>> childrenQ)
     {
-        if (childrenQ.Contains(e))
+        if (childrenQ.TryGet(e, out var kidsRow))
         {
-            var (_, kids) = childrenQ.Get(e);
+            var (_, kids) = kidsRow;
             foreach (var cid in kids.Ref)
                 DespawnSubtree(commands, cid, childrenQ);
         }

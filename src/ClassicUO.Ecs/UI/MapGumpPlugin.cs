@@ -216,8 +216,8 @@ internal readonly struct MapGumpPlugin : IPlugin
         clear.Observe((On<UiClick> _, Res<NetClient> net, Commands cmd, Query<Data<MapWindow>> wq, Query<Data<TinyEcs.Children>> kidsQ) =>
         {
             net.Value.Send_MapMessage(capSerial, 5, 0, unchecked((ushort)-24), unchecked((ushort)-31));
-            if (!wq.Contains(capRoot)) return;
-            var (_, w) = wq.Get(capRoot);
+            if (!wq.TryGet(capRoot, out var winRow)) return;
+            var (_, w) = winRow;
             ClearPins(cmd, ref w.Ref, kidsQ);
         });
 
@@ -247,8 +247,8 @@ internal readonly struct MapGumpPlugin : IPlugin
 
     private static void TogglePlot(ulong rootId, uint serial, NetClient net, Query<Data<MapWindow>> wq, Query<Data<Node>> nq)
     {
-        if (!wq.Contains(rootId)) return;
-        var (_, w) = wq.Get(rootId);
+        if (!wq.TryGet(rootId, out var winRow)) return;
+        var (_, w) = winRow;
         net.Send_MapMessage(serial, 6, (byte)w.Ref.PlotState, unchecked((ushort)-24), unchecked((ushort)-31));
         // Legacy flips locally without waiting for the EditResponse echo; some
         // servers don't echo, so mirror that.
@@ -265,8 +265,8 @@ internal readonly struct MapGumpPlugin : IPlugin
 
     private static void SetDisplay(Query<Data<Node>> q, ulong e, bool visible)
     {
-        if (e == 0 || !q.Contains(e)) return;
-        var (_, n) = q.Get(e);
+        if (e == 0 || !q.TryGet(e, out var nodeRow)) return;
+        var (_, n) = nodeRow;
         n.Ref.Display = visible ? Display.Flex : Display.None;
     }
 
@@ -324,8 +324,8 @@ internal readonly struct MapGumpPlugin : IPlugin
             var pos = mouse.Value.Position;
             foreach (var (ent, win) in windowsQ)
             {
-                if (win.Ref.PlotState != 1 || !bbQ.Contains(win.Ref.MapNode)) continue;
-                var (_, bb) = bbQ.Get(win.Ref.MapNode);
+                if (win.Ref.PlotState != 1 || !bbQ.TryGet(win.Ref.MapNode, out var bbRow)) continue;
+                var (_, bb) = bbRow;
                 if (pos.X < bb.Ref.Position.X || pos.Y < bb.Ref.Position.Y) continue;
                 if (pos.X >= bb.Ref.Position.X + bb.Ref.Size.X || pos.Y >= bb.Ref.Position.Y + bb.Ref.Size.Y) continue;
                 press.Value = new PlotPress { Active = true, Window = ent.Ref, Pos = pos };
@@ -342,10 +342,10 @@ internal readonly struct MapGumpPlugin : IPlugin
         var rel = mouse.Value.Position;
         if (Math.Abs(rel.X - latched.Pos.X) >= 5 || Math.Abs(rel.Y - latched.Pos.Y) >= 5)
             return; // it was a drag
-        if (!windowsQ.Contains(latched.Window) || !bbQ.Contains(latched.Window)) return;
-        var (_, w) = windowsQ.Get(latched.Window);
-        if (w.Ref.PlotState != 1 || !bbQ.Contains(w.Ref.MapNode)) return;
-        var (_, mapBb) = bbQ.Get(w.Ref.MapNode);
+        if (!windowsQ.TryGet(latched.Window, out var winRow) || !bbQ.Contains(latched.Window)) return;
+        var (_, w) = winRow;
+        if (w.Ref.PlotState != 1 || !bbQ.TryGet(w.Ref.MapNode, out var mapBbRow)) return;
+        var (_, mapBb) = mapBbRow;
 
         ushort x = (ushort)(rel.X - mapBb.Ref.Position.X + 5); // legacy e.X + 5
         ushort y = (ushort)(rel.Y - mapBb.Ref.Position.Y);
@@ -384,9 +384,9 @@ internal readonly struct MapGumpPlugin : IPlugin
 
     private static void DespawnSubtree(Commands commands, ulong e, Query<Data<TinyEcs.Children>> childrenQ)
     {
-        if (childrenQ.Contains(e))
+        if (childrenQ.TryGet(e, out var kidsRow))
         {
-            var (_, kids) = childrenQ.Get(e);
+            var (_, kids) = kidsRow;
             foreach (var cid in kids.Ref)
                 DespawnSubtree(commands, cid, childrenQ);
         }

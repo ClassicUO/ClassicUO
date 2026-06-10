@@ -121,10 +121,10 @@ internal readonly struct SkillsGumpPlugin : IPlugin
         app.AddObserver<On<CheckboxChanged>, Query<Data<SkillsCheck>>, Query<Data<SkillsWindow>>>(
             (trig, checks, windows) =>
             {
-                if (!checks.Contains(trig.EntityId)) return;
-                var (_, c) = checks.Get(trig.EntityId);
-                if (!windows.Contains(c.Ref.Window)) return;
-                var (_, win) = windows.Get(c.Ref.Window);
+                if (!checks.TryGet(trig.EntityId, out var checkRow)) return;
+                var (_, c) = checkRow;
+                if (!windows.TryGet(c.Ref.Window, out var windowRow)) return;
+                var (_, win) = windowRow;
                 if (c.Ref.Cap) { win.Ref.ShowCaps = trig.Event.Checked; if (trig.Event.Checked) win.Ref.ShowReal = false; }
                 else { win.Ref.ShowReal = trig.Event.Checked; if (trig.Event.Checked) win.Ref.ShowCaps = false; }
                 win.Ref.Dirty = true;
@@ -195,8 +195,8 @@ internal readonly struct SkillsGumpPlugin : IPlugin
             .Insert(Interaction.None);
         minimize.Observe((On<UiClick> _, Query<Data<SkillsWindow>> wq) =>
         {
-            if (!wq.Contains(rootId)) return;
-            var (_, w) = wq.Get(rootId);
+            if (!wq.TryGet(rootId, out var winRow)) return;
+            var (_, w) = winRow;
             w.Ref.Minimized = !w.Ref.Minimized;
         });
         commands.AddChild(rootId, minimize.Id);
@@ -272,7 +272,7 @@ internal readonly struct SkillsGumpPlugin : IPlugin
         newGroup.Observe((On<UiClick> _, Res<PlayerSkills> sk, Query<Data<SkillsWindow>> wq) =>
         {
             sk.Value.Groups.Add(new SkillsGroup("New Group"));
-            if (wq.Contains(rootId)) { var (_, w) = wq.Get(rootId); w.Ref.Dirty = true; }
+            if (wq.TryGet(rootId, out var winRow)) { var (_, w) = winRow; w.Ref.Dirty = true; }
         });
         commands.AddChild(rootId, newGroup.Id);
 
@@ -394,9 +394,9 @@ internal readonly struct SkillsGumpPlugin : IPlugin
 
             ulong rootId = rootEnt.Ref;
             var list = win.Ref.ListEntity;
-            if (childrenQ.Contains(list))
+            if (childrenQ.TryGet(list, out var kidsRow))
             {
-                var (_, kids) = childrenQ.Get(list);
+                var (_, kids) = kidsRow;
                 foreach (var cid in kids.Ref)
                     commands.Entity(cid).Despawn();
             }
@@ -439,7 +439,7 @@ internal readonly struct SkillsGumpPlugin : IPlugin
                 {
                     if (captured < sk.Value.Groups.Count)
                         sk.Value.Groups[captured].IsMaximized = !sk.Value.Groups[captured].IsMaximized;
-                    if (wq.Contains(rootId)) { var (_, w) = wq.Get(rootId); w.Ref.Dirty = true; }
+                    if (wq.TryGet(rootId, out var winRow)) { var (_, w) = winRow; w.Ref.Dirty = true; }
                 });
                 commands.AddChild(header.Id, arrow.Id);
 
@@ -535,7 +535,7 @@ internal readonly struct SkillsGumpPlugin : IPlugin
                         ns = ns < 2 ? (byte)(ns + 1) : (byte)0;
                         sv.Lock = (Lock)ns;
                         net.Value.Send_SkillStatusChangeRequest((ushort)lsid, ns);
-                        if (wq.Contains(rootId)) { var (_, w) = wq.Get(rootId); w.Ref.Dirty = true; }
+                        if (wq.TryGet(rootId, out var winRow)) { var (_, w) = winRow; w.Ref.Dirty = true; }
                     });
                     commands.AddChild(srow.Id, lockBtn.Id);
                 }
@@ -557,8 +557,8 @@ internal readonly struct SkillsGumpPlugin : IPlugin
         Query<Data<SkillsWindow>> windowsQ)
     {
         var ent = focused.Value.Entity;
-        if (ent == 0 || !editsQ.Contains(ent)) return;
-        var (_, text, edit) = editsQ.Get(ent);
+        if (ent == 0 || !editsQ.TryGet(ent, out var editRow)) return;
+        var (_, text, edit) = editRow;
         int gi = edit.Ref.GroupIndex;
         var groups = skills.Value.Groups;
         if (gi >= groups.Count) return;
@@ -572,7 +572,7 @@ internal readonly struct SkillsGumpPlugin : IPlugin
             foreach (var sid in group.Skills) groups[0].Add(sid);
             groups.RemoveAt(gi);
             focused.Value.Entity = 0;
-            if (windowsQ.Contains(edit.Ref.Window)) { var (_, w) = windowsQ.Get(edit.Ref.Window); w.Ref.Dirty = true; }
+            if (windowsQ.TryGet(edit.Ref.Window, out var winRow)) { var (_, w) = winRow; w.Ref.Dirty = true; }
             return;
         }
 
@@ -590,7 +590,7 @@ internal readonly struct SkillsGumpPlugin : IPlugin
         if (commit)
         {
             focused.Value.Entity = 0;
-            if (windowsQ.Contains(edit.Ref.Window)) { var (_, w) = windowsQ.Get(edit.Ref.Window); w.Ref.Dirty = true; }
+            if (windowsQ.TryGet(edit.Ref.Window, out var winRow)) { var (_, w) = winRow; w.Ref.Dirty = true; }
         }
     }
 
@@ -657,9 +657,9 @@ internal readonly struct SkillsGumpPlugin : IPlugin
                 {
                     groups[src].Skills.Remove((byte)anchor.Value.SkillId);
                     groups[tgt].Add((byte)anchor.Value.SkillId);
-                    if (windowsQ.Contains(anchor.Value.Window))
+                    if (windowsQ.TryGet(anchor.Value.Window, out var winRow))
                     {
-                        var (_, w) = windowsQ.Get(anchor.Value.Window);
+                        var (_, w) = winRow;
                         w.Ref.Dirty = true;
                     }
                 }
@@ -706,9 +706,9 @@ internal readonly struct SkillsGumpPlugin : IPlugin
         if (!anchor.Value.Active) return;
 
         // Preview follows the cursor.
-        if (anchor.Value.Preview != 0 && nodeQ.Contains(anchor.Value.Preview))
+        if (anchor.Value.Preview != 0 && nodeQ.TryGet(anchor.Value.Preview, out var previewRow))
         {
-            var (_, pn) = nodeQ.Get(anchor.Value.Preview);
+            var (_, pn) = previewRow;
             pn.Ref.Left = Val.Px(mouse.Value.Position.X + 12);
             pn.Ref.Top = Val.Px(mouse.Value.Position.Y + 2);
         }
@@ -737,8 +737,8 @@ internal readonly struct SkillsGumpPlugin : IPlugin
     {
         foreach (var (_, win) in windowsQ)
         {
-            if (!textQ.Contains(win.Ref.SumLabelEntity)) continue;
-            var (_, t) = textQ.Get(win.Ref.SumLabelEntity);
+            if (!textQ.TryGet(win.Ref.SumLabelEntity, out var sumRow)) continue;
+            var (_, t) = sumRow;
             t.Ref.Value = $"{skills.Value.SumValues(win.Ref.ShowReal):F1}";
         }
     }
@@ -770,8 +770,8 @@ internal readonly struct SkillsGumpPlugin : IPlugin
             {
                 if (pos.X < bb.Ref.Position.X || pos.Y < bb.Ref.Position.Y) continue;
                 if (pos.X >= bb.Ref.Position.X + bb.Ref.Size.X || pos.Y >= bb.Ref.Position.Y + bb.Ref.Size.Y) continue;
-                if (!windowsQ.Contains(handle.Ref.Window)) continue;
-                var (_, w) = windowsQ.Get(handle.Ref.Window);
+                if (!windowsQ.TryGet(handle.Ref.Window, out var handleWinRow)) continue;
+                var (_, w) = handleWinRow;
                 gate.Value.Mode = ActiveDrag.UIWindow;
                 anchor.Value.Claimed = true;
                 anchor.Value.Active = true;
@@ -782,8 +782,8 @@ internal readonly struct SkillsGumpPlugin : IPlugin
             }
         }
 
-        if (!anchor.Value.Active || !windowsQ.Contains(anchor.Value.Window)) return;
-        var (_, win) = windowsQ.Get(anchor.Value.Window);
+        if (!anchor.Value.Active || !windowsQ.TryGet(anchor.Value.Window, out var anchorWinRow)) return;
+        var (_, win) = anchorWinRow;
         int nh = (int)(anchor.Value.StartH + (mouse.Value.Position.Y - anchor.Value.StartY));
         win.Ref.SpecialHeight = Math.Clamp(nh, MinHeight, MaxHeight);
     }
@@ -827,7 +827,7 @@ internal readonly struct SkillsGumpPlugin : IPlugin
             {
                 if (r.Ref.Window != win || !Contains(bb.Ref, pos)) continue;
                 SkillsGroupDefaults.Build(skills.Value.Groups, assets.Value.Skills.SkillsCount);
-                if (windowsQ.Contains(win)) { var (_, w) = windowsQ.Get(win); w.Ref.Dirty = true; }
+                if (windowsQ.TryGet(win, out var winRow)) { var (_, w) = winRow; w.Ref.Dirty = true; }
                 break;
             }
         }
@@ -849,18 +849,18 @@ internal readonly struct SkillsGumpPlugin : IPlugin
         foreach (var (_, win) in windowsQ)
         {
             if (win.Ref.Minimized) continue;
-            if (!nodeQ.Contains(win.Ref.FlagEntity) || !nodeQ.Contains(win.Ref.ListEntity)) continue;
-            var (_, listNode) = nodeQ.Get(win.Ref.ListEntity);
+            if (!nodeQ.TryGet(win.Ref.FlagEntity, out var flagRow) || !nodeQ.TryGet(win.Ref.ListEntity, out var listRow)) continue;
+            var (_, listNode) = listRow;
             float listH = listNode.Ref.Height.Value;
             float maxScroll = Math.Max(0f, win.Ref.ContentHeight - listH);
             float offset = 0f;
-            if (scrollQ.Contains(win.Ref.ListEntity))
+            if (scrollQ.TryGet(win.Ref.ListEntity, out var scrollRow))
             {
-                var (_, sp) = scrollQ.Get(win.Ref.ListEntity);
+                var (_, sp) = scrollRow;
                 offset = Math.Abs(sp.Ref.OffsetY);
             }
             float ratio = maxScroll > 0f ? Math.Clamp(offset / maxScroll, 0f, 1f) : 0f;
-            var (_, flag) = nodeQ.Get(win.Ref.FlagEntity);
+            var (_, flag) = flagRow;
             flag.Ref.Top = Val.Px(ListTop + ratio * Math.Max(0f, listH - 16f));
             flag.Ref.Display = win.Ref.Minimized ? Display.None : Display.Flex;
         }
@@ -896,16 +896,16 @@ internal readonly struct SkillsGumpPlugin : IPlugin
             int flagH = GumpH(assets.Value, FlagGump);
             foreach (var (_, win) in windowsQ)
             {
-                if (win.Ref.Minimized || !compQ.Contains(win.Ref.FlagEntity)) continue;
-                var (_, bb) = compQ.Get(win.Ref.FlagEntity);
+                if (win.Ref.Minimized || !compQ.TryGet(win.Ref.FlagEntity, out var flagBbRow)) continue;
+                var (_, bb) = flagBbRow;
                 if (!Contains(bb.Ref, pos)) continue;
 
                 float listH = 0f;
-                if (nodeQ.Contains(win.Ref.ListEntity)) { var (_, ln) = nodeQ.Get(win.Ref.ListEntity); listH = ln.Ref.Height.Value; }
+                if (nodeQ.TryGet(win.Ref.ListEntity, out var listNodeRow)) { var (_, ln) = listNodeRow; listH = ln.Ref.Height.Value; }
                 float maxScroll = Math.Max(0f, win.Ref.ContentHeight - listH);
                 if (maxScroll <= 0f) return;
                 float startOffset = 0f;
-                if (scrollQ.Contains(win.Ref.ListEntity)) { var (_, sp) = scrollQ.Get(win.Ref.ListEntity); startOffset = sp.Ref.OffsetY; }
+                if (scrollQ.TryGet(win.Ref.ListEntity, out var startScrollRow)) { var (_, sp) = startScrollRow; startOffset = sp.Ref.OffsetY; }
 
                 gate.Value.Mode = ActiveDrag.UIWindow;
                 anchor.Value.Claimed = true;
@@ -919,19 +919,19 @@ internal readonly struct SkillsGumpPlugin : IPlugin
             }
         }
 
-        if (!anchor.Value.Active || !scrollQ.Contains(anchor.Value.List)) return;
+        if (!anchor.Value.Active || !scrollQ.TryGet(anchor.Value.List, out var scrollRow)) return;
         float delta = mouse.Value.Position.Y - anchor.Value.StartY;
         float newOffset = Math.Clamp(
             anchor.Value.StartOffset + delta / anchor.Value.TrackPixels * anchor.Value.MaxScroll,
             0f, anchor.Value.MaxScroll);
-        var (_, scroll) = scrollQ.Get(anchor.Value.List);
+        var (_, scroll) = scrollRow;
         scroll.Ref.OffsetY = newOffset;
     }
 
-    private static void SetH(Query<Data<Node>> q, ulong e, float h) { if (q.Contains(e)) { var (_, n) = q.Get(e); n.Ref.Height = Val.Px(h); } }
-    private static void SetY(Query<Data<Node>> q, ulong e, float y) { if (q.Contains(e)) { var (_, n) = q.Get(e); n.Ref.Top = Val.Px(y); } }
-    private static void SetXY(Query<Data<Node>> q, ulong e, float x, float y) { if (q.Contains(e)) { var (_, n) = q.Get(e); n.Ref.Left = Val.Px(x); n.Ref.Top = Val.Px(y); } }
-    private static void SetDisplay(Query<Data<Node>> q, ulong e, Display d) { if (q.Contains(e)) { var (_, n) = q.Get(e); n.Ref.Display = d; } }
+    private static void SetH(Query<Data<Node>> q, ulong e, float h) { if (q.TryGet(e, out var row)) { var (_, n) = row; n.Ref.Height = Val.Px(h); } }
+    private static void SetY(Query<Data<Node>> q, ulong e, float y) { if (q.TryGet(e, out var row)) { var (_, n) = row; n.Ref.Top = Val.Px(y); } }
+    private static void SetXY(Query<Data<Node>> q, ulong e, float x, float y) { if (q.TryGet(e, out var row)) { var (_, n) = row; n.Ref.Left = Val.Px(x); n.Ref.Top = Val.Px(y); } }
+    private static void SetDisplay(Query<Data<Node>> q, ulong e, Display d) { if (q.TryGet(e, out var row)) { var (_, n) = row; n.Ref.Display = d; } }
 
     private static void Despawn(
         Commands commands,
@@ -941,9 +941,9 @@ internal readonly struct SkillsGumpPlugin : IPlugin
         foreach (var (ent, _) in windowsQ)
         {
             ulong root = ent.Ref;
-            if (childrenQ.Contains(root))
+            if (childrenQ.TryGet(root, out var kidsRow))
             {
-                var (_, kids) = childrenQ.Get(root);
+                var (_, kids) = kidsRow;
                 foreach (var cid in kids.Ref)
                     DespawnSubtree(commands, cid, childrenQ);
             }
@@ -953,9 +953,9 @@ internal readonly struct SkillsGumpPlugin : IPlugin
 
     private static void DespawnSubtree(Commands commands, ulong e, Query<Data<TinyEcs.Children>> childrenQ)
     {
-        if (childrenQ.Contains(e))
+        if (childrenQ.TryGet(e, out var kidsRow))
         {
-            var (_, kids) = childrenQ.Get(e);
+            var (_, kids) = kidsRow;
             foreach (var cid in kids.Ref)
                 DespawnSubtree(commands, cid, childrenQ);
         }

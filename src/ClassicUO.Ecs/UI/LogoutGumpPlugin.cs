@@ -154,9 +154,9 @@ internal readonly struct LogoutGumpPlugin : IPlugin
 
     private static void DespawnSubtree(Commands commands, ulong e, Query<Data<TinyEcs.Children>> childrenQ)
     {
-        if (childrenQ.Contains(e))
+        if (childrenQ.TryGet(e, out var childrenRow))
         {
-            var (_, kids) = childrenQ.Get(e);
+            var (_, kids) = childrenRow;
             foreach (var cid in kids.Ref)
                 DespawnSubtree(commands, cid, childrenQ);
         }

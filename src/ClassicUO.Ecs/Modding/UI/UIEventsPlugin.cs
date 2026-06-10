@@ -247,14 +247,14 @@ internal readonly struct UIEventsPlugin : IPlugin
         {
             var id = e.Ref;
             string value;
-            if (ed.Ref.Masked && maskedQ.Contains(id))
+            if (ed.Ref.Masked && maskedQ.TryGet(id, out var maskedRow))
             {
-                var (_, mt) = maskedQ.Get(id);
+                var (_, mt) = maskedRow;
                 value = mt.Ref.Value ?? string.Empty;
             }
-            else if (textQ.Contains(id))
+            else if (textQ.TryGet(id, out var textRow))
             {
-                var (_, txt) = textQ.Get(id);
+                var (_, txt) = textRow;
                 value = txt.Ref.Value ?? string.Empty;
             }
             else
@@ -326,9 +326,9 @@ internal readonly struct UIEventsPlugin : IPlugin
             foreach (var l in listeners.Match(id, type))
                 pending.Items.Add((l.Mod, new UIEvent(type, id, l.EventId, x, y, wheel)));
 
-            if (!parents.Contains(id))
+            if (!parents.TryGet(id, out var parentRow))
                 break;
-            (_, var parent) = parents.Get(id);
+            (_, var parent) = parentRow;
             id = parent.Ref.Id;
         }
     }
@@ -373,9 +373,9 @@ internal readonly struct UIEventsPlugin : IPlugin
         {
             if (!set.Add(id))
                 break;
-            if (!parents.Contains(id))
+            if (!parents.TryGet(id, out var parentRow))
                 break;
-            (_, var parent) = parents.Get(id);
+            (_, var parent) = parentRow;
             id = parent.Ref.Id;
         }
         return set;

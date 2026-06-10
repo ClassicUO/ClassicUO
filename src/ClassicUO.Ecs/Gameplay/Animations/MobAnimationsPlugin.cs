@@ -153,7 +153,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                 continue;
             }
 
-            if (!query.Contains(ent.Id))
+            if (!query.TryGet(ent.Id, out var mobRow))
             {
                 ent.Insert(new WorldPosition()
                 {
@@ -168,7 +168,7 @@ readonly struct MobAnimationsPlugin : IPlugin
                 continue;
             }
 
-            (var position, var direction, var steps, var animation) = query.Get(ent.Id);
+            (var position, var direction, var steps, var animation) = mobRow;
 
             if (steps.Ref.Index >= MobileSteps.COUNT - 1)
             {
@@ -438,9 +438,9 @@ readonly struct MobAnimationsPlugin : IPlugin
 
             animation.Ref.MountAction = 0xFF;
 
-            if (slots.Ref[Layer.Mount].IsValid() && qEquip.Contains(slots.Ref[Layer.Mount]))
+            if (slots.Ref[Layer.Mount].IsValid() && qEquip.TryGet(slots.Ref[Layer.Mount], out var mountRow))
             {
-                (var gfx, _) = qEquip.Get(slots.Ref[Layer.Mount]);
+                (var gfx, _) = mountRow;
                 var mountGraphic = gfx.Ref.Value;
                 (mountGraphic, _) = Mounts.FixMountGraphic(fileManager.Value.TileData, mountGraphic);
 

@@ -348,8 +348,8 @@ internal readonly struct BulletinBoardGumpPlugin : IPlugin
                     .Insert<UiNoWindowDrag>().Insert<UiContainsByBounds>();
                 postBtn.Observe((On<UiClick> _, Res<NetClient> net, Commands cmd, BulletinParams bp) =>
                 {
-                    if (!bp.ItemsQ.Contains(capRoot)) return;
-                    var (_, w) = bp.ItemsQ.Get(capRoot);
+                    if (!bp.ItemsQ.TryGet(capRoot, out var itemRow)) return;
+                    var (_, w) = itemRow;
                     net.Value.Send_BulletinBoardPostMessage(capBoard, capMsg,
                         ReadSingleLine(bp, w.Ref.SubjectGlyph), ReadMultiline(bp, w.Ref.BodyGlyph));
                     DespawnSubtree(cmd, capRoot, bp.ChildrenQ);
@@ -391,16 +391,16 @@ internal readonly struct BulletinBoardGumpPlugin : IPlugin
     // Single-line field value lives in the glyph's Text component.
     private static string ReadSingleLine(BulletinParams p, ulong glyph)
     {
-        if (glyph == 0 || !p.TextQ.Contains(glyph)) return string.Empty;
-        var (_, t) = p.TextQ.Get(glyph);
+        if (glyph == 0 || !p.TextQ.TryGet(glyph, out var textRow)) return string.Empty;
+        var (_, t) = textRow;
         return t.Ref.Value ?? string.Empty;
     }
 
     // Multiline field value lives in the WrappedText custom render.
     private static string ReadMultiline(BulletinParams p, ulong glyph)
     {
-        if (glyph == 0 || !p.CustomQ.Contains(glyph)) return string.Empty;
-        var (_, c) = p.CustomQ.Get(glyph);
+        if (glyph == 0 || !p.CustomQ.TryGet(glyph, out var customRow)) return string.Empty;
+        var (_, c) = customRow;
         return c.Ref.Render()?.Text ?? string.Empty;
     }
 
@@ -466,9 +466,9 @@ internal readonly struct BulletinBoardGumpPlugin : IPlugin
 
     private static void DespawnSubtree(Commands commands, ulong e, Query<Data<TinyEcs.Children>> childrenQ)
     {
-        if (childrenQ.Contains(e))
+        if (childrenQ.TryGet(e, out var childrenRow))
         {
-            var (_, kids) = childrenQ.Get(e);
+            var (_, kids) = childrenRow;
             foreach (var cid in kids.Ref)
                 DespawnSubtree(commands, cid, childrenQ);
         }

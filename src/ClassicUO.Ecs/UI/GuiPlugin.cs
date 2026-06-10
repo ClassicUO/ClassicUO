@@ -70,8 +70,8 @@ internal readonly struct GuiPlugin : IPlugin
                 {
                     // UiContainsByBounds roots never reach here — InteractionSystem
                     // skips the hook for them (lib-side check).
-                    if (!customQuery.Contains(entityId)) return true;
-                    var (_, customPtr) = customQuery.Get(entityId);
+                    if (!customQuery.TryGet(entityId, out var customRow)) return true;
+                    var (_, customPtr) = customRow;
                     var bb = new ComputedNode
                     {
                         Position = new System.Numerics.Vector2(box.X, box.Y),
@@ -184,7 +184,7 @@ internal readonly struct GuiPlugin : IPlugin
                 continue;
 
             ulong par = 0;
-            if (parents.Contains(ent.Ref)) { var (_, p) = parents.Get(ent.Ref); par = (ulong)p.Ref.Id; }
+            if (parents.TryGet(ent.Ref, out var parentRow)) { var (_, p) = parentRow; par = (ulong)p.Ref.Id; }
             string kind = custom.IsValid() ? (custom.Ref.Render()?.Kind.ToString() ?? "nullData") : "noCustom";
             rows.Add((bb.PaintOrder,
                 $"  ent={ent.Ref} paint={bb.PaintOrder} pos=({bb.Position.X:0},{bb.Position.Y:0}) " +
@@ -345,13 +345,13 @@ internal readonly struct GuiPlugin : IPlugin
         var cur = entity;
         for (var guard = 0; guard < 64; guard++)
         {
-            if (zQ.Contains(cur))
+            if (zQ.TryGet(cur, out var zRow))
             {
-                var (_, z) = zQ.Get(cur);
+                var (_, z) = zRow;
                 return z.Ref.Value;
             }
-            if (!parentQ.Contains(cur)) break;
-            var (_, parent) = parentQ.Get(cur);
+            if (!parentQ.TryGet(cur, out var parentRow)) break;
+            var (_, parent) = parentRow;
             cur = parent.Ref.Id;
         }
         return int.MinValue;

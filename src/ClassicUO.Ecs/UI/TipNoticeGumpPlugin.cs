@@ -266,10 +266,10 @@ internal readonly struct TipNoticeGumpPlugin : IPlugin
             {
                 if (pos.X < bb.Ref.Position.X || pos.Y < bb.Ref.Position.Y) continue;
                 if (pos.X >= bb.Ref.Position.X + bb.Ref.Size.X || pos.Y >= bb.Ref.Position.Y + bb.Ref.Size.Y) continue;
-                if (!handleQ.Contains(ent.Ref)) continue;
-                var (_, exp) = handleQ.Get(ent.Ref);
-                if (!windowsQ.Contains(exp.Ref.Window)) continue;
-                var (_, win) = windowsQ.Get(exp.Ref.Window);
+                if (!handleQ.TryGet(ent.Ref, out var expRow)) continue;
+                var (_, exp) = expRow;
+                if (!windowsQ.TryGet(exp.Ref.Window, out var winRow)) continue;
+                var (_, win) = winRow;
                 gate.Value.Mode = ActiveDrag.UIWindow;
                 anchor.Value.Claimed = true;
                 anchor.Value.Active = true;
@@ -280,23 +280,23 @@ internal readonly struct TipNoticeGumpPlugin : IPlugin
             }
         }
 
-        if (!anchor.Value.Active || !windowsQ.Contains(anchor.Value.Window)) return;
-        var (_, w) = windowsQ.Get(anchor.Value.Window);
+        if (!anchor.Value.Active || !windowsQ.TryGet(anchor.Value.Window, out var anchorWinRow)) return;
+        var (_, w) = anchorWinRow;
         float newH = anchor.Value.Origin + (mouse.Value.Position.Y - anchor.Value.MouseY0);
         w.Ref.SpecialHeight = (int)Math.Clamp(newH, MinHeight, MaxHeight);
     }
 
     private static void SetNodeHeight(Query<Data<Node>> q, ulong e, float h)
     {
-        if (e != 0 && q.Contains(e)) { var (_, n) = q.Get(e); n.Ref.Height = Val.Px(h); }
+        if (e != 0 && q.TryGet(e, out var nodeRow)) { var (_, n) = nodeRow; n.Ref.Height = Val.Px(h); }
     }
     private static void SetNodeY(Query<Data<Node>> q, ulong e, float y)
     {
-        if (e != 0 && q.Contains(e)) { var (_, n) = q.Get(e); n.Ref.Top = Val.Px(y); }
+        if (e != 0 && q.TryGet(e, out var nodeRow)) { var (_, n) = nodeRow; n.Ref.Top = Val.Px(y); }
     }
     private static void SetNodeXY(Query<Data<Node>> q, ulong e, float x, float y)
     {
-        if (e != 0 && q.Contains(e)) { var (_, n) = q.Get(e); n.Ref.Left = Val.Px(x); n.Ref.Top = Val.Px(y); }
+        if (e != 0 && q.TryGet(e, out var nodeRow)) { var (_, n) = nodeRow; n.Ref.Left = Val.Px(x); n.Ref.Top = Val.Px(y); }
     }
 
     private static void Despawn(
@@ -316,9 +316,9 @@ internal readonly struct TipNoticeGumpPlugin : IPlugin
 
     private static void DespawnSubtree(Commands commands, ulong entity, Query<Data<TinyEcs.Children>> childrenQ)
     {
-        if (childrenQ.Contains(entity))
+        if (childrenQ.TryGet(entity, out var kidsRow))
         {
-            var (_, kids) = childrenQ.Get(entity);
+            var (_, kids) = kidsRow;
             foreach (var cid in kids.Ref)
                 DespawnSubtree(commands, cid, childrenQ);
         }

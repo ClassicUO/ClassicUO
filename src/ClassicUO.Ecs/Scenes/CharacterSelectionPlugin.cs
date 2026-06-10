@@ -41,8 +41,8 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
             Res<GameContext> ctx,
             Query<Data<CharacterInfo>> charQ) =>
         {
-            if (!charQ.Contains(trig.EntityId)) return;
-            var (_, ch) = charQ.Get(trig.EntityId);
+            if (!charQ.TryGet(trig.EntityId, out var charRow)) return;
+            var (_, ch) = charRow;
             net.Value.Send_SelectCharacter(ch.Ref.Index, ch.Ref.Name, net.Value.LocalIP, ctx.Value.Protocol);
         });
     }

@@ -183,7 +183,7 @@ internal readonly struct StatusBarPlugin : IPlugin
                     if (p == 0) return;
 
                     StatLocks locks = default;
-                    if (locksQ.Contains(p)) { var (_, l) = locksQ.Get(p); locks = l.Ref; }
+                    if (locksQ.TryGet(p, out var locksRow)) { var (_, l) = locksRow; locks = l.Ref; }
                     byte cur = capStat == 0 ? locks.Str : capStat == 1 ? locks.Dex : locks.Int;
                     byte next = (byte)((cur + 1) % 3);
                     if (capStat == 0) locks.Str = next; else if (capStat == 1) locks.Dex = next; else locks.Int = next;
@@ -231,7 +231,7 @@ internal readonly struct StatusBarPlugin : IPlugin
 
         // Lock button graphics reflect the player's persisted StatLocks.
         StatLocks locks = default;
-        if (locksQ.Contains(pid)) { var (_, l) = locksQ.Get(pid); locks = l.Ref; }
+        if (locksQ.TryGet(pid, out var locksRow)) { var (_, l) = locksRow; locks = l.Ref; }
         foreach (var (_, custom, btn) in lockBtnsQ)
         {
             byte st = btn.Ref.Stat == 0 ? locks.Str : btn.Ref.Stat == 1 ? locks.Dex : locks.Int;
@@ -240,10 +240,10 @@ internal readonly struct StatusBarPlugin : IPlugin
         }
 
         Hits hits = default; Mana mana = default; Stamina stam = default; PlayerData d = default;
-        if (hitsQ.Contains(pid)) { var (_, h) = hitsQ.Get(pid); hits = h.Ref; }
-        if (manaQ.Contains(pid)) { var (_, m) = manaQ.Get(pid); mana = m.Ref; }
-        if (stamQ.Contains(pid)) { var (_, s) = stamQ.Get(pid); stam = s.Ref; }
-        if (dataQ.Contains(pid)) { var (_, pd) = dataQ.Get(pid); d = pd.Ref; }
+        if (hitsQ.TryGet(pid, out var hitsRow)) { var (_, h) = hitsRow; hits = h.Ref; }
+        if (manaQ.TryGet(pid, out var manaRow)) { var (_, m) = manaRow; mana = m.Ref; }
+        if (stamQ.TryGet(pid, out var stamRow)) { var (_, s) = stamRow; stam = s.Ref; }
+        if (dataQ.TryGet(pid, out var dataRow)) { var (_, pd) = dataRow; d = pd.Ref; }
 
         foreach (var (_, text, node, label) in labelsQ)
         {
@@ -309,9 +309,9 @@ internal readonly struct StatusBarPlugin : IPlugin
 
     private static void DespawnSubtree(Commands commands, ulong entity, Query<Data<TinyEcs.Children>> childrenQ)
     {
-        if (childrenQ.Contains(entity))
+        if (childrenQ.TryGet(entity, out var kidsRow))
         {
-            var (_, kids) = childrenQ.Get(entity);
+            var (_, kids) = kidsRow;
             foreach (var cid in kids.Ref)
                 DespawnSubtree(commands, cid, childrenQ);
         }

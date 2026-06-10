@@ -786,8 +786,8 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             for (int l = (int)Layer.OneHanded; l <= (int)Layer.Legs; l++)
             {
                 var le = slots.Ref[(Layer)l];
-                if (!le.IsValid() || !qLayers.Contains(le)) continue;
-                var (lg, _) = qLayers.Get(le);
+                if (!le.IsValid() || !qLayers.TryGet(le, out var equipRow)) continue;
+                var (lg, _) = equipRow;
                 var lgfx = lg.Ref.Value;
                 if (lgfx != 0) equipGfx[l] = tileDataCache.StaticData[lgfx].AnimID;
             }
@@ -807,7 +807,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 if (!layerEnt.IsValid())
                     continue;
 
-                if (!qLayers.Contains(layerEnt))
+                if (!qLayers.TryGet(layerEnt, out var layerRow))
                 {
                     // slots.Ref[layer] = 0;
                     continue;
@@ -816,7 +816,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 if (layer != Layer.Mount && IsItemCovered2(qLayers, ref slots.Ref, layer))
                     continue;
 
-                (var gfx, var hue) = qLayers.Get(layerEnt);
+                (var gfx, var hue) = layerRow;
 
                 // Get layer data
                 byte animAction = animation.Ref.Action;
@@ -1063,9 +1063,9 @@ internal readonly struct WorldRenderingPlugin : IPlugin
     {
         bool isOk(Layer l, ref EquipmentSlots s, ushort value)
         {
-            if (qLayer.Contains(s[l]))
+            if (qLayer.TryGet(s[l], out var row))
             {
-                (var gfx, _) = qLayer.Get(s[l]);
+                (var gfx, _) = row;
                 return gfx.Ref.Value == value;
             }
             return false;
@@ -1080,8 +1080,8 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
         bool isNotAny(Layer l, ref EquipmentSlots s, params ReadOnlySpan<ushort> values)
         {
-            if (!qLayer.Contains(s[l])) return false;
-            (var gfx, _) = qLayer.Get(s[l]);
+            if (!qLayer.TryGet(s[l], out var row)) return false;
+            (var gfx, _) = row;
             foreach (var v in values)
                 if (gfx.Ref.Value == v) return false;
             return true;
@@ -1089,8 +1089,8 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
         bool inRange(Layer l, ref EquipmentSlots s, ushort min, ushort max)
         {
-            if (!qLayer.Contains(s[l])) return false;
-            (var gfx, _) = qLayer.Get(s[l]);
+            if (!qLayer.TryGet(s[l], out var row)) return false;
+            (var gfx, _) = row;
             return gfx.Ref.Value >= min && gfx.Ref.Value <= max;
         }
 
@@ -1125,9 +1125,9 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                         return true;
                     }
 
-                    if (slots[Layer.Robe].IsValid() && qLayer.Contains(slots[Layer.Robe]))
+                    if (slots[Layer.Robe].IsValid() && qLayer.TryGet(slots[Layer.Robe], out var pantsRobeRow))
                     {
-                        (var rgfx, _) = qLayer.Get(slots[Layer.Robe]);
+                        (var rgfx, _) = pantsRobeRow;
                         var rv = rgfx.Ref.Value;
                         if (rv != 0x0229 && !(rv >= 0x04E8 && rv <= 0x04EB))
                         {
@@ -1177,9 +1177,9 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
             case Layer.Helmet:
             case Layer.Hair:
-                if (slots[Layer.Robe].IsValid() && qLayer.Contains(slots[Layer.Robe]))
+                if (slots[Layer.Robe].IsValid() && qLayer.TryGet(slots[Layer.Robe], out var helmRobeRow))
                 {
-                    (var gfx, _) = qLayer.Get(slots[Layer.Robe]);
+                    (var gfx, _) = helmRobeRow;
                     var v = gfx.Ref.Value;
 
                     if (v > 0x3173)

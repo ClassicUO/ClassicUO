@@ -211,8 +211,8 @@ internal readonly struct ChatPlugin : IPlugin
                 selected.Value.Set(field.Value.Bar, float.MaxValue, bypassViewport: true);
                 return;
             }
-            if (!parents.Contains(cur)) return;
-            var (_, p) = parents.Get(cur);
+            if (!parents.TryGet(cur, out var parentRow)) return;
+            var (_, p) = parentRow;
             cur = (ulong)p.Ref.Id;
         }
     }
@@ -225,8 +225,8 @@ internal readonly struct ChatPlugin : IPlugin
         Query<Data<Node>> nodes)
     {
         var bar = field.Value.Bar;
-        if (bar == 0 || !nodes.Contains(bar)) return;
-        var (_, n) = nodes.Get(bar);
+        if (bar == 0 || !nodes.TryGet(bar, out var nodeRow)) return;
+        var (_, n) = nodeRow;
         n.Ref.Width = Val.Px(camera.Value.Bounds.Width);
     }
 
@@ -258,8 +258,8 @@ internal readonly struct ChatPlugin : IPlugin
         for (ulong cur = hit.Entity; !overWorld && cur != 0;)
         {
             if (gameWindowQ.Contains(cur)) { overWorld = true; break; }
-            if (!parents.Contains(cur)) break;
-            var (_, p) = parents.Get(cur);
+            if (!parents.TryGet(cur, out var parentRow)) break;
+            var (_, p) = parentRow;
             cur = (ulong)p.Ref.Id;
         }
 
@@ -291,9 +291,9 @@ internal readonly struct ChatPlugin : IPlugin
         Query<Data<Text>> textQ)
     {
         var glyph = field.Value.Glyph;
-        if (glyph == 0 || !textQ.Contains(glyph)) return;
+        if (glyph == 0 || !textQ.TryGet(glyph, out var textRow)) return;
 
-        var (_, t) = textQ.Get(glyph);
+        var (_, t) = textRow;
         var text = t.Ref.Value ?? string.Empty;
         if (text.Length == 0) return;
 

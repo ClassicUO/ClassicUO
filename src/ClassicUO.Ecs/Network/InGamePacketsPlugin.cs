@@ -654,9 +654,9 @@ readonly struct InGamePacketsPlugin : IPlugin
                     var revision = packet.HouseRevision.Value;
                     var house = entitiesMap.Value.GetOrCreate(commands, serial);
 
-                    if (queries.qHouseRevision.Contains(house.Id))
+                    if (queries.qHouseRevision.TryGet(house.Id, out var houseRevRow))
                     {
-                        (_, var houseRev) = queries.qHouseRevision.Get(house.Id);
+                        (_, var houseRev) = houseRevRow;
                         if (houseRev.Ref.Value == revision)
                             break;
                     }
@@ -804,10 +804,10 @@ readonly struct InGamePacketsPlugin : IPlugin
 
         var parent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
 
-        if (!queries.qPosAndGraphic.Contains(parent.Id))
+        if (!queries.qPosAndGraphic.TryGet(parent.Id, out var posAndGraphicRow))
             return;
 
-        (var pos, var graphic) = queries.qPosAndGraphic.Get(parent.Id);
+        (var pos, var graphic) = posAndGraphicRow;
         (var startX, var startY, var startZ) = pos.Ref;
 
         parent.Insert(new HouseRevision { Value = packet.Revision });
@@ -959,11 +959,11 @@ readonly struct InGamePacketsPlugin : IPlugin
             .Insert(new Notoriety() { Value = packet.Notoriety });
 
         EquipmentSlots slots;
-        bool existed = queries.qEquipmentSlots.Contains(ent.Id);
+        bool existed = queries.qEquipmentSlots.TryGet(ent.Id, out var slotsRow);
         EquipmentSlots old = default;
         if (existed)
         {
-            (_, var existing) = queries.qEquipmentSlots.Get(ent.Id);
+            (_, var existing) = slotsRow;
             old = existing.Ref;
             slots = old;
         }
@@ -1014,11 +1014,11 @@ readonly struct InGamePacketsPlugin : IPlugin
             .Insert(new Notoriety() { Value = packet.Notoriety });
 
         EquipmentSlots slots;
-        bool existed = queries.qEquipmentSlots.Contains(ent.Id);
+        bool existed = queries.qEquipmentSlots.TryGet(ent.Id, out var slotsRow);
         EquipmentSlots old = default;
         if (existed)
         {
-            (_, var existing) = queries.qEquipmentSlots.Get(ent.Id);
+            (_, var existing) = slotsRow;
             old = existing.Ref;
             slots = old;
         }
@@ -1235,11 +1235,11 @@ readonly struct InGamePacketsPlugin : IPlugin
             .Insert(new Hue() { Value = packet.Hue });
 
         EquipmentSlots slots;
-        bool existed = queries.qEquipmentSlots.Contains(parentEnt.Id);
+        bool existed = queries.qEquipmentSlots.TryGet(parentEnt.Id, out var slotsRow);
         EquipmentSlots old = default;
         if (existed)
         {
-            (_, var existing) = queries.qEquipmentSlots.Get(parentEnt.Id);
+            (_, var existing) = slotsRow;
             old = existing.Ref;
             slots = old;
         }

@@ -89,8 +89,8 @@ internal readonly struct MenuGumpPlugin : IPlugin
             On<CheckboxChanged> trig,
             Query<Data<MenuRadio, Checkbox>> radiosQ) =>
         {
-            if (!radiosQ.Contains(trig.EntityId)) return;
-            var (_, clicked, clickedCb) = radiosQ.Get(trig.EntityId);
+            if (!radiosQ.TryGet(trig.EntityId, out var radioRow)) return;
+            var (_, clicked, clickedCb) = radioRow;
             clickedCb.Ref.Checked = true;
             var root = clicked.Ref.Root;
             foreach (var (ent, r, cb) in radiosQ)
@@ -110,8 +110,8 @@ internal readonly struct MenuGumpPlugin : IPlugin
             Query<Data<MenuGumpWindow>> winQ,
             Query<Data<TinyEcs.Children>> childrenQ) =>
         {
-            if (!itemQ.Contains(trig.EntityId)) return;
-            var (_, it) = itemQ.Get(trig.EntityId);
+            if (!itemQ.TryGet(trig.EntityId, out var itemRow)) return;
+            var (_, it) = itemRow;
             net.Value.Send_MenuResponse(it.Ref.Serial, it.Ref.ServerMenuId, it.Ref.Index, it.Ref.Graphic, it.Ref.Hue);
             CloseAnswered(commands, it.Ref.Serial, winQ, childrenQ);
         });
@@ -205,8 +205,8 @@ internal readonly struct MenuGumpPlugin : IPlugin
         slider.Observe((On<SliderChanged> t,
                         Query<Data<ScrollPosition>> scrollQ) =>
         {
-            if (!scrollQ.Contains(stripId)) return;
-            var (_, sp) = scrollQ.Get(stripId);
+            if (!scrollQ.TryGet(stripId, out var scrollRow)) return;
+            var (_, sp) = scrollRow;
             sp.Ref.OffsetX = t.Event.Value;
         });
         commands.AddChild(rootId, slider.Id);
@@ -342,9 +342,9 @@ internal readonly struct MenuGumpPlugin : IPlugin
 
     private static void DespawnSubtree(Commands commands, ulong entity, Query<Data<TinyEcs.Children>> childrenQ)
     {
-        if (childrenQ.Contains(entity))
+        if (childrenQ.TryGet(entity, out var childrenRow))
         {
-            var (_, kids) = childrenQ.Get(entity);
+            var (_, kids) = childrenRow;
             foreach (var cid in kids.Ref)
                 DespawnSubtree(commands, cid, childrenQ);
         }

@@ -96,8 +96,8 @@ internal readonly struct ContainerGumpPlugin : IPlugin
             {
                 foreach (var (_, link, itemZ) in items)
                 {
-                    if (!windows.Contains(link.Ref.Container)) continue;
-                    var (_, winZ) = windows.Get(link.Ref.Container);
+                    if (!windows.TryGet(link.Ref.Container, out var windowRow)) continue;
+                    var (_, winZ) = windowRow;
                     if (itemZ.Ref.Value != winZ.Ref.Value)
                         itemZ.Ref.Value = winZ.Ref.Value;
                 }
@@ -124,8 +124,8 @@ internal readonly struct ContainerGumpPlugin : IPlugin
             Res<NetClient> net,
             Query<Data<ContainerItemUI>> itemQ) =>
         {
-            if (!itemQ.Contains(trig.EntityId)) return;
-            var (_, link) = itemQ.Get(trig.EntityId);
+            if (!itemQ.TryGet(trig.EntityId, out var itemRow)) return;
+            var (_, link) = itemRow;
             net.Value.Send_DoubleClick(link.Ref.Serial);
         });
     }
@@ -152,9 +152,9 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         ulong entity,
         Query<Data<TinyEcs.Children>> childrenQ)
     {
-        if (childrenQ.Contains(entity))
+        if (childrenQ.TryGet(entity, out var childrenRow))
         {
-            var (_, kids) = childrenQ.Get(entity);
+            var (_, kids) = childrenRow;
             foreach (var cid in kids.Ref)
                 DespawnSubtree(commands, cid, childrenQ);
         }
@@ -267,9 +267,9 @@ internal readonly struct ContainerGumpPlugin : IPlugin
             var hueVec = Vector3.UnitZ;
             if (uiScale.Value.HueContainerGumps
                 && entitiesMap.Value.TryGet(ev.Serial, out var itemEntId)
-                && hueQuery.Contains(itemEntId))
+                && hueQuery.TryGet(itemEntId, out var hueRow))
             {
-                var (_, h) = hueQuery.Get(itemEntId);
+                var (_, h) = hueRow;
                 if (h.Ref.Value != 0)
                     hueVec = new Vector3(h.Ref.Value, 1, 1);
             }
@@ -579,8 +579,8 @@ internal readonly struct ContainerGumpPlugin : IPlugin
 
     private static int ResolveCurrentZ(ContainerUiMap.Entry entry, Query<Data<GlobalZIndex>> q)
     {
-        if (!q.Contains(entry.UiEntity)) return entry.ZBase;
-        var (_, z) = q.Get(entry.UiEntity);
+        if (!q.TryGet(entry.UiEntity, out var zRow)) return entry.ZBase;
+        var (_, z) = zRow;
         return z.Ref.Value;
     }
 
@@ -610,9 +610,9 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         foreach (var (ent, hb, interaction) in hitboxQuery)
         {
             if (interaction.Ref != Interaction.Pressed) continue;
-            if (!containerQuery.Contains(hb.Ref.Container)) continue;
+            if (!containerQuery.TryGet(hb.Ref.Container, out var containerRow)) continue;
 
-            var (_, tag, render, node) = containerQuery.Get(hb.Ref.Container);
+            var (_, tag, render, node) = containerRow;
             bool willMinimize = !tag.Ref.IsMinimized;
 
             ushort newGraphic = willMinimize && tag.Ref.IconizedGraphic != 0
@@ -626,13 +626,13 @@ internal readonly struct ContainerGumpPlugin : IPlugin
             node.Ref.Width = Val.Px(gi.UV.Width * tag.Ref.Scale);
             node.Ref.Height = Val.Px(gi.UV.Height * tag.Ref.Scale);
 
-            if (childrenQ.Contains(hb.Ref.Container))
+            if (childrenQ.TryGet(hb.Ref.Container, out var childrenRow))
             {
-                var (_, kids) = childrenQ.Get(hb.Ref.Container);
+                var (_, kids) = childrenRow;
                 foreach (var cid in kids.Ref)
                 {
-                    if (!childNodes.Contains(cid)) continue;
-                    var (_, childNode, _) = childNodes.Get(cid);
+                    if (!childNodes.TryGet(cid, out var childRow)) continue;
+                    var (_, childNode, _) = childRow;
                     childNode.Ref.Display = willMinimize ? Display.None : Display.Flex;
                 }
             }
@@ -655,9 +655,9 @@ internal readonly struct ContainerGumpPlugin : IPlugin
             if (!uiMap.Value.TryGet(ev.Serial, out var entry))
                 continue;
 
-            if (childrenQ.Contains(entry.UiEntity))
+            if (childrenQ.TryGet(entry.UiEntity, out var childrenRow))
             {
-                var (_, kids) = childrenQ.Get(entry.UiEntity);
+                var (_, kids) = childrenRow;
                 foreach (var cid in kids.Ref)
                     commands.Entity(cid).Despawn();
             }

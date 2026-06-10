@@ -88,8 +88,8 @@ internal readonly struct PaperdollPlugin : IPlugin
             Res<NetClient> net,
             Query<Data<PaperdollBackpackUI>> bpQ) =>
         {
-            if (!bpQ.Contains(trig.EntityId)) return;
-            var (_, bp) = bpQ.Get(trig.EntityId);
+            if (!bpQ.TryGet(trig.EntityId, out var bpRow)) return;
+            var (_, bp) = bpRow;
             net.Value.Send_DoubleClick(bp.Ref.ItemSerial);
         });
 
@@ -116,8 +116,8 @@ internal readonly struct PaperdollPlugin : IPlugin
             Query<Data<NetworkSerial>> serialQ,
             Query<Data<UOButton, PaperdollWarModeButton>> btnQ) =>
         {
-            if (!serialQ.Contains(trigger.EntityId)) return;
-            var (_, ns) = serialQ.Get(trigger.EntityId);
+            if (!serialQ.TryGet(trigger.EntityId, out var serialRow)) return;
+            var (_, ns) = serialRow;
             var serial = ns.Ref.Value;
             bool isWar = (trigger.Component.Value & Flags.WarMode) != 0;
             var ids = isWar ? (n: (ushort)0x07E8, p: (ushort)0x07E9, o: (ushort)0x07EA)
@@ -146,9 +146,9 @@ internal readonly struct PaperdollPlugin : IPlugin
         ulong entity,
         Query<Data<TinyEcs.Children>> childrenQ)
     {
-        if (childrenQ.Contains(entity))
+        if (childrenQ.TryGet(entity, out var kidsRow))
         {
-            var (_, kids) = childrenQ.Get(entity);
+            var (_, kids) = kidsRow;
             foreach (var cid in kids.Ref)
                 DespawnSubtree(commands, cid, childrenQ);
         }
@@ -194,8 +194,8 @@ internal readonly struct PaperdollPlugin : IPlugin
         PaperdollRebuildParams p)
     {
         var mobileEnt = trigger.EntityId;
-        if (!p.SerialQ.Contains(mobileEnt)) return;
-        var (_, mns) = p.SerialQ.Get(mobileEnt);
+        if (!p.SerialQ.TryGet(mobileEnt, out var serialRow)) return;
+        var (_, mns) = serialRow;
         var serial = mns.Ref.Value;
 
         if (p.WindowsQ.Count() == 0) return;
@@ -381,9 +381,9 @@ internal readonly struct PaperdollPlugin : IPlugin
             // RefreshWarModeButtons observer flips this button's UOButton
             // gump triplet (peace 0x07E5/6/7 <-> war 0x07E8/9/A).
             bool isWarMode = false;
-            if (entitiesMap.TryGet(serial, out var playerEnt) && flagsQ.Contains(playerEnt))
+            if (entitiesMap.TryGet(serial, out var playerEnt) && flagsQ.TryGet(playerEnt, out var flagsRow))
             {
-                var (_, sf) = flagsQ.Get(playerEnt);
+                var (_, sf) = flagsRow;
                 isWarMode = (sf.Ref.Value & Flags.WarMode) != 0;
             }
             var warIds = isWarMode ? (0x07E8, 0x07E9, 0x07EA) : (0x07E5, 0x07E6, 0x07E7);
@@ -489,9 +489,9 @@ internal readonly struct PaperdollPlugin : IPlugin
         if (!mouse.Value.IsPressedDouble(Input.MouseButtonType.Left)) return;
 
         var hit = UiPick.Topmost(mouse.Value.Position, assets.Value, p.Rendered);
-        if (!hit.Found || !p.Scrolls.Contains(hit.Entity)) return;
+        if (!hit.Found || !p.Scrolls.TryGet(hit.Entity, out var scrollRow)) return;
 
-        var (_, sc) = p.Scrolls.Get(hit.Entity);
+        var (_, sc) = scrollRow;
         switch (sc.Ref.Kind)
         {
             case ScrollKind.Profile:
@@ -557,15 +557,15 @@ internal readonly struct PaperdollPlugin : IPlugin
         EquipmentSlots? slots = null;
         if (entitiesMap.TryGet(serial, out var mobileEnt))
         {
-            if (mobileGraphicQ.Contains(mobileEnt))
+            if (mobileGraphicQ.TryGet(mobileEnt, out var mobileGfxRow))
             {
-                var (_, gfx, hue) = mobileGraphicQ.Get(mobileEnt);
+                var (_, gfx, hue) = mobileGfxRow;
                 mobileGraphic = gfx.Ref.Value;
                 if (hue.IsValid()) mobileHue = hue.Ref.Value;
             }
-            if (equipQ.Contains(mobileEnt))
+            if (equipQ.TryGet(mobileEnt, out var equipRow))
             {
-                var (_, s) = equipQ.Get(mobileEnt);
+                var (_, s) = equipRow;
                 slots = s.Ref;
             }
         }
@@ -607,14 +607,14 @@ internal readonly struct PaperdollPlugin : IPlugin
             if (slots.HasValue)
             {
                 var slotItemEnt = slots.Value[slLayer];
-                if (slotItemEnt != 0 && itemQ.Contains(slotItemEnt) && itemSerialQ.Contains(slotItemEnt))
+                if (slotItemEnt != 0 && itemQ.TryGet(slotItemEnt, out var slotItemRow) && itemSerialQ.TryGet(slotItemEnt, out var slotSerialRow))
                 {
-                    var (_, sig, sih) = itemQ.Get(slotItemEnt);
+                    var (_, sig, sih) = slotItemRow;
                     if (sig.Ref.Value != 0)
                     {
                         slotArtId = sig.Ref.Value;
                         slotArtHue = sih.IsValid() ? ToShaderHue((ushort)(sih.Ref.Value & 0x3FFF)) : Vector3.UnitZ;
-                        var (_, slNs) = itemSerialQ.Get(slotItemEnt);
+                        var (_, slNs) = slotSerialRow;
                         slotItemSerial = slNs.Ref.Value;
                     }
                 }
@@ -669,8 +669,8 @@ internal readonly struct PaperdollPlugin : IPlugin
         for (int l = (int)GameLayer.OneHanded; l <= (int)GameLayer.Legs; l++)
         {
             var le = slots.Value[(GameLayer)l];
-            if (le == 0 || !itemQ.Contains(le)) continue;
-            var (_, lg, _) = itemQ.Get(le);
+            if (le == 0 || !itemQ.TryGet(le, out var layerRow)) continue;
+            var (_, lg, _) = layerRow;
             var lgfx = lg.Ref.Value;
             if (lgfx != 0 && lgfx < tileData.Length) equipGfx[l] = tileData[lgfx].AnimID;
         }
@@ -685,9 +685,9 @@ internal readonly struct PaperdollPlugin : IPlugin
             var layer = drawOrder[oi];
             var itemEnt = slots.Value[layer];
             if (itemEnt == 0) continue;
-            if (!itemQ.Contains(itemEnt)) continue;
+            if (!itemQ.TryGet(itemEnt, out var overlayRow)) continue;
 
-            var (_, ig, ih) = itemQ.Get(itemEnt);
+            var (_, ig, ih) = overlayRow;
             var itemGraphic = ig.Ref.Value;
             if (itemGraphic == 0 || itemGraphic >= tileData.Length) continue;
             var animId = tileData[itemGraphic].AnimID;
@@ -717,9 +717,9 @@ internal readonly struct PaperdollPlugin : IPlugin
             // bbox+opaque-pixel steal UiPointerDown from buttons/chrome it
             // overlaps (wide cloaks/robes can reach the x=185 button column).
             bool liftable = layer != GameLayer.Hair && layer != GameLayer.Beard;
-            if (liftable && itemSerialQ.Contains(itemEnt))
+            if (liftable && itemSerialQ.TryGet(itemEnt, out var liftSerialRow))
             {
-                var (_, itemNs) = itemSerialQ.Get(itemEnt);
+                var (_, itemNs) = liftSerialRow;
                 equipPic.Insert(new PaperdollEquipUI
                 {
                     ItemSerial = itemNs.Ref.Value,
@@ -740,9 +740,9 @@ internal readonly struct PaperdollPlugin : IPlugin
         // of body sex (matches main). Skip the per-profile backpack-style
         // swap (Suede / Polar Bear / Ghoul) — that's a settings concern.
         var backpackEnt = slots.Value[GameLayer.Backpack];
-        if (backpackEnt != 0 && itemQ.Contains(backpackEnt))
+        if (backpackEnt != 0 && itemQ.TryGet(backpackEnt, out var backpackRow))
         {
-            var (_, bg, bh) = itemQ.Get(backpackEnt);
+            var (_, bg, bh) = backpackRow;
             var backpackGraphic = bg.Ref.Value;
             if (backpackGraphic != 0 && backpackGraphic < tileData.Length)
             {
@@ -766,9 +766,9 @@ internal readonly struct PaperdollPlugin : IPlugin
                     // reads root's Interaction, not children's).
                     var bpPic = builder.AddGump(commands, bpGump, bpHue, new Vector2(8 - bx, 19))
                         .Insert(new PaperdollBodyChild { WindowEntity = rootId });
-                    if (itemSerialQ.Contains(backpackEnt))
+                    if (itemSerialQ.TryGet(backpackEnt, out var bpSerialRow))
                     {
-                        var (_, bpNs) = itemSerialQ.Get(backpackEnt);
+                        var (_, bpNs) = bpSerialRow;
                         bpPic.Insert(Interaction.None)
                              .Insert(new PaperdollBackpackUI
                              {

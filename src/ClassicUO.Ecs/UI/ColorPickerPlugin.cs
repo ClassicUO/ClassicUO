@@ -124,10 +124,10 @@ internal readonly struct ColorPickerPlugin : IPlugin
             Query<Data<UiCustom>> ucq, Query<Data<ColorPickerState>> stq, Res<UOFileManager> files) =>
         {
             int g = Math.Clamp((int)MathF.Round(t.Event.Value), 0, 4);
-            if (stq.Contains(capRoot)) { var (_, st) = stq.Get(capRoot); st.Ref.Graduation = g; }
-            if (ucq.Contains(capGrid))
+            if (stq.TryGet(capRoot, out var stRow)) { var (_, st) = stRow; st.Ref.Graduation = g; }
+            if (ucq.TryGet(capGrid, out var ucRow))
             {
-                var (_, uc) = ucq.Get(capGrid);
+                var (_, uc) = ucRow;
                 var r = uc.Ref.Render();
                 if (r?.GridColors != null)
                 {
@@ -142,8 +142,8 @@ internal readonly struct ColorPickerPlugin : IPlugin
         gridCmd.Observe((On<UiPointerDown> t,
             Query<Data<ComputedNode, UiCustom>> geomQ, Query<Data<UiCustom>> ucq, Query<Data<ColorPickerState>> stq) =>
         {
-            if (!geomQ.Contains(capGrid)) return;
-            var (_, cn, uc) = geomQ.Get(capGrid);
+            if (!geomQ.TryGet(capGrid, out var geomRow)) return;
+            var (_, cn, uc) = geomRow;
             var r = uc.Ref.Render();
             if (r == null) return;
             var bb = cn.Ref;
@@ -161,10 +161,10 @@ internal readonly struct ColorPickerPlugin : IPlugin
         ok.Observe((On<UiClick> _, Res<NetClient> net, Commands cmd,
             Query<Data<ColorPickerState>> stq, Query<Data<UiCustom>> ucq) =>
         {
-            if (!stq.Contains(capRoot)) return;
-            var (_, st) = stq.Get(capRoot);
+            if (!stq.TryGet(capRoot, out var stRow)) return;
+            var (_, st) = stRow;
             int sel = 0;
-            if (ucq.Contains(capGrid)) { var (_, uc) = ucq.Get(capGrid); sel = uc.Ref.Render()?.SelectedIndex ?? 0; }
+            if (ucq.TryGet(capGrid, out var ucRow)) { var (_, uc) = ucRow; sel = uc.Ref.Render()?.SelectedIndex ?? 0; }
             ushort hue = (ushort)(st.Ref.Graduation + 2 + 5 * sel);
             net.Value.Send_DyeDataResponse(st.Ref.Serial, st.Ref.Graphic, hue);
             cmd.Entity(capRoot).Despawn();
@@ -200,8 +200,8 @@ internal readonly struct ColorPickerPlugin : IPlugin
 
     private static void SetPreviewHue(Query<Data<UiCustom>> ucq, ulong previewId, ushort hue)
     {
-        if (!ucq.Contains(previewId)) return;
-        var (_, uc) = ucq.Get(previewId);
+        if (!ucq.TryGet(previewId, out var ucRow)) return;
+        var (_, uc) = ucRow;
         var r = uc.Ref.Render();
         if (r != null) r.Hue = ShaderHueTranslator.GetHueVector(hue, false, 1f);
     }

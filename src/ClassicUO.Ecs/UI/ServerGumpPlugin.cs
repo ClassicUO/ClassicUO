@@ -68,8 +68,8 @@ internal readonly struct ServerGumpPlugin : IPlugin
             {
                 foreach (var (_, child, node) in childQ)
                 {
-                    if (!gumpQ.Contains(child.Ref.RootEntity)) continue;
-                    var (_, gump) = gumpQ.Get(child.Ref.RootEntity);
+                    if (!gumpQ.TryGet(child.Ref.RootEntity, out var gumpRow)) continue;
+                    var (_, gump) = gumpRow;
                     bool visible = child.Ref.Page == 0 || child.Ref.Page == gump.Ref.CurrentPage;
                     var target = visible ? Display.Flex : Display.None;
                     if (node.Ref.Display != target)
@@ -127,9 +127,9 @@ internal readonly struct ServerGumpPlugin : IPlugin
                 foreach (var (_, thumb, node) in thumbQ)
                 {
                     float ratio = 0f;
-                    if (thumb.Ref.MaxScroll > 0f && scrollQ.Contains(thumb.Ref.ScrollEntity))
+                    if (thumb.Ref.MaxScroll > 0f && scrollQ.TryGet(thumb.Ref.ScrollEntity, out var scrollRow))
                     {
-                        var (_, sp) = scrollQ.Get(thumb.Ref.ScrollEntity);
+                        var (_, sp) = scrollRow;
                         ratio = Math.Clamp(Math.Abs(sp.Ref.OffsetY) / thumb.Ref.MaxScroll, 0f, 1f);
                     }
                     var target = thumb.Ref.TrackTop + ratio * thumb.Ref.Travel;
@@ -231,9 +231,9 @@ internal readonly struct ServerGumpPlugin : IPlugin
                 if (pos.X >= bb.Position.X + bb.Size.X || pos.Y >= bb.Position.Y + bb.Size.Y) continue;
 
                 float off0 = 0f;
-                if (scrollQ.Contains(thumb.Ref.ScrollEntity))
+                if (scrollQ.TryGet(thumb.Ref.ScrollEntity, out var pressScrollRow))
                 {
-                    var (_, sp0) = scrollQ.Get(thumb.Ref.ScrollEntity);
+                    var (_, sp0) = pressScrollRow;
                     off0 = sp0.Ref.OffsetY;
                 }
                 anchor.Value = new ScrollThumbAnchor
@@ -251,9 +251,9 @@ internal readonly struct ServerGumpPlugin : IPlugin
             }
         }
 
-        if (anchor.Value.Active && anchor.Value.Travel > 0f && scrollQ.Contains(anchor.Value.ScrollEntity))
+        if (anchor.Value.Active && anchor.Value.Travel > 0f && scrollQ.TryGet(anchor.Value.ScrollEntity, out var dragScrollRow))
         {
-            var (_, sp) = scrollQ.Get(anchor.Value.ScrollEntity);
+            var (_, sp) = dragScrollRow;
             float delta = mouse.Value.Position.Y - anchor.Value.MouseY0;
             sp.Ref.OffsetY = Math.Clamp(
                 anchor.Value.OffsetY0 + delta * (anchor.Value.MaxScroll / anchor.Value.Travel),
@@ -263,9 +263,9 @@ internal readonly struct ServerGumpPlugin : IPlugin
 
     private static void DespawnSubtree(Commands commands, ulong e, Query<Data<TinyEcs.Children>> childrenQ)
     {
-        if (childrenQ.Contains(e))
+        if (childrenQ.TryGet(e, out var childrenRow))
         {
-            var (_, kids) = childrenQ.Get(e);
+            var (_, kids) = childrenRow;
             foreach (var cid in kids.Ref)
                 DespawnSubtree(commands, cid, childrenQ);
         }
@@ -389,9 +389,9 @@ internal readonly struct ServerGumpPlugin : IPlugin
             // unrelated entity with generation+1. Contains() checks the
             // generation, so a stale handle returns false — we must NOT despawn
             // it, or we'd nuke whatever live entity now holds that raw id.
-            if (p.ExistingQ.Contains(oldRoot))
+            if (p.ExistingQ.TryGet(oldRoot, out var oldRootRow))
             {
-                var (_, _, oldNode) = p.ExistingQ.Get(oldRoot);
+                var (_, _, oldNode) = oldRootRow;
                 p.Positions.Value.ByKey[posKey] = new Vector2(oldNode.Ref.Left.Value, oldNode.Ref.Top.Value);
                 commands.Entity(oldRoot).Despawn();
             }
@@ -1016,9 +1016,9 @@ internal readonly struct ServerGumpPlugin : IPlugin
         var upBtn = builder.AddButton(commands, (UP, UP_PRESSED, UP), Vector3.UnitZ, new Vector2(sx, y0));
         upBtn.Observe((On<UiClick> _, Query<Data<ScrollPosition>> sq) =>
         {
-            if (sq.Contains(capScroll))
+            if (sq.TryGet(capScroll, out var spRow))
             {
-                var (_, sp) = sq.Get(capScroll);
+                var (_, sp) = spRow;
                 sp.Ref.OffsetY = Math.Clamp(sp.Ref.OffsetY - ScrollArrowStep, 0f, capMax);
             }
         });
@@ -1027,9 +1027,9 @@ internal readonly struct ServerGumpPlugin : IPlugin
         var downBtn = builder.AddButton(commands, (DOWN, DOWN_PRESSED, DOWN), Vector3.UnitZ, new Vector2(sx, y0 + h - downH));
         downBtn.Observe((On<UiClick> _, Query<Data<ScrollPosition>> sq) =>
         {
-            if (sq.Contains(capScroll))
+            if (sq.TryGet(capScroll, out var spRow))
             {
-                var (_, sp) = sq.Get(capScroll);
+                var (_, sp) = spRow;
                 sp.Ref.OffsetY = Math.Clamp(sp.Ref.OffsetY + ScrollArrowStep, 0f, capMax);
             }
         });

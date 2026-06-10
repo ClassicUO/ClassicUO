@@ -347,14 +347,14 @@ internal readonly struct TopBarPlugin : IPlugin
             }
         }
 
-        if (!anchor.Value.Active || !rootQ.Contains(anchor.Value.Root))
+        if (!anchor.Value.Active || !rootQ.TryGet(anchor.Value.Root, out var rootRow))
         {
             anchor.Value.Active = false;
             return;
         }
 
         var delta = mouse.Value.Position - anchor.Value.Mouse;
-        var (_, rootNode) = rootQ.Get(anchor.Value.Root);
+        var (_, rootNode) = rootRow;
         rootNode.Ref.Left = Val.Px(anchor.Value.OriginX + delta.X);
         rootNode.Ref.Top = Val.Px(anchor.Value.OriginY + delta.Y);
     }
@@ -466,9 +466,9 @@ internal readonly struct TopBarPlugin : IPlugin
                     foreach (var (_, slots) in playerQ)
                     {
                         var bp = slots.Ref[GameLayer.Backpack];
-                        if (bp != 0 && serialQ.Contains(bp))
+                        if (bp != 0 && serialQ.TryGet(bp, out var serialRow))
                         {
-                            var (_, ns) = serialQ.Get(bp);
+                            var (_, ns) = serialRow;
                             net.Value.Send_DoubleClick(ns.Ref.Value);
                         }
                         break;
@@ -536,9 +536,9 @@ internal readonly struct TopBarPlugin : IPlugin
             // parent button captures it when clicked on the bare button face.
             // Honour either.
             var btnInter = Interaction.None;
-            if (interQ.Contains(parent.Ref.Id))
+            if (interQ.TryGet(parent.Ref.Id, out var interRow))
             {
-                var (_, pInter) = interQ.Get(parent.Ref.Id);
+                var (_, pInter) = interRow;
                 btnInter = pInter.Ref;
             }
 
@@ -561,9 +561,9 @@ internal readonly struct TopBarPlugin : IPlugin
 
     private static void DespawnSubtree(Commands commands, ulong entity, Query<Data<TinyEcs.Children>> childrenQ)
     {
-        if (childrenQ.Contains(entity))
+        if (childrenQ.TryGet(entity, out var childrenRow))
         {
-            var (_, kids) = childrenQ.Get(entity);
+            var (_, kids) = childrenRow;
             foreach (var cid in kids.Ref)
                 DespawnSubtree(commands, cid, childrenQ);
         }

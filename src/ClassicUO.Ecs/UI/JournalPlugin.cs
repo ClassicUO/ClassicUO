@@ -153,10 +153,10 @@ internal readonly struct JournalPlugin : IPlugin
         app.AddObserver<On<CheckboxChanged>, Query<Data<JournalFilterCheck>>, Query<Data<JournalWindow>>>(
             (trig, checks, windows) =>
             {
-                if (!checks.Contains(trig.EntityId)) return;
-                var (_, fc) = checks.Get(trig.EntityId);
-                if (!windows.Contains(fc.Ref.Window)) return;
-                var (_, win) = windows.Get(fc.Ref.Window);
+                if (!checks.TryGet(trig.EntityId, out var checkRow)) return;
+                var (_, fc) = checkRow;
+                if (!windows.TryGet(fc.Ref.Window, out var windowRow)) return;
+                var (_, win) = windowRow;
                 switch (fc.Ref.Filter)
                 {
                     case JournalTextType.System: win.Ref.ShowSystem = trig.Event.Checked; break;
@@ -171,10 +171,10 @@ internal readonly struct JournalPlugin : IPlugin
         app.AddObserver<On<CheckboxChanged>, Query<Data<JournalDarkCheck>>, Query<Data<JournalWindow>>>(
             (trig, checks, windows) =>
             {
-                if (!checks.Contains(trig.EntityId)) return;
-                var (_, dc) = checks.Get(trig.EntityId);
-                if (!windows.Contains(dc.Ref.Window)) return;
-                var (_, win) = windows.Get(dc.Ref.Window);
+                if (!checks.TryGet(trig.EntityId, out var checkRow)) return;
+                var (_, dc) = checkRow;
+                if (!windows.TryGet(dc.Ref.Window, out var windowRow)) return;
+                var (_, win) = windowRow;
                 win.Ref.DarkMode = trig.Event.Checked; // LayoutWindow re-hues each frame; no rebuild
             });
     }
@@ -306,8 +306,8 @@ internal readonly struct JournalPlugin : IPlugin
             .Insert(Interaction.None);
         minimize.Observe((On<UiClick> _, Query<Data<JournalWindow>> wq) =>
         {
-            if (!wq.Contains(rootId)) return;
-            var (_, w) = wq.Get(rootId);
+            if (!wq.TryGet(rootId, out var winRow)) return;
+            var (_, w) = winRow;
             w.Ref.Minimized = !w.Ref.Minimized; // LayoutWindow toggles display each frame; no rebuild
         });
         commands.AddChild(rootId, minimize.Id);
@@ -477,16 +477,16 @@ internal readonly struct JournalPlugin : IPlugin
             // Auto-tail: if the view was already pinned to the bottom, keep it
             // pinned after the new content; if the user scrolled up, leave it.
             float listH = 0f;
-            if (nodeQ.Contains(list)) { var (_, ln) = nodeQ.Get(list); listH = ln.Ref.Height.Value; }
+            if (nodeQ.TryGet(list, out var listNodeRow)) { var (_, ln) = listNodeRow; listH = ln.Ref.Height.Value; }
             float oldOffset = 0f;
-            if (scrollQ.Contains(list)) { var (_, sp) = scrollQ.Get(list); oldOffset = sp.Ref.OffsetY; }
+            if (scrollQ.TryGet(list, out var scrollRow)) { var (_, sp) = scrollRow; oldOffset = sp.Ref.OffsetY; }
             float oldMax = Math.Max(0f, win.Ref.ContentHeight - listH);
             bool wasAtBottom = oldMax <= 0f || oldOffset >= oldMax - 4f;
 
             // Clear existing rows.
-            if (childrenQ.Contains(list))
+            if (childrenQ.TryGet(list, out var kidsRow))
             {
-                var (_, kids) = childrenQ.Get(list);
+                var (_, kids) = kidsRow;
                 foreach (var cid in kids.Ref)
                     commands.Entity(cid).Despawn();
             }
@@ -535,9 +535,9 @@ internal readonly struct JournalPlugin : IPlugin
 
             // Pin to bottom (newest) only if we were already there. Clay clamps
             // an over-large offset to the real max on the next layout.
-            if (wasAtBottom && scrollQ.Contains(list))
+            if (wasAtBottom && scrollQ.TryGet(list, out var tailScrollRow))
             {
-                var (_, sp) = scrollQ.Get(list);
+                var (_, sp) = tailScrollRow;
                 sp.Ref.OffsetY = contentH + 100000f;
             }
         }
@@ -563,19 +563,19 @@ internal readonly struct JournalPlugin : IPlugin
         foreach (var (_, win) in windowsQ)
         {
             if (win.Ref.Minimized) continue;
-            if (!nodeQ.Contains(win.Ref.FlagEntity) || !nodeQ.Contains(win.Ref.ListEntity)) continue;
+            if (!nodeQ.TryGet(win.Ref.FlagEntity, out var flagRow) || !nodeQ.TryGet(win.Ref.ListEntity, out var listRow)) continue;
 
-            var (_, listNode) = nodeQ.Get(win.Ref.ListEntity);
+            var (_, listNode) = listRow;
             float listH = listNode.Ref.Height.Value;
             float maxScroll = Math.Max(0f, win.Ref.ContentHeight - listH);
             float offset = 0f;
-            if (scrollQ.Contains(win.Ref.ListEntity))
+            if (scrollQ.TryGet(win.Ref.ListEntity, out var scrollRow))
             {
-                var (_, sp) = scrollQ.Get(win.Ref.ListEntity);
+                var (_, sp) = scrollRow;
                 offset = Math.Abs(sp.Ref.OffsetY);
             }
             float ratio = maxScroll > 0f ? Math.Clamp(offset / maxScroll, 0f, 1f) : 0f;
-            var (_, flag) = nodeQ.Get(win.Ref.FlagEntity);
+            var (_, flag) = flagRow;
             flag.Ref.Top = Val.Px(ListTop + ratio * Math.Max(0f, listH - 16f));
         }
     }
@@ -615,10 +615,10 @@ internal readonly struct JournalPlugin : IPlugin
             {
                 if (pos.X < bb.Ref.Position.X || pos.Y < bb.Ref.Position.Y) continue;
                 if (pos.X >= bb.Ref.Position.X + bb.Ref.Size.X || pos.Y >= bb.Ref.Position.Y + bb.Ref.Size.Y) continue;
-                if (!handleQ.Contains(ent.Ref)) continue;
-                var (_, exp) = handleQ.Get(ent.Ref);
-                if (!windowsQ.Contains(exp.Ref.Window)) continue;
-                var (_, win) = windowsQ.Get(exp.Ref.Window);
+                if (!handleQ.TryGet(ent.Ref, out var handleRow)) continue;
+                var (_, exp) = handleRow;
+                if (!windowsQ.TryGet(exp.Ref.Window, out var handleWinRow)) continue;
+                var (_, win) = handleWinRow;
                 gate.Value.Mode = ActiveDrag.UIWindow;
                 anchor.Value.Claimed = true;
                 anchor.Value.Active = true;
@@ -629,8 +629,8 @@ internal readonly struct JournalPlugin : IPlugin
             }
         }
 
-        if (!anchor.Value.Active || !windowsQ.Contains(anchor.Value.Window)) return;
-        var (_, w) = windowsQ.Get(anchor.Value.Window);
+        if (!anchor.Value.Active || !windowsQ.TryGet(anchor.Value.Window, out var anchorWinRow)) return;
+        var (_, w) = anchorWinRow;
         // Screenshot/render space is ~1.25x the input space; the delta sign is
         // all that matters here — grow when dragging down.
         float newH = anchor.Value.Origin + (mouse.Value.Position.Y - anchor.Value.MouseY0);
@@ -675,17 +675,17 @@ internal readonly struct JournalPlugin : IPlugin
             int flagH = GumpH(assets.Value, FlagGump);
             foreach (var (_, win) in windowsQ)
             {
-                if (win.Ref.Minimized || !compQ.Contains(win.Ref.FlagEntity)) continue;
-                var (_, bb) = compQ.Get(win.Ref.FlagEntity);
+                if (win.Ref.Minimized || !compQ.TryGet(win.Ref.FlagEntity, out var flagBbRow)) continue;
+                var (_, bb) = flagBbRow;
                 if (pos.X < bb.Ref.Position.X || pos.Y < bb.Ref.Position.Y) continue;
                 if (pos.X >= bb.Ref.Position.X + bb.Ref.Size.X || pos.Y >= bb.Ref.Position.Y + bb.Ref.Size.Y) continue;
 
                 float listH = 0f;
-                if (nodeQ.Contains(win.Ref.ListEntity)) { var (_, ln) = nodeQ.Get(win.Ref.ListEntity); listH = ln.Ref.Height.Value; }
+                if (nodeQ.TryGet(win.Ref.ListEntity, out var listNodeRow)) { var (_, ln) = listNodeRow; listH = ln.Ref.Height.Value; }
                 float maxScroll = Math.Max(0f, win.Ref.ContentHeight - listH);
                 if (maxScroll <= 0f) return; // nothing to scroll
                 float startOffset = 0f;
-                if (scrollQ.Contains(win.Ref.ListEntity)) { var (_, sp) = scrollQ.Get(win.Ref.ListEntity); startOffset = sp.Ref.OffsetY; }
+                if (scrollQ.TryGet(win.Ref.ListEntity, out var startScrollRow)) { var (_, sp) = startScrollRow; startOffset = sp.Ref.OffsetY; }
 
                 gate.Value.Mode = ActiveDrag.UIWindow;
                 anchor.Value.Claimed = true;
@@ -699,12 +699,12 @@ internal readonly struct JournalPlugin : IPlugin
             }
         }
 
-        if (!anchor.Value.Active || !scrollQ.Contains(anchor.Value.List)) return;
+        if (!anchor.Value.Active || !scrollQ.TryGet(anchor.Value.List, out var scrollRow)) return;
         float delta = mouse.Value.Position.Y - anchor.Value.StartY;
         float newOffset = Math.Clamp(
             anchor.Value.StartOffset + delta / anchor.Value.TrackPixels * anchor.Value.MaxScroll,
             0f, anchor.Value.MaxScroll);
-        var (_, scroll) = scrollQ.Get(anchor.Value.List);
+        var (_, scroll) = scrollRow;
         scroll.Ref.OffsetY = newOffset;
     }
 
@@ -719,9 +719,9 @@ internal readonly struct JournalPlugin : IPlugin
 
     private static void DespawnSubtree(Commands commands, ulong entity, Query<Data<TinyEcs.Children>> childrenQ)
     {
-        if (childrenQ.Contains(entity))
+        if (childrenQ.TryGet(entity, out var kidsRow))
         {
-            var (_, kids) = childrenQ.Get(entity);
+            var (_, kids) = kidsRow;
             foreach (var cid in kids.Ref)
                 DespawnSubtree(commands, cid, childrenQ);
         }
@@ -737,20 +737,20 @@ internal readonly struct JournalPlugin : IPlugin
 
     private static void SetNode(Query<Data<Node>> q, ulong id, float top, float height, float width)
     {
-        if (!q.Contains(id)) return;
-        var (_, n) = q.Get(id);
+        if (!q.TryGet(id, out var row)) return;
+        var (_, n) = row;
         n.Ref.Top = Val.Px(top); n.Ref.Height = Val.Px(height); n.Ref.Width = Val.Px(width);
     }
     private static void SetNodeY(Query<Data<Node>> q, ulong id, float y)
-    { if (q.Contains(id)) { var (_, n) = q.Get(id); n.Ref.Top = Val.Px(y); } }
+    { if (q.TryGet(id, out var row)) { var (_, n) = row; n.Ref.Top = Val.Px(y); } }
     private static void SetNodeXY(Query<Data<Node>> q, ulong id, float x, float y)
-    { if (q.Contains(id)) { var (_, n) = q.Get(id); n.Ref.Left = Val.Px(x); n.Ref.Top = Val.Px(y); } }
+    { if (q.TryGet(id, out var row)) { var (_, n) = row; n.Ref.Left = Val.Px(x); n.Ref.Top = Val.Px(y); } }
     private static void SetNodeHeight(Query<Data<Node>> q, ulong id, float h)
-    { if (q.Contains(id)) { var (_, n) = q.Get(id); n.Ref.Height = Val.Px(h); } }
+    { if (q.TryGet(id, out var row)) { var (_, n) = row; n.Ref.Height = Val.Px(h); } }
     private static void SetDisplay(Query<Data<Node>> q, ulong id, Display d)
-    { if (q.Contains(id)) { var (_, n) = q.Get(id); n.Ref.Display = d; } }
+    { if (q.TryGet(id, out var row)) { var (_, n) = row; n.Ref.Display = d; } }
     private static void SetCustomHue(Query<Data<UiCustom>> q, ulong id, Vector3 hue)
-    { if (q.Contains(id)) { var (_, c) = q.Get(id); var r = c.Ref.Render(); if (r != null) r.Hue = hue; } }
+    { if (q.TryGet(id, out var row)) { var (_, c) = row; var r = c.Ref.Render(); if (r != null) r.Hue = hue; } }
 }
 
 internal struct JournalFilterLabel;

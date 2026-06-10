@@ -210,9 +210,9 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
 
             var content = win.Ref.ContentEntity;
             uint serial = win.Ref.Serial;
-            if (childrenQ.Contains(content))
+            if (childrenQ.TryGet(content, out var contentRow))
             {
-                var (_, kids) = childrenQ.Get(content);
+                var (_, kids) = contentRow;
                 foreach (var cid in kids.Ref) commands.Entity(cid).Despawn();
             }
 
@@ -375,9 +375,9 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
             foreach (var (_, bb, c) in cornersQ)
             {
                 if (!Contains(bb.Ref, pos)) continue;
-                if (windowsQ.Contains(c.Ref.Window))
+                if (windowsQ.TryGet(c.Ref.Window, out var windowRow))
                 {
-                    var (_, w) = windowsQ.Get(c.Ref.Window);
+                    var (_, w) = windowRow;
                     if (mouse.Value.IsPressedDouble(MouseButtonType.Left))
                         // Double-click a corner jumps to the first / last page.
                         w.Ref.Page = c.Ref.Dir < 0 ? 0 : w.Ref.PageCount - 1;
@@ -529,9 +529,9 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
 
     private static void DespawnSubtree(Commands commands, ulong e, Query<Data<TinyEcs.Children>> childrenQ)
     {
-        if (childrenQ.Contains(e))
+        if (childrenQ.TryGet(e, out var childrenRow))
         {
-            var (_, kids) = childrenQ.Get(e);
+            var (_, kids) = childrenRow;
             foreach (var cid in kids.Ref) DespawnSubtree(commands, cid, childrenQ);
         }
         commands.Entity(e).Despawn();

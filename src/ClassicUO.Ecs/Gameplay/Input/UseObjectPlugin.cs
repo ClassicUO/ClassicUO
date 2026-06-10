@@ -36,18 +36,18 @@ internal readonly struct UseObjectPlugin : IPlugin
         // off ContainerItemUI and double-click that (mirrors legacy
         // ItemGump.OnMouseDoubleClick which calls GameActions.DoubleClick
         // on LocalSerial).
-        if (uiItemQ.Contains(target))
+        if (uiItemQ.TryGet(target, out var itemRow))
         {
-            var (_, link) = uiItemQ.Get(target);
+            var (_, link) = itemRow;
             if (link.Ref.Serial != 0)
                 network.Value.Send_DoubleClick(link.Ref.Serial);
             return;
         }
 
-        if (!query.Contains(target))
+        if (!query.TryGet(target, out var serialRow))
             return;
 
-        (var ent, var serial) = query.Get(target);
+        (var ent, var serial) = serialRow;
         if (serial.IsValid())
         {
             network.Value.Send_DoubleClick(serial.Ref.Value);

@@ -92,7 +92,7 @@ internal readonly struct CombatBookGumpPlugin : IPlugin
             ulong w = slots[GameLayer.OneHanded];
             if (w == 0) w = slots[GameLayer.TwoHanded];
             ushort wg = 0;
-            if (w != 0 && graphicQ.Contains(w)) { var (_, g) = graphicQ.Get(w); wg = g.Ref.Value; }
+            if (w != 0 && graphicQ.TryGet(w, out var gRow)) { var (_, g) = gRow; wg = g.Ref.Value; }
 
             Resolve(wg, files.Value.TileData.StaticData, out var p, out var s);
             abil.Value.Primary = (byte)p;
@@ -228,9 +228,9 @@ internal readonly struct CombatBookGumpPlugin : IPlugin
             win.Ref.Page = Math.Clamp(win.Ref.Page, 1, Math.Max(1, win.Ref.PageCount));
 
             var content = win.Ref.Content;
-            if (childrenQ.Contains(content))
+            if (childrenQ.TryGet(content, out var contentRow))
             {
-                var (_, kids) = childrenQ.Get(content);
+                var (_, kids) = contentRow;
                 foreach (var cid in kids.Ref) commands.Entity(cid).Despawn();
             }
 
@@ -450,9 +450,9 @@ internal readonly struct CombatBookGumpPlugin : IPlugin
         foreach (var (_, bb, c) in cornersQ)
         {
             if (!Contains(bb.Ref, pos)) continue;
-            if (windowsQ.Contains(c.Ref.Window))
+            if (windowsQ.TryGet(c.Ref.Window, out var windowRow))
             {
-                var (_, w) = windowsQ.Get(c.Ref.Window);
+                var (_, w) = windowRow;
                 if (mouse.Value.IsPressedDouble(MouseButtonType.Left))
                     w.Ref.Page = c.Ref.Dir < 0 ? 1 : w.Ref.PageCount;
                 else
@@ -550,9 +550,9 @@ internal readonly struct CombatBookGumpPlugin : IPlugin
 
     private static void DespawnSubtree(Commands commands, ulong e, Query<Data<TinyEcs.Children>> childrenQ)
     {
-        if (childrenQ.Contains(e))
+        if (childrenQ.TryGet(e, out var childrenRow))
         {
-            var (_, kids) = childrenQ.Get(e);
+            var (_, kids) = childrenRow;
             foreach (var cid in kids.Ref) DespawnSubtree(commands, cid, childrenQ);
         }
         commands.Entity(e).Despawn();

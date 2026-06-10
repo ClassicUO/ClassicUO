@@ -94,9 +94,9 @@ internal readonly struct TargetingPlugin : IPlugin
         var cursorId = targeting.Value.CursorId;
         var cursorType = targeting.Value.CursorType;
 
-        if (objectQ.Contains(ent))
+        if (objectQ.TryGet(ent, out var objectRow))
         {
-            var (_, serial, graphic, pos) = objectQ.Get(ent);
+            var (_, serial, graphic, pos) = objectRow;
             net.Value.Send_TargetObject(
                 serial.Ref.Value, graphic.Ref.Value,
                 pos.Ref.X, pos.Ref.Y, pos.Ref.Z, cursorId, cursorType);
@@ -105,17 +105,17 @@ internal readonly struct TargetingPlugin : IPlugin
         }
 
         // Land sends graphic 0; a static sends its own graphic (legacy parity).
-        if (landQ.Contains(ent))
+        if (landQ.TryGet(ent, out var landRow))
         {
-            var (_, _, pos) = landQ.Get(ent);
+            var (_, _, pos) = landRow;
             net.Value.Send_TargetXYZ(0, pos.Ref.X, pos.Ref.Y, pos.Ref.Z, cursorId, cursorType);
             targeting.Value.Clear();
             return;
         }
 
-        if (staticQ.Contains(ent))
+        if (staticQ.TryGet(ent, out var staticRow))
         {
-            var (_, graphic, pos) = staticQ.Get(ent);
+            var (_, graphic, pos) = staticRow;
             net.Value.Send_TargetXYZ(graphic.Ref.Value, pos.Ref.X, pos.Ref.Y, pos.Ref.Z, cursorId, cursorType);
             targeting.Value.Clear();
         }

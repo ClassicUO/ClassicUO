@@ -112,8 +112,8 @@ internal readonly struct GameScreenPlugin : IPlugin
         (_, var slots) = data;
         ref var s = ref slots.Ref;
         var backpackEnt = s[Layer.Backpack];
-        if (backpackEnt == 0 || !serialQuery.Contains(backpackEnt)) return;
-        var (_, serial) = serialQuery.Get(backpackEnt);
+        if (backpackEnt == 0 || !serialQuery.TryGet(backpackEnt, out var serialRow)) return;
+        var (_, serial) = serialRow;
         network.Value.Send_DoubleClick(serial.Ref.Value);
     }
 
@@ -624,17 +624,17 @@ internal readonly struct GameScreenPlugin : IPlugin
         else
         {
             label = $"Entity: 0x{ent:X}";
-            if (queryInfo.Contains(ent))
+            if (queryInfo.TryGet(ent, out var infoRow))
             {
-                var (_, pos, gfx) = queryInfo.Get(ent);
+                var (_, pos, gfx) = infoRow;
                 if (gfx.IsValid())
                     label += $"\nGraphic: 0x{gfx.Ref.Value:X4}";
                 if (pos.IsValid())
                     label += $"\nPos: {pos.Ref.X}, {pos.Ref.Y}, {pos.Ref.Z}";
             }
-            if (querySerial.Contains(ent))
+            if (querySerial.TryGet(ent, out var serialRow))
             {
-                var (_, serial) = querySerial.Get(ent);
+                var (_, serial) = serialRow;
                 if (serial.IsValid())
                     label += $"\nSerial: 0x{serial.Ref.Value:X8}";
             }

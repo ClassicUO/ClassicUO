@@ -187,8 +187,8 @@ internal readonly struct GameCursorPlugin : IPlugin
         int depth = 0)
     {
         if (textInputQ.Contains(entity)) return true;
-        if (depth >= 8 || !children.Contains(entity)) return false;
-        var (_, kids) = children.Get(entity);
+        if (depth >= 8 || !children.TryGet(entity, out var childrenRow)) return false;
+        var (_, kids) = childrenRow;
         foreach (var cid in kids.Ref)
             if (IsTextInput(cid, textInputQ, children, depth + 1)) return true;
         return false;

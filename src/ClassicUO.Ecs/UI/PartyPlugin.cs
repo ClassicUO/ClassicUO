@@ -177,9 +177,9 @@ internal readonly struct PartyPlugin : IPlugin
                 uint ser = packet.PartyMessageSerial ?? 0;
                 string text = packet.PartyMessageText ?? string.Empty;
                 string name = string.Empty;
-                if (entities.Value.TryGet(ser, out var ent) && p.Names.Contains(ent))
+                if (entities.Value.TryGet(ser, out var ent) && p.Names.TryGet(ent, out var nameRow))
                 {
-                    var (_, nameC) = p.Names.Get(ent);
+                    var (_, nameC) = nameRow;
                     name = nameC.Ref.Value ?? string.Empty;
                 }
 
@@ -206,9 +206,9 @@ internal readonly struct PartyPlugin : IPlugin
                     return;
 
                 string name = string.Empty;
-                if (entities.Value.TryGet(st.Inviter, out var inviterEnt) && p.Names.Contains(inviterEnt))
+                if (entities.Value.TryGet(st.Inviter, out var inviterEnt) && p.Names.TryGet(inviterEnt, out var inviterNameRow))
                 {
-                    var (_, nameC) = p.Names.Get(inviterEnt);
+                    var (_, nameC) = inviterNameRow;
                     name = nameC.Ref.Value ?? string.Empty;
                 }
 

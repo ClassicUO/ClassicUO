@@ -256,8 +256,8 @@ internal readonly struct VendorGumpPlugin : IPlugin
         Query<Data<ContainerSlotPosition>> slotQ)
     {
         var result = new List<ulong>();
-        if (!childrenQ.Contains(containerEnt)) return result;
-        var (_, kids) = childrenQ.Get(containerEnt);
+        if (!childrenQ.TryGet(containerEnt, out var kidsRow)) return result;
+        var (_, kids) = kidsRow;
         foreach (var c in kids.Ref) result.Add(c);
 
         if (containerGraphic == SortGraphic)
@@ -541,8 +541,8 @@ internal readonly struct VendorGumpPlugin : IPlugin
         Query<Data<VendorListing>> listingQ,
         Query<Data<TinyEcs.Children>> childrenQ)
     {
-        if (!map.Value.TryGet(vendor, out var vendorEnt) || !equipQ.Contains(vendorEnt)) return;
-        var (_, slots) = equipQ.Get(vendorEnt);
+        if (!map.Value.TryGet(vendor, out var vendorEnt) || !equipQ.TryGet(vendorEnt, out var equipRow)) return;
+        var (_, slots) = equipRow;
         Span<Layer> shopLayers = stackalloc Layer[] { Layer.ShopBuyRestock, Layer.ShopBuy };
         foreach (var layer in shopLayers)
         {
@@ -551,8 +551,8 @@ internal readonly struct VendorGumpPlugin : IPlugin
             var ordered = OrderShopChildren(containerEnt, ReadGraphic(graphicQ, containerEnt), childrenQ, slotQ);
             foreach (var child in ordered)
             {
-                if (!itemQ.Contains(child)) continue;
-                var (_, g, h, a, sn) = itemQ.Get(child);
+                if (!itemQ.TryGet(child, out var itemRow)) continue;
+                var (_, g, h, a, sn) = itemRow;
                 var entry = new VendorEntry
                 {
                     Serial = sn.Ref.Value,
@@ -560,9 +560,9 @@ internal readonly struct VendorGumpPlugin : IPlugin
                     Hue = h.Ref.Value,
                     Amount = (ushort)a.Ref.Value,
                 };
-                if (listingQ.Contains(child))
+                if (listingQ.TryGet(child, out var listingRow))
                 {
-                    var (_, l) = listingQ.Get(child);
+                    var (_, l) = listingRow;
                     entry.Price = l.Ref.Price;
                     entry.RawName = l.Ref.RawName;
                 }
@@ -572,9 +572,9 @@ internal readonly struct VendorGumpPlugin : IPlugin
     }
 
     private static ushort ReadGraphic(Query<Data<Graphic>> q, ulong e)
-    { if (e == 0 || !q.Contains(e)) return 0; var (_, g) = q.Get(e); return g.Ref.Value; }
+    { if (e == 0 || !q.TryGet(e, out var row)) return 0; var (_, g) = row; return g.Ref.Value; }
     private static int ReadSlotX(Query<Data<ContainerSlotPosition>> q, ulong e)
-    { if (e == 0 || !q.Contains(e)) return 0; var (_, s) = q.Get(e); return s.Ref.X; }
+    { if (e == 0 || !q.TryGet(e, out var row)) return 0; var (_, s) = row; return s.Ref.X; }
 
     private static int ShopListWidth(in VendorWindow w) => 180;
 
@@ -817,9 +817,9 @@ internal readonly struct VendorGumpPlugin : IPlugin
         foreach (var (_, bb, a) in arrowsQ)
         {
             if (!Contains(bb.Ref, p)) continue;
-            if (scrollQ.Contains(a.Ref.List))
+            if (scrollQ.TryGet(a.Ref.List, out var scrollRow))
             {
-                var (_, sp) = scrollQ.Get(a.Ref.List);
+                var (_, sp) = scrollRow;
                 sp.Ref.OffsetY = Math.Max(0f, sp.Ref.OffsetY + a.Ref.Dir * 6f);
             }
             gate.Value.Mode = ActiveDrag.UIWindow;
@@ -830,15 +830,15 @@ internal readonly struct VendorGumpPlugin : IPlugin
 
     private static void ClearTxn(ulong rootId, Query<Data<VendorWindow>> wq)
     {
-        if (!wq.Contains(rootId)) return;
-        var (_, w) = wq.Get(rootId);
+        if (!wq.TryGet(rootId, out var winRow)) return;
+        var (_, w) = winRow;
         if (w.Ref.Txn != null && w.Ref.Txn.Count > 0) { w.Ref.Txn.Clear(); w.Ref.Dirty = true; }
     }
 
     private static void AdjustTxn(ulong rootId, uint serial, int dir, bool shift, Query<Data<VendorWindow>> wq)
     {
-        if (!wq.Contains(rootId)) return;
-        var (_, w) = wq.Get(rootId);
+        if (!wq.TryGet(rootId, out var winRow)) return;
+        var (_, w) = winRow;
         if (!w.Ref.Items.TryGetValue(serial, out var entry)) return;
         int chosen = w.Ref.Txn.TryGetValue(serial, out var cc) ? cc : 0;
         if (dir > 0)
@@ -860,8 +860,8 @@ internal readonly struct VendorGumpPlugin : IPlugin
 
     private static void DoAccept(ulong rootId, Query<Data<VendorWindow>> wq, NetClient net, GameContext ctx, Commands commands, Query<Data<TinyEcs.Children>> childrenQ)
     {
-        if (!wq.Contains(rootId)) return;
-        var (ent, w) = wq.Get(rootId);
+        if (!wq.TryGet(rootId, out var winRow)) return;
+        var (ent, w) = winRow;
         if (w.Ref.Txn.Count > 0)
         {
             var items = new (uint serial, ushort amount)[w.Ref.Txn.Count];
@@ -897,8 +897,8 @@ internal readonly struct VendorGumpPlugin : IPlugin
             foreach (var (_, bb, h) in handlesQ)
             {
                 if (!Contains(bb.Ref, p)) continue;
-                if (!windowsQ.Contains(h.Ref.Window)) continue;
-                var (_, w) = windowsQ.Get(h.Ref.Window);
+                if (!windowsQ.TryGet(h.Ref.Window, out var winRow)) continue;
+                var (_, w) = winRow;
                 anchor.Value.Active = true; anchor.Value.Claimed = true;
                 anchor.Value.Window = h.Ref.Window;
                 anchor.Value.StartY = p.Y;
@@ -908,9 +908,9 @@ internal readonly struct VendorGumpPlugin : IPlugin
             }
         }
 
-        if (anchor.Value.Active && windowsQ.Contains(anchor.Value.Window))
+        if (anchor.Value.Active && windowsQ.TryGet(anchor.Value.Window, out var anchorWinRow))
         {
-            var (_, w) = windowsQ.Get(anchor.Value.Window);
+            var (_, w) = anchorWinRow;
             float steps = mouse.Value.Position.Y - anchor.Value.StartY;
             float nb = Math.Clamp(anchor.Value.InitialBody + steps, w.Ref.MinBodyHeight, 640f);
             if (Math.Abs(nb - w.Ref.BodyHeight) >= 1f)
@@ -948,13 +948,13 @@ internal readonly struct VendorGumpPlugin : IPlugin
 
     private static void SetNodeHeight(Query<Data<Node>> q, ulong e, float h)
     {
-        if (e == 0 || !q.Contains(e)) return;
-        var (_, n) = q.Get(e); n.Ref.Height = Val.Px(h);
+        if (e == 0 || !q.TryGet(e, out var row)) return;
+        var (_, n) = row; n.Ref.Height = Val.Px(h);
     }
     private static void SetNodeTop(Query<Data<Node>> q, ulong e, float t)
     {
-        if (e == 0 || !q.Contains(e)) return;
-        var (_, n) = q.Get(e); n.Ref.Top = Val.Px(t);
+        if (e == 0 || !q.TryGet(e, out var row)) return;
+        var (_, n) = row; n.Ref.Top = Val.Px(t);
     }
 
     private struct ResizeAnchor { public bool Active, Claimed; public ulong Window; public float StartY, InitialBody; }
@@ -999,15 +999,15 @@ internal readonly struct VendorGumpPlugin : IPlugin
 
     private static void SetText(Commands commands, ulong e, string s, Query<Data<Text>> textQ)
     {
-        if (e == 0 || !textQ.Contains(e)) return;
-        var (_, t) = textQ.Get(e);
+        if (e == 0 || !textQ.TryGet(e, out var textRow)) return;
+        var (_, t) = textRow;
         t.Ref.Value = s;
     }
 
     private static void ClearChildren(Commands commands, ulong parent, Query<Data<TinyEcs.Children>> childrenQ)
     {
-        if (parent == 0 || !childrenQ.Contains(parent)) return;
-        var (_, kids) = childrenQ.Get(parent);
+        if (parent == 0 || !childrenQ.TryGet(parent, out var kidsRow)) return;
+        var (_, kids) = kidsRow;
         foreach (var cid in kids.Ref) DespawnSubtree(commands, cid, childrenQ);
     }
 
@@ -1021,9 +1021,9 @@ internal readonly struct VendorGumpPlugin : IPlugin
 
     private static void DespawnSubtree(Commands commands, ulong e, Query<Data<TinyEcs.Children>> childrenQ)
     {
-        if (childrenQ.Contains(e))
+        if (childrenQ.TryGet(e, out var kidsRow))
         {
-            var (_, kids) = childrenQ.Get(e);
+            var (_, kids) = kidsRow;
             foreach (var cid in kids.Ref) DespawnSubtree(commands, cid, childrenQ);
         }
         commands.Entity(e).Despawn();

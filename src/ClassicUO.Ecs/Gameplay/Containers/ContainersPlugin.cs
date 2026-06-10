@@ -107,8 +107,8 @@ internal readonly struct ContainersPlugin : IPlugin
             for (var layer = Layer.Invalid + 1; (int)layer < EquipmentSlots.LayerCount; ++layer)
             {
                 var slotEnt = slots.Ref[layer];
-                if (slotEnt == 0 || !serialQ.Contains(slotEnt)) continue;
-                var (_, ns) = serialQ.Get(slotEnt);
+                if (slotEnt == 0 || !serialQ.TryGet(slotEnt, out var serialRow)) continue;
+                var (_, ns) = serialRow;
                 if (ns.Ref.Value != serial) continue;
                 slots.Ref[layer] = 0;
                 changed = true;
@@ -142,8 +142,8 @@ internal readonly struct ContainersPlugin : IPlugin
             var root = ResolveRootHolder(gameEnt, parentQuery);
             if (root == playerEnt.Ref) continue;
 
-            if (!worldPosQuery.Contains(root)) continue;
-            var (_, pos) = worldPosQuery.Get(root);
+            if (!worldPosQuery.TryGet(root, out var posRow)) continue;
+            var (_, pos) = posRow;
             if (Math.Abs(playerPos.Ref.X - pos.Ref.X) >= MAX_CONTAINER_DIST ||
                 Math.Abs(playerPos.Ref.Y - pos.Ref.Y) >= MAX_CONTAINER_DIST)
             {
@@ -160,8 +160,8 @@ internal readonly struct ContainersPlugin : IPlugin
         var cur = start;
         for (int i = 0; i < 16; i++)
         {
-            if (!parentQuery.Contains(cur)) return cur;
-            var (_, parent) = parentQuery.Get(cur);
+            if (!parentQuery.TryGet(cur, out var parentRow)) return cur;
+            var (_, parent) = parentRow;
             var pid = (ulong)parent.Ref.Id;
             if (pid == 0 || pid == cur) return cur;
             cur = pid;

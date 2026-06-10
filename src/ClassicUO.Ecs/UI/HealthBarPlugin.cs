@@ -175,9 +175,9 @@ internal readonly struct HealthBarPlugin : IPlugin
             latch.Value = default;
             var hit = UiPick.Topmost(pos, assets.Value, p.Rendered);
             var win = UiPick.MovableRoot(hit.Entity, p.Movables, p.Parents);
-            if (win == 0 || !p.Hb.Contains(win)) return;
+            if (win == 0 || !p.Hb.TryGet(win, out var winRow)) return;
 
-            var (_, w) = p.Hb.Get(win);
+            var (_, w) = winRow;
             if (w.Ref.IsPlayer)
             {
                 StatusBarPlugin.OpenOrFocus(commands, builder.Value, assets.Value, gameCtx.Value, zCounter.Value, p.Status);
@@ -226,9 +226,9 @@ internal readonly struct HealthBarPlugin : IPlugin
                 return; // released off the window
 
             Vector2 spawn = new(20, 150);
-            if (p.Nodes.Contains(target))
+            if (p.Nodes.TryGet(target, out var nodeRow))
             {
-                var (_, n) = p.Nodes.Get(target);
+                var (_, n) = nodeRow;
                 spawn = new Vector2(n.Ref.Left.Value, n.Ref.Top.Value);
             }
             OpenForSerial(commands, builder.Value, assets.Value, gameCtx.Value, zCounter.Value,
@@ -293,9 +293,9 @@ internal readonly struct HealthBarPlugin : IPlugin
         {
             drag.Value = default;
             var target = selected.Value.Entity;
-            if (serialQ.Contains(target))
+            if (serialQ.TryGet(target, out var serialRow))
             {
-                var (_, ns) = serialQ.Get(target);
+                var (_, ns) = serialRow;
                 if (SerialHelper.IsMobile(ns.Ref.Value))
                 {
                     drag.Value.Serial = ns.Ref.Value;
@@ -532,9 +532,9 @@ internal readonly struct HealthBarPlugin : IPlugin
             ulong rootId = ent.Ref;
 
             // Drop the current children (bars / name / heal buttons).
-            if (childrenQ.Contains(rootId))
+            if (childrenQ.TryGet(rootId, out var kidsRow))
             {
-                var (_, kids) = childrenQ.Get(rootId);
+                var (_, kids) = kidsRow;
                 foreach (var cid in kids.Ref)
                     DespawnSubtree(commands, cid, childrenQ);
             }
@@ -738,9 +738,9 @@ internal readonly struct HealthBarPlugin : IPlugin
 
     private static void DespawnSubtree(Commands commands, ulong entity, Query<Data<TinyEcs.Children>> childrenQ)
     {
-        if (childrenQ.Contains(entity))
+        if (childrenQ.TryGet(entity, out var kidsRow))
         {
-            var (_, kids) = childrenQ.Get(entity);
+            var (_, kids) = kidsRow;
             foreach (var cid in kids.Ref)
                 DespawnSubtree(commands, cid, childrenQ);
         }

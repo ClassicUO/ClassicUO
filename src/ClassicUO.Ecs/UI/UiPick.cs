@@ -104,12 +104,12 @@ internal static class UiPick
         Query<Data<TinyEcs.Parent>> parents)
     {
         ulong cur = entity;
-        for (int i = 0; i < 32 && parents.Contains(cur); i++)
+        for (int i = 0; i < 32 && parents.TryGet(cur, out var parentRow); i++)
         {
-            var (_, p) = parents.Get(cur);
+            var (_, p) = parentRow;
             cur = (ulong)p.Ref.Id;
-            if (cur == 0 || !rendered.Contains(cur)) continue;
-            var (_, comp, node, _, _, _) = rendered.Get(cur);
+            if (cur == 0 || !rendered.TryGet(cur, out var renderedRow)) continue;
+            var (_, comp, node, _, _, _) = renderedRow;
             if (node.Ref.Overflow == Overflow.Visible) continue;
             var b = comp.Ref;
             if (pos.X < b.Position.X || pos.Y < b.Position.Y
@@ -131,8 +131,8 @@ internal static class UiPick
         ulong cur = entity;
         for (int i = 0; i < 32 && cur != 0 && !movables.Contains(cur); i++)
         {
-            if (!parents.Contains(cur)) return 0;
-            var (_, parent) = parents.Get(cur);
+            if (!parents.TryGet(cur, out var parentRow)) return 0;
+            var (_, parent) = parentRow;
             cur = (ulong)parent.Ref.Id;
         }
         return cur != 0 && movables.Contains(cur) ? cur : 0;

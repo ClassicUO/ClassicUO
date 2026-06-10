@@ -532,8 +532,8 @@ internal readonly struct BookGumpPlugin : IPlugin
     // incoming spread that the server hasn't streamed yet.
     private static void Flip(ulong rootId, int dir, NetClient net, BookFlipParams p)
     {
-        if (!p.WindowsQ.Contains(rootId)) return;
-        var (_, win) = p.WindowsQ.Get(rootId);
+        if (!p.WindowsQ.TryGet(rootId, out var winRow)) return;
+        var (_, win) = winRow;
         int max = MaxPage(win.Ref.PageCount);
         int next = Math.Clamp(win.Ref.ActivePage + dir, 1, max);
 
@@ -629,8 +629,8 @@ internal readonly struct BookGumpPlugin : IPlugin
     {
         foreach (var (_, node, vis) in visQ)
         {
-            if (!windowsQ.Contains(vis.Ref.Window)) continue;
-            var (_, win) = windowsQ.Get(vis.Ref.Window);
+            if (!windowsQ.TryGet(vis.Ref.Window, out var winRow)) continue;
+            var (_, win) = winRow;
             int ap = win.Ref.ActivePage;
 
             bool visible = vis.Ref.Page switch
@@ -727,9 +727,9 @@ internal readonly struct BookGumpPlugin : IPlugin
 
     private static void DespawnSubtree(Commands commands, ulong entity, Query<Data<TinyEcs.Children>> childrenQ)
     {
-        if (childrenQ.Contains(entity))
+        if (childrenQ.TryGet(entity, out var kidsRow))
         {
-            var (_, kids) = childrenQ.Get(entity);
+            var (_, kids) = kidsRow;
             foreach (var cid in kids.Ref)
                 DespawnSubtree(commands, cid, childrenQ);
         }

@@ -83,8 +83,8 @@ internal readonly struct MiniMapPlugin : IPlugin
             Res<AssetsServer> assets,
             Query<Data<MiniMapWindow, UiCustom, Node>> q) =>
         {
-            if (!q.Contains(trig.EntityId)) return;
-            var (_, win, custom, node) = q.Get(trig.EntityId);
+            if (!q.TryGet(trig.EntityId, out var winRow)) return;
+            var (_, win, custom, node) = winRow;
             win.Ref.UseLargeMap = !win.Ref.UseLargeMap;
             var bgId = win.Ref.UseLargeMap ? MiniMapState.BigGraphic : MiniMapState.SmallGraphic;
             ref readonly var gi = ref assets.Value.Gumps.GetGump(bgId);

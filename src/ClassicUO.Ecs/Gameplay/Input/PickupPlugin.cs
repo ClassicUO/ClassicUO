@@ -157,16 +157,16 @@ internal readonly struct PickupPlugin : IPlugin
                 // mobiles / multis / anything else so pickup never fires on
                 // non-items (matches legacy GameActions.OpenCorpse-style
                 // SerialHelper.IsItem guards).
-                if (q.Contains(ent))
+                if (q.TryGet(ent, out var serialRow))
                 {
-                    var (_, ns) = q.Get(ent);
+                    var (_, ns) = serialRow;
                     return SerialHelper.IsItem(ns.Ref.Value);
                 }
                 // Container item UI selections resolve to their backing game
                 // entity via NetworkEntitiesMap. Pickup body re-resolves.
-                if (uiItemQ.Contains(ent))
+                if (uiItemQ.TryGet(ent, out var uiItemRow))
                 {
-                    var (_, link) = uiItemQ.Get(ent);
+                    var (_, link) = uiItemRow;
                     if (!SerialHelper.IsItem(link.Ref.Serial)) return false;
                     return entitiesMap.Value.TryGet(link.Ref.Serial, out var gameEnt)
                         && q.Contains(gameEnt);
@@ -174,9 +174,9 @@ internal readonly struct PickupPlugin : IPlugin
                 // Paperdoll equipment overlay -> game entity by ItemSerial.
                 // Mirrors main's PaperDollInteractable.GumpPicEquipment.Update
                 // pickup gate (drag threshold + CanLift).
-                if (equipUiQ.Contains(ent))
+                if (equipUiQ.TryGet(ent, out var equipUiRow))
                 {
-                    var (_, link) = equipUiQ.Get(ent);
+                    var (_, link) = equipUiRow;
                     if (!SerialHelper.IsItem(link.Ref.ItemSerial)) return false;
                     return entitiesMap.Value.TryGet(link.Ref.ItemSerial, out var gameEnt)
                         && q.Contains(gameEnt);
@@ -332,8 +332,8 @@ internal readonly struct PickupPlugin : IPlugin
     private static void RestoreSourceUi(GrabbedItem grabbed, Query<Data<Node>> nodeQ)
     {
         var src = grabbed.SourceUiEntity;
-        if (src == 0 || !nodeQ.Contains(src)) return;
-        var (_, node) = nodeQ.Get(src);
+        if (src == 0 || !nodeQ.TryGet(src, out var nodeRow)) return;
+        var (_, node) = nodeRow;
         node.Ref.Display = Display.Flex;
     }
 
@@ -346,9 +346,9 @@ internal readonly struct PickupPlugin : IPlugin
     {
         if (grabbed.Serial == 0) return;
         if (!entitiesMap.TryGet(grabbed.Serial, out var ent)) return;
-        if (q.Contains(ent))
+        if (q.TryGet(ent, out var propsRow))
         {
-            var (_, g, h, a) = q.Get(ent);
+            var (_, g, h, a) = propsRow;
             g.Ref.Value = grabbed.OriginalGraphic;
             h.Ref.Value = grabbed.OriginalHue;
             a.Ref.Value = grabbed.OriginalAmount;
@@ -356,16 +356,16 @@ internal readonly struct PickupPlugin : IPlugin
         // Restore position into the same type slot the item originated from.
         // OriginalFromSlot was set at pickup based on which component the
         // game entity carried.
-        if (grabbed.OriginalFromSlot && slotPosQ.Contains(ent))
+        if (grabbed.OriginalFromSlot && slotPosQ.TryGet(ent, out var slotRow))
         {
-            var (_, sp) = slotPosQ.Get(ent);
+            var (_, sp) = slotRow;
             sp.Ref.X = grabbed.OriginalX;
             sp.Ref.Y = grabbed.OriginalY;
             sp.Ref.GridIndex = grabbed.OriginalGridIndex;
         }
-        else if (!grabbed.OriginalFromSlot && worldPosQ.Contains(ent))
+        else if (!grabbed.OriginalFromSlot && worldPosQ.TryGet(ent, out var worldRow))
         {
-            var (_, p) = worldPosQ.Get(ent);
+            var (_, p) = worldRow;
             p.Ref.X = grabbed.OriginalX;
             p.Ref.Y = grabbed.OriginalY;
             p.Ref.Z = grabbed.OriginalZ;
@@ -404,18 +404,18 @@ internal readonly struct PickupPlugin : IPlugin
         uint sourceContainer = 0;
         // Container item UIs are not game entities — resolve to the backing
         // game entity (carrying NetworkSerial/Amount/Graphic/Hue) first.
-        if (uiItemQ.Contains(sel))
+        if (uiItemQ.TryGet(sel, out var uiItemRow))
         {
-            var (_, link) = uiItemQ.Get(sel);
+            var (_, link) = uiItemRow;
             if (!entitiesMap.Value.TryGet(link.Ref.Serial, out target))
                 return;
             sourceUi = sel;
             // Walk ContainerItemUI -> UI window -> ContainerWindow.Serial to
             // recover the source container's UO serial. Snapshot below uses
             // it to mirror legacy ItemHold.Container.
-            if (windowQ.Contains(link.Ref.Container))
+            if (windowQ.TryGet(link.Ref.Container, out var windowRow))
             {
-                var (_, win) = windowQ.Get(link.Ref.Container);
+                var (_, win) = windowRow;
                 sourceContainer = win.Ref.Serial;
             }
         }
@@ -428,18 +428,18 @@ internal readonly struct PickupPlugin : IPlugin
         // Server's drop-ok ack doesn't re-broadcast equipment state, so
         // without this the body stays stale until the user re-equips
         // something or relogs.
-        else if (equipUiQ.Contains(sel))
+        else if (equipUiQ.TryGet(sel, out var equipRow))
         {
-            var (_, link) = equipUiQ.Get(sel);
+            var (_, link) = equipRow;
             if (!entitiesMap.Value.TryGet(link.Ref.ItemSerial, out target))
                 return;
             sourceUi = sel;
             sourceContainer = link.Ref.MobileSerial;
 
             if (entitiesMap.Value.TryGet(link.Ref.MobileSerial, out var mobileEnt)
-                && equipmentSlotsQ.Contains(mobileEnt))
+                && equipmentSlotsQ.TryGet(mobileEnt, out var slotsRow))
             {
-                var (_, slots) = equipmentSlotsQ.Get(mobileEnt);
+                var (_, slots) = slotsRow;
                 slots.Ref[link.Ref.Layer] = 0;
                 // Re-Insert to bump the Changed tick (in-place mutation of
                 // an InlineArray field doesn't trigger TinyEcs's tick).
@@ -456,15 +456,15 @@ internal readonly struct PickupPlugin : IPlugin
         ushort origX = 0, origY = 0;
         sbyte origZ = 0;
         byte origGrid = 0;
-        bool fromSlot = slotPosQ.Contains(target);
+        bool fromSlot = slotPosQ.TryGet(target, out var slotPosRow);
         if (fromSlot)
         {
-            var (_, sp) = slotPosQ.Get(target);
+            var (_, sp) = slotPosRow;
             origX = sp.Ref.X; origY = sp.Ref.Y; origGrid = sp.Ref.GridIndex;
         }
-        else if (worldPosQ.Contains(target))
+        else if (worldPosQ.TryGet(target, out var worldPosRow))
         {
-            var (_, wp) = worldPosQ.Get(target);
+            var (_, wp) = worldPosRow;
             origX = wp.Ref.X; origY = wp.Ref.Y; origZ = wp.Ref.Z;
         }
 
@@ -526,9 +526,9 @@ internal readonly struct PickupPlugin : IPlugin
         // Hide (don't despawn) the source slot so a deny/end response can
         // restore the item to its original position. Despawn happens on
         // OnDropItemOkPacket_0x29 in HandlePickupPackets.
-        if (sourceUi != 0 && nodeQ.Contains(sourceUi))
+        if (sourceUi != 0 && nodeQ.TryGet(sourceUi, out var nodeRow))
         {
-            var (_, node) = nodeQ.Get(sourceUi);
+            var (_, node) = nodeRow;
             node.Ref.Display = Display.None;
         }
     }
@@ -594,9 +594,9 @@ internal readonly struct PickupPlugin : IPlugin
         if (paperdollWindowQ.Contains(target) || paperdollEquipQ.Contains(target))
         {
             uint mobileSerial = 0;
-            if (paperdollWindowQ.Contains(target))
+            if (paperdollWindowQ.TryGet(target, out var pdWinRow))
             {
-                var (_, pw) = paperdollWindowQ.Get(target);
+                var (_, pw) = pdWinRow;
                 mobileSerial = pw.Ref.Serial;
             }
             else
@@ -623,9 +623,9 @@ internal readonly struct PickupPlugin : IPlugin
             // Check target layer slot is empty (legacy behavior — main's
             // PaperDollGump.OnMouseUp guards via FindItemByLayer).
             if (entitiesMap.Value.TryGet(mobileSerial, out var mobileEnt)
-                && equipmentSlotsQ.Contains(mobileEnt))
+                && equipmentSlotsQ.TryGet(mobileEnt, out var slotsRow))
             {
-                var (_, slots) = equipmentSlotsQ.Get(mobileEnt);
+                var (_, slots) = slotsRow;
                 if (slots.Ref[heldLayer] != 0)
                 {
                     grabbedItem.Value.Clear();
@@ -639,9 +639,9 @@ internal readonly struct PickupPlugin : IPlugin
         }
 
         // Case 1: dropping directly onto a container window (UI entity).
-        if (containerQuery.Contains(target))
+        if (containerQuery.TryGet(target, out var containerRow))
         {
-            var (_, tag, computed, window) = containerQuery.Get(target);
+            var (_, tag, computed, window) = containerRow;
             if (!IsContainerInRange(window.Ref.Serial, playerPos.Ref, entitiesMap.Value, itemDataQuery, parentQuery, playerQuery))
             {
                 grabbedItem.Value.Clear();
@@ -660,9 +660,9 @@ internal readonly struct PickupPlugin : IPlugin
         // Resolve the item's game entity through NetworkEntitiesMap to read
         // graphic / world-grid coords; resolve the parent container window via
         // ContainerItemUI.Container.
-        if (containerItemQuery.Contains(target))
+        if (containerItemQuery.TryGet(target, out var itemLinkRow))
         {
-            var (_, link) = containerItemQuery.Get(target);
+            var (_, link) = itemLinkRow;
             var targetSerial = link.Ref.Serial;
 
             ushort targetGraphic = 0;
@@ -672,16 +672,16 @@ internal readonly struct PickupPlugin : IPlugin
             // WorldPosition for items that haven't been re-routed yet.
             if (entitiesMap.Value.TryGet(targetSerial, out var targetGameEnt))
             {
-                if (slotItemQuery.Contains(targetGameEnt))
+                if (slotItemQuery.TryGet(targetGameEnt, out var slotItemRow))
                 {
-                    var (_, g, sp) = slotItemQuery.Get(targetGameEnt);
+                    var (_, g, sp) = slotItemRow;
                     targetGraphic = g.Ref.Value;
                     targetItemX = sp.Ref.X;
                     targetItemY = sp.Ref.Y;
                 }
-                else if (itemDataQuery.Contains(targetGameEnt))
+                else if (itemDataQuery.TryGet(targetGameEnt, out var itemDataRow))
                 {
-                    var (_, g, p) = itemDataQuery.Get(targetGameEnt);
+                    var (_, g, p) = itemDataRow;
                     targetGraphic = g.Ref.Value;
                     targetItemX = p.Ref.X;
                     targetItemY = p.Ref.Y;
@@ -691,9 +691,9 @@ internal readonly struct PickupPlugin : IPlugin
             // Distance is measured against the owning container, not the item
             // (matches legacy: thisCont = World.Get(RootContainer)).
             uint ownerSerial = 0;
-            if (containerQuery.Contains(link.Ref.Container))
+            if (containerQuery.TryGet(link.Ref.Container, out var ownerWinRow))
             {
-                var (_, _, _, pwindow) = containerQuery.Get(link.Ref.Container);
+                var (_, _, _, pwindow) = ownerWinRow;
                 ownerSerial = pwindow.Ref.Serial;
             }
             if (ownerSerial != 0 && !IsContainerInRange(ownerSerial, playerPos.Ref, entitiesMap.Value, itemDataQuery, parentQuery, playerQuery))
@@ -720,9 +720,9 @@ internal readonly struct PickupPlugin : IPlugin
                 grabbedItem.Value.DropTargetSerial = targetSerial;
                 itemSent = true;
             }
-            else if (containerQuery.Contains(link.Ref.Container))
+            else if (containerQuery.TryGet(link.Ref.Container, out var parentWinRow))
             {
-                var (_, ptag, pcomputed, pwindow) = containerQuery.Get(link.Ref.Container);
+                var (_, ptag, pcomputed, pwindow) = parentWinRow;
                 var (x, y) = ClampToContainer(
                     mouse.Value.Position, pcomputed.Ref, ptag.Ref,
                     assets.Value, grabbedItem.Value.Graphic, uiScale.Value);
@@ -738,9 +738,9 @@ internal readonly struct PickupPlugin : IPlugin
         }
 
         // Case 3: world drop (unchanged from prior behavior).
-        if (worldQuery.Contains(target))
+        if (worldQuery.TryGet(target, out var worldHitRow))
         {
-            (var targetEntity, var targetSerial, var targetWorldPos) = worldQuery.Get(target);
+            (var targetEntity, var targetSerial, var targetWorldPos) = worldHitRow;
             var serial = targetSerial.IsValid() ? targetSerial.Ref.Value : 0xFFFF_FFFF;
             (ushort tx, ushort ty, sbyte tz) = targetWorldPos.Ref;
             if (serial != 0xFFFF_FFFF) (tx, ty, tz) = (0, 0, 0);
@@ -776,8 +776,8 @@ internal readonly struct PickupPlugin : IPlugin
         var (playerEnt, _) = playerQuery.Get();
         if (root == playerEnt.Ref) return true;
 
-        if (!itemDataQuery.Contains(root)) return true;
-        var (_, _, pos) = itemDataQuery.Get(root);
+        if (!itemDataQuery.TryGet(root, out var rootRow)) return true;
+        var (_, _, pos) = rootRow;
         var dx = Math.Abs(playerPos.X - pos.Ref.X);
         var dy = Math.Abs(playerPos.Y - pos.Ref.Y);
         return Math.Max(dx, dy) <= Constants.DRAG_ITEMS_DISTANCE;
@@ -788,8 +788,8 @@ internal readonly struct PickupPlugin : IPlugin
         var cur = start;
         for (int i = 0; i < 16; i++)
         {
-            if (!parentQuery.Contains(cur)) return cur;
-            var (_, parent) = parentQuery.Get(cur);
+            if (!parentQuery.TryGet(cur, out var parentRow)) return cur;
+            var (_, parent) = parentRow;
             var pid = (ulong)parent.Ref.Id;
             if (pid == 0 || pid == cur) return cur;
             cur = pid;

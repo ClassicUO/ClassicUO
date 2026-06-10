@@ -181,10 +181,10 @@ internal sealed class TextOverHeadManager
             if (list.Count == 0 || list.First == null)
                 continue;
 
-            if (!networkEntities.TryGet(list.First.Value.Serial, out var entId) || !query.Contains(entId))
+            if (!networkEntities.TryGet(list.First.Value.Serial, out var entId) || !query.TryGet(entId, out var posRow))
                 continue;
 
-            (var worldPos, var offset) = query.Get(entId);
+            (var worldPos, var offset) = posRow;
 
             var position = Isometric.IsoToScreen(worldPos.Ref.X, worldPos.Ref.Y, worldPos.Ref.Z);
             if (!Unsafe.IsNullRef(ref offset))

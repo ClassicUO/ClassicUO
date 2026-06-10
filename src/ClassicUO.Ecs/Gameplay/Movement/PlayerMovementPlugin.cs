@@ -433,14 +433,14 @@ readonly struct PlayerMovementPlugin : IPlugin
         if (!chunksLoaded.TryGetValue((x >> 3, y >> 3), out var val))
             return;
 
-        if (childrenQuery.Contains(val.entity))
+        if (childrenQuery.TryGet(val.entity, out var childrenRow))
         {
-            (_, var children) = childrenQuery.Get(val.entity);
+            (_, var children) = childrenRow;
             foreach (var child in children.Ref)
             {
-                if (tileQuery.Contains(child))
+                if (tileQuery.TryGet(child, out var tileRow))
                 {
-                    (var pos, var graphic, var stretched) = tileQuery.Get(child);
+                    (var pos, var graphic, var stretched) = tileRow;
                     if (pos.Ref.X != x || pos.Ref.Y != y)
                         continue;
 
@@ -488,9 +488,9 @@ readonly struct PlayerMovementPlugin : IPlugin
                     list.Add(tinfo);
                 }
 
-                if (staticsQuery.Contains(child))
+                if (staticsQuery.TryGet(child, out var staticRow))
                 {
-                    (var pos, var graphic) = staticsQuery.Get(child);
+                    (var pos, var graphic) = staticRow;
                     if (pos.Ref.X != x || pos.Ref.Y != y)
                         continue;
 

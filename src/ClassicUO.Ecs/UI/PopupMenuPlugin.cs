@@ -119,8 +119,8 @@ internal readonly struct PopupMenuPlugin : IPlugin
         foreach (var _ in popupQ) return;
 
         var target = selected.Value.Entity;
-        if (!serialQ.Contains(target)) return;
-        var (_, ser) = serialQ.Get(target);
+        if (!serialQ.TryGet(target, out var serialRow)) return;
+        var (_, ser) = serialRow;
         if (ser.Ref.Value == 0) return;
 
         // Ignore clicks that landed on a gump window, not the world.
@@ -388,8 +388,8 @@ internal readonly struct PopupMenuPlugin : IPlugin
         var pos = mouse.Value.Position;
         foreach (var (_, bb, row) in rowsQ)
         {
-            if (!barsQ.Contains(row.Ref.Bar)) continue;
-            var (_, bar) = barsQ.Get(row.Ref.Bar);
+            if (!barsQ.TryGet(row.Ref.Bar, out var barRow)) continue;
+            var (_, bar) = barRow;
             bar.Ref.Value = Contains(bb.Ref, pos) ? Highlight : Transparent;
         }
     }
@@ -405,9 +405,9 @@ internal readonly struct PopupMenuPlugin : IPlugin
 
     private static void DespawnSubtree(Commands commands, ulong e, Query<Data<TinyEcs.Children>> childrenQ)
     {
-        if (childrenQ.Contains(e))
+        if (childrenQ.TryGet(e, out var childrenRow))
         {
-            var (_, kids) = childrenQ.Get(e);
+            var (_, kids) = childrenRow;
             foreach (var cid in kids.Ref)
                 DespawnSubtree(commands, cid, childrenQ);
         }

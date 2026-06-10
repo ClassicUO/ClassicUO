@@ -164,17 +164,17 @@ internal readonly struct WindowDragPlugin : IPlugin
             if (noCloseQ.Contains(target))
                 return;
 
-            if (containerQuery.Contains(target))
+            if (containerQuery.TryGet(target, out var containerRow))
             {
-                var (_, window) = containerQuery.Get(target);
+                var (_, window) = containerRow;
                 closedWriter.Send(new ContainerClosedEvent(window.Ref.Serial));
                 hostMsgs.Send(new HostMessage.ContainerClosed(window.Ref.Serial));
                 return;
             }
 
-            if (serverGumpQuery.Contains(target))
+            if (serverGumpQuery.TryGet(target, out var serverGumpRow))
             {
-                var (_, sg) = serverGumpQuery.Get(target);
+                var (_, sg) = serverGumpRow;
                 net.Value.Send_GumpResponse(sg.Ref.Sender, sg.Ref.GumpId, 0,
                     Array.Empty<uint>(), Array.Empty<Tuple<ushort, string>>());
                 if (serverGumpRegistry.Value.ByGumpId.TryGetValue(sg.Ref.GumpId, out var r) && r == target)
@@ -257,10 +257,10 @@ internal readonly struct WindowDragPlugin : IPlugin
         // the cursor so it tracks like legacy AttemptDragControl.
         if (forced.Value.Owner != 0)
         {
-            if (movables.Contains(forced.Value.Owner))
+            if (movables.TryGet(forced.Value.Owner, out var forcedRow))
             {
                 var ownerF = forced.Value.Owner;
-                var (_, nodeF, zF) = movables.Get(ownerF);
+                var (_, nodeF, zF) = forcedRow;
                 var pos = mouse.Value.Position;
                 float wF = nodeF.Ref.Width.Type == ValType.Px ? nodeF.Ref.Width.Value : 0f;
                 float hF = nodeF.Ref.Height.Type == ValType.Px ? nodeF.Ref.Height.Value : 0f;
@@ -332,7 +332,7 @@ internal readonly struct WindowDragPlugin : IPlugin
 
         if (!anchor.Value.Active) return;
 
-        if (!movables.Contains(anchor.Value.Owner))
+        if (!movables.TryGet(anchor.Value.Owner, out var anchorRow))
         {
             anchor.Value.Active = false;
             anchor.Value.Owner = 0;
@@ -340,7 +340,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         }
 
         var delta = mouse.Value.Position - anchor.Value.Mouse;
-        var (_, ownerNode, _) = movables.Get(anchor.Value.Owner);
+        var (_, ownerNode, _) = anchorRow;
         ownerNode.Ref.PositionType = PositionType.Absolute;
         ownerNode.Ref.Left = Val.Px(anchor.Value.OriginX + delta.X);
         ownerNode.Ref.Top = Val.Px(anchor.Value.OriginY + delta.Y);
