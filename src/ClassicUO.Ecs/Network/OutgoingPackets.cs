@@ -974,6 +974,132 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
+        // Mirrors main's Send_CreateCharacter (0x00 / 0xF8) with the character
+        // data flattened to plain args — the ECS branch has no PlayerMobile to
+        // read layers/skills from.
+        public static void Send_CreateCharacter(
+            this NetClient socket,
+            ClientVersion version,
+            ClientFlags protocol,
+            string name,
+            bool isFemale,
+            RaceType race,
+            byte strength,
+            byte dexterity,
+            byte intelligence,
+            ReadOnlySpan<(byte Index, byte Value)> skills,
+            ushort skinHue,
+            ushort hairGraphic,
+            ushort hairHue,
+            ushort beardGraphic,
+            ushort beardHue,
+            ushort shirtHue,
+            ushort pantsHue,
+            int cityIndex,
+            uint slot,
+            uint clientIP,
+            byte profession)
+        {
+            const byte ID = 0x00;
+            const byte ID_NEW = 0xF8;
+
+            byte id = ID;
+            int skillcount = 3;
+
+            if (version >= ClientVersion.CV_70160)
+            {
+                id = ID_NEW;
+                ++skillcount;
+            }
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(id);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt32BE(0xEDEDEDED);
+            writer.WriteUInt32BE(0xFFFF_FFFF);
+            writer.WriteUInt8(0x00);
+            writer.WriteASCII(name, 30);
+            writer.WriteZero(2);
+
+            writer.WriteUInt32BE((uint) protocol);
+            writer.WriteUInt32BE(0x01);
+            writer.WriteUInt32BE(0x00);
+            writer.WriteUInt8(profession);
+            writer.WriteZero(15);
+
+            byte val;
+
+            if (version < ClientVersion.CV_4011D)
+            {
+                val = (byte) (isFemale ? 0x01 : 0x00);
+            }
+            else
+            {
+                val = (byte) race;
+
+                if (version < ClientVersion.CV_7000)
+                {
+                    val--;
+                }
+
+                val = (byte) (val * 2 + (byte) (isFemale ? 0x01 : 0x00));
+            }
+
+            writer.WriteUInt8(val);
+            writer.WriteUInt8(strength);
+            writer.WriteUInt8(dexterity);
+            writer.WriteUInt8(intelligence);
+
+            for (int i = 0; i < skillcount; i++)
+            {
+                if (i < skills.Length)
+                {
+                    writer.WriteUInt8(skills[i].Index);
+                    writer.WriteUInt8(skills[i].Value);
+                }
+                else
+                {
+                    writer.WriteZero(2);
+                }
+            }
+
+            writer.WriteUInt16BE(skinHue);
+
+            writer.WriteUInt16BE(hairGraphic);
+            writer.WriteUInt16BE(hairHue);
+            writer.WriteUInt16BE(beardGraphic);
+            writer.WriteUInt16BE(beardHue);
+
+            writer.WriteUInt16BE((ushort) cityIndex);
+            writer.WriteZero(2);
+            writer.WriteUInt16BE((ushort) slot);
+            writer.WriteUInt32BE(clientIP);
+
+            writer.WriteUInt16BE(shirtHue);
+            writer.WriteUInt16BE(pantsHue);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort) writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+
+            writer.Dispose();
+        }
+
         public static void Send_PickUpRequest(this NetClient socket, uint serial, ushort count)
         {
             const byte ID = 0x07;

@@ -44,9 +44,10 @@ internal readonly struct LoginPacketsPlugin : IPlugin
             On<PacketReceived<OnCharacterListPacket_0xA9>> trig,
             ResMut<GameContext> gameCtx,
             ResMut<NextState<GameState>> gameState,
+            ResMut<CharacterListSnapshot> snapshot,
             EventWriter<CharacterSelectionInfoEvent> characterWriter,
             EventWriter<HostMessage> hostMsgsWriter)
-            => HandleCharacterListPacket(trig.Event.Packet, gameCtx, gameState, characterWriter, hostMsgsWriter));
+            => HandleCharacterListPacket(trig.Event.Packet, gameCtx, gameState, snapshot, characterWriter, hostMsgsWriter));
 
         app.AddObserver((
             On<PacketReceived<OnServerRelayPacket_0x8C>> trig,
@@ -96,12 +97,18 @@ internal readonly struct LoginPacketsPlugin : IPlugin
         OnCharacterListPacket_0xA9 packet,
         ResMut<GameContext> gameCtx,
         ResMut<NextState<GameState>> gameState,
+        ResMut<CharacterListSnapshot> snapshot,
         EventWriter<CharacterSelectionInfoEvent> characterWriter,
         EventWriter<HostMessage> hostMsgsWriter
     )
     {
         var towns = ParseTowns(packet, gameCtx.Value.ClientVersion);
         gameCtx.Value.ClientFeatures = packet.Flags;
+
+        // Kept for flows that need the data after the event is consumed —
+        // character creation reads towns (city step) and the first free slot.
+        snapshot.Value.Characters = packet.Characters;
+        snapshot.Value.Towns = towns;
 
         gameState.Value.Set(GameState.CharacterSelection);
         characterWriter.Send(new CharacterSelectionInfoEvent

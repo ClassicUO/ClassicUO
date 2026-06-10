@@ -55,6 +55,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
 
             .AddPlugin<ServerSelectionPlugin>()
             .AddPlugin<CharacterSelectionPlugin>()
+            .AddPlugin<CharacterCreationPlugin>()
             .AddPlugin<LoginErrorScreenPlugin>();
     }
 

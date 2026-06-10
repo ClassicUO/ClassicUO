@@ -209,10 +209,13 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
             commands.Entity(rows[0].LabelEnt).Insert(new TextColor(highlightColor));
         }
 
-        // New character button (Buttons.New = 0x159D/0x159F/0x159E).
+        // New character button (Buttons.New = 0x159D/0x159F/0x159E) —
+        // mirrors main's Buttons.New: loginScene.StartCharCreation().
         mainMenu.AddChild(gumpBuilder.Value.AddButton(
             commands, (0x159D, 0x159F, 0x159E), XnaVector3.UnitZ, new XnaVector2(224, 350))
-            .Insert<CharacterSelectionScene>());
+            .Insert<CharacterSelectionScene>()
+            .Observe((On<UiClick> _, ResMut<NextState<GameState>> state) =>
+                state.Value.Set(GameState.CharacterCreation)));
 
         // Delete button (0x159A/0x159C/0x159B).
         mainMenu.AddChild(gumpBuilder.Value.AddButton(
@@ -337,6 +340,15 @@ internal struct CharacterSelectionInfoEvent
 {
     public List<CharacterInfo> Characters;
     public List<TownInfo> Towns;
+}
+
+// Last 0xA9 character list, kept as a resource (the event above is consumed
+// the frame it arrives). Character creation reads Towns for the city map and
+// Characters for the first free slot index.
+internal sealed class CharacterListSnapshot
+{
+    public List<CharacterInfo> Characters = new();
+    public List<TownInfo> Towns = new();
 }
 
 internal record struct CharacterInfo(
