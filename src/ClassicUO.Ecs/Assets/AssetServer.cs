@@ -11,6 +11,7 @@ internal sealed class AssetsServer
         Texmaps = new Renderer.Texmaps.Texmap(fileManager.Texmaps, device);
         Animations = new Renderer.Animations.Animations(fileManager.Animations, device);
         Gumps = new Renderer.Gumps.Gump(fileManager.Gumps, device);
+        MultiMaps = new Renderer.MultiMaps.MultiMap(fileManager.MultiMaps, device);
         Skills = fileManager.Skills;
     }
 
@@ -27,5 +28,6 @@ internal sealed class AssetsServer
     public Renderer.Animations.Animations Animations { get; }
     public Renderer.Texmaps.Texmap Texmaps { get; }
     public Renderer.Gumps.Gump Gumps { get; }
+    public Renderer.MultiMaps.MultiMap MultiMaps { get; }
     public SkillsLoader Skills { get; }
 }

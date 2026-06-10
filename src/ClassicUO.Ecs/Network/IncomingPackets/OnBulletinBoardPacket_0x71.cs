@@ -10,6 +10,9 @@ internal struct OnBulletinBoardPacket_0x71 : IPacket
     public byte Type { get; private set; }
     public uint BoardSerial { get; private set; }
 
+    // Type 0 data
+    public string BoardName { get; private set; }
+
     // Type 1 data
     public uint? MessageSerial { get; private set; }
     public uint? MessageParentSerial { get; private set; }
@@ -26,6 +29,7 @@ internal struct OnBulletinBoardPacket_0x71 : IPacket
         Type = reader.ReadUInt8();
         BoardSerial = reader.ReadUInt32BE();
 
+        BoardName = string.Empty;
         MessageSerial = null;
         MessageParentSerial = null;
         MessagePreview = string.Empty;
@@ -37,24 +41,31 @@ internal struct OnBulletinBoardPacket_0x71 : IPacket
 
         switch (Type)
         {
+            case 0:
+                BoardName = reader.ReadUTF8(22, true);
+                break;
+
             case 1:
                 MessageSerial = reader.ReadUInt32BE();
                 MessageParentSerial = reader.ReadUInt32BE();
 
+                // poster - subject - datetime (legacy joins with " - ").
                 var partLen = reader.ReadUInt8();
-                var preview = reader.ReadASCII(partLen, true);
+                var preview = partLen > 0 ? reader.ReadUTF8(partLen, true) : string.Empty;
                 partLen = reader.ReadUInt8();
-                preview += " " + reader.ReadASCII(partLen, true);
+                preview += " - " + (partLen > 0 ? reader.ReadUTF8(partLen, true) : string.Empty);
                 partLen = reader.ReadUInt8();
-                preview += " " + reader.ReadASCII(partLen, true);
+                preview += " - " + (partLen > 0 ? reader.ReadUTF8(partLen, true) : string.Empty);
                 MessagePreview = preview.Trim();
                 break;
 
             case 2:
+                MessageSerial = reader.ReadUInt32BE();
+
                 var len = reader.ReadUInt8();
                 Author = reader.ReadASCII(len, true);
                 len = reader.ReadUInt8();
-                Subject = reader.ReadASCII(len, true);
+                Subject = len > 0 ? reader.ReadUTF8(len, true) : string.Empty;
                 len = reader.ReadUInt8();
                 DateTime = reader.ReadASCII(len, true);
 
@@ -70,7 +81,7 @@ internal struct OnBulletinBoardPacket_0x71 : IPacket
                 for (var i = 0; i < lineCount; ++i)
                 {
                     var lineLen = reader.ReadUInt8();
-                    Lines.Add(reader.ReadASCII(lineLen, true));
+                    Lines.Add(lineLen > 0 ? reader.ReadUTF8(lineLen, true) : string.Empty);
                 }
                 break;
         }

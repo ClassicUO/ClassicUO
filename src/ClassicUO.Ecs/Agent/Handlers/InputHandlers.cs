@@ -66,7 +66,39 @@ internal static class InputHandlers
         d.Register("debug.openTip", DebugOpenTip);
         d.Register("debug.openBook", DebugOpenBook);
         d.Register("debug.openMessageBox", DebugOpenMessageBox);
+        d.Register("debug.openBulletinBoard", DebugOpenBulletinBoard);
+        d.Register("debug.openMap", DebugOpenMap);
         d.Register("debug.dumpLayout", DebugDumpLayout);
+    }
+
+    // Test-only: open a bulletin board (0x71 type 0 + a few type 1 summaries)
+    // through the real observer path.
+    public static JsonRpcResponse DebugOpenBulletinBoard(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        var q = ctx.Runtime.GetResource<DebugBulletinQueue>();
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object
+            && p.TryGetProperty("message", out var m) && m.ValueKind == JsonValueKind.True)
+            q.OpenMessage = true;
+        q.Pending = true;
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true } };
+    }
+
+    // Test-only: open a treasure-map gump (0x90) baked from the local multimap.
+    // Optional x/y region + size params.
+    public static JsonRpcResponse DebugOpenMap(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        var q = ctx.Runtime.GetResource<DebugMapQueue>();
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object)
+        {
+            if (p.TryGetProperty("startX", out var sx) && sx.TryGetInt32(out var v1)) q.StartX = v1;
+            if (p.TryGetProperty("startY", out var sy) && sy.TryGetInt32(out var v2)) q.StartY = v2;
+            if (p.TryGetProperty("endX", out var ex) && ex.TryGetInt32(out var v3)) q.EndX = v3;
+            if (p.TryGetProperty("endY", out var ey) && ey.TryGetInt32(out var v4)) q.EndY = v4;
+            if (p.TryGetProperty("width", out var w) && w.TryGetInt32(out var v5)) q.Width = v5;
+            if (p.TryGetProperty("height", out var h) && h.TryGetInt32(out var v6)) q.Height = v6;
+        }
+        q.Pending = true;
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true } };
     }
 
     // Test-only: toggle "print the UI element stack under each left-click" (set

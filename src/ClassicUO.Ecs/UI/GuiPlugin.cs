@@ -638,6 +638,11 @@ internal enum UOCustomKind : byte
     // a 2px white selection dot over SelectedIndex. Colors are baked by the owning
     // plugin (it has HuesLoader); the renderer just blits quads.
     HueGrid,
+    // A plugin-owned Texture2D (UOCustomRender.Dynamic) stretched to the node
+    // box, with an optional white polyline (Points, node-relative) drawn over
+    // it. Used by the treasure-map gump: the multimap bake is the texture, the
+    // plotted course is the polyline.
+    DynTexture,
 }
 
 // Reference type (NOT an ECS component) — the instance lives in UiCustom.Data
@@ -673,6 +678,9 @@ internal sealed class UOCustomRender
     // and updated by MiniMapPlugin's bake system; the renderer just draws it
     // over the bg gump. Null until the first bake.
     public Microsoft.Xna.Framework.Graphics.Texture2D Dynamic;
+    // For UOCustomKind.DynTexture: node-relative polyline drawn over Dynamic
+    // (the treasure-map plotted course). Null/short list draws nothing.
+    public System.Collections.Generic.List<Vector2> Points;
 
     // For UOCustomKind.WrappedText: the wrapped (optionally HTML) text run plus
     // the parse params. The atlas drawer reproduces the same layout that

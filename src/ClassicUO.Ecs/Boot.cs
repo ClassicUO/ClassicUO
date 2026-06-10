@@ -58,6 +58,8 @@ internal readonly struct CuoPlugin : IPlugin
         app.AddPlugin<TipNoticeGumpPlugin>();
         app.AddPlugin<BookGumpPlugin>();
         app.AddPlugin<MessageBoxGumpPlugin>();
+        app.AddPlugin<BulletinBoardGumpPlugin>();
+        app.AddPlugin<MapGumpPlugin>();
         app.AddPlugin<SplitMenuPlugin>();
         app.AddPlugin<PopupMenuPlugin>();
         app.AddPlugin<TooltipPlugin>();

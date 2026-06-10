@@ -602,6 +602,34 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                 break;
             }
 
+            case UOCustomKind.DynTexture:
+            {
+                // Plugin-owned texture (treasure-map multimap bake) stretched to
+                // the node box + the plotted course polyline over it.
+                if (custom.Dynamic == null)
+                    break;
+                b.Draw(
+                    custom.Dynamic,
+                    new Rectangle((int)bb.X, (int)bb.Y, (int)bb.Width, (int)bb.Height),
+                    custom.Dynamic.Bounds,
+                    custom.Hue,
+                    0f,
+                    Vector2.Zero,
+                    SpriteEffects.None,
+                    cmd.ZIndex);
+                var pts = custom.Points;
+                if (pts != null)
+                    for (int i = 0; i + 1 < pts.Count; i++)
+                        b.DrawLine(
+                            white,
+                            new Vector2(bb.X + pts[i].X, bb.Y + pts[i].Y),
+                            new Vector2(bb.X + pts[i + 1].X, bb.Y + pts[i + 1].Y),
+                            Vector3.UnitZ,
+                            1,
+                            cmd.ZIndex);
+                break;
+            }
+
             case UOCustomKind.Land:
             {
                 // Land tile (ART block < 0x4000): a 44x44 diamond. Fit to the node

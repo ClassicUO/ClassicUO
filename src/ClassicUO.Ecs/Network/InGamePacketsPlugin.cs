@@ -278,20 +278,16 @@ readonly struct InGamePacketsPlugin : IPlugin
         app.AddObserver<On<PacketReceived<OnUpdateSkillsPacket_0x3A>>,
             ResMut<PlayerSkills>>(OnUpdateSkills);
         Stub<OnSoundEffectPacket_0x54>(app);
-        Stub<OnMapDataPacket_0x56>(app);
         Stub<OnWeatherPacket_0x65>(app);
         // 0x66 (book pages) is handled by BookGumpPlugin.
         Stub<OnPlayMusicPacket_0x6D>(app);
         Stub<OnCharacterAnimationPacket_0x6E>(app);
         Stub<OnGraphicEffectPacket_0x70>(app);
-        Stub<OnBulletinBoardPacket_0x71>(app);
         Stub<OnPingPacket_0x73>(app);
         Stub<OnBuyListPacket_0x74>(app);
         Stub<OnUpdateCharacterPacket_0x77>(app);
         Stub<OnOpenMenuPacket_0x7C>(app);
         Stub<OnCorpseEquipmentPacket_0x89>(app);
-        Stub<OnShowMapPacket_0x90_Pre308Z>(app);
-        Stub<OnShowMapPacket_0x90_Post308Z>(app);
         // 0x93 (open book, old header) is handled by BookGumpPlugin.
         Stub<OnColorPickerPacket_0x95>(app);
         Stub<OnMovePlayerPacket_0x97>(app);
@@ -332,8 +328,6 @@ readonly struct InGamePacketsPlugin : IPlugin
         Stub<OnAddWaypointPacket_0xE5>(app);
         Stub<OnRemoveWaypointPacket_0xE6>(app);
         Stub<OnKrriosClientPacket_0xF0>(app);
-        Stub<OnShowMapFacetPacket_0xF5_Pre308Z>(app);
-        Stub<OnShowMapFacetPacket_0xF5_Post308Z>(app);
         Stub<OnBoatMovingPacket_0xF6>(app);
         Stub<OnPacketListPacket_0xF7>(app);
     }

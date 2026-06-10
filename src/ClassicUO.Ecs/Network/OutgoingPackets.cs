@@ -2613,5 +2613,123 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
+
+        // 0x71 subtype 3 — request a bulletin message body (double-click a row).
+        public static void Send_BulletinBoardRequestMessage(this NetClient socket, uint serial, uint msgSerial)
+        {
+            Send_BulletinBoardCommand(socket, 0x03, serial, msgSerial);
+        }
+
+        // 0x71 subtype 5 — post a new message / reply (msgSerial = replied-to or 0).
+        public static void Send_BulletinBoardPostMessage(this NetClient socket, uint serial, uint msgSerial, string subject, string text)
+        {
+            const byte ID = 0x71;
+            int length = socket.PacketsTable.GetPacketLength(ID);
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+            if (length < 0)
+                writer.WriteZero(2);
+
+            subject = subject.Replace("\r\n", "\n");
+            text = text.Replace("\r\n", "\n");
+
+            writer.WriteUInt8(0x05);
+            writer.WriteUInt32BE(serial);
+            writer.WriteUInt32BE(msgSerial);
+
+            byte[] title = Encoding.UTF8.GetBytes(subject);
+            writer.WriteUInt8((byte)(title.Length + 1));
+            writer.Write(title);
+            writer.WriteUInt8(0x00);
+
+            var lines = text.Split('\n');
+            writer.WriteUInt8((byte)Math.Max(1, lines.Length));
+            if (lines.Length == 0)
+                lines = new[] { text };
+            foreach (var line in lines)
+            {
+                var bytes = Encoding.UTF8.GetBytes(line);
+                writer.WriteUInt8((byte)(bytes.Length + 1));
+                writer.Write(bytes.AsSpan());
+                writer.WriteUInt8(0x00);
+            }
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
+        // 0x71 subtype 6 — remove own message.
+        public static void Send_BulletinBoardRemoveMessage(this NetClient socket, uint serial, uint msgSerial)
+        {
+            Send_BulletinBoardCommand(socket, 0x06, serial, msgSerial);
+        }
+
+        private static void Send_BulletinBoardCommand(NetClient socket, byte subtype, uint serial, uint msgSerial)
+        {
+            const byte ID = 0x71;
+            int length = socket.PacketsTable.GetPacketLength(ID);
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+            if (length < 0)
+                writer.WriteZero(2);
+
+            writer.WriteUInt8(subtype);
+            writer.WriteUInt32BE(serial);
+            writer.WriteUInt32BE(msgSerial);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
+        // 0x56 — treasure-map actions: 1 add pin, 5 clear course, 6 toggle plot.
+        public static void Send_MapMessage(this NetClient socket, uint serial, byte action, byte pin, ushort x, ushort y)
+        {
+            const byte ID = 0x56;
+            int length = socket.PacketsTable.GetPacketLength(ID);
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+            if (length < 0)
+                writer.WriteZero(2);
+
+            writer.WriteUInt32BE(serial);
+            writer.WriteUInt8(action);
+            writer.WriteUInt8(pin);
+            writer.WriteUInt16BE(x);
+            writer.WriteUInt16BE(y);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
     }
 }
