@@ -19,7 +19,7 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class ModernBookGump : Gump
     {
-        internal const int MAX_BOOK_LINES = 8;
+        internal const int MAX_BOOK_LINES = 10;
         private const int MAX_BOOK_CHARS_PER_LINE = 53;
         private const int LEFT_X = 38;
         private const int RIGHT_X = 223;
@@ -320,7 +320,7 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             string[] text = new string[MAX_BOOK_LINES];
 
-                            for (int x = (i - 1) * MAX_BOOK_LINES, l = 0; x < (i - 1) * MAX_BOOK_LINES + 8; x++, l++)
+                            for (int x = (i - 1) * MAX_BOOK_LINES, l = 0; x < (i - 1) * MAX_BOOK_LINES + MAX_BOOK_LINES; x++, l++)
                             {
                                 text[l] = BookLines[x];
                             }
@@ -793,9 +793,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                     for (int i = 0; i < _pageLines.Length; i++)
                     {
-                        if (!_pagesChanged[(i >> 3) + 1] && _handler[i] != _pageLines[i])
+                        if (!_pagesChanged[i / MAX_BOOK_LINES + 1] && _handler[i] != _pageLines[i])
                         {
-                            _pagesChanged[(i >> 3) + 1] = true;
+                            _pagesChanged[i / MAX_BOOK_LINES + 1] = true;
                         }
 
                         _sb.Append(_pageLines[i] = _handler[i]);
