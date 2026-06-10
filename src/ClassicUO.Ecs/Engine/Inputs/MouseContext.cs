@@ -1,23 +1,26 @@
 using ClassicUO.Input;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using TinyEcs.Bevy.Input;
 
 namespace ClassicUO.Ecs;
 
-internal class MouseContext : InputContext<MouseButtonType>
+// Thin FNA adapter over TinyEcs.Bevy.Input.MouseInput. The adapter owns
+// everything device/host specific — FNA polling, physical→logical DpiScale
+// conversion, window-focus gate, AGENT_BUILD synthetic injection — and feeds
+// the library a per-frame snapshot. Edge detection, double-click timing,
+// consume flags and wheel-consume semantics live in the library; this class
+// re-exposes them in XNA types (Vector2, MouseButtonType) so call sites are
+// untouched. MouseButtonType and MouseButton share numeric values — casts are
+// direct.
+internal class MouseContext
 {
-    private static float DCLICK_DELTA = 300;
+    // protected so a headless test double (see ClassicUO.Ecs.Tests) can feed
+    // frames straight into the library without an OS mouse or FNA Game.
+    protected readonly MouseInput Input = new();
+    protected readonly Microsoft.Xna.Framework.Game _game;
 
-    // protected so a headless test double (see ClassicUO.Ecs.Tests) can inject
-    // a frame's raw state without an OS mouse or FNA Game.
-    protected MouseState _oldState, _newState;
-    private float _lastClickTime, _currentTime;
-    private readonly MouseButtonType?[] _lastClickButtons = new MouseButtonType?[2];
-    private Vector2 _lastMouseClickPosition;
-    // Buttons consumed by a UI handler this frame. Cleared at the start of
-    // Update so the flag only suppresses reads for the remainder of the tick.
-    // Lets UI close systems eat a right-click before PlayerMovement sees it.
-    private readonly bool[] _consumed = new bool[(int)MouseButtonType.Size];
+    private MouseState _oldState, _newState;
 
 #if AGENT_BUILD
     private bool _agentSynthEnabled;
@@ -44,118 +47,37 @@ internal class MouseContext : InputContext<MouseButtonType>
     internal bool AgentSyntheticActive => _agentSynthEnabled;
 #endif
 
-    internal MouseContext(Microsoft.Xna.Framework.Game game) : base(game) { }
+    internal MouseContext(Microsoft.Xna.Framework.Game game) => _game = game;
 
     // Window-focus gate for the press-edge checks. Real input only counts while
     // the FNA window is focused; a headless subclass overrides this to stay
     // "focused" with no Game.
     protected virtual bool IsActiveWindow => _game?.IsActive ?? false;
 
-    // Reset per-frame consume flags. Called at the top of Update; exposed so a
-    // headless frame-injector can reproduce the same per-frame reset.
-    protected void ClearConsumed()
+    // All public positions are LOGICAL pixels (post-DpiScale): Update divides
+    // physical input by DpiScale before feeding the library. UI layout,
+    // Camera.Bounds and gump hit-tests all reason in logical space, so a single
+    // conversion here keeps every downstream consumer consistent. AGENT_BUILD
+    // synthetic input is already logical (the agent sends UO-grid coords), so
+    // GetScale returns 1 in that path.
+    public Vector2 Position => ToXna(Input.Position);
+    public Vector2 PositionOffset => ToXna(Input.PositionOffset);
+    public Vector2 DraggingOffset => ToXna(Input.DraggingOffset);
+
+    public float Wheel => Input.Wheel;
+    public bool WheelConsumed => Input.WheelConsumed;
+    public void ConsumeWheel() => Input.ConsumeWheel();
+
+    public bool IsPressed(MouseButtonType button) => Input.IsPressed((MouseButton)button);
+    public bool IsPressedOnce(MouseButtonType button) => Input.IsPressedOnce((MouseButton)button);
+    public bool IsReleased(MouseButtonType button) => Input.IsReleased((MouseButton)button);
+    public bool IsPressedDouble(MouseButtonType button) => Input.IsPressedDouble((MouseButton)button);
+
+    public void Consume(MouseButtonType button) => Input.Consume((MouseButton)button);
+    public bool IsConsumed(MouseButtonType button) => Input.IsConsumed((MouseButton)button);
+
+    public virtual void Update(float totalTimeMs)
     {
-        for (int i = 0; i < _consumed.Length; i++)
-            _consumed[i] = false;
-        WheelConsumed = false;
-    }
-
-
-    // All public positions return LOGICAL pixels (post-DpiScale). Mirrors
-    // main's Mouse.Update which divides physical input by DpiScale before
-    // storing. UI layout, Camera.Bounds, and gump hit-tests all reason in
-    // logical space, so a single conversion here keeps every downstream
-    // consumer (GameScene world picks, UI clicks, drag offsets) consistent.
-    // AGENT_BUILD synthetic input is already in logical pixels (the agent
-    // sends UO-grid coords), so no division needed in that path — _newState
-    // values are stored pre-scaled below.
-    public Vector2 Position
-    {
-        get
-        {
-            var (sx, sy) = GetScale();
-            return new(_newState.X / sx, _newState.Y / sy);
-        }
-    }
-    public Vector2 PositionOffset
-    {
-        get
-        {
-            var (sx, sy) = GetScale();
-            return new((_newState.X - _oldState.X) / sx, (_newState.Y - _oldState.Y) / sy);
-        }
-    }
-    public Vector2 DraggingOffset
-    {
-        get
-        {
-            // _lastMouseClickPosition is stored in logical pixels (set via
-            // Position which already divides by DpiScale). Subtract in
-            // logical space — do NOT mix raw _newState (physical) with
-            // logical, that double-counts the scale and produces a non-zero
-            // offset on press-down for any DpiScale != 1.
-            var p = Position;
-            return new(p.X - _lastMouseClickPosition.X, p.Y - _lastMouseClickPosition.Y);
-        }
-    }
-
-    private (float, float) GetScale()
-    {
-#if AGENT_BUILD
-        if (_agentSynthEnabled) return (1f, 1f);
-#endif
-        if (_game is UoGame ug)
-        {
-            var d = ug.DpiScale;
-            if (d <= 0f) d = 1f;
-            return (d, d);
-        }
-        return (1f, 1f);
-    }
-    public float Wheel { get; private set; }
-    // Set by a UI handler when the scroll wheel has been consumed for the
-    // current frame (e.g. a scrollable gump was hovered + scrolled). The
-    // camera plugin checks this before applying zoom so wheel input doesn't
-    // pass through gump UI to the world. ConsumeWheel ALSO zeroes the
-    // Wheel reading so any downstream consumer that doesn't honour the
-    // flag still sees a no-op.
-    public bool WheelConsumed { get; private set; }
-    public void ConsumeWheel()
-    {
-        WheelConsumed = true;
-        Wheel = 0f;
-    }
-
-    public override bool IsPressed(MouseButtonType input) => !IsConsumed(input) && VerifyCondition(input, ButtonState.Pressed, ButtonState.Pressed);
-
-    public override bool IsPressedOnce(MouseButtonType input) => !IsConsumed(input) && VerifyCondition(input, ButtonState.Pressed, ButtonState.Released);
-
-    public override bool IsReleased(MouseButtonType input) => !IsConsumed(input) && VerifyCondition(input, ButtonState.Released, ButtonState.Pressed);
-
-    public bool IsPressedDouble(MouseButtonType input) => !IsConsumed(input) && _lastClickButtons[0] == input && _lastClickButtons[1] == input;
-
-    public void Consume(MouseButtonType input)
-    {
-        var idx = (int)input;
-        if (idx >= 0 && idx < _consumed.Length)
-            _consumed[idx] = true;
-    }
-
-    public bool IsConsumed(MouseButtonType input)
-    {
-        var idx = (int)input;
-        return idx >= 0 && idx < _consumed.Length && _consumed[idx];
-    }
-
-    public override void Update(float deltaTime)
-    {
-        ClearConsumed();
-
-        // Advance state FIRST so press-edge detection below uses the same
-        // (_oldState, _newState) pair that downstream systems will see this
-        // frame. Otherwise _lastMouseClickPosition lags by one frame and
-        // DraggingOffset reads as (cursor − 0) on the press-once frame —
-        // tripping pickup drag thresholds instantly.
         _oldState = _newState;
 #if AGENT_BUILD
         if (_agentSynthEnabled)
@@ -171,59 +93,46 @@ internal class MouseContext : InputContext<MouseButtonType>
         {
             _newState = Microsoft.Xna.Framework.Input.Mouse.GetState();
         }
-        _currentTime = deltaTime;
-        Wheel = (_newState.ScrollWheelValue - _oldState.ScrollWheelValue) / 120f;
 
-        for (var button = MouseButtonType.None + 1; button < MouseButtonType.Size; button++)
-        {
-            if (IsPressedDouble(button))
-            {
-                _lastClickButtons[0] = _lastClickButtons[1] = null;
-            }
-
-            if (IsPressedOnce(button))
-            {
-                _lastMouseClickPosition = Position;
-
-                if (_lastClickButtons[0] == null)
-                {
-                    _lastClickButtons[0] = button;
-                    _lastClickTime = _currentTime + DCLICK_DELTA;
-                }
-                else if (_lastClickButtons[0] == button && _lastClickButtons[1] == null)
-                {
-                    _lastClickButtons[1] = button;
-                }
-
-                break;
-            }
-
-            if (IsReleased(button))
-            {
-                _lastMouseClickPosition = Vector2.Zero;
-            }
-        }
-
-        if (_currentTime > _lastClickTime)
-        {
-            _lastClickButtons[0] = _lastClickButtons[1] = null;
-        }
-
-        base.Update(deltaTime);
+        var (sx, sy) = GetScale();
+        var wheelDelta = (_newState.ScrollWheelValue - _oldState.ScrollWheelValue) / 120f;
+#if AGENT_BUILD
+        var active = _agentSynthEnabled || IsActiveWindow;
+#else
+        var active = IsActiveWindow;
+#endif
+        Input.SetSnapshot(
+            new System.Numerics.Vector2(_newState.X / sx, _newState.Y / sy),
+            ToButtons(_newState),
+            wheelDelta,
+            active);
+        Input.Update(totalTimeMs);
     }
 
-    private bool VerifyCondition(MouseButtonType button, ButtonState stateNew, ButtonState stateOld)
+    protected static MouseButtons ToButtons(MouseState state)
+    {
+        var down = MouseButtons.None;
+        if (state.LeftButton == ButtonState.Pressed) down |= MouseButtons.Left;
+        if (state.MiddleButton == ButtonState.Pressed) down |= MouseButtons.Middle;
+        if (state.RightButton == ButtonState.Pressed) down |= MouseButtons.Right;
+        if (state.XButton1 == ButtonState.Pressed) down |= MouseButtons.XButton1;
+        if (state.XButton2 == ButtonState.Pressed) down |= MouseButtons.XButton2;
+        return down;
+    }
+
+    private static Vector2 ToXna(System.Numerics.Vector2 v) => new(v.X, v.Y);
+
+    private (float, float) GetScale()
+    {
 #if AGENT_BUILD
-        => (_agentSynthEnabled || IsActiveWindow) && button switch
-#else
-        => IsActiveWindow && button switch
+        if (_agentSynthEnabled) return (1f, 1f);
 #endif
+        if (_game is UoGame ug)
         {
-            MouseButtonType.Left => _newState.LeftButton == stateNew && _oldState.LeftButton == stateOld,
-            MouseButtonType.Middle => _newState.MiddleButton == stateNew && _oldState.MiddleButton == stateOld,
-            MouseButtonType.Right => _newState.RightButton == stateNew && _oldState.RightButton == stateOld,
-            MouseButtonType.XButton1 => _newState.XButton1 == stateNew && _oldState.XButton1 == stateOld,
-            MouseButtonType.XButton2 => _newState.XButton2 == stateNew && _oldState.XButton2 == stateOld,
-            _ => false
-        };
+            var d = ug.DpiScale;
+            if (d <= 0f) d = 1f;
+            return (d, d);
+        }
+        return (1f, 1f);
+    }
 }

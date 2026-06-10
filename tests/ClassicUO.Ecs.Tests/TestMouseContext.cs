@@ -5,24 +5,31 @@ namespace ClassicUO.Ecs.Tests;
 
 // Headless MouseContext for ECS system tests. No FNA Game, no OS mouse: it
 // stays "focused" (IsActiveWindow) and advances frames via Frame(old, new)
-// instead of Update() (which would read Mouse.GetState()). Press-edge
-// detection (IsPressedOnce / IsReleased / IsPressed) runs the real base logic
-// against the injected states, so systems see exactly what they would at
-// runtime. Registered as the MouseContext resource — systems take
-// Res<MouseContext> and get this transparently.
+// instead of Update() (which would read Mouse.GetState()). Each Frame feeds
+// both raw states straight into the TinyEcs.Bevy.Input library, so press-edge
+// detection (IsPressedOnce / IsReleased / IsPressed) runs the real logic
+// systems see at runtime. Registered as the MouseContext resource — systems
+// take Res<MouseContext> and get this transparently.
 internal sealed class TestMouseContext : MouseContext
 {
+    private float _time;
+
     public TestMouseContext() : base(null) { }
 
     protected override bool IsActiveWindow => true;
 
-    // Advance one frame: reset per-frame consume flags (as Update does), then
-    // set the previous + current raw mouse states the edge checks compare.
+    // Advance one frame: feed the previous then current raw mouse states so
+    // the library's edge checks compare exactly this pair.
     public void Frame(MouseState previous, MouseState current)
     {
-        ClearConsumed();
-        _oldState = previous;
-        _newState = current;
+        Feed(previous);
+        Feed(current);
+    }
+
+    private void Feed(MouseState state)
+    {
+        Input.SetSnapshot(new System.Numerics.Vector2(state.X, state.Y), ToButtons(state));
+        Input.Update(_time += 16f);
     }
 
     // Convenience builders for the common button layouts.
