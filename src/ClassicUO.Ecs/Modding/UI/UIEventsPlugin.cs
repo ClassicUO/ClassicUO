@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ClassicUO.Ecs.Modding.Host;
 using ClassicUO.Ecs.Modding.Input;
 using TinyEcs;
 using TinyEcs.Bevy;
@@ -104,6 +105,53 @@ internal readonly struct UIEventsPlugin : IPlugin
         // drains the same frame.
         var reportEditFn = ReportModTextChanges;
         app.AddSystem(reportEditFn).InStage(Stage.Last).Before("modHoverBoundary").Build();
+
+        var reapFn = ReapDespawnedModNodes;
+        app.AddSystem(reapFn).InStage(Stage.PostUpdate).Build();
+    }
+
+    // The host can despawn a mod's window without the guest asking (right-click
+    // close in WindowDragPlugin, state teardown). The guest's reconciler keeps
+    // rendering the stale ids (Api.cs drops them at the boundary) and its
+    // listeners / text values leak. OnRemove<T> doesn't reliably fire on despawn
+    // (see SplitMenuPlugin), so poll: a mod-owned root alive last frame and gone
+    // now becomes a ui.window.closed CustomEvent so the guest unmounts; listener
+    // / text entries whose node died are pruned.
+    private static void ReapDespawnedModNodes(
+        Query<Data<PluginEntity>> modNodes,
+        Query<Data<PluginEntity>, Without<Parent>> roots,
+        ResMut<ModListeners> listeners,
+        ResMut<ModTextValues> agreed,
+        EventWriter<HostMessage> hostMsgs,
+        Local<HashSet<ulong>> prevRoots,
+        Local<List<ulong>> dead)
+    {
+        dead.Value.Clear();
+        foreach (var id in prevRoots.Value)
+            if (!modNodes.Contains(id))
+                dead.Value.Add(id);
+        foreach (var id in dead.Value)
+        {
+            prevRoots.Value.Remove(id);
+            hostMsgs.Send(new HostMessage.CustomEvent("ui.window.closed", $"{{\"id\":{id}}}"));
+        }
+
+        foreach (var (e, _) in roots)
+            prevRoots.Value.Add(e.Ref);
+
+        dead.Value.Clear();
+        foreach (var id in listeners.Value.Nodes)
+            if (!modNodes.Contains(id))
+                dead.Value.Add(id);
+        foreach (var id in dead.Value)
+            listeners.Value.RemoveNode(id);
+
+        dead.Value.Clear();
+        foreach (var id in agreed.Value.Keys)
+            if (!modNodes.Contains(id))
+                dead.Value.Add(id);
+        foreach (var id in dead.Value)
+            agreed.Value.Remove(id);
     }
 
     // Spawn the caret bar + selection highlight for each editable node once and
@@ -373,6 +421,10 @@ internal sealed class ModListeners
                 _byNode.Remove(nodeId);
         }
     }
+
+    // Every node with at least one listener — the reap system sweeps these
+    // against the live world to prune entries for despawned entities.
+    public IEnumerable<ulong> Nodes => _byNode.Keys;
 
     // Drop every listener for a node — called when its entity is despawned so
     // listeners don't accumulate across show/hide churn (e.g. tooltips).

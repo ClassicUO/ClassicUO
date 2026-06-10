@@ -154,6 +154,14 @@ internal static class Api
 
                 foreach (var n in tree.Nodes)
                 {
+                    // Stale guest id: the host closed the window out from under
+                    // the mod (right-click despawn) and its next render raced the
+                    // ui.window.closed notification. Reviving a recycled id is
+                    // unsound (generation mismatch panics in GetRecord) — drop
+                    // the node; the close event tells the mod to unmount.
+                    if (n.Id != 0 && !world.Exists(n.Id))
+                        continue;
+
                     // Id 0 = let the host allocate (used when a mod builds a node
                     // without a prior cuo_ecs_spawn_entity round-trip).
                     var ent = n.Id == 0 ? world.Entity() : world.Entity(n.Id);
