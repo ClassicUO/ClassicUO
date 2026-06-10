@@ -70,6 +70,7 @@ internal static class InputHandlers
         d.Register("debug.openMap", DebugOpenMap);
         d.Register("debug.dumpLayout", DebugDumpLayout);
         d.Register("debug.nameplates", DebugNameplates);
+        d.Register("debug.say", DebugSay);
     }
 
     // Test-only: flip the nameplate "stay active" toggle (synthetic input
@@ -87,6 +88,30 @@ internal static class InputHandlers
         st.IsToggled = toggled;
         st.DebugForceMenu = menu;
         return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["toggled"] = toggled, ["menu"] = menu } };
+    }
+
+    // Test-only: push an overhead speech line for the player through the real
+    // TextOverheadEvent pipeline (chat Enter needs a physical key press the
+    // synth input can't produce).
+    public static JsonRpcResponse DebugSay(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        string text = "test";
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object
+            && p.TryGetProperty("text", out var t) && t.ValueKind == JsonValueKind.String)
+            text = t.GetString() ?? "test";
+
+        var gameCtx = ctx.Runtime.GetResource<GameContext>();
+        ctx.Runtime.SendEvent(new TextOverheadEvent
+        {
+            Serial = gameCtx.PlayerSerial,
+            Text = text,
+            Name = "agent",
+            Hue = 0x44,
+            Font = 0,
+            IsUnicode = true,
+            MessageType = ClassicUO.Game.Data.MessageType.Regular,
+        });
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["said"] = text } };
     }
 
     // Test-only: open a bulletin board (0x71 type 0 + a few type 1 summaries)

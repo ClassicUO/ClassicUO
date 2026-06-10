@@ -36,6 +36,7 @@ using TinyEcs.Bevy;
 using TinyEcs.Bevy.UI;
 using TinyEcs.Bevy.UI.Widgets;
 using ClayColor = Clay.Color;
+using GameLayer = ClassicUO.Game.Data.Layer;
 
 namespace ClassicUO.Ecs;
 
@@ -70,6 +71,11 @@ internal sealed class NameplateState
     public readonly HashSet<uint> StatusRequested = new();
     // serial -> plate root entity
     public readonly Dictionary<uint, ulong> Plates = new();
+    // serial -> screen Y of the visible plate's TOP edge (UI logical space),
+    // refreshed each frame. Overhead speech reads it to stack ABOVE the plate
+    // instead of overlapping it (legacy UpdateTextCoordsV shifts by the gump
+    // height when ObjectHandlesStatus == DISPLAYING).
+    public readonly Dictionary<uint, float> PlateTops = new();
 
     public ulong MenuEntity;          // handler menu root (0 = not spawned yet)
     public Vector2? MenuPos;          // persisted across opens (legacy LastPosition)
@@ -306,6 +312,7 @@ internal readonly struct NameplatePlugin : IPlugin
                 st.Plates.Clear();
             }
             st.StatusRequested.Clear();
+            st.PlateTops.Clear();
             return;
         }
 
@@ -375,7 +382,8 @@ internal readonly struct NameplatePlugin : IPlugin
             // below every window (UiZCounter starts at 1).
             .Insert(new GlobalZIndex(0));
 
-        // Name row fills the space above the bar; centers the label both ways.
+        // Name row fills the space above the bar. Legacy draws the label at
+        // plate top + 2 (not vertically centered), so top-align with padding.
         var nameRow = commands.Spawn()
             .Insert(new Node
             {
@@ -384,7 +392,8 @@ internal readonly struct NameplatePlugin : IPlugin
                 Width = Val.Percent(100),
                 Height = Val.Px(height - (hpBar ? HpBarHeight : 0)),
                 JustifyContent = JustifyContent.Center,
-                AlignItems = AlignItems.Center,
+                AlignItems = AlignItems.Start,
+                Padding = new UiRect(Val.Px(0), Val.Px(0), Val.Px(2), Val.Px(0)),
             });
 
         var text = commands.Spawn()
@@ -448,10 +457,11 @@ internal readonly struct NameplatePlugin : IPlugin
         Res<Camera> camera,
         Res<NetworkEntitiesMap> entitiesMap,
         Res<UOFileManager> fileManager,
+        Res<AssetsServer> assets,
         Res<ObjectPropertyLists> opl,
         Query<Data<NameplateUI, Node>> platesQ,
-        Query<Data<WorldPosition, ScreenPositionOffset, Notoriety, Hits, EntityName, Graphic, Amount>,
-            Filter<Optional<ScreenPositionOffset>, Optional<Notoriety>, Optional<Hits>, Optional<EntityName>, Optional<Amount>>> gameQ,
+        Query<Data<WorldPosition, ScreenPositionOffset, Notoriety, Hits, EntityName, Graphic, Amount, EquipmentSlots, ServerFlags>,
+            Filter<Optional<ScreenPositionOffset>, Optional<Notoriety>, Optional<Hits>, Optional<EntityName>, Optional<Amount>, Optional<EquipmentSlots>, Optional<ServerFlags>>> gameQ,
         Query<Data<Text, TextColor>> textQ,
         Query<Data<Node, BackgroundColor>> rectQ)
     {
@@ -466,6 +476,8 @@ internal readonly struct NameplatePlugin : IPlugin
         var panelOrigin = new Vector2(camera.Value.Bounds.X, camera.Value.Bounds.Y);
         var hues = fileManager.Value.Hues;
 
+        state.Value.PlateTops.Clear();
+
         foreach (var (plateEnt, plate, node) in platesQ)
         {
             if (!entitiesMap.Value.TryGet(plate.Ref.Serial, out var gameEnt) || !gameQ.Contains(gameEnt))
@@ -474,7 +486,7 @@ internal readonly struct NameplatePlugin : IPlugin
                 continue;
             }
 
-            var (_, worldPos, offset, notoriety, hits, name, graphic, amount) = gameQ.Get(gameEnt);
+            var (_, worldPos, offset, notoriety, hits, name, graphic, amount, equip, flags) = gameQ.Get(gameEnt);
 
             // Name: mobiles from EntityName (status reply), items from OPL
             // with tiledata fallback (legacy SetName).
@@ -516,16 +528,32 @@ internal readonly struct NameplatePlugin : IPlugin
                     : new ClayColor(255, 0, 0, 255);                 // Red
             }
 
-            // Anchor above the entity (TextOverheadPlugin convention); items
-            // anchor at the art's spot without the head lift.
+            // Anchor: legacy NameOverheadGump.AddToRenderLists. Mobiles measure
+            // the FIXED standing frame (dir 0, group 0, frame 0) so the anchor
+            // doesn't bounce with the walk cycle, then sit above the head;
+            // items hang at half the art's real height.
             var position = Isometric.IsoToScreen(worldPos.Ref.X, worldPos.Ref.Y, worldPos.Ref.Z);
             if (offset.IsValid())
                 position += offset.Ref.Value;
             position -= center;
-            position.X += 22f;
-            position.Y += 22f;
+            position.X += 22f + 5f;
             if (plate.Ref.IsMobile)
-                position.Y -= Constants.DEFAULT_CHARACTER_HEIGHT * 5;
+            {
+                bool mounted = equip.IsValid() && equip.Ref[GameLayer.Mount] != 0;
+                assets.Value.Animations.GetAnimationDimensions(
+                    0, graphic.Ref.Value, 0, 0, mounted, 0,
+                    out _, out int animCenterY, out _, out int animHeight);
+                bool flyingGargoyle = flags.IsValid()
+                    && (flags.Ref.Value & Flags.Flying) != 0
+                    && IsGargoyle(graphic.Ref.Value);
+                position.Y -= animHeight + animCenterY + 8 + 10;
+                position.Y += flyingGargoyle ? -22 : (mounted ? 0 : 22);
+            }
+            else
+            {
+                var artBounds = assets.Value.Arts.GetRealArtBounds(graphic.Ref.Value);
+                position.Y += artBounds.Height >> 1;
+            }
             position = camera.Value.WorldToScreen(position) + panelOrigin;
 
             float w = PlateWidth + 2;
@@ -543,6 +571,9 @@ internal readonly struct NameplatePlugin : IPlugin
             node.Ref.Display = visible ? Display.Flex : Display.None;
             node.Ref.Left = Val.Px(x);
             node.Ref.Top = Val.Px(y);
+
+            if (visible)
+                state.Value.PlateTops[plate.Ref.Serial] = y;
         }
     }
 
@@ -582,6 +613,10 @@ internal readonly struct NameplatePlugin : IPlugin
         }
         return name + "...";
     }
+
+    // Legacy Mobile.IsGargoyle — flying gargoyles get the -22 anchor shift.
+    private static bool IsGargoyle(ushort graphic)
+        => graphic == 0x029A || graphic == 0x029B || graphic == 0x02B6 || graphic == 0x02B7;
 
     // Legacy Notoriety.GetHue with default profile hues (same table
     // HealthBarPlugin uses).

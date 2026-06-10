@@ -153,12 +153,18 @@ internal sealed class TextOverHeadManager
     // GuiRenderingPlugin's Phase 1 (the UI render target, logical pixels), the
     // only place UoFontRenderer's atlas path renders. Coords are RT-local logical
     // (world panel origin + camera.WorldToScreen); the Phase 2 blit scales them.
+    // `plateTops` (optional): serial -> screen Y of that entity's visible
+    // nameplate top (NameplateState.PlateTops). Speech for a plated entity
+    // stacks upward from the PLATE's top edge instead of the head anchor, so
+    // the two never overlap (legacy UpdateTextCoordsV shifts by the object-
+    // handles gump height while it's displaying).
     public void Render(
         NetworkEntitiesMap networkEntities,
         UltimaBatcher2D batch,
         GameContext gameCtx,
         Camera camera,
-        Query<Data<WorldPosition, ScreenPositionOffset>> query
+        Query<Data<WorldPosition, ScreenPositionOffset>> query,
+        IReadOnlyDictionary<uint, float> plateTops = null
     )
     {
         var center = Isometric.IsoToScreen(gameCtx.CenterX, gameCtx.CenterY, gameCtx.CenterZ);
@@ -190,7 +196,12 @@ internal sealed class TextOverHeadManager
             position = camera.WorldToScreen(position) + panelOrigin;
 
             // Newest line sits just above the head; older lines stack upward.
+            // A visible nameplate owns the head slot — start above it instead.
             float y = position.Y;
+            if (plateTops != null
+                && plateTops.TryGetValue(list.First.Value.Serial, out var plateTop)
+                && plateTop < y)
+                y = plateTop;
             for (var node = list.Last; node != null; node = node.Previous)
             {
                 var t = node.Value;

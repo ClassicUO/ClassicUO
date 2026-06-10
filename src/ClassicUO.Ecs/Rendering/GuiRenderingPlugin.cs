@@ -56,6 +56,7 @@ internal readonly struct GuiRenderingPlugin : IPlugin
             Res<GameContext>,
             Res<Camera>,
             Res<RenderTarget2D>,
+            Res<NameplateState>,
             Query<Data<WorldPosition, ScreenPositionOffset>>> renderFn = Render;
 
         app.AddSystem(renderFn)
@@ -80,6 +81,7 @@ internal readonly struct GuiRenderingPlugin : IPlugin
         Res<GameContext> gameCtx,
         Res<Camera> camera,
         Res<RenderTarget2D> worldRt,
+        Res<NameplateState> nameplates,
         Query<Data<WorldPosition, ScreenPositionOffset>> overheadQuery)
     {
         dumbTexture.Value.Texture ??= MakeWhitePixel(batcher.Value.GraphicsDevice);
@@ -140,7 +142,7 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                         && ReferenceEquals(cmd.Image.ImageData, worldRt.Value))
                     {
                         overhead.Value.Update(time.Value, networkEntities.Value);
-                        overhead.Value.Render(networkEntities.Value, b, gameCtx.Value, camera.Value, overheadQuery);
+                        overhead.Value.Render(networkEntities.Value, b, gameCtx.Value, camera.Value, overheadQuery, nameplates.Value.PlateTops);
                     }
                     break;
 
