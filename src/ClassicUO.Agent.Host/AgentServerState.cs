@@ -87,6 +87,12 @@ public sealed class AgentServerState
     // directly) but kept here for shared-struct simplicity.
     public readonly Queue<char> PendingTypedChars = new();
 
+    // Synthetic key presses (one frame down, released next) waiting to be
+    // drained into the ECS runtime's KeyboardContext. Lets the harness drive
+    // IsPressedOnce paths (Enter to submit chat, Escape) that the CharInput
+    // text channel can't reach. Unused on the OOP runtime.
+    public readonly Queue<Keys> PendingKeyPresses = new();
+
     // Auto-progress through ServerSelection and CharacterSelection after
     // an agent.login dispatch — bypasses the UI clicks the human player
     // would otherwise issue. Indices default to 0. Cleared once

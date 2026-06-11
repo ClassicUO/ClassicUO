@@ -119,6 +119,14 @@ internal readonly struct AgentServerPlugin : IPlugin
             .SingleThreaded()
             .Build();
 
+        // Hand queued synthetic key presses to KeyboardContext, which paces
+        // them one-per-Update so each press edge survives the snapshot diff.
+        Action<Res<AgentServerState>, Res<KeyboardContext>> drainKeysFn = DrainKeyPressesSystem;
+        app.AddSystem(drainKeysFn)
+            .InStage(Stage.First)
+            .SingleThreaded()
+            .Build();
+
         // Auto-progress through ServerSelection / CharacterSelection after
         // agent.login when state.AutoLoginActive is set. Sends the same
         // Send_SelectServer / Send_SelectCharacter the UI clicks emit.
@@ -193,6 +201,15 @@ internal readonly struct AgentServerPlugin : IPlugin
             var ch = state.PendingTypedChars.Dequeue();
             writer.Send(new CharInput { Value = ch });
         }
+    }
+
+    private static void DrainKeyPressesSystem(
+        Res<AgentServerState> stateRes,
+        Res<KeyboardContext> kbRes)
+    {
+        var state = stateRes.Value!;
+        while (state.PendingKeyPresses.Count > 0)
+            kbRes.Value!.AgentPressKey(state.PendingKeyPresses.Dequeue());
     }
 
     private static void ServiceCaptureRequestSystem(

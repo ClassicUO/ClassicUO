@@ -12,6 +12,16 @@ internal class KeyboardContext
     protected readonly KeyboardInput Input = new();
     private readonly Microsoft.Xna.Framework.Game _game;
 
+#if AGENT_BUILD
+    // One synthetic key per Update: held down for exactly one snapshot so the
+    // press edge (IsPressedOnce) fires, gone the next. Queue paced one-per-
+    // frame for the same reason as SynthMouseFrame — two presses coalesced in
+    // one snapshot would lose an edge.
+    private readonly System.Collections.Generic.Queue<Keys> _agentPendingKeys = new();
+
+    internal void AgentPressKey(Keys key) => _agentPendingKeys.Enqueue(key);
+#endif
+
     internal KeyboardContext(Microsoft.Xna.Framework.Game game) => _game = game;
 
     // Window-focus gate; a headless subclass overrides this to stay "focused"
@@ -45,7 +55,16 @@ internal class KeyboardContext
             if (state.IsKeyDown(key))
                 buf[count++] = (KeyCode)key;
 
+#if AGENT_BUILD
+        // Inject the synthetic key without focus theft (the agent window may
+        // be unfocused), mirroring MouseContext's synth path.
+        var synthKey = _agentPendingKeys.Count > 0 ? _agentPendingKeys.Dequeue() : Keys.None;
+        if (synthKey != Keys.None && count < buf.Length)
+            buf[count++] = (KeyCode)synthKey;
+        Input.SetSnapshot(buf[..count], IsActiveWindow || synthKey != Keys.None);
+#else
         Input.SetSnapshot(buf[..count], IsActiveWindow);
+#endif
         Input.Update(totalTimeMs);
     }
 }

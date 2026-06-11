@@ -48,6 +48,7 @@ internal static class InputHandlers
         d.Register("input.mouseWheel", MouseWheel);
         d.Register("input.clear", InputClear);
         d.Register("input.type", Type);
+        d.Register("input.keyPress", KeyPress);
         d.Register("debug.openSpellbook", DebugOpenSpellbook);
         d.Register("debug.openVendor", DebugOpenVendor);
         d.Register("debug.openPopup", DebugOpenPopup);
@@ -71,6 +72,7 @@ internal static class InputHandlers
         d.Register("debug.dumpLayout", DebugDumpLayout);
         d.Register("debug.nameplates", DebugNameplates);
         d.Register("debug.say", DebugSay);
+        d.Register("debug.chatState", DebugChatState);
         d.Register("debug.questArrow", DebugQuestArrow);
     }
 
@@ -89,6 +91,33 @@ internal static class InputHandlers
         st.IsToggled = toggled;
         st.DebugForceMenu = menu;
         return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["toggled"] = toggled, ["menu"] = menu } };
+    }
+
+    // Test-only: inspect the in-game chat field wiring — bar/glyph entity ids,
+    // attach state, keyboard focus target, the glyph's current Text, and the
+    // bar's computed bounds. For harness debugging of the chat input path.
+    public static JsonRpcResponse DebugChatState(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        var world = ctx.Runtime.GetWorld();
+        var field = ctx.Runtime.GetResource<ChatField>();
+        var focused = ctx.Runtime.GetResource<FocusedInput>();
+
+        var result = new JsonObject
+        {
+            ["bar"] = field.Bar,
+            ["glyph"] = field.Glyph,
+            ["attached"] = field.Attached,
+            ["focusedEntity"] = focused.Entity,
+        };
+        if (field.Glyph != 0 && world.Has<TinyEcs.Bevy.UI.Text>(field.Glyph))
+            result["glyphText"] = world.Get<TinyEcs.Bevy.UI.Text>(field.Glyph).Value;
+        if (field.Bar != 0 && world.Has<TinyEcs.Bevy.UI.ComputedNode>(field.Bar))
+        {
+            ref var cn = ref world.Get<TinyEcs.Bevy.UI.ComputedNode>(field.Bar);
+            result["barPos"] = $"{cn.Position.X},{cn.Position.Y}";
+            result["barSize"] = $"{cn.Size.X},{cn.Size.Y}";
+        }
+        return new JsonRpcResponse { Id = req.Id, Result = result };
     }
 
     // Test-only: push an overhead speech line for the player through the real
@@ -741,6 +770,21 @@ internal static class InputHandlers
         var text = tEl.GetString() ?? string.Empty;
         var pushed = PushTextInputEvents(text, in ctx);
         return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["pushed"] = pushed } };
+    }
+
+    // Synthetic key press (one frame down): drives IsPressedOnce paths the
+    // CharInput text channel can't reach — Enter to submit chat, Escape.
+    // Key name is the FNA Keys enum member ("Enter", "Escape", "F1", …).
+    public static JsonRpcResponse KeyPress(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        if (req.Params is not JsonElement p || p.ValueKind != JsonValueKind.Object
+            || !p.TryGetProperty("key", out var kEl) || kEl.ValueKind != JsonValueKind.String
+            || !Enum.TryParse<Keys>(kEl.GetString(), ignoreCase: true, out var key))
+            return AgentServer.ErrorResponse(req.Id, JsonRpcErrorCodes.InvalidParams,
+                "input.keyPress expects { key: \"<Keys enum name>\" }");
+
+        ctx.State.PendingKeyPresses.Enqueue(key);
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["queued"] = 1 } };
     }
 
     // Queue typed text into AgentServerState. A per-frame system in
