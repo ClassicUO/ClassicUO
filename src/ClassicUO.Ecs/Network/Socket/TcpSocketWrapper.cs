@@ -59,6 +59,17 @@ sealed class TcpSocketWrapper : SocketWrapper
         if (!IsConnected)
             return 0;
 
+        // An idle socket never reports a remote FIN/RST through Available, so
+        // a dropped server would look alive forever. Readable-with-zero-bytes
+        // is the standard liveness probe for that case.
+        if (_socket.Client.Poll(0, SelectMode.SelectRead) && _socket.Available == 0)
+        {
+            InvokeOnDisconnected();
+            Disconnect();
+
+            return 0;
+        }
+
         var available = Math.Min(buffer.Length, _socket.Available);
         var done = 0;
 

@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Net.Sockets;
 using ClassicUO.Configuration;
 using ClassicUO.Network;
 using ClassicUO.Utility;
@@ -17,6 +19,14 @@ struct OnLoginRequest
     public string Password;
     public string Address;
     public ushort Port;
+}
+
+// Bridges NetClient.Disconnected (a plain C# event that can fire from a
+// socket thread on the websocket path) into the ECS frame loop. Drained by
+// HandleConnectionLost each Update.
+internal sealed class NetworkDisconnectQueue
+{
+    public readonly ConcurrentQueue<SocketError> Errors = new();
 }
 
 internal struct PacketReceived<T> where T : struct, IPacket
@@ -79,12 +89,14 @@ readonly struct NetworkPlugin : IPlugin
     {
         var setupSocketFn = SetupSocket;
         var handleLoginRequestsFn = HandleLoginRequests;
+        var handleConnectionLostFn = HandleConnectionLost;
         var packetReaderFn = PacketReader;
 
 
         app
             .AddResource(new PacketsMap())
             .AddResource(new CircularBuffer())
+            .AddResource(new NetworkDisconnectQueue())
             .AddSystem(Stage.Startup, setupSocketFn)
 
             .AddSystem(Stage.Startup, (
@@ -239,12 +251,58 @@ readonly struct NetworkPlugin : IPlugin
             .AddSystem(packetReaderFn)
             .InStage(Stage.Update)
             .RunIf((Res<NetClient> network) => network.Value!.IsConnected)
+            .Build()
+
+            .AddSystem(handleConnectionLostFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<NetworkDisconnectQueue> q) => !q.Value.Errors.IsEmpty)
             .Build();
     }
 
-    void SetupSocket(Res<Settings> settings, Res<NetClient> socket, Res<UOFileManager> fileManager, Commands commands)
+    void SetupSocket(
+        Res<Settings> settings,
+        Res<NetClient> socket,
+        Res<UOFileManager> fileManager,
+        Res<NetworkDisconnectQueue> disconnects,
+        Commands commands)
     {
         settings.Value.Encryption = (byte)socket.Value.Load(fileManager.Value.Version, (EncryptionType)settings.Value.Encryption);
+
+        // The queue resource outlives the socket; the lambda captures only it.
+        var queue = disconnects.Value;
+        socket.Value.Disconnected += (_, error) => queue.Errors.Enqueue(error);
+    }
+
+    // Mirrors legacy LoginScene.OnNetClientDisconnected: a socket drop during
+    // the login flow surfaces as a popup ("Connection lost") and kicks back to
+    // the login screen via the LoginError state. Drops during character
+    // creation are ignored (legacy parity), as are in-game drops (separate
+    // concern). Unlike legacy we also surface SocketError.Success (remote
+    // graceful close): local disconnects never raise the event — TCP's
+    // wrapper closes silently and the websocket one cancels — so Success here
+    // can only mean the server went away.
+    static void HandleConnectionLost(
+        Res<NetworkDisconnectQueue> disconnects,
+        Res<State<GameState>> state,
+        ResMut<NextState<GameState>> nextState,
+        EventWriter<LoginErrorsInfoEvent> loginErrorWriter)
+    {
+        while (disconnects.Value.Errors.TryDequeue(out var error))
+        {
+            var current = state.Value.Current;
+            if (current is not (GameState.LoginScreen or GameState.ServerSelection or GameState.CharacterSelection))
+                continue;
+
+            var message = error == SocketError.Success
+                ? "Connection lost."
+                : $"Connection lost:\n{StringHelper.AddSpaceBeforeCapital(error.ToString())}";
+
+            nextState.Value.Set(GameState.LoginError);
+            loginErrorWriter.Send(new LoginErrorsInfoEvent
+            {
+                Error = new(message)
+            });
+        }
     }
 
     void HandleLoginRequests(
