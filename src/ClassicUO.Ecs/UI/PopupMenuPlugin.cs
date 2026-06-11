@@ -11,6 +11,7 @@
 
 using System.Collections.Generic;
 using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Utility;
@@ -95,6 +96,8 @@ internal readonly struct PopupMenuPlugin : IPlugin
         Res<NetClient> net,
         Res<GrabbedItem> grabbed,
         Res<TargetingState> targeting,
+        Res<KeyboardContext> keyboard,
+        Res<Profile> profile,
         ResMut<PopupMenuState> state,
         Query<Data<NetworkSerial>> serialQ,
         Query<Data<ComputedNode>, With<PopupMenuRoot>> popupQ,
@@ -114,6 +117,12 @@ internal readonly struct PopupMenuPlugin : IPlugin
         if (!mouse.Value.IsReleased(MouseButtonType.Left)) return;
         if (targeting.Value.IsTargeting) return;
         if (grabbed.Value.IsActive || grabbed.Value.Serial != 0) return;
+
+        // Legacy GameActions.OpenPopupMenu: with HoldShiftForContext set, the
+        // menu only opens while Shift is held.
+        if (profile.Value.HoldShiftForContext
+            && !keyboard.Value.IsPressed(Microsoft.Xna.Framework.Input.Keys.LeftShift)
+            && !keyboard.Value.IsPressed(Microsoft.Xna.Framework.Input.Keys.RightShift)) return;
 
         // Don't open a second popup over an open one.
         foreach (var _ in popupQ) return;

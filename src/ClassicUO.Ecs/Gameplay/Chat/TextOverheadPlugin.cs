@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Renderer;
@@ -38,6 +39,7 @@ internal readonly struct TextOverheadPlugin : IPlugin
 
     private static void ReadTextOverhead(
         Res<Time> time,
+        Res<Profile> profile,
         EventReader<TextOverheadEvent> texts,
         EventWriter<Modding.Host.HostMessage> hostMsgs,
         Res<TextOverHeadManager> textOverHeadManager
@@ -47,6 +49,10 @@ internal readonly struct TextOverheadPlugin : IPlugin
         {
             switch (text.MessageType)
             {
+                // Party lines go overhead only when the profile opts in (legacy
+                // MessageManager's Party case); the journal capture keeps its
+                // copy regardless.
+                case MessageType.Party when profile.Value.OverheadPartyMessages:
                 case MessageType.Regular:
                 case MessageType.Emote:
                 case MessageType.Focus:
@@ -56,7 +62,9 @@ internal readonly struct TextOverheadPlugin : IPlugin
                 case MessageType.Label:
                 case MessageType.Limit3Spell:
                     var copyText = text;
-                    copyText.Time = time.Value.Total + 5000f;
+                    if (text.MessageType == MessageType.Party)
+                        copyText.Hue = profile.Value.PartyMessageHue;
+                    copyText.Time = time.Value.Total + TimeToLive(profile.Value, in text);
 
                     textOverHeadManager.Value.Append(copyText);
 
@@ -72,12 +80,33 @@ internal readonly struct TextOverheadPlugin : IPlugin
             }
         }
     }
+
+    // Legacy MessageManager.CalculateTimeToLive: scaled mode keys the lifetime
+    // to the wrapped line count (4s per line at delay 100); unscaled mode is
+    // the fixed-point ~40ms-per-delay-unit form, ported bit-for-bit. Lines are
+    // recovered from the measured wrapped height (legacy reads
+    // RenderedText.LinesCount; the ECS layout doesn't expose it).
+    private static float TimeToLive(Profile profile, in TextOverheadEvent t)
+    {
+        if (!profile.ScaleSpeechDelay)
+        {
+            long delay = (5497558140000L * profile.SpeechDelay) >> 32 >> 5;
+            return (delay >> 31) + delay;
+        }
+
+        int speechDelay = Math.Max(10, profile.SpeechDelay);
+        var fontId = t.IsUnicode ? t.Font : (ushort)(t.Font | UoFontRuntime.AsciiFlag);
+        var (_, height) = UoFontRenderer.MeasureFont(t.Text, fontId, TextOverHeadManager.MaxWidth, allowHtml: false);
+        var (_, lineHeight) = UoFontRenderer.MeasureFont("W", fontId, TextOverHeadManager.MaxWidth, allowHtml: false);
+        int lines = lineHeight > 0 ? Math.Max(1, (height + lineHeight / 2) / lineHeight) : 1;
+        return 4000f * lines * speechDelay / 100f;
+    }
 }
 
 internal sealed class TextOverHeadManager
 {
     // Wrap width for an overhead line (legacy ItemView/overhead uses ~200px).
-    private const int MaxWidth = 200;
+    internal const int MaxWidth = 200;
 
     private readonly List<uint> _toRemove = new();
     private readonly Dictionary<uint, LinkedList<TextOverheadEvent>> _textOverHeadMap = new();

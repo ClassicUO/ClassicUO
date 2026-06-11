@@ -28,6 +28,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Input;
 using Microsoft.Xna.Framework;
@@ -135,6 +136,8 @@ internal readonly struct JournalPlugin : IPlugin
             .RunIf((EventReader<TextOverheadEvent> texts) => texts.HasEvents).Build();
         app.AddSystem(captureSystemFn).InStage(Stage.Update)
             .RunIf((EventReader<SystemMessageEvent> msgs) => msgs.HasEvents).Build();
+        var syncProfileFn = SyncProfile;
+        app.AddSystem(syncProfileFn).InStage(Stage.Update).Build();
         app.AddSystem(rebuildFn).InStage(Stage.Update).Build();
         app.AddSystem(layoutFn).InStage(Stage.Update).Build();
         app.AddSystem(flagFn).InStage(Stage.PostUpdate).Build();
@@ -149,40 +152,78 @@ internal readonly struct JournalPlugin : IPlugin
         var flagDragFn = FlagDrag;
         app.AddSystem(flagDragFn).InStage(Stage.PreUpdate).Build();
 
-        // Filter checkboxes -> window flags.
-        app.AddObserver<On<CheckboxChanged>, Query<Data<JournalFilterCheck>>, Query<Data<JournalWindow>>>(
-            (trig, checks, windows) =>
+        // Filter checkboxes -> profile. SyncProfile routes profile -> window
+        // flags / checkbox sprites, so the journal toggles and the Options
+        // window stay in lockstep (profile is the single source of truth).
+        app.AddObserver<On<CheckboxChanged>, Query<Data<JournalFilterCheck>>, ResMut<Profile>>(
+            (trig, checks, profile) =>
             {
                 if (!checks.TryGet(trig.EntityId, out var checkRow)) return;
                 var (_, fc) = checkRow;
-                if (!windows.TryGet(fc.Ref.Window, out var windowRow)) return;
-                var (_, win) = windowRow;
                 switch (fc.Ref.Filter)
                 {
-                    case JournalTextType.System: win.Ref.ShowSystem = trig.Event.Checked; break;
-                    case JournalTextType.Object: win.Ref.ShowObjects = trig.Event.Checked; break;
-                    case JournalTextType.Client: win.Ref.ShowClient = trig.Event.Checked; break;
-                    case JournalTextType.GuildAlly: win.Ref.ShowGuild = trig.Event.Checked; break;
+                    case JournalTextType.System: profile.Value.ShowJournalSystem = trig.Event.Checked; break;
+                    case JournalTextType.Object: profile.Value.ShowJournalObjects = trig.Event.Checked; break;
+                    case JournalTextType.Client: profile.Value.ShowJournalClient = trig.Event.Checked; break;
+                    case JournalTextType.GuildAlly: profile.Value.ShowJournalGuildAlly = trig.Event.Checked; break;
                 }
-                win.Ref.StyleEpoch++;
             });
 
-        // Dark-mode checkbox -> window flag.
-        app.AddObserver<On<CheckboxChanged>, Query<Data<JournalDarkCheck>>, Query<Data<JournalWindow>>>(
-            (trig, checks, windows) =>
+        // Dark-mode checkbox -> profile.
+        app.AddObserver<On<CheckboxChanged>, Query<Data<JournalDarkCheck>>, ResMut<Profile>>(
+            (trig, checks, profile) =>
             {
-                if (!checks.TryGet(trig.EntityId, out var checkRow)) return;
-                var (_, dc) = checkRow;
-                if (!windows.TryGet(dc.Ref.Window, out var windowRow)) return;
-                var (_, win) = windowRow;
-                win.Ref.DarkMode = trig.Event.Checked; // LayoutWindow re-hues each frame; no rebuild
+                if (!checks.Contains(trig.EntityId)) return;
+                profile.Value.JournalDarkMode = trig.Event.Checked;
             });
+    }
+
+    // Profile is the source of truth for the journal's filter + dark-mode
+    // state: window flags, checkbox sprites and the Options-window toggles all
+    // converge here every frame (a journal checkbox click writes the profile
+    // via the observers above, so the next pass is a no-op). Direct Checked
+    // writes don't re-fire CheckboxChanged (that's UiClick-only) — no loop.
+    private static void SyncProfile(
+        Res<Profile> profile,
+        Query<Data<JournalWindow>> windowsQ,
+        Query<Data<JournalFilterCheck, Checkbox>> filterChecksQ,
+        Query<Data<JournalDarkCheck, Checkbox>> darkChecksQ)
+    {
+        var p = profile.Value;
+        foreach (var (_, win) in windowsQ)
+        {
+            if (win.Ref.ShowSystem != p.ShowJournalSystem
+                || win.Ref.ShowObjects != p.ShowJournalObjects
+                || win.Ref.ShowClient != p.ShowJournalClient
+                || win.Ref.ShowGuild != p.ShowJournalGuildAlly)
+            {
+                win.Ref.ShowSystem = p.ShowJournalSystem;
+                win.Ref.ShowObjects = p.ShowJournalObjects;
+                win.Ref.ShowClient = p.ShowJournalClient;
+                win.Ref.ShowGuild = p.ShowJournalGuildAlly;
+                win.Ref.StyleEpoch++; // filter change forces a row rebuild
+            }
+            win.Ref.DarkMode = p.JournalDarkMode; // LayoutWindow re-hues each frame
+        }
+
+        foreach (var (_, fc, cb) in filterChecksQ)
+            cb.Ref.Checked = fc.Ref.Filter switch
+            {
+                JournalTextType.System => p.ShowJournalSystem,
+                JournalTextType.Object => p.ShowJournalObjects,
+                JournalTextType.Client => p.ShowJournalClient,
+                JournalTextType.GuildAlly => p.ShowJournalGuildAlly,
+                _ => cb.Ref.Checked,
+            };
+        foreach (var (_, _, cb) in darkChecksQ)
+            cb.Ref.Checked = p.JournalDarkMode;
     }
 
     // Broadened vs the overhead reader: keep System/Guild/Alliance/Party so
     // server broadcasts reach the journal. Classify TextType from type + serial.
     private static void Capture(
         Res<JournalTimeProvider> clock,
+        Res<Profile> profile,
         EventReader<TextOverheadEvent> texts,
         ResMut<JournalStore> store)
     {
@@ -214,11 +255,21 @@ internal readonly struct JournalPlugin : IPlugin
                     continue; // Command/Encoded etc. — not journalled
             }
 
+            // Party/guild/alliance lines display in the profile hue, not the
+            // server's (legacy GameScene.ChatOnMessageReceived).
+            var hue = t.MessageType switch
+            {
+                MessageType.Party => profile.Value.PartyMessageHue,
+                MessageType.Guild => profile.Value.GuildMessageHue,
+                MessageType.Alliance => profile.Value.AllyMessageHue,
+                _ => t.Hue,
+            };
+
             store.Value.Append(new JournalEntry
             {
                 Text = t.Text,
                 Name = t.Name,
-                Hue = t.Hue,
+                Hue = hue,
                 TextType = type,
                 TimeLabel = clock.Value.NowLabel(),
             });

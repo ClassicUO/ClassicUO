@@ -9,6 +9,7 @@ using ClassicUO.Game.Data;
 using ClassicUO.Game.Managers;
 using ClassicUO.IO;
 using ClassicUO.Network;
+using ClassicUO.Resources;
 using ClassicUO.Utility;
 using TinyEcs;
 using TinyEcs.Bevy;
@@ -147,16 +148,19 @@ readonly struct InGamePacketsPlugin : IPlugin
 
         app.AddObserver<On<PacketReceived<OnUnicodeSpeechPacket_0xAE>>,
             Res<NetClient>,
+            Res<Profile>,
             EventWriter<TextOverheadEvent>,
             EventWriter<SystemMessageEvent>>(OnUnicodeSpeech);
 
         app.AddObserver<On<PacketReceived<OnAsciiSpeechPacket_0x1C>>,
             Res<NetClient>,
+            Res<Profile>,
             EventWriter<TextOverheadEvent>,
             EventWriter<SystemMessageEvent>>(OnAsciiSpeech);
 
         app.AddObserver<On<PacketReceived<OnClilocMessagePacket_0xC1>>,
             Res<UOFileManager>,
+            Res<Profile>,
             EventWriter<TextOverheadEvent>,
             EventWriter<SystemMessageEvent>>(OnClilocMessage);
 
@@ -216,7 +220,10 @@ readonly struct InGamePacketsPlugin : IPlugin
         app.AddObserver<On<PacketReceived<OnCharacterStatusPacket_0x11>>,
             Commands,
             ResMut<GameContext>,
-            Res<NetworkEntitiesMap>>(OnCharacterStatus);
+            Res<NetworkEntitiesMap>,
+            Res<Profile>,
+            EventWriter<SystemMessageEvent>,
+            Query<Data<PlayerData>>>(OnCharacterStatus);
 
         app.AddObserver<On<PacketReceived<OnMobileAttributesPacket_0x2D>>,
             Commands,
@@ -276,7 +283,10 @@ readonly struct InGamePacketsPlugin : IPlugin
         Stub<OnSwingPacket_0x2F>(app);
         Stub<OnPathfindingPacket_0x38>(app);
         app.AddObserver<On<PacketReceived<OnUpdateSkillsPacket_0x3A>>,
-            ResMut<PlayerSkills>>(OnUpdateSkills);
+            ResMut<PlayerSkills>,
+            Res<UOFileManager>,
+            Res<Profile>,
+            EventWriter<SystemMessageEvent>>(OnUpdateSkills);
         Stub<OnSoundEffectPacket_0x54>(app);
         Stub<OnWeatherPacket_0x65>(app);
         // 0x66 (book pages) is handled by BookGumpPlugin.
@@ -308,6 +318,7 @@ readonly struct InGamePacketsPlugin : IPlugin
         Stub<OnGraphicEffectC7Packet_0xC7>(app);
         app.AddObserver<On<PacketReceived<OnClilocMessageAffixPacket_0xCC>>,
             Res<UOFileManager>,
+            Res<Profile>,
             EventWriter<TextOverheadEvent>,
             EventWriter<SystemMessageEvent>>(OnClilocMessageAffix);
         // 0xD1 reply is handled by LogoutGumpPlugin (client-initiated logout).
@@ -467,9 +478,17 @@ readonly struct InGamePacketsPlugin : IPlugin
     // bottom-left system log, not over an entity.
     const uint SystemSerial = 0xFFFF_FFFF;
 
+    // Legacy MessageManager.HandleMessage drops ignored guild/alliance chat
+    // before ANY display path (overhead, system log, journal) — same here, at
+    // the event source.
+    static bool IsIgnoredChat(MessageType type, Profile profile)
+        => (type == MessageType.Guild && profile.IgnoreGuildMessages)
+        || (type == MessageType.Alliance && profile.IgnoreAllianceMessages);
+
     static void OnUnicodeSpeech(
         On<PacketReceived<OnUnicodeSpeechPacket_0xAE>> trig,
         Res<NetClient> network,
+        Res<Profile> profile,
         EventWriter<TextOverheadEvent> textOverHeadQueue,
         EventWriter<SystemMessageEvent> systemMsgQueue)
     {
@@ -486,6 +505,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             ]);
             return;
         }
+
+        if (IsIgnoredChat(packet.MessageType, profile.Value)) return;
 
         if (packet.Serial == SystemSerial)
         {
@@ -508,6 +529,7 @@ readonly struct InGamePacketsPlugin : IPlugin
     static void OnAsciiSpeech(
         On<PacketReceived<OnAsciiSpeechPacket_0x1C>> trig,
         Res<NetClient> network,
+        Res<Profile> profile,
         EventWriter<TextOverheadEvent> textOverHeadQueue,
         EventWriter<SystemMessageEvent> systemMsgQueue)
     {
@@ -518,6 +540,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             network.Value.Send_ACKTalk();
             return;
         }
+
+        if (IsIgnoredChat(packet.MessageType, profile.Value)) return;
 
         if (packet.Serial == SystemSerial)
         {
@@ -543,10 +567,12 @@ readonly struct InGamePacketsPlugin : IPlugin
     static void OnClilocMessage(
         On<PacketReceived<OnClilocMessagePacket_0xC1>> trig,
         Res<UOFileManager> files,
+        Res<Profile> profile,
         EventWriter<TextOverheadEvent> textOverHeadQueue,
         EventWriter<SystemMessageEvent> systemMsgQueue)
     {
         var packet = trig.Event.Packet;
+        if (IsIgnoredChat(packet.MessageType, profile.Value)) return;
         var text = files.Value.Clilocs.Translate((int)packet.Cliloc, packet.Arguments);
         if (string.IsNullOrEmpty(text)) return;
 
@@ -571,10 +597,12 @@ readonly struct InGamePacketsPlugin : IPlugin
     static void OnClilocMessageAffix(
         On<PacketReceived<OnClilocMessageAffixPacket_0xCC>> trig,
         Res<UOFileManager> files,
+        Res<Profile> profile,
         EventWriter<TextOverheadEvent> textOverHeadQueue,
         EventWriter<SystemMessageEvent> systemMsgQueue)
     {
         var packet = trig.Event.Packet;
+        if (IsIgnoredChat(packet.MessageType, profile.Value)) return;
         var text = files.Value.Clilocs.Translate((int)packet.Cliloc, packet.Arguments);
         if (string.IsNullOrEmpty(text)) return;
 
@@ -1117,7 +1145,10 @@ readonly struct InGamePacketsPlugin : IPlugin
         On<PacketReceived<OnCharacterStatusPacket_0x11>> trig,
         Commands commands,
         ResMut<GameContext> gameCtx,
-        Res<NetworkEntitiesMap> entitiesMap)
+        Res<NetworkEntitiesMap> entitiesMap,
+        Res<Profile> profile,
+        EventWriter<SystemMessageEvent> systemMsgQueue,
+        Query<Data<PlayerData>> playerDataQ)
     {
         var packet = trig.Event.Packet;
         var ent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
@@ -1153,6 +1184,26 @@ readonly struct InGamePacketsPlugin : IPlugin
         // Weight off the player entity instead of re-decoding the packet.
         if (packet.Strength.HasValue)
         {
+            // Announce the player's str/dex/int deltas as system lines (legacy
+            // PacketHandlers 0x11). The previous PlayerData is still readable
+            // here — the Insert below lands at the next sync point.
+            if (profile.Value.ShowStatsChangedMessage
+                && packet.Serial == gameCtx.Value.PlayerSerial
+                && entitiesMap.Value.TryGet(packet.Serial, out var playerId)
+                && playerDataQ.TryGet(playerId, out var oldRow))
+            {
+                var (_, old) = oldRow;
+                if (old.Ref.Str != 0)
+                {
+                    SendStatDelta(systemMsgQueue, ResGeneral.Strength,
+                        packet.Strength.Value - old.Ref.Str, packet.Strength.Value);
+                    SendStatDelta(systemMsgQueue, ResGeneral.Dexterity,
+                        packet.Dexterity.GetValueOrDefault() - old.Ref.Dex, packet.Dexterity.GetValueOrDefault());
+                    SendStatDelta(systemMsgQueue, ResGeneral.Intelligence,
+                        packet.Intelligence.GetValueOrDefault() - old.Ref.Int, packet.Intelligence.GetValueOrDefault());
+                }
+            }
+
             var data = new PlayerData
             {
                 Str = packet.Strength.GetValueOrDefault(),
@@ -1193,6 +1244,18 @@ readonly struct InGamePacketsPlugin : IPlugin
             };
             ent.Insert(data);
         }
+    }
+
+    // Hue 0x0170 / font 3 mirror legacy GameActions.Print for stat deltas.
+    static void SendStatDelta(EventWriter<SystemMessageEvent> queue, string stat, int delta, int value)
+    {
+        if (delta == 0) return;
+        queue.Send(new SystemMessageEvent
+        {
+            Text = string.Format(ResGeneral.Your0HasChangedBy1ItIsNow2, stat, delta, value),
+            Hue = 0x0170,
+            Font = 3,
+        });
     }
 
     static void OnMobileAttributes(
@@ -1377,7 +1440,10 @@ readonly struct InGamePacketsPlugin : IPlugin
     // PacketHandlers.UpdateSkills writing into World.Player.Skills.
     static void OnUpdateSkills(
         On<PacketReceived<OnUpdateSkillsPacket_0x3A>> trig,
-        ResMut<PlayerSkills> skills)
+        ResMut<PlayerSkills> skills,
+        Res<UOFileManager> fileManager,
+        Res<Profile> profile,
+        EventWriter<SystemMessageEvent> systemMsgQueue)
     {
         var packet = trig.Event.Packet;
         if (packet.Values == null) return;
@@ -1386,6 +1452,33 @@ readonly struct InGamePacketsPlugin : IPlugin
         {
             if (v.Id < 0 || v.Id >= skills.Value.Values.Length) continue;
             ref var slot = ref skills.Value.Values[v.Id];
+
+            // Single-skill updates announce the delta as a system line (legacy
+            // PacketHandlers.UpdateSkills): only past the profile threshold
+            // (tenths) and only for a skill we've already seen — the initial
+            // bulk load is never a single update.
+            if (packet.IsSingleUpdate && slot.Received
+                && profile.Value.ShowSkillsChangedMessage
+                && v.Id < fileManager.Value.Skills.SkillsCount)
+            {
+                float change = (v.RealValue - slot.Real) / 10f;
+                if (change != 0f
+                    && Math.Abs(change * 10f) >= profile.Value.ShowSkillsChangedDeltaValue)
+                {
+                    systemMsgQueue.Send(new SystemMessageEvent
+                    {
+                        Text = string.Format(
+                            ResGeneral.YourSkillIn0Has1By2ItIsNow3,
+                            fileManager.Value.Skills.Skills[v.Id].Name,
+                            change < 0 ? ResGeneral.Decreased : ResGeneral.Increased,
+                            Math.Abs(change),
+                            v.RealValue / 10f),
+                        Hue = 0x58,
+                        Font = 3,
+                    });
+                }
+            }
+
             slot.Real = (ushort)v.RealValue;
             slot.Base = (ushort)v.BaseValue;
             slot.Lock = v.Status;

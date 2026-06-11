@@ -2,6 +2,7 @@ using System;
 using ClassicUO.Configuration;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework.Graphics;
+using Microsoft.Xna.Framework.Input;
 using TinyEcs;
 using TinyEcs.Bevy;
 
@@ -34,6 +35,16 @@ internal readonly struct CameraPlugin : IPlugin
             .AddSystem(updateCameraFn)
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+            .Build()
+
+            // Mirror main's GameScene.Unload: persist the session zoom as the
+            // new default only when the profile opted in.
+            .AddSystem((Res<Camera> camera, ResMut<Profile> profile) =>
+            {
+                if (profile.Value.SaveScaleAfterClose)
+                    profile.Value.DefaultScale = camera.Value.Zoom;
+            })
+            .OnExit(GameState.GameScreen)
             .Build();
 
     }
@@ -100,6 +111,9 @@ internal readonly struct CameraPlugin : IPlugin
         Res<GraphicsDevice> device
     )
     {
+        // Mirror main's GameScene.Load: world entry starts at the profile scale.
+        camera.Value.Zoom = profile.Value.DefaultScale;
+
         if (settings.Value.IsWindowMaximized && profile.Value.GameWindowFullSize)
         {
             const int TopBarHeight = 27;
@@ -124,18 +138,30 @@ internal readonly struct CameraPlugin : IPlugin
         Res<Time> time,
         Res<Camera> camera,
         Res<MouseContext> mouseCtx,
+        Res<KeyboardContext> keyboardCtx,
         Res<Profile> profile
     )
     {
         var mousePos = mouseCtx.Value.Position;
+        var ctrl = keyboardCtx.Value.IsPressed(Keys.LeftControl) || keyboardCtx.Value.IsPressed(Keys.RightControl);
 
-        if (!mouseCtx.Value.WheelConsumed &&
-            camera.Value.Bounds.Contains((int)mouseCtx.Value.Position.X, (int)mouseCtx.Value.Position.Y))
+        // Legacy GameSceneInputHandler: wheel zoom only with ctrl held and the
+        // profile opt-in; releasing ctrl optionally snaps back to DefaultScale.
+        if (profile.Value.EnableMousewheelScaleZoom)
         {
-            if (mouseCtx.Value.Wheel > 0)
-                camera.Value.ZoomIn();
-            else if (mouseCtx.Value.Wheel < 0)
-                camera.Value.ZoomOut();
+            if (ctrl &&
+                !mouseCtx.Value.WheelConsumed &&
+                camera.Value.Bounds.Contains((int)mouseCtx.Value.Position.X, (int)mouseCtx.Value.Position.Y))
+            {
+                if (mouseCtx.Value.Wheel > 0)
+                    camera.Value.ZoomIn();
+                else if (mouseCtx.Value.Wheel < 0)
+                    camera.Value.ZoomOut();
+            }
+            else if (!ctrl && profile.Value.RestoreScaleAfterUnpressCtrl)
+            {
+                camera.Value.Zoom = profile.Value.DefaultScale;
+            }
         }
 
         camera.Value.Update(true, time.Value.Total, new((int)mousePos.X, (int)mousePos.Y));

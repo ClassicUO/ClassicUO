@@ -12,11 +12,13 @@
 using System;
 using System.Collections.Generic;
 using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
@@ -32,6 +34,7 @@ internal readonly struct ContainerGumpPlugin : IPlugin
     {
         app.AddResource(new ContainerDataRegistry());
         app.AddResource(new ContainerUiMap());
+        app.AddResource(new ContainerPositionMemory());
 
         var spawnUiFn = SpawnContainerWindow;
         var updateSlotsFn = UpdateContainerSlots;
@@ -40,8 +43,24 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         var tearDownFn = TearDownClosedUi;
         var updateSelectionFn = UpdateSelectedFromContainerUI;
         var disposeOnLogoutFn = DisposeOnLogout;
+        var syncProfileFn = SyncProfileToUiScale;
+        var dragEndFn = TrackContainerDragEnd;
 
         app
+            // Profile -> UIScale bridge: the options gump writes Profile; the
+            // container/pickup systems read UIScale. Stage.First so every
+            // consumer this frame sees the current settings.
+            .AddSystem(syncProfileFn)
+                .InStage(Stage.First)
+                .Build()
+
+            // Legacy ContainerGump.OnDragEnd: dropping a dragged container
+            // updates the shared "last dragged position" used by
+            // OverrideContainerLocationSetting 2/3 for the next open.
+            .AddSystem(dragEndFn)
+                .InStage(Stage.PostUpdate)
+                .Build()
+
             .AddSystem(spawnUiFn)
                 .InStage(Stage.Update)
                 .RunIf((EventReader<ContainerOpenedEvent> r) => r.HasEvents)
@@ -119,13 +138,76 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         // is synthesized by Bevy.UI from two UiClick events on the same entity
         // within UiClayContext.DoubleClickWindow. Pickup gate is drag-only so
         // a held-still click never grabs — both clicks land cleanly here.
+        //
+        // DoubleClickToLootInsideContainers reroutes the gesture to a grab
+        // (legacy ItemGump.OnMouseDoubleClick -> GameActions.GrabItem): pick
+        // the item up and drop it into the grab bag / player backpack, unless
+        // the item is itself a container (still opens) or already sits in the
+        // player's backpack window.
         app.AddObserver((
             On<UiDoubleClick> trig,
             Res<NetClient> net,
-            Query<Data<ContainerItemUI>> itemQ) =>
+            Res<Profile> profile,
+            Res<UOFileManager> fileManager,
+            Res<NetworkEntitiesMap> entitiesMap,
+            Query<Data<ContainerItemUI>> itemQ,
+            Query<Data<ContainerWindow>> windowQ,
+            Query<Data<Graphic>> graphicQ,
+            Query<Data<Amount>> amountQ,
+            Query<Data<EquipmentSlots>, Filter<With<Player>>> playerQ,
+            Query<Data<NetworkSerial>> serialQ) =>
         {
             if (!itemQ.TryGet(trig.EntityId, out var itemRow)) return;
             var (_, link) = itemRow;
+
+            if (profile.Value.DoubleClickToLootInsideContainers)
+            {
+                uint containerSerial = 0;
+                if (windowQ.TryGet(link.Ref.Container, out var winRow))
+                {
+                    var (_, w) = winRow;
+                    containerSerial = w.Ref.Serial;
+                }
+
+                uint backpack = 0;
+                foreach (var (_, slots) in playerQ)
+                {
+                    var bp = slots.Ref[GameLayer.Backpack];
+                    if (bp != 0 && serialQ.TryGet(bp, out var bpRow))
+                    {
+                        var (_, ns) = bpRow;
+                        backpack = ns.Ref.Value;
+                    }
+                    break;
+                }
+
+                bool isContainerItem = false;
+                ushort amount = 1;
+                if (entitiesMap.Value.TryGet(link.Ref.Serial, out var gameEnt))
+                {
+                    if (graphicQ.TryGet(gameEnt, out var gRow))
+                    {
+                        var (_, g) = gRow;
+                        var tileData = fileManager.Value.TileData.StaticData;
+                        if (g.Ref.Value < tileData.Length)
+                            isContainerItem = tileData[g.Ref.Value].IsContainer;
+                    }
+                    if (amountQ.TryGet(gameEnt, out var aRow))
+                    {
+                        var (_, a) = aRow;
+                        amount = (ushort)Math.Clamp(a.Ref.Value, 1, ushort.MaxValue);
+                    }
+                }
+
+                if (backpack != 0 && containerSerial != backpack && !isContainerItem)
+                {
+                    uint bag = profile.Value.GrabBagSerial != 0 ? profile.Value.GrabBagSerial : backpack;
+                    net.Value.Send_PickUpRequest(link.Ref.Serial, amount);
+                    net.Value.Send_DropRequest(link.Ref.Serial, 0xFFFF, 0xFFFF, 0, 0, bag);
+                    return;
+                }
+            }
+
             net.Value.Send_DoubleClick(link.Ref.Serial);
         });
     }
@@ -231,6 +313,174 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         return info.Texture != null ? candidate : (ushort)0x003C;
     }
 
+    private static void SyncProfileToUiScale(Res<Profile> profile, ResMut<UIScale> uiScale)
+    {
+        var p = profile.Value;
+        var s = uiScale.Value;
+        s.ContainerScale = Math.Clamp(p.ContainersScale, (byte)50, (byte)200) / 100f;
+        s.ScaleItemsInsideContainers = p.ScaleItemsInsideContainers;
+        s.HueContainerGumps = p.HueContainerGumps;
+        s.BackpackStyle = p.BackpackStyle;
+        s.RelativeDragAndDropItems = p.RelativeDragAndDropItems;
+        s.SkipEmptyCorpse = p.SkipEmptyCorpse;
+        s.OverrideContainerLocation = p.OverrideContainerLocation;
+    }
+
+    // Legacy PacketHandlers.OpenContainer: UOP clients with the option on swap
+    // the classic container art for the big 0x06Ex/0x9CDx variants when the
+    // dataset actually has them.
+    private static ushort ResolveLargeContainerGraphic(AssetsServer assets, ushort graphic)
+    {
+        ushort candidate = graphic switch
+        {
+            0x0048 => 0x06E8,
+            0x0049 => 0x9CDF,
+            0x0051 => 0x06E7,
+            0x003E => 0x06E9,
+            0x004D => 0x06EA,
+            0x004E => 0x06E6,
+            0x004F => 0x06E5,
+            0x004A => 0x9CDD,
+            0x0044 => 0x9CE3,
+            _ => graphic,
+        };
+        if (candidate == graphic) return graphic;
+        ref readonly var info = ref assets.Gumps.GetGump(candidate);
+        return info.Texture != null ? candidate : graphic;
+    }
+
+    // World-anchored screen position of the container's root holder (chest on
+    // ground / corpse / pack-animal mobile). Same camera math as
+    // NameplatePlugin.UpdatePlates. Null when nothing in the chain has a
+    // WorldPosition (e.g. a sub-container of the player's own backpack).
+    private static Vector2? ScreenPosOf(
+        uint serial,
+        GameContext gameCtx,
+        Camera camera,
+        NetworkEntitiesMap entitiesMap,
+        Query<Data<WorldPosition>> worldPosQ,
+        Query<Data<TinyEcs.Parent>> parentsQ)
+    {
+        if (!entitiesMap.TryGet(serial, out var ent)) return null;
+
+        var root = ent;
+        for (int i = 0; i < 16 && !worldPosQ.Contains(root); i++)
+        {
+            if (!parentsQ.TryGet(root, out var parentRow)) break;
+            var (_, p) = parentRow;
+            var pid = (ulong)p.Ref.Id;
+            if (pid == 0 || pid == root) break;
+            root = pid;
+        }
+        if (!worldPosQ.TryGet(root, out var posRow)) return null;
+        var (_, wp) = posRow;
+
+        var center = Isometric.IsoToScreen(gameCtx.CenterX, gameCtx.CenterY, gameCtx.CenterZ);
+        center -= new Vector2(camera.Bounds.Width, camera.Bounds.Height) / 2f;
+        center.X += 22f;
+        center.Y += 22f;
+        center -= gameCtx.CenterOffset;
+
+        var position = Isometric.IsoToScreen(wp.Ref.X, wp.Ref.Y, wp.Ref.Z);
+        position -= center;
+        return camera.WorldToScreen(position) + new Vector2(camera.Bounds.X, camera.Bounds.Y);
+    }
+
+    // Legacy ContainerManager.CalculateContainerPosition: a per-serial saved
+    // position (setting 3, consumed once like UIManager.RemovePosition) wins;
+    // otherwise OverrideContainerLocationSetting picks near-object / top-right
+    // / the shared last-dragged point; otherwise the registry default.
+    private static (float X, float Y) ResolveSpawnPosition(
+        uint serial,
+        int width,
+        int height,
+        ContainerDataRegistry registry,
+        Profile profile,
+        GameContext gameCtx,
+        Camera camera,
+        UiSurface surface,
+        NetworkEntitiesMap entitiesMap,
+        ContainerPositionMemory memory,
+        Query<Data<WorldPosition>> worldPosQ,
+        Query<Data<TinyEcs.Parent>> parentsQ)
+    {
+        if (memory.Saved.TryGetValue(serial, out var saved))
+        {
+            memory.Saved.Remove(serial);
+            return (saved.X, saved.Y);
+        }
+
+        if (!profile.OverrideContainerLocation)
+            return (registry.DefaultX, registry.DefaultY);
+
+        float screenW = surface.LogicalSize.X;
+        float screenH = surface.LogicalSize.Y;
+        float x = registry.DefaultX;
+        float y = registry.DefaultY;
+
+        switch (profile.OverrideContainerLocationSetting)
+        {
+            case 0: // near the container in the world (legacy +40, vertically centered)
+                if (ScreenPosOf(serial, gameCtx, camera, entitiesMap, worldPosQ, parentsQ) is { } pos)
+                {
+                    x = pos.X + 40;
+                    y = pos.Y - (height >> 1);
+                }
+                break;
+            case 1: // top right
+                x = screenW - width;
+                y = 0;
+                break;
+            case 2:
+            case 3: // centered on the last dragged point
+                x = profile.OverrideContainerLocationPosition.X - (width >> 1);
+                y = profile.OverrideContainerLocationPosition.Y - (height >> 1);
+                break;
+        }
+
+        if (x + width > screenW) x -= width;
+        if (y + height > screenH) y -= height;
+        return (x, y);
+    }
+
+    // Legacy ContainerGump.OnDragEnd: when a container window was moved with
+    // the mouse and setting >= 2, remember its center as the spawn point for
+    // the next container. Snapshot positions on press, compare on release.
+    private static void TrackContainerDragEnd(
+        Res<MouseContext> mouse,
+        Res<Profile> profile,
+        Local<Dictionary<ulong, Vector2>> snapshot,
+        Query<Data<ContainerWindow, Node>> windowsQ)
+    {
+        snapshot.Value ??= new Dictionary<ulong, Vector2>();
+
+        if (mouse.Value.IsPressedOnce(MouseButtonType.Left))
+        {
+            snapshot.Value.Clear();
+            foreach (var (ent, _, node) in windowsQ)
+                snapshot.Value[ent.Ref] = new Vector2(node.Ref.Left.Value, node.Ref.Top.Value);
+            return;
+        }
+
+        if (!mouse.Value.IsReleased(MouseButtonType.Left) || snapshot.Value.Count == 0)
+            return;
+
+        if (profile.Value.OverrideContainerLocation
+            && profile.Value.OverrideContainerLocationSetting >= 2)
+        {
+            foreach (var (ent, _, node) in windowsQ)
+            {
+                if (!snapshot.Value.TryGetValue(ent.Ref, out var pressPos)) continue;
+                var cur = new Vector2(node.Ref.Left.Value, node.Ref.Top.Value);
+                if (cur == pressPos) continue;
+                profile.Value.OverrideContainerLocationPosition = new Point(
+                    (int)(cur.X + node.Ref.Width.Value / 2f),
+                    (int)(cur.Y + node.Ref.Height.Value / 2f));
+            }
+        }
+        snapshot.Value.Clear();
+    }
+
     private static void SpawnContainerWindow(
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
@@ -239,8 +489,15 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         Res<ContainerUiMap> uiMap,
         Res<UIScale> uiScale,
         Res<UiZCounter> zCounter,
+        Res<Profile> profile,
+        Res<GameContext> gameCtx,
+        Res<UiSurface> surface,
+        Res<Camera> camera,
+        Res<ContainerPositionMemory> memory,
         EventReader<ContainerOpenedEvent> reader,
-        Query<Data<Hue>> hueQuery)
+        Query<Data<Hue>> hueQuery,
+        Query<Data<WorldPosition>> worldPosQ,
+        Query<Data<TinyEcs.Parent>> parentsQ)
     {
         foreach (var ev in reader.Read())
         {
@@ -252,6 +509,8 @@ internal readonly struct ContainerGumpPlugin : IPlugin
                 continue;
 
             var graphic = ResolveBackpackGraphic(assets.Value, ev.Graphic, uiScale.Value.BackpackStyle);
+            if (gameCtx.Value.ClientVersion >= ClientVersion.CV_706000 && profile.Value.UseLargeContainerGumps)
+                graphic = ResolveLargeContainerGraphic(assets.Value, graphic);
             var data = registry.Value.Get(graphic);
 
             bool isBoard = graphic == 0x091A || graphic == 0x092E;
@@ -261,8 +520,9 @@ internal readonly struct ContainerGumpPlugin : IPlugin
             var width = (int)(gumpInfo.UV.Width * scale);
             var height = (int)(gumpInfo.UV.Height * scale);
 
-            var posX = registry.Value.DefaultX;
-            var posY = registry.Value.DefaultY;
+            var (posX, posY) = ResolveSpawnPosition(
+                ev.Serial, width, height, registry.Value, profile.Value, gameCtx.Value,
+                camera.Value, surface.Value, entitiesMap.Value, memory.Value, worldPosQ, parentsQ);
 
             var hueVec = Vector3.UnitZ;
             if (uiScale.Value.HueContainerGumps
@@ -647,13 +907,25 @@ internal readonly struct ContainerGumpPlugin : IPlugin
     private static void TearDownClosedUi(
         Commands commands,
         Res<ContainerUiMap> uiMap,
+        Res<Profile> profile,
+        Res<ContainerPositionMemory> memory,
         EventReader<ContainerClosedEvent> reader,
+        Query<Data<Node>> nodeQ,
         Query<Data<TinyEcs.Children>> childrenQ)
     {
         foreach (var ev in reader.Read())
         {
             if (!uiMap.Value.TryGet(ev.Serial, out var entry))
                 continue;
+
+            // Setting 3 remembers each container's position across closes
+            // (legacy ContainerGump.Dispose -> UIManager.SavePosition).
+            if (profile.Value.OverrideContainerLocationSetting == 3
+                && nodeQ.TryGet(entry.UiEntity, out var nodeRow))
+            {
+                var (_, n) = nodeRow;
+                memory.Value.Saved[ev.Serial] = new Point((int)n.Ref.Left.Value, (int)n.Ref.Top.Value);
+            }
 
             if (childrenQ.TryGet(entry.UiEntity, out var childrenRow))
             {
@@ -706,6 +978,15 @@ internal struct ContainerEyeTag
 internal struct MinimizeHitbox
 {
     public ulong Container;   // UI entity id
+}
+
+// Per-serial remembered window positions for OverrideContainerLocationSetting
+// == 3 ("remember each container"). Written on close (legacy Dispose ->
+// UIManager.SavePosition), consumed once on the next open (legacy
+// GetGumpCachePosition + RemovePosition).
+internal sealed class ContainerPositionMemory
+{
+    public readonly Dictionary<uint, Point> Saved = new();
 }
 
 // Serial -> UI window entry. Caches enough of ContainerGumpTag inline so item

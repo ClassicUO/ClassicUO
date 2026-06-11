@@ -43,6 +43,11 @@ internal struct HealthBarWindow
     // server with repeat requests if the entity churns in/out before the reply
     // lands (legacy HitsRequestStatus Pending/Received).
     public bool HpRequested;
+    // Last in-range HP reading was 0 — when the entity then vanishes, the
+    // disappearance was a death, which is what CloseHealthBarType == 2 closes
+    // on (legacy checks CorpseManager.Exists; ECS has no corpse manager, so
+    // the hits-at-zero edge is the death signal).
+    public bool WasDead;
     // Which layout is currently built (party 3-bar vs normal). The rebuild
     // system flips the layout when this diverges from PartyState.Contains.
     public bool InParty;
@@ -164,6 +169,7 @@ internal readonly struct HealthBarPlugin : IPlugin
         Res<UiZCounter> zCounter,
         Res<NetClient> net,
         Res<PartyState> party,
+        Res<ClassicUO.Configuration.Profile> profile,
         Local<ClickLatch> latch,
         HbInteractParams p)
     {
@@ -180,7 +186,7 @@ internal readonly struct HealthBarPlugin : IPlugin
             var (_, w) = winRow;
             if (w.Ref.IsPlayer)
             {
-                StatusBarPlugin.OpenOrFocus(commands, builder.Value, assets.Value, gameCtx.Value, zCounter.Value, p.Status);
+                StatusBarPlugin.OpenOrFocus(commands, builder.Value, assets.Value, gameCtx.Value, profile.Value, zCounter.Value, p.Status);
                 DespawnSubtree(commands, win, p.Children);
             }
             else
@@ -575,8 +581,11 @@ internal readonly struct HealthBarPlugin : IPlugin
     }
 
     private static void Refresh(
+        Commands commands,
         Res<NetworkEntitiesMap> entities,
         Res<NetClient> net,
+        Res<ClassicUO.Configuration.Profile> profile,
+        Query<Data<TinyEcs.Children>> childrenQ,
         Query<Data<Hits>> hitsQ,
         Query<Data<Mana>> manaQ,
         Query<Data<Stamina>> stamQ,
@@ -646,7 +655,7 @@ internal readonly struct HealthBarPlugin : IPlugin
         // going out -> Send_CloseStatusBarGump (server stops hp updates), coming
         // back -> Send_StatusRequest if hp is stale (HitsMax==0) so the bar
         // refills instead of showing 0 (legacy RequestMobileStatus on re-entry).
-        foreach (var (_, win, custom) in rootsQ)
+        foreach (var (ent, win, custom) in rootsQ)
         {
             var r = custom.Ref.Render();
             if (r == null) continue;
@@ -655,13 +664,28 @@ internal readonly struct HealthBarPlugin : IPlugin
             bool hpKnown = inRange && hitsQ.Contains(ment) && Get(hitsQ, ment).MaxValue > 0;
 
             // HP arrived -> request satisfied; allow a future re-request.
-            if (hpKnown) win.Ref.HpRequested = false;
+            if (hpKnown)
+            {
+                win.Ref.HpRequested = false;
+                win.Ref.WasDead = Get(hitsQ, ment).Value == 0;
+            }
 
             if (inRange == win.Ref.OutOfRange) // edge: state flipped
             {
                 if (!inRange)
                 {
+                    // CloseHealthBarType: 1 = close when the mobile leaves
+                    // range, 2 = close only when it died (legacy HealthBarGump
+                    // entity-null path). Party bars stay (legacy keeps them);
+                    // the player's own bar never auto-closes.
                     net.Value.Send_CloseStatusBarGump(win.Ref.Serial);
+                    if (!win.Ref.IsPlayer && !win.Ref.InParty
+                        && (profile.Value.CloseHealthBarType == 1
+                            || (profile.Value.CloseHealthBarType == 2 && win.Ref.WasDead)))
+                    {
+                        DespawnSubtree(commands, ent.Ref, childrenQ);
+                        continue;
+                    }
                 }
                 else if (!hpKnown && !win.Ref.HpRequested)
                 {

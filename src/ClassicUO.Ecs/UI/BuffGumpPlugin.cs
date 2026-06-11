@@ -36,7 +36,9 @@ namespace ClassicUO.Ecs;
 // _buffIcons exactly — same type, same add/remove ops, same iteration.
 internal sealed class PlayerBuffs
 {
-    public readonly Dictionary<BuffIconType, ushort> Buffs = new();
+    // ExpiresAt: engine-clock ms when the buff runs out (legacy BuffIcon.Timer
+    // = Time.Ticks + timer*1000); float.MaxValue = no countdown.
+    public readonly Dictionary<BuffIconType, (ushort Graphic, float ExpiresAt)> Buffs = new();
     // Set when the buff set OR the bar direction changes; the open bar relays
     // its icons and clears it. Stays set while closed so a later open is current.
     public bool Dirty;
@@ -57,6 +59,10 @@ internal struct BuffBarLayout { public ushort Graphic; }
 internal struct BuffIconUI;
 internal struct BuffBarToggle;
 
+// Countdown label child of a buff icon (Profile.BuffBarTime). Carries the
+// buff's expiry so the per-frame text refresh needs no dictionary lookup.
+internal struct BuffIconTime { public float ExpiresAt; }
+
 internal readonly struct BuffGumpPlugin : IPlugin
 {
     // Legacy direction backgrounds. Default LEFT_HORIZONTAL (0x7580).
@@ -71,11 +77,19 @@ internal readonly struct BuffGumpPlugin : IPlugin
     {
         app.AddResource(new PlayerBuffs());
 
-        app.AddObserver<On<PacketReceived<OnBuffDebuffPacket_0xDF>>, ResMut<PlayerBuffs>>(OnBuffDebuff);
+        app.AddObserver((
+            On<PacketReceived<OnBuffDebuffPacket_0xDF>> trig,
+            ResMut<PlayerBuffs> buffs,
+            Res<Time> time) => OnBuffDebuff(trig, buffs, time));
 
         var syncFn = Sync;
+        var timersFn = UpdateTimers;
         var despawnFn = Despawn;
         app.AddSystem(syncFn).InStage(Stage.Update).Build();
+        app.AddSystem(timersFn)
+            .InStage(Stage.Update)
+            .RunIf((Query<Data<BuffIconTime>> q) => q.Count() > 0)
+            .Build();
         app.AddSystem(despawnFn).OnExit(GameState.GameScreen).Build();
 
 #if AGENT_BUILD
@@ -136,7 +150,8 @@ internal readonly struct BuffGumpPlugin : IPlugin
 
     private static void OnBuffDebuff(
         On<PacketReceived<OnBuffDebuffPacket_0xDF>> trig,
-        ResMut<PlayerBuffs> buffs)
+        ResMut<PlayerBuffs> buffs,
+        Res<Time> time)
     {
         var packet = trig.Event.Packet;
         ushort ic = (ushort)packet.IconType;
@@ -150,9 +165,19 @@ internal readonly struct BuffGumpPlugin : IPlugin
         // Mirror legacy PlayerMobile: dict[type]=graphic to add/refresh (keeps
         // the existing slot on refresh), Remove(type) on a Count==0 packet.
         if (packet.Count != 0)
-            buffs.Value.Buffs[packet.IconType] = BuffTable.Table[iconID];
+        {
+            // Timer is seconds remaining (legacy: Time.Ticks + timer*1000);
+            // 0 / 0xFFFF mean "no countdown".
+            ushort timer = packet.Entries[packet.Entries.Count - 1].Timer;
+            float expires = timer == 0 || timer == 0xFFFF
+                ? float.MaxValue
+                : time.Value.Total + timer * 1000f;
+            buffs.Value.Buffs[packet.IconType] = (BuffTable.Table[iconID], expires);
+        }
         else
+        {
             buffs.Value.Buffs.Remove(packet.IconType);
+        }
 
         buffs.Value.Dirty = true;
     }
@@ -208,10 +233,74 @@ internal readonly struct BuffGumpPlugin : IPlugin
         foreach (var kv in buffs.Value.Buffs)
         {
             var (x, y) = IconPosition(dir, i, bgW, bgH);
-            var icon = builder.Value.AddGump(commands, kv.Value, Vector3.UnitZ, new Vector2(x, y));
+            var icon = builder.Value.AddGump(commands, kv.Value.Graphic, Vector3.UnitZ, new Vector2(x, y));
             icon.Insert<BuffIconUI>();
             commands.AddChild(root, icon.Id);
+
+            // Countdown label (legacy BuffIcon._gText: centered over the icon
+            // at half height). Text is filled by UpdateTimers only while
+            // Profile.BuffBarTime is on, so the node is inert otherwise.
+            ref readonly var iconInfo = ref assets.Value.Gumps.GetGump(kv.Value.Graphic);
+            int iconW = iconInfo.UV.Width > 0 ? iconInfo.UV.Width : 30;
+            int iconH = iconInfo.UV.Height > 0 ? iconInfo.UV.Height : 30;
+            var label = commands.Spawn()
+                .Insert(new Node
+                {
+                    PositionType = PositionType.Absolute,
+                    Left = Val.Px(-3),
+                    Top = Val.Px(iconH / 2 - 3),
+                    Width = Val.Px(iconW + 6),
+                    Height = Val.Px(20),
+                })
+                .Insert(new UiCustom
+                {
+                    Data = new UOCustomRender
+                    {
+                        Kind = UOCustomKind.WrappedText,
+                        Hue = Vector3.UnitZ,
+                        Text = string.Empty,
+                        TextFont = 2,          // legacy RenderedText font 2
+                        TextHue = 0xFFFF,      // white
+                        WrapWidth = iconW + 6,
+                        TextCenter = true,
+                    }
+                })
+                .Insert(new BuffIconTime { ExpiresAt = kv.Value.ExpiresAt });
+            commands.AddChild(icon.Id, label.Id);
             i++;
+        }
+    }
+
+    // Fill / clear the per-icon countdown labels. Mirrors legacy
+    // BuffIcon.Update text formatting ("Xh" / "M:SS" / "SSs"); the labels are
+    // blank while Profile.BuffBarTime is off, so toggling applies live.
+    private static void UpdateTimers(
+        Res<ClassicUO.Configuration.Profile> profile,
+        Res<Time> time,
+        Query<Data<BuffIconTime, UiCustom>> labelsQ)
+    {
+        foreach (var (_, t, custom) in labelsQ)
+        {
+            var r = custom.Ref.Render();
+            if (r == null) continue;
+
+            string text = string.Empty;
+            if (profile.Value.BuffBarTime && t.Ref.ExpiresAt != float.MaxValue)
+            {
+                float delta = t.Ref.ExpiresAt - time.Value.Total;
+                if (delta > 0)
+                {
+                    var span = TimeSpan.FromMilliseconds(delta);
+                    text = span.Hours > 0
+                        ? $"+{span.Hours}hr"
+                        : span.Minutes > 0
+                            ? $"{span.Minutes}:{span.Seconds:00}"
+                            : $"{span.Seconds:00}s";
+                }
+            }
+
+            if (r.Text != text)
+                r.Text = text;
         }
     }
 

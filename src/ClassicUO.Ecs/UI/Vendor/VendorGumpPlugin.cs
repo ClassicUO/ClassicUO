@@ -14,6 +14,7 @@
 using System;
 using System.Collections.Generic;
 using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Input;
@@ -276,6 +277,7 @@ internal readonly struct VendorGumpPlugin : IPlugin
         Res<GumpBuilder> builder,
         Res<AssetsServer> assets,
         Res<UiZCounter> z,
+        Res<Profile> profile,
         EventReader<VendorOpenedEvent> reader,
         Query<Data<VendorWindow>> existingQ)
     {
@@ -295,11 +297,11 @@ internal readonly struct VendorGumpPlugin : IPlugin
                 }
             }
             if (focused) continue;
-            BuildWindow(commands, builder.Value, assets.Value, z.Value, ev.Vendor, ev.IsBuy);
+            BuildWindow(commands, builder.Value, assets.Value, z.Value, profile.Value, ev.Vendor, ev.IsBuy);
         }
     }
 
-    private static void BuildWindow(Commands commands, GumpBuilder builder, AssetsServer assets, UiZCounter z, uint vendor, bool isBuy)
+    private static void BuildWindow(Commands commands, GumpBuilder builder, AssetsServer assets, UiZCounter z, Profile profile, uint vendor, bool isBuy)
     {
         ushort gLeft = isBuy ? BuyLeft : SellLeft;
         ushort gRight = isBuy ? BuyRight : SellRight;
@@ -307,7 +309,9 @@ internal readonly struct VendorGumpPlugin : IPlugin
         int rightW = GumpW(assets, gRight), rightH = GumpH(assets, gRight);
         int naturalMid = leftH - (TopH + LeftBotH);
         int naturalMidR = rightH - (TopH + RightBotH);
-        float bodyH = naturalMid;
+        // Legacy ShopGump seeds the resizable middle from the profile (resize
+        // writes it back), clamped to the art's natural height as the minimum.
+        float bodyH = Math.Clamp(profile.VendorGumpHeight, naturalMid, 640);
         float rightMidExtra = naturalMidR - naturalMid; // keep right panel diff like legacy
         int rightX = leftW - RightOffset;
         int rightY = leftH / 2 - RightOffset;
@@ -877,6 +881,7 @@ internal readonly struct VendorGumpPlugin : IPlugin
     private static void ResizeDrag(
         Res<MouseContext> mouse,
         Res<DragGate> gate,
+        ResMut<Profile> profile,
         Local<ResizeAnchor> anchor,
         Query<Data<ComputedNode, VendorResizeHandle>> handlesQ,
         Query<Data<VendorWindow>> windowsQ,
@@ -916,6 +921,7 @@ internal readonly struct VendorGumpPlugin : IPlugin
             if (Math.Abs(nb - w.Ref.BodyHeight) >= 1f)
             {
                 w.Ref.BodyHeight = nb;
+                profile.Value.VendorGumpHeight = (int)nb;
                 RepositionPanels(w.Ref, nodeQ);
                 w.Ref.Dirty = true;
             }

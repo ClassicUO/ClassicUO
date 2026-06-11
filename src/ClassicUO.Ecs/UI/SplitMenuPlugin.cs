@@ -1,10 +1,10 @@
 // Split-stack menu — ECS port of Game/UI/Gumps/SplitMenuGump.cs.
 //
-// Dragging a stackable item (Amount > 1) out of a container without holding
-// Shift opens this little gump instead of picking up the whole pile (legacy
-// GameActions.PickUp with HoldShiftToSplitStack == Keyboard.Shift; the ECS
-// profile has no such toggle yet, so the default — split when Shift is up — is
-// hardcoded). A blue slider (1..Amount) + a numbers-only text box choose the
+// Dragging a stackable item (Amount > 1) out of a container opens this little
+// gump instead of picking up the whole pile when the Shift state matches
+// Profile.HoldShiftToSplitStack (legacy GameActions.PickUp with
+// HoldShiftToSplitStack == Keyboard.Shift; PickupPlugin owns that gate).
+// A blue slider (1..Amount) + a numbers-only text box choose the
 // quantity; OK / Enter lifts that many, right-click closes. PickupPlugin hands
 // us the full pickup snapshot through SplitPrompt so the commit can write
 // GrabbedItem exactly as a normal pickup would.

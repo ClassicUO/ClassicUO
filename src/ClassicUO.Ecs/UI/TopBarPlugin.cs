@@ -36,14 +36,20 @@ internal readonly struct TopBarPlugin : IPlugin
 
     public void Build(App app)
     {
-        var spawnFn = Spawn;
+        var syncFn = SyncPresence;
         var despawnFn = Despawn;
         var dragFn = Drag;
         var resetFn = RightClickReset;
         var pressFn = PressOffsetCaptions;
 
         app
-            .AddSystem(spawnFn).OnEnter(GameState.GameScreen).Build()
+            // Presence follows Profile.TopbarGumpIsDisabled live: spawns the
+            // bar when enabled (incl. the first GameScreen frame), despawns it
+            // when the options gump disables it.
+            .AddSystem(syncFn)
+                .InStage(Stage.Update)
+                .RunIf((Res<State<GameState>> s) => s.Value.Current == GameState.GameScreen)
+                .Build()
             .AddSystem(despawnFn).OnExit(GameState.GameScreen).Build()
             // PreUpdate so the bar claims the shared DragGate BEFORE the
             // Stage.Update drags (GameScreen border-drag, WindowDragPlugin) —
@@ -79,6 +85,35 @@ internal readonly struct TopBarPlugin : IPlugin
     {
         Map, Paperdoll, Inventory, Journal, Chat, Help,
         WorldMap, Info, Debug, NetStats, UOStore, GlobalChat,
+    }
+
+    // Spawn / despawn the bar to match the profile flag. `spawnQueued` covers
+    // the one-frame gap between queueing the deferred spawn and the root
+    // becoming visible to the query (avoids a double spawn).
+    private static void SyncPresence(
+        Commands commands,
+        Res<AssetsServer> assets,
+        Res<GameContext> gameCtx,
+        Res<ClassicUO.Configuration.Profile> profile,
+        Local<bool> spawnQueued,
+        Query<Data<Node>, Filter<With<IsTopBar>>> roots,
+        Query<Data<TinyEcs.Children>> childrenQ)
+    {
+        bool exists = false;
+        foreach (var _ in roots) { exists = true; break; }
+        if (exists) spawnQueued.Value = false;
+
+        if (profile.Value.TopbarGumpIsDisabled)
+        {
+            spawnQueued.Value = false;
+            if (exists)
+                Despawn(commands, roots, childrenQ);
+            return;
+        }
+
+        if (exists || spawnQueued.Value) return;
+        spawnQueued.Value = true;
+        Spawn(commands, assets, gameCtx);
     }
 
     private static void Spawn(

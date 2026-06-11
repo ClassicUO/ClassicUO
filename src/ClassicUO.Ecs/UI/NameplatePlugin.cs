@@ -24,6 +24,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Input;
@@ -176,6 +177,7 @@ internal readonly struct NameplatePlugin : IPlugin
         app.AddObserver((
             On<CheckboxChanged> trig,
             Res<NameplateState> state,
+            Res<Profile> profile,
             Query<Data<NameplateMenuCheck, Checkbox>> checksQ) =>
         {
             if (!checksQ.TryGet(trig.EntityId, out var row)) return;
@@ -186,6 +188,9 @@ internal readonly struct NameplatePlugin : IPlugin
             {
                 case NameplateCheckKind.StayActive:
                     state.Value.IsToggled = on;
+                    // Persisted setting — legacy NameOverHeadManager.IsToggled
+                    // reads/writes Profile.NameOverheadToggled directly.
+                    profile.Value.NameOverheadToggled = on;
                     return;
                 case NameplateCheckKind.All:
                     state.Value.TypeAllowed = on ? NameplateTypeAllowed.All : NameplateTypeAllowed.None;
@@ -218,11 +223,26 @@ internal readonly struct NameplatePlugin : IPlugin
         Commands commands,
         Res<KeyboardContext> keyboard,
         Res<NameplateState> state,
+        Res<Profile> profile,
         Res<UOFileManager> fileManager,
         Res<AssetsServer> assets,
         Res<UiZCounter> zCounter,
-        Query<Data<Node>, Filter<With<NameplateMenuWindow>>> menuQ)
+        Query<Data<Node>, Filter<With<NameplateMenuWindow>>> menuQ,
+        Query<Data<NameplateMenuCheck, Checkbox>> checksQ)
     {
+        // Profile is the persisted source for the stay-active toggle (the
+        // options gump writes it); the handler-menu checkbox writes both, so a
+        // mismatch here means the options gump flipped it — adopt + resync.
+        if (profile.Value.NameOverheadToggled != state.Value.IsToggled)
+        {
+            state.Value.IsToggled = profile.Value.NameOverheadToggled;
+            foreach (var (_, c, cb) in checksQ)
+            {
+                if (c.Ref.Kind == NameplateCheckKind.StayActive)
+                    cb.Ref.Checked = state.Value.IsToggled;
+            }
+        }
+
         bool ctrlShift =
             (keyboard.Value.IsPressed(Keys.LeftControl) || keyboard.Value.IsPressed(Keys.RightControl))
             && (keyboard.Value.IsPressed(Keys.LeftShift) || keyboard.Value.IsPressed(Keys.RightShift))
@@ -295,6 +315,7 @@ internal readonly struct NameplatePlugin : IPlugin
     private static void SyncPlates(
         Commands commands,
         Res<NameplateState> state,
+        Res<Profile> profile,
         Res<NetClient> net,
         Query<Data<NetworkSerial, WorldPosition, Graphic, Notoriety>,
             Filter<Without<ContainedInto>, Without<IsMulti>, Optional<Notoriety>>> worldQ,
@@ -302,6 +323,18 @@ internal readonly struct NameplatePlugin : IPlugin
         Query<Data<TinyEcs.Children>> childrenQ)
     {
         var st = state.Value;
+
+        // The hp-bar row is baked into the plate at build time — when the
+        // profile setting flips, drop every live plate so the eligible loop
+        // below rebuilds them with the new layout (applies live).
+        if (st.ShowHpBar != profile.Value.NameOverheadShowHpBar)
+        {
+            st.ShowHpBar = profile.Value.NameOverheadShowHpBar;
+            foreach (var plate in st.Plates.Values)
+                if (platesQ.Contains(plate))
+                    UiHierarchy.DespawnSubtree(commands, plate, childrenQ);
+            st.Plates.Clear();
+        }
 
         if (!st.Active)
         {

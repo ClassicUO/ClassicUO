@@ -19,6 +19,7 @@ public class JournalCaptureTests
         app.AddResource(new AssetsServer()); // empty: LayoutWindow has no windows to size
         app.AddResource<MouseContext>(new TestMouseContext()); // ResizeDrag reads mouse
         app.AddResource(new DragGate());
+        app.AddResource(new ClassicUO.Configuration.Profile()); // Capture reads journal filter/hue settings
         app.AddPlugin<JournalPlugin>();
         // Deterministic timestamp for assertions.
         app.GetResource<JournalTimeProvider>().Source = static () => "12:34";

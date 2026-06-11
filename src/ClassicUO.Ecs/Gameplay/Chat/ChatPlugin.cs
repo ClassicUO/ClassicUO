@@ -15,12 +15,6 @@ using ClayColor = Clay.Color;
 namespace ClassicUO.Ecs;
 
 
-internal sealed class ChatOptions
-{
-    public int MaxMessageLength { get; set; } = 120;
-    public ushort ChatColor { get; set; } = 0x44;
-}
-
 // The in-game chat input is a real focusable UI field (built on the shared
 // SpawnTextField primitive), not a resource-backed overlay: it gets the I-beam
 // cursor on hover, a blinking caret, and the global EditFocusedTextField path
@@ -45,7 +39,6 @@ internal readonly struct ChatPlugin : IPlugin
 
     public void Build(App app)
     {
-        app.AddResource(new ChatOptions());
         app.AddResource(new ChatField());
 
         var spawnFn = SpawnChatField;
@@ -123,6 +116,7 @@ internal readonly struct ChatPlugin : IPlugin
 
     private static void SpawnChatField(
         Commands commands,
+        Res<Profile> profile,
         ResMut<ChatField> field,
         ResMut<FocusedInput> focused)
     {
@@ -147,8 +141,9 @@ internal readonly struct ChatPlugin : IPlugin
             .Insert<ChatUi>();
 
         // Unicode font -> white RGB tint (a packed UO hue would read as RGB and
-        // black the text out).
-        var font = new TextFont { FontId = UoFontRuntime.DefaultFont, Size = 18 };
+        // black the text out). The font id comes from the profile's ChatFont
+        // (legacy SystemChatControl textbox font).
+        var font = new TextFont { FontId = profile.Value.ChatFont, Size = 18 };
         var glyphId = GuiPlugin.SpawnTextField(
             commands, bar, new Vector2(LeftMargin, 2), font, new ClayColor(255, 255, 255, 255), string.Empty, masked: false,
             decorate: e => e.Insert<ChatUi>());
@@ -219,15 +214,25 @@ internal readonly struct ChatPlugin : IPlugin
 
     // Stretch the bar to the viewport width (camera.Bounds is logical px, the
     // same space Val.Px feeds into). In-place Node mutation — no Commands.
+    // Also keeps the translucent backdrop in sync with the profile's
+    // HideChatGradient toggle (live, so the Options window applies instantly).
     private static void SizeChatBar(
         Res<ChatField> field,
         Res<Camera> camera,
-        Query<Data<Node>> nodes)
+        Res<Profile> profile,
+        Query<Data<Node>> nodes,
+        Query<Data<BackgroundColor>> backgrounds)
     {
         var bar = field.Value.Bar;
         if (bar == 0 || !nodes.TryGet(bar, out var nodeRow)) return;
         var (_, n) = nodeRow;
         n.Ref.Width = Val.Px(camera.Value.Bounds.Width);
+
+        if (backgrounds.TryGet(bar, out var bgRow))
+        {
+            var (_, bg) = bgRow;
+            bg.Ref.Value = new ClayColor(0, 0, 0, profile.Value.HideChatGradient ? (byte)0 : (byte)180);
+        }
     }
 
     // A left-press that lands on the game world (the viewport node, or empty
@@ -287,7 +292,7 @@ internal readonly struct ChatPlugin : IPlugin
         Res<NetClient> network,
         Res<GameContext> gameCtx,
         Res<Settings> settings,
-        Res<ChatOptions> chatOptions,
+        Res<Profile> profile,
         Query<Data<Text>> textQ)
     {
         var glyph = field.Value.Glyph;
@@ -298,16 +303,18 @@ internal readonly struct ChatPlugin : IPlugin
         if (text.Length == 0) return;
 
         var entries = fileManager.Value.Speeches.GetKeywords(text);
+        // Hue from the profile (legacy GameActions.Say); font 3 is the wire
+        // font legacy always sends — ChatFont only styles the input field.
         if (gameCtx.Value.ClientVersion >= ClientVersion.CV_200)
         {
             network.Value.Send_UnicodeSpeechRequest(
-                text, MessageType.Regular, 3, chatOptions.Value.ChatColor,
+                text, MessageType.Regular, 3, profile.Value.SpeechHue,
                 settings.Value.Language, entries);
         }
         else
         {
             network.Value.Send_ASCIISpeechRequest(
-                text, MessageType.Regular, 3, chatOptions.Value.ChatColor, entries);
+                text, MessageType.Regular, 3, profile.Value.SpeechHue, entries);
         }
 
         t.Ref.Value = string.Empty;

@@ -1,5 +1,6 @@
 using System;
 using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Network;
@@ -384,10 +385,12 @@ internal readonly struct PickupPlugin : IPlugin
         Res<NetworkEntitiesMap> entitiesMap,
         Res<UOFileManager> fileManager,
         Res<KeyboardContext> keyboard,
+        Res<Profile> profile,
         ResMut<SplitPrompt> splitPrompt,
-        Query<Data<NetworkSerial, Amount, Graphic, Hue>, Filter<Optional<Amount>>> q,
+        // ContainerSlotPosition rides along as an Optional (instead of its own
+        // query) — the system is at the 16-param cap.
+        Query<Data<NetworkSerial, Amount, Graphic, Hue, ContainerSlotPosition>, Filter<Optional<Amount>, Optional<ContainerSlotPosition>>> q,
         Query<Data<WorldPosition>> worldPosQ,
-        Query<Data<ContainerSlotPosition>> slotPosQ,
         Query<Data<ContainerItemUI>> uiItemQ,
         Query<Data<ContainerWindow>> windowQ,
         Query<Data<PaperdollEquipUI>> equipUiQ,
@@ -447,7 +450,7 @@ internal readonly struct PickupPlugin : IPlugin
             }
         }
 
-        var (serial, amount, graphic, hue) = q.Get(target);
+        var (serial, amount, graphic, hue, slotPos) = q.Get(target);
 
         // Snapshot origin from whichever position type the item carries.
         // Nested items use ContainerSlotPosition (X/Y/GridIndex); ground
@@ -456,11 +459,10 @@ internal readonly struct PickupPlugin : IPlugin
         ushort origX = 0, origY = 0;
         sbyte origZ = 0;
         byte origGrid = 0;
-        bool fromSlot = slotPosQ.TryGet(target, out var slotPosRow);
+        bool fromSlot = slotPos.IsValid();
         if (fromSlot)
         {
-            var (_, sp) = slotPosRow;
-            origX = sp.Ref.X; origY = sp.Ref.Y; origGrid = sp.Ref.GridIndex;
+            origX = slotPos.Ref.X; origY = slotPos.Ref.Y; origGrid = slotPos.Ref.GridIndex;
         }
         else if (worldPosQ.TryGet(target, out var worldPosRow))
         {
@@ -473,16 +475,18 @@ internal readonly struct PickupPlugin : IPlugin
         // ground/stackable items always carry it.
         int amountValue = amount.IsValid() ? amount.Ref.Value : 1;
 
-        // Stackable + amount>1 + Shift up -> prompt for a split instead of
-        // lifting the whole pile (legacy GameActions.PickUp; default profile
-        // HoldShiftToSplitStack == false, so the menu shows when Shift is up).
+        // Stackable + amount>1 -> prompt for a split instead of lifting the
+        // whole pile when the Shift state matches HoldShiftToSplitStack
+        // (legacy GameActions.PickUp: `HoldShiftToSplitStack == Keyboard.Shift`;
+        // default false, so the menu shows when Shift is up).
         // Snapshot the full pickup context into SplitPrompt; SplitMenuPlugin's
         // OK/Enter commit replays it as a normal pickup. The pickup system's
         // RunIf gate (SplitPrompt.Open) keeps this from re-firing while up.
         var graphicId = graphic.Ref.Value;
         bool stackable = graphicId < fileManager.Value.TileData.StaticData.Length
             && fileManager.Value.TileData.StaticData[graphicId].IsStackable;
-        if (!splitPrompt.Value.Open && amountValue > 1 && stackable && !ShiftDown(keyboard.Value))
+        if (!splitPrompt.Value.Open && amountValue > 1 && stackable
+            && ShiftDown(keyboard.Value) == profile.Value.HoldShiftToSplitStack)
         {
             splitPrompt.Value.Open = true;
             splitPrompt.Value.Built = false;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Network;
@@ -85,12 +86,14 @@ readonly struct PlayerMovementPlugin : IPlugin
                        Res<PlayerStepsContext> playerRequestedSteps,
                        Local<bool> autoWalk,
                        Res<Time> time,
+                       Res<Profile> profile,
                        Query<Data<WorldPosition, Facing, MobileSteps, MobAnimation>, With<Player>> playerQuery
                    ) =>
                    {
                        if (!autoWalk.Value)
                        {
-                           if (mouseCtx.Value.IsPressed(Input.MouseButtonType.Right) &&
+                           if (!profile.Value.DisableAutoMove &&
+                               mouseCtx.Value.IsPressed(Input.MouseButtonType.Right) &&
                                mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
                            {
                                autoWalk.Value = true;
@@ -163,7 +166,8 @@ readonly struct PlayerMovementPlugin : IPlugin
         Single<Data<WorldPosition, Facing, MobileSteps, MobAnimation, ServerFlags>, With<Player>> playerQuery,
         Query<Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tilesQuery,
         Query<Data<WorldPosition, Graphic>, Filter<With<IsStatic>, Without<IsTile>, Without<MobAnimation>>> staticsQuery,
-        Res<Time> time
+        Res<Time> time,
+        Res<Profile> profile
     )
     {
         terrainList.Value ??= new();
@@ -178,9 +182,14 @@ readonly struct PlayerMovementPlugin : IPlugin
         var mouseDir = (Direction)ClassicUO.Game.GameCursor.GetMouseDirection((int)center.X, (int)center.Y, (int)mousePos.X, (int)mousePos.Y, 1);
         var mouseRange = Utility.MathHelper.Hypotenuse(center.X - mousePos.X, center.Y - mousePos.Y);
         var facing = mouseDir == Direction.North ? Direction.Mask : mouseDir - 1;
-        var run = mouseRange >= Constants.THREESHOLD_MOUSE_WALK_RUN || false;
+        var run = mouseRange >= Constants.THREESHOLD_MOUSE_WALK_RUN || profile.Value.AlwaysRun;
 
         (var worldPos, var dir, var mobSteps, var animation, var flags) = playerQuery.Get();
+
+        // Legacy PlayerMobile.Walk: a hidden player is forced to walk when
+        // AlwaysRunUnlessHidden is set.
+        if (profile.Value.AlwaysRunUnlessHidden && flags.Ref.Value.HasFlag(Flags.Hidden))
+            run = false;
         var hasNoSteps = mobSteps.Ref.Index < 0;
         var playerX = worldPos.Ref.X;
         var playerY = worldPos.Ref.Y;
@@ -298,7 +307,9 @@ readonly struct PlayerMovementPlugin : IPlugin
         if (canMove || !sameDir)
         {
             var isMountedOrFlying = animation.Ref.MountAction != 0xFF || flags.Ref.Value.HasFlag(Flags.Flying);
-            var stepTime = sameDir ? MovementSpeed.TimeToCompleteMovement(run, isMountedOrFlying) : Constants.TURN_DELAY;
+            var stepTime = sameDir
+                ? MovementSpeed.TimeToCompleteMovement(run, isMountedOrFlying)
+                : (profile.Value.FastRotation ? Constants.TURN_DELAY_FAST : Constants.TURN_DELAY);
             ref var requestedStep = ref playerRequestedSteps.Value.Steps[playerRequestedSteps.Value.Count];
             requestedStep.Sequence = playerRequestedSteps.Value.Sequence;
             requestedStep.X = playerX;

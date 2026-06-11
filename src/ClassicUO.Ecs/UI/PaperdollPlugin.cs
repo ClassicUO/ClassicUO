@@ -413,12 +413,13 @@ internal readonly struct PaperdollPlugin : IPlugin
                            Res<GumpBuilder> gb,
                            Res<AssetsServer> assets,
                            Res<GameContext> ctx,
+                           Res<ClassicUO.Configuration.Profile> profile,
                            Res<UiZCounter> z,
                            Query<Data<StatusBarWindow>> existing) =>
         {
             if (capturedPlayerSerial != 0)
                 net.Value.Send_StatusRequest(capturedPlayerSerial);
-            StatusBarPlugin.OpenOrFocus(cmd, gb.Value, assets.Value, ctx.Value, z.Value, existing);
+            StatusBarPlugin.OpenOrFocus(cmd, gb.Value, assets.Value, ctx.Value, profile.Value, z.Value, existing);
         });
         commands.AddChild(root.Id, btnStatus.Id);
 

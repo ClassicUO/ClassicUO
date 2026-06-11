@@ -105,6 +105,7 @@ internal readonly struct StatusBarPlugin : IPlugin
         GumpBuilder builder,
         AssetsServer assets,
         GameContext gameCtx,
+        ClassicUO.Configuration.Profile profile,
         UiZCounter zCounter,
         Query<Data<StatusBarWindow>> existingQ)
     {
@@ -114,7 +115,9 @@ internal readonly struct StatusBarPlugin : IPlugin
             return;
         }
 
-        bool modern = gameCtx.ClientVersion >= ClientVersion.CV_308Z;
+        // UseOldStatusGump forces the classic 0x0802 layout on modern clients
+        // (legacy StatusGumpBase.GetStatusGump). Takes effect on next open.
+        bool modern = gameCtx.ClientVersion >= ClientVersion.CV_308Z && !profile.UseOldStatusGump;
         var bg = modern ? ModernBackground : OldBackground;
         var layout = modern ? s_modern : s_old;
         // Exact legacy parity: ASCII font 1 + hue 0x0386 (Label(text, isunicode:

@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Text;
 using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Input;
 using ClassicUO.Network;
@@ -102,14 +103,34 @@ internal sealed class TooltipState
 // Marker on the tooltip box root.
 internal struct TooltipRoot { }
 
+// Queries for TrackAndRender, bundled to stay under the system-parameter cap
+// (Res<Profile> pushed the flat list past 16).
+internal sealed class TooltipQueries : CompositeSystemParam
+{
+    public readonly Query<Data<NetworkSerial, Notoriety>, Filter<Optional<Notoriety>>> World;
+    public readonly Query<Data<ContainerItemUI>> ContainerItems;
+    public readonly Query<Data<PaperdollSlot>> PaperdollSlots;
+    public readonly Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> Rendered;
+    public readonly Query<Data<Node>, With<TooltipRoot>> Roots;
+    public readonly Query<Data<TinyEcs.Children>> Children;
+
+    public TooltipQueries()
+    {
+        World          = Add(new Query<Data<NetworkSerial, Notoriety>, Filter<Optional<Notoriety>>>());
+        ContainerItems = Add(new Query<Data<ContainerItemUI>>());
+        PaperdollSlots = Add(new Query<Data<PaperdollSlot>>());
+        Rendered       = Add(new Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>>());
+        Roots          = Add(new Query<Data<Node>, With<TooltipRoot>>());
+        Children       = Add(new Query<Data<TinyEcs.Children>>());
+    }
+}
+
 internal readonly struct TooltipPlugin : IPlugin
 {
-    private const float Delay = 250f;     // legacy TooltipDelayBeforeDisplay
     private const int MaxWidth = 600;      // legacy clamps tooltip text to 600px
     private const int Pad = 4;             // legacy box = text + 4px each side
     private const int OffsetX = 8;         // box origin down-right of the cursor
     private const int OffsetY = 22;        //   point so it stays out of UiPick
-    private static readonly ClayColor Background = new(0, 0, 0, 178); // black @ 0.7
 
     public void Build(App app)
     {
@@ -167,15 +188,25 @@ internal readonly struct TooltipPlugin : IPlugin
         Res<DragGate> gate,
         Res<AssetsServer> assets,
         Res<UiSurface> surface,
+        Res<Profile> profile,
         ResMut<ObjectPropertyLists> opl,
         ResMut<TooltipState> state,
-        Query<Data<NetworkSerial, Notoriety>, Filter<Optional<Notoriety>>> worldQ,
-        Query<Data<ContainerItemUI>> contQ,
-        Query<Data<PaperdollSlot>> slotQ,
-        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
-        Query<Data<Node>, With<TooltipRoot>> rootQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        TooltipQueries q)
     {
+        var worldQ = q.World;
+        var contQ = q.ContainerItems;
+        var slotQ = q.PaperdollSlots;
+        var rendered = q.Rendered;
+        var rootQ = q.Roots;
+        var childrenQ = q.Children;
+
+        if (!profile.Value.UseTooltip)
+        {
+            HideBox(commands, state, childrenQ);
+            state.Value.Serial = 0;
+            return;
+        }
+
         var pos = mouse.Value.Position;
 
         // A UI item under the cursor (container slot, paperdoll equipment) owns
@@ -233,7 +264,7 @@ internal readonly struct TooltipPlugin : IPlugin
             HideBox(commands, state, childrenQ);   // drop the old box until the new one is ready
         }
 
-        if (time.Value.Total - state.Value.HoverStart < Delay)
+        if (time.Value.Total - state.Value.HoverStart < profile.Value.TooltipDelayBeforeDisplay)
             return;
 
         if (!opl.Value.TryGet(serial, out var entry))
@@ -254,8 +285,18 @@ internal readonly struct TooltipPlugin : IPlugin
         {
             HideBox(commands, state, childrenQ);
 
+            byte font = profile.Value.TooltipFont;
+            // Base (untagged) text colour: legacy GeneratePixelsUnicode maps
+            // hue 0xFFFF to near-white, anything else through the hue palette
+            // (cell 5 = the RenderedText cell legacy Tooltip creates with).
+            uint startColor = profile.Value.TooltipTextHue == 0xFFFF
+                ? 0xFFFFFFFF
+                : (UoFontRuntime.Hues.GetPolygoneColor(5, profile.Value.TooltipTextHue) << 8) | 0xFF;
+            var background = new ClayColor(0, 0, 0,
+                (byte)(Math.Clamp(profile.Value.TooltipBackgroundOpacity, 0, 100) * 255 / 100));
+
             int wrapWidth = entry.MaxWidth > 0 ? entry.MaxWidth : MaxWidth;
-            var (w, h) = UoFontRenderer.Measure(html, font: 1, wrapWidth, isHtml: true, htmlStartColor: 0xFFFFFFFF, htmlBg: false, align: TEXT_ALIGN_TYPE.TS_CENTER);
+            var (w, h) = UoFontRenderer.Measure(html, font, wrapWidth, isHtml: true, htmlStartColor: startColor, htmlBg: false, align: TEXT_ALIGN_TYPE.TS_CENTER);
             if (w <= 0 || h <= 0)
                 return;
 
@@ -273,7 +314,7 @@ internal readonly struct TooltipPlugin : IPlugin
                     Width = Val.Px(boxW),
                     Height = Val.Px(boxH),
                 })
-                .Insert(new BackgroundColor(Background))
+                .Insert(new BackgroundColor(background))
                 .Insert(new GlobalZIndex(short.MaxValue))   // always above every gump
                 .Insert(new TooltipRoot());
 
@@ -293,11 +334,11 @@ internal readonly struct TooltipPlugin : IPlugin
                         Kind = UOCustomKind.WrappedText,
                         Hue = Vector3.UnitZ,
                         Text = html,
-                        TextFont = 1,
+                        TextFont = font,
                         TextHue = 0,
                         WrapWidth = wrapWidth,
                         IsHtml = true,
-                        HtmlStartColor = 0xFFFFFFFF,
+                        HtmlStartColor = startColor,
                         HtmlBg = false,
                         TextCenter = true,
                     }
