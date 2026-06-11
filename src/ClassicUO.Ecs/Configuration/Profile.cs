@@ -80,6 +80,10 @@ namespace ClassicUO.Configuration
         public bool ShowMobilesHP { get; set; }
         public int MobileHPType { get; set; }                             // 0 = %, 1 = line, 2 = both
         public int MobileHPShowWhen { get; set; }                         // 0 = always, 1 = <100%, 2 = smart
+        // OSI shards normalize other mobiles' hits to a fixed scale and only
+        // push updates on change — polling (close status + re-request, 500ms)
+        // keeps the overheads fresh there. Off for ModernUO/RunUO-likes.
+        public bool PollMobileStatus { get; set; }
         public bool DrawRoofs { get; set; } = true;
         public bool TreeToStumps { get; set; }
         public bool EnableCaveBorder { get; set; }

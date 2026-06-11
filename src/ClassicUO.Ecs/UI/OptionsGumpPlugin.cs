@@ -129,6 +129,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
         T("Mobiles", "Show mobiles HP", p => p.ShowMobilesHP, (p, v) => p.ShowMobilesHP = v, "health overhead"),
         C("Mobiles", "HP display", new[] { "Percentage", "Line", "Both" }, p => p.MobileHPType, (p, v) => p.MobileHPType = v, "health"),
         C("Mobiles", "HP show when", new[] { "Always", "Less than 100%", "Smart" }, p => p.MobileHPShowWhen, (p, v) => p.MobileHPShowWhen = v, "health"),
+        T("Mobiles", "Poll mobiles HP status (OSI)", p => p.PollMobileStatus, (p, v) => p.PollMobileStatus = v, "health refresh 500ms normalized"),
         T("Mobiles", "Highlight game objects", p => p.HighlightGameObjects, (p, v) => p.HighlightGameObjects = v, "selection"),
         T("Mobiles", "Highlight poisoned", p => p.HighlightMobilesByPoisoned, (p, v) => p.HighlightMobilesByPoisoned = v),
         H("Mobiles", "Poison hue", p => p.PoisonHue, (p, v) => p.PoisonHue = (ushort)v),

@@ -50,14 +50,13 @@ internal readonly struct GuiRenderingPlugin : IPlugin
             Res<UoGame>,
             Res<UiRenderCommands>,
             Res<State<GameState>>,
-            Res<TextOverHeadManager>,
             Res<NetworkEntitiesMap>,
             Res<Time>,
             Res<GameContext>,
             Res<Camera>,
             Res<RenderTarget2D>,
             Res<NameplateState>,
-            Query<Data<WorldPosition, ScreenPositionOffset>>> renderFn = Render;
+            WorldOverlayParams> renderFn = Render;
 
         app.AddSystem(renderFn)
             .InStage(UiPlugin.UiRenderStage)
@@ -75,14 +74,13 @@ internal readonly struct GuiRenderingPlugin : IPlugin
         Res<UoGame> game,
         Res<UiRenderCommands> renderCommands,
         Res<State<GameState>> gameState,
-        Res<TextOverHeadManager> overhead,
         Res<NetworkEntitiesMap> networkEntities,
         Res<Time> time,
         Res<GameContext> gameCtx,
         Res<Camera> camera,
         Res<RenderTarget2D> worldRt,
         Res<NameplateState> nameplates,
-        Query<Data<WorldPosition, ScreenPositionOffset>> overheadQuery)
+        WorldOverlayParams overlay)
     {
         dumbTexture.Value.Texture ??= MakeWhitePixel(batcher.Value.GraphicsDevice);
 
@@ -141,8 +139,12 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                     if (gameState.Value.Current == GameState.GameScreen
                         && ReferenceEquals(cmd.Image.ImageData, worldRt.Value))
                     {
-                        overhead.Value.Update(time.Value, networkEntities.Value);
-                        overhead.Value.Render(networkEntities.Value, b, gameCtx.Value, camera.Value, overheadQuery, nameplates.Value.PlateTops);
+                        // HP overheads first: speech (and everything painted
+                        // after) sits on top of the bars/labels like legacy.
+                        MobileHpOverheads.Render(b, assets.Value, overlay.Profile.Value,
+                            gameCtx.Value, camera.Value, overlay.Mobiles, nameplates.Value.PlateTops);
+                        overlay.Overhead.Value.Update(time.Value, networkEntities.Value);
+                        overlay.Overhead.Value.Render(networkEntities.Value, b, gameCtx.Value, camera.Value, overlay.OverheadAnchors, nameplates.Value.PlateTops);
                     }
                     break;
 

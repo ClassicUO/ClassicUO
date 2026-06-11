@@ -18,6 +18,7 @@ internal readonly struct GumpPlugin : IPlugin
         app.AddPlugin<ColorPickerPlugin>();
         app.AddPlugin<OptionsGumpPlugin>();
         app.AddPlugin<NameplatePlugin>();
+        app.AddPlugin<MobileHpOverheadPlugin>();
         app.AddPlugin<QuestArrowPlugin>();
     }
 }
