@@ -336,10 +336,10 @@ internal readonly struct TextEditPlugin : IPlugin
         else { var (_, t) = textQ.Get(e); current = t.Ref.Value ?? string.Empty; }
 
         bool newField = a.Entity != e;
-        bool externallyChanged = !newField && !string.Equals(current, a.Buffer.ToString(), StringComparison.Ordinal)
-            // only treat as external if it doesn't match what we'd render (masked
-            // Text is the mask, not the real value — compare against real)
-            && current != (a.Masked ? a.Buffer.ToString() : current);
+        // `current` is already the real value for every path (masked reads
+        // MaskedText.Value, not the rendered mask), so a plain buffer compare
+        // detects external writes like ChatPlugin clearing Text on submit.
+        bool externallyChanged = !newField && !string.Equals(current, a.Buffer.ToString(), StringComparison.Ordinal);
 
         if (newField || externallyChanged)
         {
