@@ -9,6 +9,12 @@
     <Project Path="external/FNA/FNA.Core.csproj" />
     <Project Path="external/FontStashSharp/src/XNA/FontStashSharp.FNA.Core.csproj" />
     <Project Path="external/MP3Sharp/MP3Sharp/MP3Sharp.csproj" />
+    <Project Path="external\TinyEcs\src\TinyEcs.Bevy.Input\TinyEcs.Bevy.Input.csproj">
+      <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />
+      <Configuration Solution="Debug|x86" Project="Debug|Any CPU" />
+      <Configuration Solution="Release|x64" Project="Release|Any CPU" />
+      <Configuration Solution="Release|x86" Project="Release|Any CPU" />
+    </Project>
     <Project Path="external\TinyEcs\src\TinyEcs.Bevy\TinyEcs.Bevy.csproj">
       <Configuration Solution="Debug|x64" Project="Debug|Any CPU" />
       <Configuration Solution="Debug|x86" Project="Debug|Any CPU" />
