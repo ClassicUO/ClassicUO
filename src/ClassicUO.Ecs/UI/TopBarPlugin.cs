@@ -503,8 +503,9 @@ internal readonly struct TopBarPlugin : IPlugin
                              Commands cmd,
                              Res<UiZCounter> z,
                              Res<UiSurface> surf,
+                             Res<OptionsUiState> st,
                              Query<Data<OptionsWindow>> existing) =>
-                    OptionsGumpPlugin.OpenOrFocus(cmd, z.Value, surf.Value, existing));
+                    OptionsGumpPlugin.OpenOrFocus(cmd, z.Value, surf.Value, st.Value, existing));
                 break;
             case Buttons.NetStats:
                 btn.Observe((On<UiClick> _) => Console.WriteLine("[TopBar] NetStats — no ECS gump yet"));

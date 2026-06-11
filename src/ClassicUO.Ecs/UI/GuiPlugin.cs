@@ -426,6 +426,11 @@ internal readonly struct GuiPlugin : IPlugin
     // it as the caller needs (e.g. ServerGumpTextEntry). `decorate`, if given, is
     // applied to every spawned sub-entity (row, glyph, caret) so callers can add
     // scene/page markers (LoginScene, ServerGumpChild) that gate visibility.
+    // `flowRow` puts the single-line glyph row in FLOW layout (content offset
+    // becomes row padding) instead of the default absolute placement — needed
+    // when the field lives inside an Overflow.Scroll container, where an
+    // absolute row would escape the scroll clip and its text would paint
+    // outside the viewport.
     internal static ulong SpawnTextField(
         Commands commands,
         EntityCommands frame,
@@ -437,7 +442,8 @@ internal readonly struct GuiPlugin : IPlugin
         System.Action<EntityCommands> decorate = null,
         char maskChar = '*',
         bool multiline = false,
-        int wrapWidth = 0)
+        int wrapWidth = 0,
+        bool flowRow = false)
     {
         // `color` semantics follow the font kind (see UoFontRuntime): an ASCII
         // font (FontId | AsciiFlag) wants a PACKED hue (UoFontRuntime.AsciiHue);
@@ -538,18 +544,30 @@ internal readonly struct GuiPlugin : IPlugin
         // Multiline: a FLOWING row so it (and its growing glyph) is clipped and
         // scrolled by the frame's Overflow.Scroll — an absolute row would escape
         // the scroll clip and spill past the box.
+        // flowRow: same flow treatment for a single-line field inside a scroll
+        // container; the content offset becomes row padding so the glyph (and
+        // TextFieldGeom caret math) keeps the same origin.
         var rowNode = multiline
             ? new Node { FlexDirection = FlexDirection.Row, AlignItems = AlignItems.Start, Width = Val.Auto, Height = Val.Auto }
-            : new Node
-            {
-                PositionType = PositionType.Absolute,
-                Left = Val.Px(contentOffset.X),
-                Top = Val.Px(contentOffset.Y),
-                FlexDirection = FlexDirection.Row,
-                AlignItems = AlignItems.Center,
-                Width = Val.Auto,
-                Height = Val.Auto,
-            };
+            : flowRow
+                ? new Node
+                {
+                    FlexDirection = FlexDirection.Row,
+                    AlignItems = AlignItems.Center,
+                    Width = Val.Auto,
+                    Height = Val.Auto,
+                    Padding = new UiRect { Left = Val.Px(contentOffset.X), Top = Val.Px(contentOffset.Y) },
+                }
+                : new Node
+                {
+                    PositionType = PositionType.Absolute,
+                    Left = Val.Px(contentOffset.X),
+                    Top = Val.Px(contentOffset.Y),
+                    FlexDirection = FlexDirection.Row,
+                    AlignItems = AlignItems.Center,
+                    Width = Val.Auto,
+                    Height = Val.Auto,
+                };
         var row = commands.Spawn()
             .Insert(rowNode)
             .Insert(Interaction.None)

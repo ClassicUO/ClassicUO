@@ -67,9 +67,12 @@ internal readonly struct ColorPickerPlugin : IPlugin
     // Spawn the dye picker for (serial, graphic). serial 0 = a local/no-target
     // picker (OK still sends, but the server ignores serial 0) — used by the
     // Options test gump. Exposed so non-packet callers can open it too.
+    // onPick != null switches OK to local mode: the chosen hue goes to the
+    // callback instead of Send_DyeDataResponse (Options hue settings).
     internal static void Open(
         Commands commands, AssetsServer assets, GumpBuilder builder, HuesLoader hues,
-        UiZCounter zc, UiSurface surface, uint serial, ushort graphic)
+        UiZCounter zc, UiSurface surface, uint serial, ushort graphic,
+        Action<ushort> onPick = null)
     {
         const int grad = 1; // legacy ColorPickerBox default Graduation
 
@@ -156,7 +159,8 @@ internal readonly struct ColorPickerPlugin : IPlugin
             SetPreviewHue(ucq, capPrev, (ushort)(g + 2 + 5 * idx));
         });
 
-        // OK (legacy button id 0): reply with the selected hue, then close.
+        // OK (legacy button id 0): reply with the selected hue (or hand it to
+        // the local-pick callback), then close.
         var ok = builder.AddButton(commands, (0x0907, 0x0908, 0x0909), Vector3.UnitZ, new Vector2(208, 138));
         ok.Observe((On<UiClick> _, Res<NetClient> net, Commands cmd,
             Query<Data<ColorPickerState>> stq, Query<Data<UiCustom>> ucq) =>
@@ -166,7 +170,10 @@ internal readonly struct ColorPickerPlugin : IPlugin
             int sel = 0;
             if (ucq.TryGet(capGrid, out var ucRow)) { var (_, uc) = ucRow; sel = uc.Ref.Render()?.SelectedIndex ?? 0; }
             ushort hue = (ushort)(st.Ref.Graduation + 2 + 5 * sel);
-            net.Value.Send_DyeDataResponse(st.Ref.Serial, st.Ref.Graphic, hue);
+            if (onPick != null)
+                onPick(hue);
+            else
+                net.Value.Send_DyeDataResponse(st.Ref.Serial, st.Ref.Graphic, hue);
             cmd.Entity(capRoot).Despawn();
         });
         commands.AddChild(rootId, ok.Id);

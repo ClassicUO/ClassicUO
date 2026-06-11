@@ -321,8 +321,9 @@ internal readonly struct PaperdollPlugin : IPlugin
                                 Commands cmd,
                                 Res<UiZCounter> z,
                                 Res<UiSurface> surf,
+                                Res<OptionsUiState> st,
                                 Query<Data<OptionsWindow>> existing) =>
-                OptionsGumpPlugin.OpenOrFocus(cmd, z.Value, surf.Value, existing));
+                OptionsGumpPlugin.OpenOrFocus(cmd, z.Value, surf.Value, st.Value, existing));
             commands.AddChild(root.Id, btnOptions.Id);
 
             var btnLogout = builder.AddButton(commands, (0x07D9, 0x07DA, 0x07DB), Vector3.UnitZ, new Vector2(185, 44 + 27 * 2));
