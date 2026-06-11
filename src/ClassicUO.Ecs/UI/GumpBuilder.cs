@@ -272,7 +272,9 @@ internal sealed class GumpBuilder
     /// Returns the track entity (carries the Slider component to read Value).
     /// thumbGump != 0 renders the knob as that gump sprite (sized from the asset)
     /// instead of the default solid-color rect.
-    public EntityCommands AddHSlider(Commands commands, float min, float max, float value, Vector2 position, float width, Vector3 hue = default, ushort thumbGump = 0)
+    /// trackGumps renders the legacy recessed-bar background (left cap + tiled
+    /// middle + right cap, e.g. 213/214/215 for HSliderBarStyle.MetalWidgetRecessedBar).
+    public EntityCommands AddHSlider(Commands commands, float min, float max, float value, Vector2 position, float width, Vector3 hue = default, ushort thumbGump = 0, (ushort Left, ushort Mid, ushort Right)? trackGumps = null)
     {
         int knobW = 12, knobH = 16;
         if (thumbGump != 0)
@@ -296,6 +298,36 @@ internal sealed class GumpBuilder
             // A slider lives inside movable gump windows; without this a press to
             // drag the knob would latch the whole window instead.
             .Insert<UiNoWindowDrag>();
+
+        if (trackGumps is { } tg)
+        {
+            ref readonly var li = ref _assets.Gumps.GetGump(tg.Left);
+            ref readonly var ri = ref _assets.Gumps.GetGump(tg.Right);
+            var hueV = hue == default ? Vector3.UnitZ : hue;
+            var trackId = track.Id;
+
+            // The bar pieces paint topmost over the (invisible) track, and Clay
+            // routes pointer events to the topmost element — without their own
+            // handler they'd swallow the click-on-track-to-jump press. Forward
+            // it back to the track so SliderPlugin's jump logic runs.
+            EntityCommands Piece(ushort id, UOCustomKind kind, float x, float w, int h)
+            {
+                var piece = commands.Spawn()
+                    .Insert(MakeFloatingNode(new Vector2(x, 0), new Vector2(w, h)))
+                    .Insert(new UiCustom { Data = new UOCustomRender { Kind = kind, AssetId = id, Hue = hueV } })
+                    .Insert(Interaction.None)
+                    .Insert<UiContainsByBounds>()
+                    .Insert<UiNoWindowDrag>()
+                    .Observe((On<UiPointerDown> t, Commands cmd) =>
+                        cmd.Entity(trackId).EmitTrigger(t.Event));
+                commands.AddChild(trackId, piece.Id);
+                return piece;
+            }
+
+            Piece(tg.Left, UOCustomKind.Gump, 0, li.UV.Width, li.UV.Height);
+            Piece(tg.Mid, UOCustomKind.GumpTiled, li.UV.Width, width - li.UV.Width - ri.UV.Width, li.UV.Height);
+            Piece(tg.Right, UOCustomKind.Gump, width - ri.UV.Width, ri.UV.Width, ri.UV.Height);
+        }
 
         // SliderPlugin overwrites Width/Height/Left each frame. Default knob is a
         // solid-color rect; thumbGump renders the classic gump sprite instead.

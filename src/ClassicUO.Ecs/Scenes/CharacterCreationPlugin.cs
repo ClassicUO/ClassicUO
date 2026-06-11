@@ -300,11 +300,25 @@ internal readonly struct CharacterCreationPlugin : IPlugin
         commands.AddChild(dynId, nameFrame.Id);
 
         // Prev — mirrors CharCreationGump.StepBack on the first page:
-        // loginScene.StepBack → back to the character list.
+        // loginScene.StepBack → back to the character list. Legacy rebuilds
+        // CharacterSelectionGump from the cached Characters list (no new 0xA9);
+        // here CharacterInfoSetup is event-driven, so replay the event from the
+        // snapshot or the selection screen comes up empty.
         commands.AddChild(dynId, builder.AddButton(
             commands, (0x15A1, 0x15A3, 0x15A2), Vector3.UnitZ, new Vector2(586, 445))
-            .Observe((On<UiClick> _, ResMut<NextState<GameState>> state) =>
-                state.Value.Set(GameState.CharacterSelection)).Id);
+            .Observe((
+                On<UiClick> _,
+                Res<CharacterListSnapshot> snap,
+                EventWriter<CharacterSelectionInfoEvent> charWriter,
+                ResMut<NextState<GameState>> state) =>
+            {
+                state.Value.Set(GameState.CharacterSelection);
+                charWriter.Send(new CharacterSelectionInfoEvent
+                {
+                    Characters = snap.Value.Characters,
+                    Towns = snap.Value.Towns
+                });
+            }).Id);
 
         // Next — validate the name, then go to profession selection.
         commands.AddChild(dynId, builder.AddButton(
@@ -556,15 +570,39 @@ internal readonly struct CharacterCreationPlugin : IPlugin
             .Insert<UiNoWindowDrag>();
         commands.AddChild(parent, box.Id);
 
-        var text = selectedIndex >= 0 && selectedIndex < items.Length ? items[selectedIndex] : placeholder;
-        AddAsciiLabel(commands, parent, text, (int)pos.X + 4, (int)pos.Y + 5, 9, 0x0453);
-
-        // dropdown arrow
-        commands.AddChild(parent, builder.AddGump(commands, 0x00FC, Vector3.UnitZ,
-            new Vector2(pos.X + width - 18, pos.Y + 2)).Id);
-
         box.Observe((On<UiClick> _, Commands cmd) =>
             SpawnComboOverlay(cmd, builder, overlayParent, pos, width, items, maxHeight, onSelect));
+
+        // The label and the arrow paint topmost over the box, and Clay routes
+        // the click to the topmost element — without their own handlers they
+        // swallow it (the CharacterSelection row-label trap). Same opener on all
+        // three.
+        var text = selectedIndex >= 0 && selectedIndex < items.Length ? items[selectedIndex] : placeholder;
+        var label = commands.Spawn()
+            .Insert(new Node
+            {
+                PositionType = PositionType.Absolute,
+                Left = Val.Px((int)pos.X + 4), Top = Val.Px((int)pos.Y + 5),
+                Width = Val.Auto, Height = Val.Auto,
+            })
+            .Insert(new Text(text))
+            .Insert(new TextFont { FontId = (ushort)(9 | UoFontRuntime.AsciiFlag), Size = 14 })
+            .Insert(new TextColor(UoFontRuntime.AsciiHue(0x0453)))
+            .Insert(Interaction.None)
+            .Insert<UiContainsByBounds>()
+            .Insert<UiNoWindowDrag>()
+            .Observe((On<UiClick> _, Commands cmd) =>
+                SpawnComboOverlay(cmd, builder, overlayParent, pos, width, items, maxHeight, onSelect));
+        commands.AddChild(parent, label.Id);
+
+        var arrow = builder.AddGump(commands, 0x00FC, Vector3.UnitZ,
+            new Vector2(pos.X + width - 18, pos.Y + 2))
+            .Insert(Interaction.None)
+            .Insert<UiContainsByBounds>()
+            .Insert<UiNoWindowDrag>()
+            .Observe((On<UiClick> _, Commands cmd) =>
+                SpawnComboOverlay(cmd, builder, overlayParent, pos, width, items, maxHeight, onSelect));
+        commands.AddChild(parent, arrow.Id);
     }
 
     private static void SpawnComboOverlay(
@@ -859,38 +897,60 @@ internal readonly struct CharacterCreationPlugin : IPlugin
         Commands commands, GumpBuilder builder, UOFileManager files, ulong parent,
         int x, int y, ProfessionInfo info)
     {
+        // The name label and the profession graphic paint topmost over the
+        // ninepatch, and Clay routes the click to the topmost element — all
+        // three need the same handler or the label/graphic swallow it.
+        var onClick = (
+            On<UiClick> _,
+            Res<CharCreationContext> c,
+            Res<UOFileManager> filesInner,
+            Res<GameContext> g,
+            ResMut<NextState<CharCreationStep>> next) =>
+        {
+            if (info.Type == ProfessionLoader.PROF_TYPE.CATEGORY
+                && filesInner.Value.Professions.Professions.TryGetValue(info, out var children)
+                && children != null)
+            {
+                c.Value.ProfessionPage = info;
+                c.Value.ProfessionDirty = true;
+                return;
+            }
+
+            ApplyProfession(c.Value, info, g.Value.ClientVersion, filesInner.Value);
+            next.Value.Set(info.DescriptionIndex > 0 ? CharCreationStep.City : CharCreationStep.Trade);
+        };
+
         var bg = builder.AddGumpNinePatch(commands, 3000, Vector3.UnitZ,
             new Vector2(x, y), new Vector2(175, 34))
             .Insert(Interaction.None)
             .Insert<UiContainsByBounds>()
-            .Observe((
-                On<UiClick> _,
-                Res<CharCreationContext> c,
-                Res<UOFileManager> filesInner,
-                Res<GameContext> g,
-                ResMut<NextState<CharCreationStep>> next) =>
-            {
-                if (info.Type == ProfessionLoader.PROF_TYPE.CATEGORY
-                    && filesInner.Value.Professions.Professions.TryGetValue(info, out var children)
-                    && children != null)
-                {
-                    c.Value.ProfessionPage = info;
-                    c.Value.ProfessionDirty = true;
-                    return;
-                }
-
-                ApplyProfession(c.Value, info, g.Value.ClientVersion, filesInner.Value);
-                next.Value.Set(info.DescriptionIndex > 0 ? CharCreationStep.City : CharCreationStep.Trade);
-            });
+            .Observe(onClick);
         commands.AddChild(parent, bg.Id);
 
         var name = files.Clilocs.GetString(info.Localization) ?? info.Name ?? string.Empty;
-        AddUnicodeLabel(commands, parent, name, x + 7, y + 8, 1);
+        var label = commands.Spawn()
+            .Insert(new Node
+            {
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(x + 7), Top = Val.Px(y + 8),
+                Width = Val.Auto, Height = Val.Auto,
+            })
+            .Insert(new Text(name))
+            .Insert(new TextFont { FontId = 1, Size = 16 })
+            .Insert(new TextColor(s_unicodeBlack))
+            .Insert(Interaction.None)
+            .Insert<UiContainsByBounds>()
+            .Observe(onClick);
+        commands.AddChild(parent, label.Id);
 
         if (info.Graphic != 0)
         {
-            commands.AddChild(parent, builder.AddGump(
-                commands, info.Graphic, Vector3.UnitZ, new Vector2(x + 121, y - 12)).Id);
+            var gfx = builder.AddGump(
+                commands, info.Graphic, Vector3.UnitZ, new Vector2(x + 121, y - 12))
+                .Insert(Interaction.None)
+                .Insert<UiContainsByBounds>()
+                .Observe(onClick);
+            commands.AddChild(parent, gfx.Id);
         }
     }
 
@@ -964,8 +1024,9 @@ internal readonly struct CharacterCreationPlugin : IPlugin
             AddUnicodeLabel(commands, stepRootId,
                 files.Clilocs.GetString(statClilocs[i]) ?? string.Empty, 158, statY[i], 1);
 
+            // Legacy HSliderBarStyle.MetalWidgetRecessedBar: track 213/214/215, thumb 216.
             var slider = builder.AddHSlider(commands, 10, 60, ctx.TradeStats[i],
-                new Vector2(164, statSliderY[i]), 93, thumbGump: 0x0845);
+                new Vector2(164, statSliderY[i]), 93, thumbGump: 216, trackGumps: (213, 214, 215));
             commands.AddChild(stepRootId, slider.Id);
             statSliderIds[i] = slider.Id;
             AddSliderValueLabel(commands, stepRootId, slider.Id, 164 + 96, statSliderY[i]);
@@ -1018,7 +1079,7 @@ internal readonly struct CharacterCreationPlugin : IPlugin
                 (sel, c) => { c.TradeSkillIdx[comboIdx] = sel; c.TradeDirty = true; });
 
             var slider = builder.AddHSlider(commands, 0, 50, ctx.TradeSkillValues[i],
-                new Vector2(344, y + 32), 93, thumbGump: 0x0845);
+                new Vector2(344, y + 32), 93, thumbGump: 216, trackGumps: (213, 214, 215));
             commands.AddChild(stepRootId, slider.Id);
             skillSliderIds[i] = slider.Id;
             AddSliderValueLabel(commands, stepRootId, slider.Id, 344 + 96, y + 32);
