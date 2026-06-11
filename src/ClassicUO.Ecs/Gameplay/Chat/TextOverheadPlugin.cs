@@ -204,6 +204,7 @@ internal sealed class TextOverHeadManager
         center -= gameCtx.CenterOffset;
 
         var panelOrigin = new Vector2(camera.Bounds.X, camera.Bounds.Y);
+        var bounds = camera.Bounds;
 
         foreach (var list in _mainLinkedList)
         {
@@ -243,10 +244,19 @@ internal sealed class TextOverHeadManager
                 if (h <= 0) continue;
 
                 y -= h;
-                int x = (int)(position.X - w / 2f);
-                if (x < 0) x = 0;
 
-                UoFontRenderer.Draw(batch, t.Text, fontId, NormalizeHue(t.Hue), x, (int)y, MaxWidth, 0f, allowHtml: false);
+                // Clamp into the game window (legacy FixTextCoordinatesInScreen:
+                // +4 left pad, each line clamped independently) so speech from
+                // edge-of-screen entities stays readable. The bottom edge is
+                // deliberately NOT clamped: text from entities below the view
+                // would get pulled up over the bottom-center strip (system log /
+                // chat bar) — let the game-window scissor trim it instead.
+                int x = (int)(position.X - w / 2f);
+                x = Math.Clamp(x, bounds.X + 4, Math.Max(bounds.X + 4, bounds.Right - w));
+                int dy = (int)y;
+                if (dy < bounds.Y) dy = bounds.Y;
+
+                UoFontRenderer.Draw(batch, t.Text, fontId, NormalizeHue(t.Hue), x, dy, MaxWidth, 0f, allowHtml: false);
             }
         }
     }

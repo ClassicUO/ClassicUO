@@ -135,16 +135,21 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                     // Overhead world text is drawn right after the game-window
                     // image (the world RT) so it sits ON the world but UNDER any
                     // gump windows, which paint later in this loop. UoFontRenderer
-                    // only renders into this UI RT, and no scissor is active here.
+                    // only renders into this UI RT. Scissor to the game window so
+                    // overheads never bleed outside it (clamping keeps them
+                    // readable; the scissor catches anything that still pokes out).
                     if (gameState.Value.Current == GameState.GameScreen
                         && ReferenceEquals(cmd.Image.ImageData, worldRt.Value))
                     {
+                        var camBounds = camera.Value.Bounds;
+                        b.ClipBegin(camBounds.X, camBounds.Y, camBounds.Width, camBounds.Height);
                         // HP overheads first: speech (and everything painted
                         // after) sits on top of the bars/labels like legacy.
                         MobileHpOverheads.Render(b, assets.Value, overlay.Profile.Value,
                             gameCtx.Value, camera.Value, overlay.Mobiles, nameplates.Value.PlateTops);
                         overlay.Overhead.Value.Update(time.Value, networkEntities.Value);
                         overlay.Overhead.Value.Render(networkEntities.Value, b, gameCtx.Value, camera.Value, overlay.OverheadAnchors, nameplates.Value.PlateTops);
+                        b.ClipEnd();
                     }
                     break;
 
