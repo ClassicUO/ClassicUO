@@ -15,6 +15,7 @@
 
 using System;
 using ClassicUO.Assets;
+using ClassicUO.Configuration;
 using ClassicUO.Game;
 using ClassicUO.Input;
 using ClassicUO.Network;
@@ -528,7 +529,13 @@ internal readonly struct TopBarPlugin : IPlugin
                 btn.Observe((On<UiClick> _) => Console.WriteLine("[TopBar] Chat — no ECS gump yet"));
                 break;
             case Buttons.WorldMap:
-                btn.Observe((On<UiClick> _) => Console.WriteLine("[TopBar] World Map — no ECS gump yet"));
+                btn.Observe((On<UiClick> _,
+                             Commands cmd,
+                             ResMut<WorldMapState> state,
+                             Res<Profile> profile,
+                             Res<UiZCounter> z,
+                             Query<Data<WorldMapWindow>> existing) =>
+                    WorldMapGumpPlugin.OpenOrFocus(cmd, state.Value, profile.Value, z.Value, existing));
                 break;
             case Buttons.Debug:
                 // Repurposed as an Options/test window launcher (host-side gump

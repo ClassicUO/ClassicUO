@@ -124,7 +124,9 @@ internal readonly struct GuiPlugin : IPlugin
             Query<Data<TinyEcs.Parent>>,
             Query<Data<GlobalZIndex>>,
             Query<Empty, With<GameScreenPlugin.GameWindowUI>>> routeWheelFn = RouteWheelToScrollable;
-        app.AddSystem(Stage.First, routeWheelFn);
+        // Labeled so gumps with their own wheel gesture (world map zoom) can
+        // order a Stage.First handler before this consume-over-any-gump pass.
+        app.AddSystem(routeWheelFn).InStage(Stage.First).Label("cuo:route_wheel").Build();
         // Must run after InteractionSystem.PostLayout writes Hovered/Pressed,
         // before UiRenderStage reads UOCustomRender.AssetId.
         app.AddSystem(updateUOButtonsStateFn)
@@ -661,6 +663,11 @@ internal enum UOCustomKind : byte
     // it. Used by the treasure-map gump: the multimap bake is the texture, the
     // plotted course is the polyline.
     DynTexture,
+    // World map window canvas: the full-facet bake + per-frame overlay snapshot
+    // ride in UOCustomRender.Tag (a WorldMapRenderData);
+    // WorldMapGumpPlugin.DrawWorldMap draws the rotated/zoomed map viewport,
+    // markers, dots, grid and coordinate overlays.
+    WorldMap,
 }
 
 // Reference type (NOT an ECS component) — the instance lives in UiCustom.Data
@@ -749,6 +756,11 @@ internal sealed class UOCustomRender
     // TooltipPlugin reads this off the topmost hit element's UOCustomRender and
     // renders the OPL entry pre-seeded under this synthetic serial. 0 = none.
     public uint TooltipSerial;
+
+    // Kind-specific payload that doesn't fit the shared fields (WorldMap: the
+    // owning plugin's WorldMapRenderData). Reference semantics — the producer
+    // system mutates it in place, the renderer reads the live object.
+    public object Tag;
 }
 
 // The UO render payload lives in UiCustom.Data (a reference, so it threads into

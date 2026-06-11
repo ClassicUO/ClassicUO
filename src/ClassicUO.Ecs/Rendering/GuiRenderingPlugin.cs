@@ -639,6 +639,13 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                 break;
             }
 
+            case UOCustomKind.WorldMap:
+            {
+                if (custom.Tag is WorldMapRenderData worldMap)
+                    WorldMapGumpPlugin.DrawWorldMap(b, white, bb.X, bb.Y, bb.Width, bb.Height, worldMap, cmd.ZIndex);
+                break;
+            }
+
             case UOCustomKind.Land:
             {
                 // Land tile (ART block < 0x4000): a 44x44 diamond. Fit to the node

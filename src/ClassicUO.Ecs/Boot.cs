@@ -40,6 +40,7 @@ internal readonly struct CuoPlugin : IPlugin
         app.AddPlugin<GameScreenPlugin>();
         app.AddPlugin<TopBarPlugin>();
         app.AddPlugin<MiniMapPlugin>();
+        app.AddPlugin<WorldMapGumpPlugin>();
         app.AddPlugin<JournalPlugin>();
         app.AddPlugin<StatusBarPlugin>();
         app.AddPlugin<HealthBarPlugin>();
