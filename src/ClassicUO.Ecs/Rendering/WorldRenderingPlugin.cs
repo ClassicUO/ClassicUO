@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
@@ -290,6 +291,17 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             maxZ = playerZ16;
         }
 
+        // Foliage transparency — legacy CheckIfBehindATree marking pass runs
+        // before the draw so this frame's statics fade with fresh targets.
+        var foliageMarks = scratch.Value.FoliageMarks ??= new HashSet<long>();
+        MarkFoliage(
+            foliageMarks, assetsServer, fileManager, profile.Value,
+            playerX, playerY, maxZ,
+            PlayerScreenRect(assetsServer, playerEnt.Ref, queryBodyOnly),
+            queryStatics);
+        fx.FoliageMarks = foliageMarks;
+        fx.FoliageDraws = scratch.Value.FoliageDraws ??= new List<FoliageDraw>();
+
         // Calculate camera-related values once
         var center = Isometric.IsoToScreen(gameCtx.Value.CenterX, gameCtx.Value.CenterY, gameCtx.Value.CenterZ);
         center.X -= camera.Value.Bounds.Width / 2f;
@@ -330,6 +342,25 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
         RenderEffects();
 
+        // Late transparent pass — foliage deferred from RenderStatics blends
+        // over the mobiles drawn above; depth test still hides it behind
+        // statics in front of it.
+        foreach (ref var d in System.Runtime.InteropServices.CollectionsMarshal.AsSpan(fx.FoliageDraws))
+        {
+            batch.Value.Draw(
+                d.Texture,
+                d.Position,
+                d.UV,
+                d.Color,
+                rotation: 0f,
+                origin: Vector2.Zero,
+                scale: 1f,
+                effects: SpriteEffects.None,
+                d.Depth
+            );
+        }
+        fx.FoliageDraws.Clear();
+
         // Clean up resources - only change state if necessary
         batch.Value.SetSampler(null);
         batch.Value.SetStencil(null);
@@ -350,6 +381,8 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         public Vector2 CotCenter;       // player iso screen pos
         public bool AlphaChanged;       // ALPHA_TIME tick elapsed this frame
         public bool ObjectsFading;      // Profile.UseObjectsFading
+        public HashSet<long> FoliageMarks; // foliage keys hiding the player this frame
+        public List<FoliageDraw> FoliageDraws; // semi-transparent foliage, drawn after mobiles
     }
 
     private struct RenderScratch
@@ -357,6 +390,173 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         public (int lastPosX, int lastPosY, int lastPosZ)? LastPos;
         public MaxZInfo ZInfo;
         public float AlphaTime;
+        public HashSet<long> FoliageMarks;
+        public List<FoliageDraw> FoliageDraws;
+    }
+
+    // Semi-transparent foliage can't draw in the statics pass: it would write
+    // depth before the player is drawn and the depth test culls the player's
+    // sprite instead of blending the leaves over it (legacy draws back-to-front
+    // per tile, so foliage always blends over an already-drawn mobile).
+    private struct FoliageDraw
+    {
+        public Texture2D Texture;
+        public Vector2 Position;
+        public Rectangle UV;
+        public Vector3 Color;
+        public float Depth;
+    }
+
+    // Legacy GameSceneDrawingSorting._treeInfos: graphic ranges whose pieces
+    // form one tree; marking any piece marks the whole diagonal run.
+    private static readonly (ushort Start, ushort End)[] _treeUnions =
+    {
+        (0x0D45, 0x0D4C),
+        (0x0D5C, 0x0D62),
+        (0x0D73, 0x0D79),
+        (0x0D87, 0x0D8B),
+        (0x12BE, 0x12C7),
+        (0x0D4D, 0x0D53),
+        (0x0D63, 0x0D69),
+        (0x0D7A, 0x0D7F),
+        (0x0D8C, 0x0D90)
+    };
+
+    private static long FoliageKey(ushort graphic, int x, int y, sbyte z)
+        => ((long)graphic << 40) | ((long)(ushort)x << 24) | ((long)(ushort)y << 8) | (byte)z;
+
+    // Legacy GameScene._rectanglePlayer — the player sprite's screen-space
+    // bounds, derived from the current body animation frame (FrameInfo).
+    private static Rectangle? PlayerScreenRect(
+        Res<AssetsServer> assetsServer,
+        ulong playerEnt,
+        Query<Data<WorldPosition, Graphic, Hue, NetworkSerial, ScreenPositionOffset, Facing, MobAnimation, MobileSteps, ServerFlags, Notoriety, AlphaFade>,
+            Filter<Without<ContainedInto>, Optional<Facing>, Optional<MobAnimation>, Optional<MobileSteps>, Optional<ServerFlags>, Optional<Notoriety>>> queryBodyOnly)
+    {
+        if (!queryBodyOnly.TryGet(playerEnt, out var row))
+            return null;
+
+        (var pos, var graphic, _, _, var offset, var direction, var animation, _, _, _, _) = row;
+
+        var dir = direction.IsValid() ? direction.Ref.Value : Direction.North;
+        (dir, var mirror) = FixDirection(dir);
+
+        byte animAction = 0;
+        var animIndex = 0;
+        if (animation.IsValid())
+        {
+            animAction = animation.Ref.Action;
+            animIndex = animation.Ref.Index;
+        }
+
+        var frames = assetsServer.Value.Animations.GetAnimationFrames(
+            graphic.Ref.Value, animAction, (byte)dir, out _, out _);
+        if (frames.IsEmpty)
+            return null;
+
+        ref readonly var frame = ref frames[animIndex % frames.Length];
+        if (frame.Texture == null)
+            return null;
+
+        // Legacy MobileView FrameInfo: xx/yy are the frame's offset from the
+        // tile anchor; View.GetOnScreenRectangle adds +22 and the walk offset.
+        var iso = pos.Ref.WorldToScreen();
+        var xx = mirror ? -(frame.UV.Width - frame.Center.X) : -frame.Center.X;
+        var yy = -(frame.UV.Height + frame.Center.Y + 3);
+
+        return new Rectangle(
+            (int)(iso.X + xx + 22 + offset.Ref.Value.X),
+            (int)(iso.Y + yy + 22 + offset.Ref.Value.Y),
+            frame.UV.Width,
+            frame.UV.Height);
+    }
+
+    // Legacy CheckIfBehindATree: foliage below maxZ whose art bounds overlap
+    // the player sprite (player standing north-west of it) goes transparent;
+    // tree-union pieces are marked as one tree.
+    private static void MarkFoliage(
+        HashSet<long> marks,
+        Res<AssetsServer> assetsServer,
+        Res<UOFileManager> fileManager,
+        Profile profile,
+        int playerX,
+        int playerY,
+        int? maxZ,
+        Rectangle? playerRect,
+        Query<Data<WorldPosition, ScreenPosition, Graphic, Hue, Amount, NetworkSerial, AlphaFade>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>, Optional<Amount>, Optional<NetworkSerial>>> queryStatics)
+    {
+        marks.Clear();
+
+        if (!playerRect.HasValue || profile.TreeToStumps)
+            return;
+
+        var tileDataCache = fileManager.Value.TileData;
+        var arts = assetsServer.Value.Arts;
+        var pRect = playerRect.Value;
+
+        foreach (var (_, worldPos, screenPos, graphic, _, _, _, _) in queryStatics)
+        {
+            var g = graphic.Ref.Value;
+            ref readonly var tileData = ref tileDataCache.StaticData[g];
+
+            if (!tileData.IsFoliage)
+                continue;
+
+            if (maxZ.HasValue && worldPos.Ref.Z >= maxZ)
+                continue;
+
+            if (profile.HideVegetation && !tileData.IsMultiMovable &&
+                StaticFilters.IsVegetation(g, in tileData))
+                continue;
+
+            int x = worldPos.Ref.X;
+            int y = worldPos.Ref.Y;
+
+            var check = playerX <= x && playerY <= y
+                || playerY <= y && playerX <= x + 1
+                || playerX <= x && playerY <= y + 1;
+            if (!check)
+                continue;
+
+            var rect = arts.GetRealArtBounds(g);
+            var iso = screenPos.Ref.Value;
+            rect.X = (int)iso.X - (rect.Width >> 1) + rect.X;
+            rect.Y = (int)iso.Y - rect.Height + rect.Y;
+
+            if (!rect.Intersects(pRect))
+                continue;
+
+            MarkFoliageUnion(marks, g, x, y, worldPos.Ref.Z);
+        }
+    }
+
+    // Legacy IsFoliageUnion + ApplyFoliageTransparency, keyed on
+    // (graphic, x, y, z) instead of walking map tile lists.
+    private static void MarkFoliageUnion(HashSet<long> marks, ushort graphic, int x, int y, sbyte z)
+    {
+        for (var i = 0; i < _treeUnions.Length; i++)
+        {
+            (var start, var end) = _treeUnions[i];
+
+            if (start <= graphic && graphic <= end)
+            {
+                while (graphic > start)
+                {
+                    graphic--;
+                    x--;
+                    y++;
+                }
+
+                for (graphic = start; graphic <= end; graphic++, x++, y--)
+                {
+                    marks.Add(FoliageKey(graphic, x, y, z));
+                }
+
+                return;
+            }
+        }
+
+        marks.Add(FoliageKey(graphic, x, y, z));
     }
 
     // Legacy GameSceneDrawingSorting.ProcessAlpha: step the entity's alpha
@@ -375,9 +575,9 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             return true;
         }
 
-        // NOTE: legacy excludes foliage from the fade-in branch because the
-        // foliage-transparency system owns its alpha; that system isn't
-        // ported yet, so foliage fades in like any other static here.
+        // Foliage never reaches this branch — RenderStatics routes visible
+        // foliage through the foliage-transparency targets instead (legacy
+        // ProcessAlpha excludes IsFoliage from fade-in).
         if (fx.AlphaChanged && alpha != 0xFF)
             CalculateAlpha(ref alpha, 0xFF, fx.ObjectsFading);
         return true;
@@ -733,7 +933,21 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             // the alpha reaches 0; selection is suppressed meanwhile (legacy
             // meshed-static path).
             var fadingOut = hide;
-            if (!ProcessFade(ref fade.Ref.Value, hide, tileData.IsTranslucent, in fx))
+            var foliageTransparent = false;
+            if (!hide && tileData.IsFoliage)
+            {
+                // Legacy GameScene foliage loop: the foliage system owns the
+                // alpha of visible foliage (FOLIAGE_ALPHA when hiding the
+                // player, fade back to opaque otherwise) — ProcessFade's
+                // fade-in branch never runs for it (legacy ProcessAlpha
+                // excludes IsFoliage).
+                foliageTransparent = fx.FoliageMarks.Contains(
+                    FoliageKey(graphic.Ref.Value, worldPos.Ref.X, worldPos.Ref.Y, worldPos.Ref.Z));
+                if (fx.AlphaChanged)
+                    CalculateAlpha(ref fade.Ref.Value,
+                        foliageTransparent ? Constants.FOLIAGE_ALPHA : 0xFF, fx.ObjectsFading);
+            }
+            else if (!ProcessFade(ref fade.Ref.Value, hide, tileData.IsTranslucent, in fx))
                 continue;
 
             // Position calculation
@@ -805,9 +1019,11 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
             var color = Renderer.ShaderHueTranslator.GetHueVector(hueValue, partialHue, alpha, circletrans: circleTrans);
 
-            // Selection checking
+            // Selection checking — transparent foliage is click-through
+            // (legacy Static.CheckMouseSelection FoliageIndex match).
             var p = mousePos - position;
-            if (!fadingOut && assetsServer.Value.Arts.PixelCheck(drawGraphic, (int)p.X, (int)p.Y))
+            if (!fadingOut && !foliageTransparent &&
+                assetsServer.Value.Arts.PixelCheck(drawGraphic, (int)p.X, (int)p.Y))
                 selectedEntity.Value.Set(entity.Ref, depthZ);
 
             // Trees, foliage and rocks cast a flat shadow (legacy StaticView →
@@ -834,6 +1050,21 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                     effects: SpriteEffects.None,
                     depthZ
                 );
+            }
+
+            // Defer semi-transparent foliage to the post-mobiles pass — see
+            // FoliageDraw. Opaque foliage stays in this pass (no blend issue).
+            if (tileData.IsFoliage && fade.Ref.Value < 0xFF)
+            {
+                fx.FoliageDraws.Add(new FoliageDraw
+                {
+                    Texture = artInfo.Texture,
+                    Position = position,
+                    UV = artInfo.UV,
+                    Color = color,
+                    Depth = depthZ
+                });
+                continue;
             }
 
             var scale = Vector2.One;
