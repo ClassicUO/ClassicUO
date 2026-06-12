@@ -538,38 +538,7 @@ internal readonly struct ServerGumpPlugin : IPlugin
                     var btn = p.Builder.Value.AddButton(commands, (normal, pressed, normal),
                         Vector3.UnitZ, new Vector2(bx, by));
 
-                    var capturedSender = sender;
-                    var capturedGumpId = gumpId;
-                    var capturedBtnId = btnId;
-                    var capturedRootId = rootId;
-                    var capturedToPage = toPage;
-
-                    if (action != 0)
-                    {
-                        // Activate: reply to server, then close the gump. OOP
-                        // Gump.OnButtonClick disposes after ReplyGump — any
-                        // activate button dismisses its own window (the server
-                        // pushes the follow-up gump separately).
-                        btn.Observe((On<UiClick> _, Res<NetClient> net, Commands cmd, ResMut<ServerGumpRegistry> reg,
-                            Query<Data<ServerGumpTextEntry, Text>> entriesQ) =>
-                        {
-                            net.Value.Send_GumpResponse(capturedSender, capturedGumpId, capturedBtnId,
-                                Array.Empty<uint>(), CollectTextEntries(capturedRootId, entriesQ));
-                            // Drop the registry entry so a later push of this
-                            // gumpId never despawns this now-dead (recycled) id.
-                            if (reg.Value.ByGumpId.TryGetValue(capturedGumpId, out var r) && r == capturedRootId)
-                                reg.Value.ByGumpId.Remove(capturedGumpId);
-                            cmd.Entity(capturedRootId).Despawn();
-                        });
-                    }
-                    else
-                    {
-                        // SwitchPage: tag the root with a page request via
-                        // Commands; ApplyPageRequests (Stage.Update) writes it
-                        // to CurrentPage, then SyncPageVisibility re-displays.
-                        btn.Observe((On<UiClick> _, Commands cmd) =>
-                            cmd.Entity(capturedRootId).Insert(new ServerGumpPageRequest { Page = capturedToPage }));
-                    }
+                    WireButtonAction(btn, sender, gumpId, rootId, action, btnId, toPage);
                     childId = btn.Id;
 
                     var binfo = p.Assets.Value.Gumps.GetGump(normal);
@@ -613,20 +582,8 @@ internal readonly struct ServerGumpPlugin : IPlugin
                 {
                     bool hasBg = gparams.Count >= 7 && gparams[6] == "1";
                     bool hasScroll = gparams.Count >= 8 && gparams[7] != "0";
-                    if (hasBg)
-                    {
-                        var bg = SpawnHtmlBackground(commands, p.Builder.Value,
-                            new Vector2(tx, ty), new Vector2(tw, th), hasScroll, page, group, rootId);
-                        if (tx + tw > maxRight)  maxRight  = tx + tw;
-                        if (ty + th > maxBottom) maxBottom = ty + th;
-                    }
                     var text = SafeLine(lines, lid);
-                    var (txtX, txtY, txtW, txtH) = HtmlInnerRect(tx, ty, tw, th, hasBg, hasScroll);
-                    childId = SpawnWrappedText(commands, new Vector2(txtX, txtY), new Vector2(txtW, txtH), text, 0, hasBg, hasScroll, isHtml: true, out var contentH);
-                    if (hasScroll)
-                        SpawnScrollBar(commands, p.Builder.Value, p.Assets.Value,
-                            new Vector2(tx, ty), new Vector2(tw, th), page, group, rootId,
-                            scrollEntity: childId, maxScroll: Math.Max(0, contentH - txtH));
+                    childId = RenderHtmlBlock(commands, p.Builder.Value, p.Assets.Value, tx, ty, tw, th, hasBg, hasScroll, text, 0, page, group, rootId);
                     cx0 = tx; cy0 = ty; cw0 = tw; ch0 = th;
                 }
             }
@@ -638,13 +595,6 @@ internal readonly struct ServerGumpPlugin : IPlugin
                 {
                     bool hasBg = gparams.Count >= 7 && gparams[6] == "1";
                     bool hasScroll = gparams.Count >= 8 && gparams[7] != "0";
-                    if (hasBg)
-                    {
-                        var bg = SpawnHtmlBackground(commands, p.Builder.Value,
-                            new Vector2(tx, ty), new Vector2(tw, th), hasScroll, page, group, rootId);
-                        if (tx + tw > maxRight)  maxRight  = tx + tw;
-                        if (ty + th > maxBottom) maxBottom = ty + th;
-                    }
                     var cliloc = ParseClilocId(gparams[5]);
                     var text = p.Files.Value.Clilocs.GetString(cliloc) ?? string.Empty;
                     // xmfhtmlgumpcolor carries an HTML start colour in gparams[8];
@@ -653,12 +603,7 @@ internal readonly struct ServerGumpPlugin : IPlugin
                     int htmlHue = 0;
                     if (Eq(entry, "xmfhtmlgumpcolor") && gparams.Count >= 9 && int.TryParse(gparams[8], out var hc))
                         htmlHue = hc == 0x7FFF ? 0x00FFFFFF : hc;
-                    var (txtX, txtY, txtW, txtH) = HtmlInnerRect(tx, ty, tw, th, hasBg, hasScroll);
-                    childId = SpawnWrappedText(commands, new Vector2(txtX, txtY), new Vector2(txtW, txtH), text, htmlHue, hasBg, hasScroll, isHtml: true, out var contentH);
-                    if (hasScroll)
-                        SpawnScrollBar(commands, p.Builder.Value, p.Assets.Value,
-                            new Vector2(tx, ty), new Vector2(tw, th), page, group, rootId,
-                            scrollEntity: childId, maxScroll: Math.Max(0, contentH - txtH));
+                    childId = RenderHtmlBlock(commands, p.Builder.Value, p.Assets.Value, tx, ty, tw, th, hasBg, hasScroll, text, htmlHue, page, group, rootId);
                     cx0 = tx; cy0 = ty; cw0 = tw; ch0 = th;
                 }
             }
@@ -675,13 +620,6 @@ internal readonly struct ServerGumpPlugin : IPlugin
                     int htmlHue = 0;
                     if (int.TryParse(gparams[7], out var hc))
                         htmlHue = hc == 0x7FFF ? 0x00FFFFFF : hc;
-                    if (hasBg)
-                    {
-                        var bg = SpawnHtmlBackground(commands, p.Builder.Value,
-                            new Vector2(tx, ty), new Vector2(tw, th), hasScroll, page, group, rootId);
-                        if (tx + tw > maxRight)  maxRight  = tx + tw;
-                        if (ty + th > maxBottom) maxBottom = ty + th;
-                    }
                     var cliloc = ParseClilocId(gparams[8]);
                     string text;
                     if (gparams.Count > 9)
@@ -694,12 +632,7 @@ internal readonly struct ServerGumpPlugin : IPlugin
                     {
                         text = p.Files.Value.Clilocs.GetString(cliloc) ?? string.Empty;
                     }
-                    var (txtX, txtY, txtW, txtH) = HtmlInnerRect(tx, ty, tw, th, hasBg, hasScroll);
-                    childId = SpawnWrappedText(commands, new Vector2(txtX, txtY), new Vector2(txtW, txtH), text, htmlHue, hasBg, hasScroll, isHtml: true, out var contentH);
-                    if (hasScroll)
-                        SpawnScrollBar(commands, p.Builder.Value, p.Assets.Value,
-                            new Vector2(tx, ty), new Vector2(tw, th), page, group, rootId,
-                            scrollEntity: childId, maxScroll: Math.Max(0, contentH - txtH));
+                    childId = RenderHtmlBlock(commands, p.Builder.Value, p.Assets.Value, tx, ty, tw, th, hasBg, hasScroll, text, htmlHue, page, group, rootId);
                     cx0 = tx; cy0 = ty; cw0 = tw; ch0 = th;
                 }
             }
@@ -783,25 +716,7 @@ internal readonly struct ServerGumpPlugin : IPlugin
                     var btnId  = gparams.Count >= 8 ? SafeInt(gparams[7]) : 0;
                     var btn = p.Builder.Value.AddButton(commands, (normal, pressed, normal),
                         Vector3.UnitZ, new Vector2(bx, by));
-                    var capSender = sender; var capGumpId = gumpId; var capBtnId = btnId;
-                    var capRoot = rootId; var capToPage = toPage;
-                    if (action != 0)
-                    {
-                        btn.Observe((On<UiClick> _, Res<NetClient> net, Commands cmd, ResMut<ServerGumpRegistry> reg,
-                            Query<Data<ServerGumpTextEntry, Text>> entriesQ) =>
-                        {
-                            net.Value.Send_GumpResponse(capSender, capGumpId, capBtnId,
-                                Array.Empty<uint>(), CollectTextEntries(capRoot, entriesQ));
-                            if (reg.Value.ByGumpId.TryGetValue(capGumpId, out var r) && r == capRoot)
-                                reg.Value.ByGumpId.Remove(capGumpId);
-                            cmd.Entity(capRoot).Despawn();
-                        });
-                    }
-                    else
-                    {
-                        btn.Observe((On<UiClick> _, Commands cmd) =>
-                            cmd.Entity(capRoot).Insert(new ServerGumpPageRequest { Page = capToPage }));
-                    }
+                    WireButtonAction(btn, sender, gumpId, rootId, action, btnId, toPage);
                     // Overlay tile art (parts[8] = tileId, parts[9] = hue, parts[10,11] = tileX,tileY).
                     if (gparams.Count >= 12 &&
                         ushort.TryParse(gparams[8], out var tileId) &&
@@ -927,7 +842,7 @@ internal readonly struct ServerGumpPlugin : IPlugin
     // when hasBg=1 it spawns a ResizePic 0x2486 inside the htmlgump area,
     // and the text region shrinks by 8px (4 per side) for the bg padding
     // plus 16px for the scrollbar (right edge) if hasScroll=true.
-    private static (int X, int Y, int W, int H) HtmlInnerRect(int x, int y, int w, int h, bool hasBg, bool hasScroll)
+    internal static (int X, int Y, int W, int H) HtmlInnerRect(int x, int y, int w, int h, bool hasBg, bool hasScroll)
     {
         int padW = hasScroll ? 16 : 0;
         if (hasBg)
@@ -938,6 +853,55 @@ internal readonly struct ServerGumpPlugin : IPlugin
             return (x + 4, y + 4, Math.Max(0, w - padW - 8), Math.Max(0, h - 8));
         }
         return (x, y, Math.Max(0, w - padW), h);
+    }
+
+    // Shared button click wiring for the button / buttontileart commands.
+    // action != 0 → reply Send_GumpResponse then close the gump (OOP
+    // Gump.OnButtonClick disposes after ReplyGump); action == 0 → switchpage
+    // (tag the root with a page request, applied in Stage.Update). Captures
+    // only immutable ids, so the closure stays valid for the button's lifetime.
+    private static void WireButtonAction(EntityCommands btn, uint sender, uint gumpId, ulong rootId, int action, int btnId, int toPage)
+    {
+        var capSender = sender; var capGumpId = gumpId; var capBtnId = btnId;
+        var capRoot = rootId; var capToPage = toPage;
+        if (action != 0)
+        {
+            btn.Observe((On<UiClick> _, Res<NetClient> net, Commands cmd, ResMut<ServerGumpRegistry> reg,
+                Query<Data<ServerGumpTextEntry, Text>> entriesQ) =>
+            {
+                net.Value.Send_GumpResponse(capSender, capGumpId, capBtnId,
+                    Array.Empty<uint>(), CollectTextEntries(capRoot, entriesQ));
+                if (reg.Value.ByGumpId.TryGetValue(capGumpId, out var r) && r == capRoot)
+                    reg.Value.ByGumpId.Remove(capGumpId);
+                cmd.Entity(capRoot).Despawn();
+            });
+        }
+        else
+        {
+            btn.Observe((On<UiClick> _, Commands cmd) =>
+                cmd.Entity(capRoot).Insert(new ServerGumpPageRequest { Page = capToPage }));
+        }
+    }
+
+    // Shared body for the htmlgump / xmfhtmlgump(color) / xmfhtmltok commands:
+    // optional bg sprite, inset wrapped-text run, optional scrollbar. Callers
+    // differ only in how they resolve `text` + `htmlHue`. Returns the text
+    // container entity (the scroll target). Bounds tracking is the caller's job
+    // via the returned child's outer rect (tx,ty,tw,th).
+    private static ulong RenderHtmlBlock(
+        Commands commands, GumpBuilder builder, AssetsServer assets,
+        int tx, int ty, int tw, int th, bool hasBg, bool hasScroll, string text, int htmlHue, int page, int group, ulong rootId)
+    {
+        if (hasBg)
+            SpawnHtmlBackground(commands, builder, new Vector2(tx, ty), new Vector2(tw, th), hasScroll, page, group, rootId);
+
+        var (txtX, txtY, txtW, txtH) = HtmlInnerRect(tx, ty, tw, th, hasBg, hasScroll);
+        var childId = SpawnWrappedText(commands, new Vector2(txtX, txtY), new Vector2(txtW, txtH), text, htmlHue, hasBg, hasScroll, isHtml: true, out var contentH);
+        if (hasScroll)
+            SpawnScrollBar(commands, builder, assets,
+                new Vector2(tx, ty), new Vector2(tw, th), page, group, rootId,
+                scrollEntity: childId, maxScroll: Math.Max(0, contentH - txtH));
+        return childId;
     }
 
     // Inner ResizePic 0x2486 — the wood-frame backdrop OOP HtmlControl

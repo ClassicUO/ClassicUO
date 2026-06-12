@@ -124,4 +124,20 @@ public class ServerGumpParseTests
     [InlineData("text", "html", false)]
     public void Eq_is_case_insensitive(string a, string b, bool expected)
         => Assert.Equal(expected, ServerGumpPlugin.Eq(a, b));
+
+    [Fact]
+    public void HtmlInnerRect_plain_is_unchanged()
+        => Assert.Equal((10, 20, 100, 50), ServerGumpPlugin.HtmlInnerRect(10, 20, 100, 50, hasBg: false, hasScroll: false));
+
+    [Fact]
+    public void HtmlInnerRect_scrollbar_reserves_16px_width()
+        => Assert.Equal((10, 20, 84, 50), ServerGumpPlugin.HtmlInnerRect(10, 20, 100, 50, hasBg: false, hasScroll: true));
+
+    [Fact]
+    public void HtmlInnerRect_bg_insets_4px_each_side()
+        => Assert.Equal((14, 24, 92, 42), ServerGumpPlugin.HtmlInnerRect(10, 20, 100, 50, hasBg: true, hasScroll: false));
+
+    [Fact]
+    public void HtmlInnerRect_bg_and_scroll_combine_insets()
+        => Assert.Equal((14, 24, 76, 42), ServerGumpPlugin.HtmlInnerRect(10, 20, 100, 50, hasBg: true, hasScroll: true));
 }
