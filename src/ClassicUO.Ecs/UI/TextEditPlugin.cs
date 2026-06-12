@@ -407,20 +407,31 @@ internal readonly struct TextEditPlugin : IPlugin
         foreach (var ev in reader.Read())
         {
             var ch = ev.Value;
-            if (ch == '\b') { TextEdit.Key(a, a.State, TextEditKey.Backspace); continue; }
-            // Multiline fields accept a newline (typed paste or Enter delivered as
-            // a char); single-line drops it. Other control chars aren't edits.
-            // Drop '\r' entirely: FNA delivers Enter as a '\r' TextInput char,
-            // but RouteKeys already inserts the newline from Keys.Enter — handling
-            // it here too would double up (and pasted Windows "\r\n" would too).
-            // A real '\n' (e.g. pasted unix text) still inserts once.
-            if (ch == '\r') continue;
-            if (ch == '\n') { if (a.Multiline) TextEdit.InputChar(a, a.State, '\n'); continue; }
-            // FNA synthesizes Home/End/Tab (2/3/9) and Delete (127) as TextInput
-            // control chars; RouteKeys owns those, so drop them here.
-            if (ch < ' ' || ch == (char)127) continue;
-            TextEdit.InputChar(a, a.State, ch);
+            switch (ClassifyChar(ch, a.Multiline))
+            {
+                case TextCharAction.Backspace: TextEdit.Key(a, a.State, TextEditKey.Backspace); break;
+                case TextCharAction.Newline: TextEdit.InputChar(a, a.State, '\n'); break;
+                case TextCharAction.Insert: TextEdit.InputChar(a, a.State, ch); break;
+                // Drop: '\r', a newline in a single-line field, and other control chars.
+            }
         }
+    }
+
+    internal enum TextCharAction { Drop, Insert, Backspace, Newline }
+
+    // Classify a TextInput char into an edit action. The control-char rules are
+    // parity-sensitive (and a past defect source):
+    //   '\b' -> backspace; '\r' -> dropped (Enter already inserts the newline via
+    //   Keys.Enter, and pasted "\r\n" must not double up); '\n' -> newline only in
+    //   multiline fields; other control chars (< space, 127 = FNA Home/End/Tab/
+    //   Delete synthesized as TextInput) are dropped; everything else inserts.
+    internal static TextCharAction ClassifyChar(char ch, bool multiline)
+    {
+        if (ch == '\b') return TextCharAction.Backspace;
+        if (ch == '\r') return TextCharAction.Drop;
+        if (ch == '\n') return multiline ? TextCharAction.Newline : TextCharAction.Drop;
+        if (ch < ' ' || ch == (char)127) return TextCharAction.Drop;
+        return TextCharAction.Insert;
     }
 
     // Push the edited buffer back into the field's Text (plain) or MaskedText
