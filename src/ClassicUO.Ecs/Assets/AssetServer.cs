@@ -13,6 +13,7 @@ internal sealed class AssetsServer
         Gumps = new Renderer.Gumps.Gump(fileManager.Gumps, device);
         MultiMaps = new Renderer.MultiMaps.MultiMap(fileManager.MultiMaps, device);
         Skills = fileManager.Skills;
+        Sounds = new Renderer.Sounds.Sound(fileManager.Sounds);
     }
 
     // Test-only: an assets server with no loaders (loaders need UO files + a
@@ -30,4 +31,5 @@ internal sealed class AssetsServer
     public Renderer.Gumps.Gump Gumps { get; }
     public Renderer.MultiMaps.MultiMap MultiMaps { get; }
     public SkillsLoader Skills { get; }
+    public Renderer.Sounds.Sound Sounds { get; }
 }

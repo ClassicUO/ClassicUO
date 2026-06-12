@@ -287,10 +287,9 @@ readonly struct InGamePacketsPlugin : IPlugin
             Res<UOFileManager>,
             Res<Profile>,
             EventWriter<SystemMessageEvent>>(OnUpdateSkills);
-        Stub<OnSoundEffectPacket_0x54>(app);
+        // 0x54 (sound effect) and 0x6D (play music) are handled by AudioPlugin.
         Stub<OnWeatherPacket_0x65>(app);
         // 0x66 (book pages) is handled by BookGumpPlugin.
-        Stub<OnPlayMusicPacket_0x6D>(app);
         Stub<OnCharacterAnimationPacket_0x6E>(app);
         Stub<OnGraphicEffectPacket_0x70>(app);
         Stub<OnPingPacket_0x73>(app);

@@ -67,6 +67,7 @@ internal readonly struct CuoPlugin : IPlugin
 
         app.AddPlugin<NetworkPlugin>();
         app.AddPlugin<GameplayPlugin>();
+        app.AddPlugin<AudioPlugin>();
         app.AddPlugin<RenderingPlugin>();
         // After RenderingPlugin: its WorldRenderingPlugin child registers the
         // "cuo:rendering:rendering"/"end" labels the system-message render
