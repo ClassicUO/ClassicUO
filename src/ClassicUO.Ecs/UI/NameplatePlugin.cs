@@ -554,11 +554,7 @@ internal readonly struct NameplatePlugin : IPlugin
                 int pct = hits.Ref.MaxValue > 0 ? hits.Ref.Value * 100 / hits.Ref.MaxValue : 0;
                 var (_, fillNode, fillBg) = fillRow;
                 fillNode.Ref.Width = Val.Percent(pct);
-                fillBg.Ref.Value =
-                    pct >= 80 ? new ClayColor(0, 128, 0, 255)        // Green
-                    : pct >= 50 ? new ClayColor(154, 205, 50, 255)   // YellowGreen
-                    : pct >= 30 ? new ClayColor(255, 255, 0, 255)    // Yellow
-                    : new ClayColor(255, 0, 0, 255);                 // Red
+                fillBg.Ref.Value = HpFillColor(pct);
             }
 
             // Anchor: legacy NameOverheadGump.AddToRenderLists. Mobiles measure
@@ -647,13 +643,21 @@ internal readonly struct NameplatePlugin : IPlugin
         return name + "...";
     }
 
+    // HP-bar fill colour by percentage (legacy HitsPercentage thresholds:
+    // green >=80, yellow-green >=50, yellow >=30, else red).
+    internal static ClayColor HpFillColor(int pct)
+        => pct >= 80 ? new ClayColor(0, 128, 0, 255)
+         : pct >= 50 ? new ClayColor(154, 205, 50, 255)
+         : pct >= 30 ? new ClayColor(255, 255, 0, 255)
+         : new ClayColor(255, 0, 0, 255);
+
     // Legacy Mobile.IsGargoyle — flying gargoyles get the -22 anchor shift.
-    private static bool IsGargoyle(ushort graphic)
+    internal static bool IsGargoyle(ushort graphic)
         => graphic == 0x029A || graphic == 0x029B || graphic == 0x02B6 || graphic == 0x02B7;
 
     // Legacy Notoriety.GetHue with default profile hues (same table
     // HealthBarPlugin uses).
-    private static ushort NotorietyHue(NotorietyFlag flag) => flag switch
+    internal static ushort NotorietyHue(NotorietyFlag flag) => flag switch
     {
         NotorietyFlag.Innocent => 0x005A,
         NotorietyFlag.Ally => 0x0044,
