@@ -108,7 +108,7 @@ internal readonly struct HealthBarPlugin : IPlugin
     private const ushort NameHue = 0x0386;
 
     // Profile default notoriety hues (Configuration/Profile.cs).
-    private static ushort NotorietyHue(NotorietyFlag flag) => flag switch
+    internal static ushort NotorietyHue(NotorietyFlag flag) => flag switch
     {
         NotorietyFlag.Innocent => 0x005A,
         NotorietyFlag.Ally => 0x0044,
@@ -256,7 +256,7 @@ internal readonly struct HealthBarPlugin : IPlugin
 
     // current*100/max capped at 100, then scaled to maxValue pixels — verbatim
     // from BaseHealthBarGump.CalculatePercents.
-    private static int CalculatePercents(int max, int current, int maxValue)
+    internal static int CalculatePercents(int max, int current, int maxValue)
     {
         if (max > 0)
         {
@@ -269,6 +269,26 @@ internal readonly struct HealthBarPlugin : IPlugin
 
     private static Vector3 ToShaderHue(ushort hue)
         => hue == 0 ? Vector3.UnitZ : new Vector3(hue, 1f, 1f);
+
+    // HP fill sprite + tint for a mobile's poison / yellow-bar / party state.
+    // Party bars keep one sprite (LINE_BLUE_PARTY) and tint it lime/orange
+    // (legacy _bars[0].Hue 63/353); non-party bars swap the sprite and stay
+    // untinted. Pure, so the parity is unit-tested.
+    internal static (ushort AssetId, Vector3 Hue) ResolveHpFillSprite(bool party, Flags flags)
+    {
+        if (party)
+        {
+            var hue = (flags & Flags.Poisoned) != 0 ? ToShaderHue(63)
+                    : (flags & Flags.YellowBar) != 0 ? ToShaderHue(353)
+                    : Vector3.UnitZ;
+            return (LINE_BLUE_PARTY, hue);
+        }
+
+        var asset = (flags & Flags.Poisoned) != 0 ? LINE_POISONED
+                  : (flags & Flags.YellowBar) != 0 ? LINE_YELLOWHITS
+                  : LINE_BLUE;
+        return (asset, Vector3.UnitZ);
+    }
 
     private static void OpenOnDrag(
         Commands commands,
@@ -619,21 +639,7 @@ internal readonly struct HealthBarPlugin : IPlugin
                 if (r != null)
                 {
                     var flags = flagsQ.Contains(ent) ? Get(flagsQ, ent).Value : Flags.None;
-                    if (fill.Ref.Party)
-                    {
-                        // Party HP bar keeps the LINE_BLUE_PARTY sprite and tints
-                        // it (legacy _bars[0].Hue = 63 lime / 353 orange).
-                        r.AssetId = LINE_BLUE_PARTY;
-                        r.Hue = (flags & Flags.Poisoned) != 0 ? ToShaderHue(63)
-                              : (flags & Flags.YellowBar) != 0 ? ToShaderHue(353)
-                              : Vector3.UnitZ;
-                    }
-                    else
-                    {
-                        r.AssetId = (flags & Flags.Poisoned) != 0 ? LINE_POISONED
-                                  : (flags & Flags.YellowBar) != 0 ? LINE_YELLOWHITS
-                                  : LINE_BLUE;
-                    }
+                    (r.AssetId, r.Hue) = ResolveHpFillSprite(fill.Ref.Party, flags);
                 }
             }
         }
