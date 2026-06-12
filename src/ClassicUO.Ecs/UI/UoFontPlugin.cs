@@ -80,9 +80,6 @@ internal static class UoFontRuntime
         return (idx < 20 ? (byte)idx : DefaultFont, ascii);
     }
 
-    // Back-compat for callers that only need the unicode font index.
-    public static byte ResolveFont(ushort fontId) => Resolve(fontId).Font;
-
     // For ASCII gump text the TextColor does NOT carry an RGB tint — it
     // carries the UO hue, packed R=low byte / G=high byte. The renderer bakes
     // the glyph already coloured by that hue (FontsLoader applies it per pixel,
@@ -134,6 +131,11 @@ internal sealed class UoFontTextMeasurer : Clay.ITextMeasurer
 // exactly like legacy RenderedText.DrawGlyphs.
 internal static class UoFontRenderer
 {
+    // Mirror FontsLoader's private UOFONT_* flag constants (MultilinesFontData.Flags).
+    private const ushort UOFONT_SOLID = 0x0001;
+    private const ushort UOFONT_ITALIC = 0x0002;
+    private const ushort UOFONT_BLACK_BORDER = 0x0008;
+
     private readonly struct LayoutKey : IEquatable<LayoutKey>
     {
         public readonly string Text;
@@ -173,10 +175,30 @@ internal static class UoFontRenderer
 
     private static readonly Dictionary<LayoutKey, Layout> _layouts = new();
 
+    // Shared by DrawGlyphs + BuildHitMask — the hit mask must place glyphs
+    // exactly where the draw does, so the per-line walk math lives here once.
+    internal static int LineAlignOffset(MultilinesFontInfo ptr, int textWidth, bool isUnicode)
+    {
+        int w = ptr.Align switch
+        {
+            TEXT_ALIGN_TYPE.TS_CENTER => isUnicode ? (textWidth - 8) / 2 - ptr.Width / 2 : (textWidth - ptr.Width) >> 1,
+            TEXT_ALIGN_TYPE.TS_RIGHT => textWidth - 10 - ptr.Width,
+            _ => 0,
+        };
+        return w < 0 ? 0 : w;
+    }
+
+    // Match GeneratePixelsASCII: ASCII font 6 reduces line spacing by 7px.
+    internal static int LinePitch(MultilinesFontInfo ptr, byte font, bool isUnicode)
+        => ptr.MaxHeight - (!isUnicode && font == 6 ? 7 : 0);
+
+    internal static (byte Font, bool Border, bool Solid, bool Italic) HtmlCharStyle(in MultilinesFontData d)
+        => (d.Font, (d.Flags & UOFONT_BLACK_BORDER) != 0, (d.Flags & UOFONT_SOLID) != 0, (d.Flags & UOFONT_ITALIC) != 0);
+
     // Remove <U></U> tags (case-insensitive). OOP's atlas renderer ignores the
     // per-char underline these set; stripping them matches it without disturbing
     // other tags (<basefont>, <a>, <i>, …) or text width.
-    private static string StripUnderlineTags(string text)
+    internal static string StripUnderlineTags(string text)
     {
         if (string.IsNullOrEmpty(text) || text.IndexOf('<') < 0)
             return text;
@@ -213,9 +235,7 @@ internal static class UoFontRenderer
             for (var ptr = info; ptr != null; ptr = ptr.Next)
             {
                 if (ptr.Width > w) w = ptr.Width;
-                // Match GeneratePixelsASCII: font 6 reduces line spacing by 7px.
-                int font6 = ascii && font == 6 ? 7 : 0;
-                h += ptr.MaxHeight - font6;
+                h += LinePitch(ptr, font, isUnicode: !ascii);
             }
 
             var layout = new Layout { Info = info, Width = w, Height = h };
@@ -265,18 +285,7 @@ internal static class UoFontRenderer
 
         while (ptr != null)
         {
-            int w = 0;
-            switch (ptr.Align)
-            {
-                case TEXT_ALIGN_TYPE.TS_CENTER:
-                    w = isUnicode ? (textWidth - 8) / 2 - ptr.Width / 2 : (textWidth - ptr.Width) >> 1;
-                    if (w < 0) w = 0;
-                    break;
-                case TEXT_ALIGN_TYPE.TS_RIGHT:
-                    w = textWidth - 10 - ptr.Width;
-                    if (w < 0) w = 0;
-                    break;
-            }
+            int w = LineAlignOffset(ptr, textWidth, isUnicode);
 
             int dataLen = ptr.Data.Count;
             var dataSpan = CollectionsMarshal.AsSpan(ptr.Data);
@@ -294,10 +303,7 @@ internal static class UoFontRenderer
 
                 if (isHtml)
                 {
-                    charFont = d.Font;
-                    charBorder = (d.Flags & 0x0008) != 0; // UOFONT_BLACK_BORDER
-                    charSolid = (d.Flags & 0x0001) != 0;  // UOFONT_SOLID
-                    charItalic = (d.Flags & 0x0002) != 0; // UOFONT_ITALIC
+                    (charFont, charBorder, charSolid, charItalic) = HtmlCharStyle(in d);
                     if (d.Color != 0xFFFFFFFF)
                         charColor = HuesHelper.RgbaToArgb(d.Color);
                 }
@@ -359,8 +365,7 @@ internal static class UoFontRenderer
                 w += entry.AdvanceWidth;
             }
 
-            int font6OffsetY = !isUnicode && font == 6 ? 7 : 0;
-            lineOffsY += ptr.MaxHeight - font6OffsetY;
+            lineOffsY += LinePitch(ptr, font, isUnicode);
             ptr = ptr.Next;
         }
     }
@@ -554,18 +559,7 @@ internal static class UoFontRenderer
 
         for (var ptr = layout.Info; ptr != null; ptr = ptr.Next)
         {
-            int w = 0;
-            switch (ptr.Align)
-            {
-                case TEXT_ALIGN_TYPE.TS_CENTER:
-                    w = isUnicode ? (textWidth - 8) / 2 - ptr.Width / 2 : (textWidth - ptr.Width) >> 1;
-                    if (w < 0) w = 0;
-                    break;
-                case TEXT_ALIGN_TYPE.TS_RIGHT:
-                    w = textWidth - 10 - ptr.Width;
-                    if (w < 0) w = 0;
-                    break;
-            }
+            int w = LineAlignOffset(ptr, textWidth, isUnicode);
 
             var dataSpan = CollectionsMarshal.AsSpan(ptr.Data);
             for (int i = 0; i < dataSpan.Length; i++)
@@ -578,12 +572,7 @@ internal static class UoFontRenderer
                 byte charFont = font;
                 bool charBorder = border, charSolid = false, charItalic = false;
                 if (isHtml)
-                {
-                    charFont = d.Font;
-                    charBorder = (d.Flags & 0x0008) != 0;
-                    charSolid = (d.Flags & 0x0001) != 0;
-                    charItalic = (d.Flags & 0x0002) != 0;
-                }
+                    (charFont, charBorder, charSolid, charItalic) = HtmlCharStyle(in d);
 
                 var gi = isUnicode
                     ? fonts.RenderSingleGlyphUnicode(charFont, si, charBorder, charSolid, charItalic)
@@ -610,8 +599,7 @@ internal static class UoFontRenderer
                 w += gi.AdvanceWidth;
             }
 
-            int font6OffsetY = !isUnicode && font == 6 ? 7 : 0;
-            lineOffsY += ptr.MaxHeight - font6OffsetY;
+            lineOffsY += LinePitch(ptr, font, isUnicode);
         }
 
         return mask;
@@ -625,10 +613,10 @@ internal static class UoFontRenderer
     // glyphs exactly. The multiline editor field renders HTML (for its near-black
     // text colour), and HTML mode changes per-line MaxHeight; measuring plain here
     // made the caret drift up a few px per line. Used by TextEditPlugin.
-    public static System.Collections.Generic.List<(int Start, int Count, int Width, int Height)> WrapLines(
+    public static List<(int Start, int Count, int Width, int Height)> WrapLines(
         string text, ushort fontId, int maxWidth, bool isHtml = false, uint htmlStartColor = 0xFFFFFFFF, bool htmlBg = false)
     {
-        var lines = new System.Collections.Generic.List<(int, int, int, int)>();
+        var lines = new List<(int, int, int, int)>();
         if (UoFontRuntime.Fonts == null)
             return lines;
 
@@ -650,10 +638,10 @@ internal static class UoFontRenderer
     // (raw-buffer indices), the HTML wrap (what's drawn) drives the Y pitch + row
     // height, so the rects sit exactly under the glyphs. Used to paint multi-row
     // text selection, which a single overlay rect can't cover.
-    public static System.Collections.Generic.List<(float X, float Y, float W, float H)> SelectionRects(
+    public static List<(float X, float Y, float W, float H)> SelectionRects(
         string text, ushort fontId, int maxWidth, bool isHtml, uint htmlStartColor, bool htmlBg, int selStart, int selEnd)
     {
-        var rects = new System.Collections.Generic.List<(float, float, float, float)>();
+        var rects = new List<(float, float, float, float)>();
         if (selEnd <= selStart || string.IsNullOrEmpty(text) || UoFontRuntime.Fonts == null)
             return rects;
 
@@ -668,14 +656,16 @@ internal static class UoFontRenderer
 
         var lines = WrapLines(text, fontId, maxWidth);
         var rlines = isHtml ? WrapLines(text, fontId, maxWidth, isHtml, htmlStartColor, htmlBg) : lines;
-        float lh = MeasureFont("Wg", fontId, int.MaxValue, allowHtml: false).Height is var mh && mh > 0 ? mh : 20;
+        int fontH = MeasureFont("Wg", fontId, int.MaxValue, allowHtml: false).Height;
+        float lh = fontH > 0 ? fontH : 20;
         float y = 0;
         for (int i = 0; i < lines.Count; i++)
         {
             var ln = lines[i];
             int ls = Math.Clamp(ln.Start, 0, len);
             int le = Math.Clamp(ln.Start + ln.Count, ls, len);
-            float rh = (i < rlines.Count ? rlines[i].Height : ln.Height) is var h && h > 0 ? h : lh;
+            int lineH = i < rlines.Count ? rlines[i].Height : ln.Height;
+            float rh = lineH > 0 ? lineH : lh;
             int a = Math.Clamp(Math.Max(ss, ls), ls, le);
             int b = Math.Clamp(Math.Min(se, le), ls, le);
             if (b > a)
@@ -689,7 +679,7 @@ internal static class UoFontRenderer
         return rects;
     }
 
-    private static readonly System.Collections.Generic.Dictionary<ushort, (float Top, float Height)> _caretMetrics = new();
+    private static readonly Dictionary<ushort, (float Top, float Height)> _caretMetrics = new();
 
     // Caret bar geometry for a font: the visible glyph INK extent within a line,
     // NOT the line cell. The cell (what MeasureFont returns) carries top leading
