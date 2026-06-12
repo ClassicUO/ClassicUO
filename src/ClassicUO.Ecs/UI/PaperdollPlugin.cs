@@ -506,7 +506,7 @@ internal readonly struct PaperdollPlugin : IPlugin
     // adds in BuildWindow exactly — it's the start index for the body subtree so
     // the body paints over the scrolls. Profile is always present; party only for
     // the player; the books gate on PaladinNecromancer tooltips + client version.
-    private static int BehindBodyScrollCount(GameContext gameCtx, uint serial)
+    internal static int BehindBodyScrollCount(GameContext gameCtx, uint serial)
     {
         bool isPlayer = serial == gameCtx.PlayerSerial;
         bool showBooks = (gameCtx.ClientFeatures & CharacterListFlags.CLF_PALADIN_NECROMANCER_TOOLTIPS) != 0 && isPlayer;
@@ -772,7 +772,7 @@ internal readonly struct PaperdollPlugin : IPlugin
     }
 
     // Mirrors PaperDollInteractable.UpdateUI's body picker.
-    private static ushort ResolveBodyGraphic(ushort mobileGraphic, bool isFemale)
+    internal static ushort ResolveBodyGraphic(ushort mobileGraphic, bool isFemale)
     {
         return mobileGraphic switch
         {
@@ -793,7 +793,7 @@ internal readonly struct PaperdollPlugin : IPlugin
     private static Vector3 ToShaderHue(ushort hue)
         => hue == 0 ? Vector3.UnitZ : new Vector3(hue, 1f, 1f);
 
-    private static bool ResolveIsFemale(ushort mobileGraphic)
+    internal static bool ResolveIsFemale(ushort mobileGraphic)
     {
         // Best-effort: known female body ids. PlayerData.IsFemale would be
         // more authoritative but reads a separate component; treat unknown
