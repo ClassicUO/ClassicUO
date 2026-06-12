@@ -1662,158 +1662,134 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         return (dir, mirror);
     }
 
-    private static bool IsItemCovered2(Query<Data<Graphic, Hue>> qLayer, ref EquipmentSlots slots, Layer layer)
+    // Whether the item worn on `layer` is hidden by something layered over it
+    // (robe / legs / etc.). A faithful port of legacy ItemGump.IsCovered; split
+    // per layer so each rule set is readable. The graphic-id constants are raw
+    // UO art ids and intentionally opaque. Tested in WorldRenderingTests.
+    internal static bool IsItemCovered2(Query<Data<Graphic, Hue>> qLayer, ref EquipmentSlots slots, Layer layer)
+        => layer switch
+        {
+            Layer.Shoes => CoversShoes(qLayer, in slots),
+            Layer.Pants => CoversPants(qLayer, in slots),
+            Layer.Tunic => CoversTunic(qLayer, in slots),
+            Layer.Torso => CoversTorso(qLayer, in slots),
+            Layer.Arms => CoversArms(qLayer, in slots),
+            Layer.Helmet or Layer.Hair => CoversHelmetOrHair(qLayer, in slots),
+            _ => false,
+        };
+
+    static bool LayerGraphicIs(Query<Data<Graphic, Hue>> qLayer, in EquipmentSlots s, Layer l, ushort value)
     {
-        bool isOk(Layer l, ref EquipmentSlots s, ushort value)
+        if (qLayer.TryGet(s[l], out var row))
         {
-            if (qLayer.TryGet(s[l], out var row))
-            {
-                (var gfx, _) = row;
-                return gfx.Ref.Value == value;
-            }
-            return false;
-        }
-
-        bool isAny(Layer l, ref EquipmentSlots s, params ReadOnlySpan<ushort> values)
-        {
-            foreach (var v in values)
-                if (isOk(l, ref s, v)) return true;
-            return false;
-        }
-
-        bool isNotAny(Layer l, ref EquipmentSlots s, params ReadOnlySpan<ushort> values)
-        {
-            if (!qLayer.TryGet(s[l], out var row)) return false;
             (var gfx, _) = row;
-            foreach (var v in values)
-                if (gfx.Ref.Value == v) return false;
+            return gfx.Ref.Value == value;
+        }
+        return false;
+    }
+
+    static bool LayerGraphicIsAny(Query<Data<Graphic, Hue>> qLayer, in EquipmentSlots s, Layer l, params ReadOnlySpan<ushort> values)
+    {
+        foreach (var v in values)
+            if (LayerGraphicIs(qLayer, in s, l, v)) return true;
+        return false;
+    }
+
+    static bool LayerGraphicIsNotAny(Query<Data<Graphic, Hue>> qLayer, in EquipmentSlots s, Layer l, params ReadOnlySpan<ushort> values)
+    {
+        if (!qLayer.TryGet(s[l], out var row)) return false;
+        (var gfx, _) = row;
+        foreach (var v in values)
+            if (gfx.Ref.Value == v) return false;
+        return true;
+    }
+
+    static bool CoversShoes(Query<Data<Graphic, Hue>> qLayer, in EquipmentSlots slots)
+    {
+        if (slots[Layer.Legs].IsValid() ||
+            (slots[Layer.Pants].IsValid() && LayerGraphicIs(qLayer, in slots, Layer.Pants, 0x1411)))
             return true;
-        }
 
-        bool inRange(Layer l, ref EquipmentSlots s, ushort min, ushort max)
+        return (slots[Layer.Pants].IsValid() && LayerGraphicIsAny(qLayer, in slots, Layer.Pants, 0x0513, 0x0514)) ||
+               (slots[Layer.Robe].IsValid() && LayerGraphicIs(qLayer, in slots, Layer.Robe, 0x0504));
+    }
+
+    static bool CoversPants(Query<Data<Graphic, Hue>> qLayer, in EquipmentSlots slots)
+    {
+        if (slots[Layer.Legs].IsValid() ||
+            (slots[Layer.Robe].IsValid() && LayerGraphicIs(qLayer, in slots, Layer.Robe, 0x0504)))
+            return true;
+
+        if (slots[Layer.Pants].IsValid() && LayerGraphicIsAny(qLayer, in slots, Layer.Pants, 0x01EB, 0x03E5, 0x03EB))
         {
-            if (!qLayer.TryGet(s[l], out var row)) return false;
-            (var gfx, _) = row;
-            return gfx.Ref.Value >= min && gfx.Ref.Value <= max;
-        }
+            if (slots[Layer.Skirt].IsValid() && LayerGraphicIsNotAny(qLayer, in slots, Layer.Skirt, 0x01C7, 0x01E4))
+                return true;
 
-        switch (layer)
+            if (slots[Layer.Robe].IsValid() && qLayer.TryGet(slots[Layer.Robe], out var pantsRobeRow))
+            {
+                (var rgfx, _) = pantsRobeRow;
+                var rv = rgfx.Ref.Value;
+                if (rv != 0x0229 && !(rv >= 0x04E8 && rv <= 0x04EB))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    static bool CoversTunic(Query<Data<Graphic, Hue>> qLayer, in EquipmentSlots slots)
+    {
+        if (slots[Layer.Robe].IsValid() && qLayer.Contains(slots[Layer.Robe]))
+            return LayerGraphicIsNotAny(qLayer, in slots, Layer.Robe, 0x0000, 0x9985, 0x9986, 0xA412);
+
+        if (slots[Layer.Tunic].IsValid() && LayerGraphicIs(qLayer, in slots, Layer.Tunic, 0x0238))
+            return slots[Layer.Robe].IsValid() && LayerGraphicIsNotAny(qLayer, in slots, Layer.Robe, 0x9985, 0x9986, 0xA412);
+
+        return false;
+    }
+
+    static bool CoversTorso(Query<Data<Graphic, Hue>> qLayer, in EquipmentSlots slots)
+    {
+        if (slots[Layer.Robe].IsValid() && LayerGraphicIsNotAny(qLayer, in slots, Layer.Robe, 0x0000, 0x9985, 0x9986, 0xA412, 0xA2CA))
+            return true;
+
+        if (slots[Layer.Tunic].IsValid() && LayerGraphicIsNotAny(qLayer, in slots, Layer.Tunic, 0x1541, 0x1542))
+            return slots[Layer.Torso].IsValid() && LayerGraphicIsAny(qLayer, in slots, Layer.Torso, 0x782A, 0x782B);
+
+        return false;
+    }
+
+    static bool CoversArms(Query<Data<Graphic, Hue>> qLayer, in EquipmentSlots slots)
+        => slots[Layer.Robe].IsValid() && LayerGraphicIsNotAny(qLayer, in slots, Layer.Robe, 0x0000, 0x9985, 0x9986, 0xA412);
+
+    static bool CoversHelmetOrHair(Query<Data<Graphic, Hue>> qLayer, in EquipmentSlots slots)
+    {
+        if (slots[Layer.Robe].IsValid() && qLayer.TryGet(slots[Layer.Robe], out var helmRobeRow))
         {
-            case Layer.Shoes:
-                if (slots[Layer.Legs].IsValid() ||
-                    (slots[Layer.Pants].IsValid() && isOk(Layer.Pants, ref slots, 0x1411)))
+            (var gfx, _) = helmRobeRow;
+            var v = gfx.Ref.Value;
+
+            if (v > 0x3173)
+            {
+                if (v is 0x4B9D or 0x7816)
+                    return true;
+            }
+            else if (v <= 0x2687)
+            {
+                if (v < 0x2683)
+                {
+                    if (v is >= 0x204E and <= 0x204F)
+                        return true;
+                }
+                else
                 {
                     return true;
                 }
-                else if (
-                    (slots[Layer.Pants].IsValid() && isAny(Layer.Pants, ref slots, 0x0513, 0x0514)) ||
-                    (slots[Layer.Robe].IsValid() && isOk(Layer.Robe, ref slots, 0x0504))
-                )
-                {
-                    return true;
-                }
-                break;
-
-            case Layer.Pants:
-                if (slots[Layer.Legs].IsValid() ||
-                    (slots[Layer.Robe].IsValid() && isOk(Layer.Robe, ref slots, 0x0504)))
-                {
-                    return true;
-                }
-
-                if (slots[Layer.Pants].IsValid() && isAny(Layer.Pants, ref slots, 0x01EB, 0x03E5, 0x03EB))
-                {
-                    if (slots[Layer.Skirt].IsValid() && isNotAny(Layer.Skirt, ref slots, 0x01C7, 0x01E4))
-                    {
-                        return true;
-                    }
-
-                    if (slots[Layer.Robe].IsValid() && qLayer.TryGet(slots[Layer.Robe], out var pantsRobeRow))
-                    {
-                        (var rgfx, _) = pantsRobeRow;
-                        var rv = rgfx.Ref.Value;
-                        if (rv != 0x0229 && !(rv >= 0x04E8 && rv <= 0x04EB))
-                        {
-                            return true;
-                        }
-                    }
-                }
-                break;
-
-            case Layer.Tunic:
-                if (slots[Layer.Robe].IsValid() && qLayer.Contains(slots[Layer.Robe]))
-                {
-                    if (isNotAny(Layer.Robe, ref slots, 0x0000, 0x9985, 0x9986, 0xA412))
-                    {
-                        return true;
-                    }
-                }
-                else if (slots[Layer.Tunic].IsValid() && isOk(Layer.Tunic, ref slots, 0x0238))
-                {
-                    if (slots[Layer.Robe].IsValid() && isNotAny(Layer.Robe, ref slots, 0x9985, 0x9986, 0xA412))
-                    {
-                        return true;
-                    }
-                }
-                break;
-
-            case Layer.Torso:
-                if (slots[Layer.Robe].IsValid() && isNotAny(Layer.Robe, ref slots, 0x0000, 0x9985, 0x9986, 0xA412, 0xA2CA))
-                {
-                    return true;
-                }
-                else if (slots[Layer.Tunic].IsValid() && isNotAny(Layer.Tunic, ref slots, 0x1541, 0x1542))
-                {
-                    if (slots[Layer.Torso].IsValid() && isAny(Layer.Torso, ref slots, 0x782A, 0x782B))
-                    {
-                        return true;
-                    }
-                }
-                break;
-
-            case Layer.Arms:
-                if (slots[Layer.Robe].IsValid() && isNotAny(Layer.Robe, ref slots, 0x0000, 0x9985, 0x9986, 0xA412))
-                {
-                    return true;
-                }
-                break;
-
-            case Layer.Helmet:
-            case Layer.Hair:
-                if (slots[Layer.Robe].IsValid() && qLayer.TryGet(slots[Layer.Robe], out var helmRobeRow))
-                {
-                    (var gfx, _) = helmRobeRow;
-                    var v = gfx.Ref.Value;
-
-                    if (v > 0x3173)
-                    {
-                        if (v is 0x4B9D or 0x7816)
-                        {
-                            return true;
-                        }
-                    }
-                    else if (v <= 0x2687)
-                    {
-                        if (v < 0x2683)
-                        {
-                            if (v is >= 0x204E and <= 0x204F)
-                            {
-                                return true;
-                            }
-                        }
-                        else
-                        {
-                            return true;
-                        }
-                    }
-                    else if (v is 0x2FB9 or 0x3173)
-                    {
-                        return true;
-                    }
-                }
-                break;
+            }
+            else if (v is 0x2FB9 or 0x3173)
+            {
+                return true;
+            }
         }
-
         return false;
     }
 
