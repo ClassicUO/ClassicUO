@@ -163,6 +163,12 @@ internal static class UoFontRenderer
         public MultilinesFontInfo? Info;
         public int Width;
         public int Height;
+        // Lazy 1-bit ink mask for pixel-perfect hit testing (PixelHit). Built
+        // on first query by re-rendering each glyph's pixels; border pixels are
+        // included when the mask was built with border=true so the hit area
+        // matches the drawn outline.
+        public bool[]? HitMask;
+        public bool HitMaskBorder;
     }
 
     private static readonly Dictionary<LayoutKey, Layout> _layouts = new();
@@ -237,7 +243,8 @@ internal static class UoFontRenderer
         int destY,
         float depth,
         bool border = false,
-        uint unicodeBaked = 0)
+        uint unicodeBaked = 0,
+        float alpha = 1f)
     {
         var atlas = UoFontRuntime.Atlas;
         if (atlas == null || layout.Info == null)
@@ -334,6 +341,11 @@ internal static class UoFontRenderer
                         ? XnaColor.White
                         : (isUnicode ? unicodeTint : XnaColor.White);
 
+                    // Premultiplied fade (legacy RenderedText.Draw alpha):
+                    // scale all four channels so the glyph blends half-out.
+                    if (alpha < 1f)
+                        drawTint *= alpha;
+
                     batcher.Draw(
                         entry.Texture,
                         new Vector2(dx, dy),
@@ -366,7 +378,8 @@ internal static class UoFontRenderer
         float layerDepth,
         bool allowHtml = true,
         bool border = false,
-        uint unicodeBaked = 0)
+        uint unicodeBaked = 0,
+        float alpha = 1f)
     {
         if (string.IsNullOrEmpty(text) || UoFontRuntime.Fonts == null || UoFontRuntime.Atlas == null)
             return;
@@ -382,7 +395,7 @@ internal static class UoFontRenderer
         bool isHtml = allowHtml && !ascii && text.IndexOf('<') >= 0;
 
         var layout = GetLayout(text, font, ascii, isHtml, 0xFFFFFFFF, htmlBg: false, maxWidth);
-        DrawGlyphs(batcher, layout, font, isUnicode: !ascii, isHtml, asciiHue, tint, x, y, layerDepth, border, unicodeBaked);
+        DrawGlyphs(batcher, layout, font, isUnicode: !ascii, isHtml, asciiHue, tint, x, y, layerDepth, border, unicodeBaked, alpha);
     }
 
     // Wrapped HTML block draw path (UOCustomKind.WrappedText). The node was
@@ -473,7 +486,8 @@ internal static class UoFontRenderer
         int x, int y,
         int maxWidth,
         float layerDepth,
-        bool allowHtml = true)
+        bool allowHtml = true,
+        float alpha = 1f)
     {
         var (_, ascii) = UoFontRuntime.Resolve(fontId);
         // Overhead/world text mirrors legacy MessageManager.CreateMessage:
@@ -483,7 +497,7 @@ internal static class UoFontRenderer
         // leaves them unchanged); the border is baked black per glyph.
         XnaColor tint = ascii ? new XnaColor(hue & 0xFF, (hue >> 8) & 0xFF, 0, 255) : XnaColor.White;
         uint unicodeBaked = ascii ? 0u : UnicodeBakedColor(hue);
-        Draw(batcher, text, fontId, tint, x, y, maxWidth, layerDepth, allowHtml, border: true, unicodeBaked: unicodeBaked);
+        Draw(batcher, text, fontId, tint, x, y, maxWidth, layerDepth, allowHtml, border: true, unicodeBaked: unicodeBaked, alpha: alpha);
     }
 
     // Measure a run honouring the fontId's ascii/unicode flag (the other Measure
@@ -497,6 +511,110 @@ internal static class UoFontRenderer
         bool isHtml = allowHtml && !ascii && text.IndexOf('<') >= 0;
         var layout = GetLayout(text, font, ascii, isHtml, 0xFFFFFFFF, htmlBg: false, maxWidth);
         return (layout.Width, layout.Height);
+    }
+
+    // Pixel-perfect hit test against a rendered run — the ECS analogue of
+    // legacy RenderedText.PixelCheck. (x, y) are text-local px from the run's
+    // top-left draw position. Walks the SAME cached layout the matching Draw
+    // uses, so glyph placement is identical; the per-layout ink mask is built
+    // lazily by re-rendering each glyph's pixels once. `border` must match the
+    // draw call (overhead text draws with the black border, which widens the
+    // ink by 1px all around — legacy PixelCheck includes it).
+    public static bool PixelHit(string text, ushort fontId, int maxWidth, int x, int y, bool allowHtml = true, bool border = false)
+    {
+        if (string.IsNullOrEmpty(text) || UoFontRuntime.Fonts == null)
+            return false;
+
+        var (font, ascii) = UoFontRuntime.Resolve(fontId);
+        bool isHtml = allowHtml && !ascii && text.IndexOf('<') >= 0;
+        var layout = GetLayout(text, font, ascii, isHtml, 0xFFFFFFFF, htmlBg: false, maxWidth);
+        if (x < 0 || y < 0 || x >= layout.Width || y >= layout.Height)
+            return false;
+
+        if (layout.HitMask == null || layout.HitMaskBorder != border)
+        {
+            layout.HitMask = BuildHitMask(layout, font, isUnicode: !ascii, isHtml, border);
+            layout.HitMaskBorder = border;
+        }
+
+        return layout.HitMask[y * layout.Width + x];
+    }
+
+    // Mirrors DrawGlyphs' placement walk exactly (align offset, bearings, line
+    // pitch, html per-char font/flags), ORing each glyph's non-transparent
+    // pixels into a Width×Height mask. The near-black border skip DrawGlyphs
+    // applies per baked colour is ignored here — the layout cache isn't keyed
+    // on hue, and the 1px divergence only exists for near-black text.
+    private static bool[] BuildHitMask(Layout layout, byte font, bool isUnicode, bool isHtml, bool border)
+    {
+        var mask = new bool[layout.Width * layout.Height];
+        var fonts = UoFontRuntime.Fonts!;
+        int textWidth = layout.Width;
+        int lineOffsY = 0;
+
+        for (var ptr = layout.Info; ptr != null; ptr = ptr.Next)
+        {
+            int w = 0;
+            switch (ptr.Align)
+            {
+                case TEXT_ALIGN_TYPE.TS_CENTER:
+                    w = isUnicode ? (textWidth - 8) / 2 - ptr.Width / 2 : (textWidth - ptr.Width) >> 1;
+                    if (w < 0) w = 0;
+                    break;
+                case TEXT_ALIGN_TYPE.TS_RIGHT:
+                    w = textWidth - 10 - ptr.Width;
+                    if (w < 0) w = 0;
+                    break;
+            }
+
+            var dataSpan = CollectionsMarshal.AsSpan(ptr.Data);
+            for (int i = 0; i < dataSpan.Length; i++)
+            {
+                ref MultilinesFontData d = ref dataSpan[i];
+                char si = d.Item;
+                if (si == '\n' || si == '\r')
+                    continue;
+
+                byte charFont = font;
+                bool charBorder = border, charSolid = false, charItalic = false;
+                if (isHtml)
+                {
+                    charFont = d.Font;
+                    charBorder = (d.Flags & 0x0008) != 0;
+                    charSolid = (d.Flags & 0x0001) != 0;
+                    charItalic = (d.Flags & 0x0002) != 0;
+                }
+
+                var gi = isUnicode
+                    ? fonts.RenderSingleGlyphUnicode(charFont, si, charBorder, charSolid, charItalic)
+                    : fonts.RenderSingleGlyphASCII(charFont, si);
+
+                if (si != ' ' && gi.Data != null && gi.Width > 0 && gi.Height > 0)
+                {
+                    int dx = w + gi.BearingX;
+                    int dy = lineOffsY + gi.BearingY;
+                    for (int gy = 0; gy < gi.Height; gy++)
+                    {
+                        int my = dy + gy;
+                        if (my < 0 || my >= layout.Height) continue;
+                        for (int gx = 0; gx < gi.Width; gx++)
+                        {
+                            int mx = dx + gx;
+                            if (mx < 0 || mx >= textWidth) continue;
+                            if (gi.Data[gy * gi.Width + gx] != 0)
+                                mask[my * textWidth + mx] = true;
+                        }
+                    }
+                }
+
+                w += gi.AdvanceWidth;
+            }
+
+            int font6OffsetY = !isUnicode && font == 6 ? 7 : 0;
+            lineOffsY += ptr.MaxHeight - font6OffsetY;
+        }
+
+        return mask;
     }
 
     // Wrap a unicode run to maxWidth and return one entry per visual line:

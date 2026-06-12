@@ -148,7 +148,8 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                         MobileHpOverheads.Render(b, assets.Value, overlay.Profile.Value,
                             gameCtx.Value, camera.Value, overlay.Mobiles, nameplates.Value.PlateTops);
                         overlay.Overhead.Value.Update(time.Value, networkEntities.Value);
-                        overlay.Overhead.Value.Render(networkEntities.Value, b, gameCtx.Value, camera.Value, overlay.OverheadAnchors, nameplates.Value.PlateTops);
+                        overlay.Overhead.Value.Render(networkEntities.Value, b, gameCtx.Value, camera.Value, overlay.OverheadAnchors,
+                            overlay.Mouse.Value, overlay.Selected.Value, nameplates.Value.PlateTops);
                         b.ClipEnd();
                     }
                     break;

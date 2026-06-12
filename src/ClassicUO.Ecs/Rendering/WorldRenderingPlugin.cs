@@ -1535,9 +1535,16 @@ internal sealed class SelectedEntity
     }
 
     private ulong _lastEntity;
+    private bool _lastIsText;
 
     public ulong Entity { get; private set; }
     public float DepthZ { get; private set; }
+
+    // True when the winning pick came from overhead TEXT rather than the
+    // object's own pixels. Legacy keeps the TextObject itself in
+    // SelectedObject.Object — actions route to the owner, but anything
+    // gated on "hovering the entity proper" (tooltip) must not fire.
+    public bool IsText { get; private set; }
 
     // Gated each frame by mouse-in-viewport; off => no world object picks.
     public bool Enabled = true;
@@ -1550,7 +1557,7 @@ internal sealed class SelectedEntity
     // Without this, releasing a held item over a gutter-parked paperdoll left
     // SelectedEntity at 0 -> DropItem cleared the cursor with no drop packet,
     // so the client dropped the item locally while the server kept dragging.
-    public void Set(ulong entity, float depth, bool bypassViewport = false)
+    public void Set(ulong entity, float depth, bool bypassViewport = false, bool isText = false)
     {
         if (!Enabled && !bypassViewport)
             return;
@@ -1561,12 +1568,14 @@ internal sealed class SelectedEntity
             {
                 _lastEntity = entity;
                 DepthZ = depth;
+                _lastIsText = isText;
             }
         }
         else
         {
             _lastEntity = entity;
             DepthZ = depth;
+            _lastIsText = isText;
         }
     }
 
@@ -1575,6 +1584,8 @@ internal sealed class SelectedEntity
         Entity = _lastEntity;
         DepthZ = 0;
         _lastEntity = 0;
+        IsText = _lastIsText;
+        _lastIsText = false;
     }
 
     public void IsPointInStretchedLand(ulong entity, float depthZ, ref readonly UltimaBatcher2D.YOffsets yOffsets, Vector2 mousePosition, Vector2 position)

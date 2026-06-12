@@ -126,14 +126,21 @@ internal static class InputHandlers
     public static JsonRpcResponse DebugSay(JsonRpcRequest req, in AgentRpcContext<App> ctx)
     {
         string text = "test";
-        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object
-            && p.TryGetProperty("text", out var t) && t.ValueKind == JsonValueKind.String)
-            text = t.GetString() ?? "test";
+        uint serial = 0;
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object)
+        {
+            if (p.TryGetProperty("text", out var t) && t.ValueKind == JsonValueKind.String)
+                text = t.GetString() ?? "test";
+            // Optional: speak as another entity (any mapped serial — item or
+            // mobile) so overlap/z-order scenarios can be staged cross-serial.
+            if (p.TryGetProperty("serial", out var se) && se.TryGetUInt32(out var sv))
+                serial = sv;
+        }
 
         var gameCtx = ctx.Runtime.GetResource<GameContext>();
         ctx.Runtime.SendEvent(new TextOverheadEvent
         {
-            Serial = gameCtx.PlayerSerial,
+            Serial = serial != 0 ? serial : gameCtx.PlayerSerial,
             Text = text,
             Name = "agent",
             Hue = 0x44,

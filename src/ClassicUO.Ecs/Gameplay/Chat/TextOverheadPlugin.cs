@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
@@ -187,12 +188,34 @@ internal sealed class TextOverHeadManager
     // stacks upward from the PLATE's top edge instead of the head anchor, so
     // the two never overlap (legacy UpdateTextCoordsV shifts by the object-
     // handles gump height while it's displaying).
+    // Overhead text sits above every world object but under gump windows:
+    // beat any world render depth, lose float.MaxValue UI claims on ties.
+    private const float PickDepth = float.MaxValue / 2f;
+
+    // One message block placed this frame, in draw order (index 0 = bottom,
+    // last = topmost — _mainLinkedList order, newest speaker last).
+    private struct DrawEntry
+    {
+        public string Text;
+        public ushort FontId;
+        public ushort Hue;
+        public ulong Ent;
+        public uint Serial;
+        public Rectangle Rect;
+        public bool Transparent;
+    }
+
+    // Per-frame scratch; Render is single-threaded (GuiRenderingPlugin).
+    private readonly List<DrawEntry> _drawList = new();
+
     public void Render(
         NetworkEntitiesMap networkEntities,
         UltimaBatcher2D batch,
         GameContext gameCtx,
         Camera camera,
         Query<Data<WorldPosition, ScreenPositionOffset>> query,
+        MouseContext mouse,
+        SelectedEntity selected,
         IReadOnlyDictionary<uint, float> plateTops = null
     )
     {
@@ -205,6 +228,16 @@ internal sealed class TextOverHeadManager
 
         var panelOrigin = new Vector2(camera.Bounds.X, camera.Bounds.Y);
         var bounds = camera.Bounds;
+
+        // Mouse in the same logical UI-RT space the text draws in. Hits only
+        // count inside the game window — the scissor trims anything outside,
+        // so an offscreen-clamped line must not pick.
+        var mousePos = mouse.Position;
+        bool mouseInView = bounds.Contains((int)mousePos.X, (int)mousePos.Y);
+
+        // Pass 1: place every message block (rect only, no draw yet) so the
+        // overlap pass below can see the full frame's layout.
+        _drawList.Clear();
 
         foreach (var list in _mainLinkedList)
         {
@@ -232,6 +265,7 @@ internal sealed class TextOverHeadManager
                 && plateTops.TryGetValue(list.First.Value.Serial, out var plateTop)
                 && plateTop < y)
                 y = plateTop;
+            int stackStart = _drawList.Count;
             for (var node = list.Last; node != null; node = node.Previous)
             {
                 var t = node.Value;
@@ -256,8 +290,111 @@ internal sealed class TextOverHeadManager
                 int dy = (int)y;
                 if (dy < bounds.Y) dy = bounds.Y;
 
-                UoFontRenderer.Draw(batch, t.Text, fontId, NormalizeHue(t.Hue), x, dy, MaxWidth, 0f, allowHtml: false);
+                _drawList.Add(new DrawEntry
+                {
+                    Text = t.Text,
+                    FontId = fontId,
+                    Hue = t.Hue,
+                    Ent = entId,
+                    Serial = t.Serial,
+                    Rect = new Rectangle(x, dy, w, h),
+                });
+            }
+
+            // Placement walks newest->oldest (y stacks upward from the head);
+            // draw order needs oldest-first so the newest line is topmost —
+            // when the top-edge clamp piles lines onto the same y, the OLDER
+            // line goes transparent, not the fresh one (legacy AddMessage
+            // inserts new text at the head = highest priority).
+            _drawList.Reverse(stackStart, _drawList.Count - stackStart);
+        }
+
+        // Pass 2: hover pick — topmost pixel-hit message wins (scan back to
+        // front). Legacy TextRenderer.Draw: pixel-perfect check against the
+        // rendered glyphs (border included) selects the text — claims the
+        // OWNER entity, so click/dclick/targeting on the speech act on the
+        // speaker (legacy maps TextObject -> ov.Owner).
+        int hoverIdx = -1;
+        if (mouseInView)
+        {
+            for (int i = _drawList.Count - 1; i >= 0; i--)
+            {
+                var e = _drawList[i];
+                if (e.Rect.Contains((int)mousePos.X, (int)mousePos.Y)
+                    && UoFontRenderer.PixelHit(
+                        e.Text, e.FontId, MaxWidth,
+                        (int)mousePos.X - e.Rect.X, (int)mousePos.Y - e.Rect.Y,
+                        allowHtml: false, border: true))
+                {
+                    hoverIdx = i;
+                    break;
+                }
             }
         }
+
+        if (hoverIdx >= 0)
+        {
+            var e = _drawList[hoverIdx];
+            selected.Set(e.Ent, PickDepth, isText: true);
+
+            // Legacy GameController.Render: a hovered world TextObject gets
+            // WorldTextManager.MoveToTop every frame — it lifts above all
+            // other speech and STAYS there after the cursor leaves. Lift the
+            // hovered message to the end of this frame's draw order (drawn
+            // last = on top, exempt from the fade below) and persist the
+            // speaker's stack at the list tail for subsequent frames.
+            MoveToTop(e.Serial);
+            _drawList.RemoveAt(hoverIdx);
+            _drawList.Add(e);
+            hoverIdx = _drawList.Count - 1;
+        }
+
+        var entries = CollectionsMarshal.AsSpan(_drawList);
+
+        // Pass 3: legacy TextRenderer.ProcessWorldText(doit)/Collides — a
+        // message whose rect is overlapped by ANY message drawn above it
+        // (later in draw order) renders half transparent, so the covering
+        // text stays readable. Newest speech is topmost (Append moves the
+        // speaker's stack to the list tail) and stays opaque.
+        for (int i = 0; i < entries.Length; i++)
+            for (int j = i + 1; j < entries.Length && !entries[i].Transparent; j++)
+                if (entries[i].Rect.Intersects(entries[j].Rect))
+                    entries[i].Transparent = true;
+
+        // Pass 4: draw, bottom to top. Highlight (hue 0x35) only when the
+        // claim actually won the frame (selected.Entity is last frame's
+        // resolved pick), so a gump overlapping the text suppresses it like
+        // legacy.
+        for (int i = 0; i < entries.Length; i++)
+        {
+            ref var e = ref entries[i];
+
+            var hue = i == hoverIdx && selected.Entity == e.Ent
+                ? (ushort)0x0035
+                : NormalizeHue(e.Hue);
+            // 0x7F/255 — same half-fade legacy applies to covered text.
+            UoFontRenderer.Draw(batch, e.Text, e.FontId, hue, e.Rect.X, e.Rect.Y, MaxWidth, 0f,
+                allowHtml: false, alpha: e.Transparent ? 0x7F / 255f : 1f);
+        }
+    }
+
+    // Legacy WorldTextManager.MoveToTop: lift a speaker's overhead stack to
+    // the top of the z-order (drawn last). Called on hover; also the reason
+    // hovered speech stays on top after the cursor moves away.
+    public void MoveToTop(uint serial)
+    {
+        if (_textOverHeadMap.TryGetValue(serial, out var list))
+        {
+            _mainLinkedList.Remove(list);
+            _mainLinkedList.AddLast(list);
+        }
+    }
+
+    // Test seam: stack z-order, bottom to top (one serial per stack).
+    internal IEnumerable<uint> ZOrderSerials()
+    {
+        foreach (var list in _mainLinkedList)
+            if (list.First != null)
+                yield return list.First.Value.Serial;
     }
 }

@@ -234,7 +234,10 @@ internal readonly struct TooltipPlugin : IPlugin
         }
         // entity 0 is the null/sentinel id — Contains(0) can resolve to a stale
         // archetype entry, so the tooltip would show for "nothing" hovered.
-        if (serial == 0 && selected.Value.Entity != 0 && worldQ.TryGet(selected.Value.Entity, out var worldRow))
+        // A pick that came from overhead TEXT doesn't count: legacy selects the
+        // TextObject there, and the tooltip only fires on the entity proper.
+        if (serial == 0 && selected.Value.Entity != 0 && !selected.Value.IsText
+            && worldQ.TryGet(selected.Value.Entity, out var worldRow))
         {
             var (_, s, n) = worldRow;
             serial = s.Ref.Value;
