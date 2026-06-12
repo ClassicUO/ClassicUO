@@ -11,6 +11,7 @@ using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
+using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
 
@@ -480,7 +481,7 @@ readonly struct InGamePacketsPlugin : IPlugin
     // Legacy MessageManager.HandleMessage drops ignored guild/alliance chat
     // before ANY display path (overhead, system log, journal) — same here, at
     // the event source.
-    static bool IsIgnoredChat(MessageType type, Profile profile)
+    internal static bool IsIgnoredChat(MessageType type, Profile profile)
         => (type == MessageType.Guild && profile.IgnoreGuildMessages)
         || (type == MessageType.Alliance && profile.IgnoreAllianceMessages);
 
@@ -717,26 +718,7 @@ readonly struct InGamePacketsPlugin : IPlugin
         if (packet.Type == 2 && !queries.qMultis.Contains(ent.Id))
         {
             ent.Insert<IsMulti>();
-
-            var multiInfo = multiCache.Value.GetMulti(finalGraphic);
-            foreach (ref readonly var block in CollectionsMarshal.AsSpan(multiInfo.Blocks))
-            {
-                if (!block.IsVisible)
-                    continue;
-
-                var child = commands.Spawn()
-                    .Insert(new Graphic() { Value = block.ID })
-                    .Insert(new Hue())
-                    .Insert(new WorldPosition()
-                    {
-                        X = (ushort)(packet.X + block.X),
-                        Y = (ushort)(packet.Y + block.Y),
-                        Z = (sbyte)(packet.Z + block.Z)
-                    })
-                    .Insert<NormalMulti>();
-
-                ent.AddChild(child);
-            }
+            SpawnMultiBlocks(commands, ent, multiCache.Value.GetMulti(finalGraphic).Blocks, packet.X, packet.Y, packet.Z);
         }
 
         if (Game.SerialHelper.IsMobile(packet.Serial))
@@ -754,6 +736,31 @@ readonly struct InGamePacketsPlugin : IPlugin
         {
             ent.Insert(new WorldPosition() { X = packet.X, Y = packet.Y, Z = packet.Z })
                 .Insert(new Facing() { Value = packet.Direction });
+        }
+    }
+
+    // Spawn each visible block of a multi as a child entity offset from the
+    // multi's origin tile. Shared by 0x1A / 0xF3 (NormalMulti); the house-plane
+    // path uses CustomMulti and stays separate.
+    static void SpawnMultiBlocks(Commands commands, EntityCommands parent, List<MultiInfo> blocks, ushort baseX, ushort baseY, sbyte baseZ)
+    {
+        foreach (ref readonly var block in CollectionsMarshal.AsSpan(blocks))
+        {
+            if (!block.IsVisible)
+                continue;
+
+            var child = commands.Spawn()
+                .Insert(new Graphic() { Value = block.ID })
+                .Insert(new Hue())
+                .Insert(new WorldPosition()
+                {
+                    X = (ushort)(baseX + block.X),
+                    Y = (ushort)(baseY + block.Y),
+                    Z = (sbyte)(baseZ + block.Z)
+                })
+                .Insert<NormalMulti>();
+
+            parent.AddChild(child);
         }
     }
 
@@ -794,26 +801,7 @@ readonly struct InGamePacketsPlugin : IPlugin
         if (packet.UpdateType == 2 && !queries.qMultis.Contains(ent.Id))
         {
             ent.Insert<IsMulti>();
-
-            var multiInfo = multiCache.Value.GetMulti(finalGraphic);
-            foreach (ref readonly var block in CollectionsMarshal.AsSpan(multiInfo.Blocks))
-            {
-                if (!block.IsVisible)
-                    continue;
-
-                var child = commands.Spawn()
-                    .Insert(new Graphic() { Value = block.ID })
-                    .Insert(new Hue())
-                    .Insert(new WorldPosition()
-                    {
-                        X = (ushort)(packet.X + block.X),
-                        Y = (ushort)(packet.Y + block.Y),
-                        Z = (sbyte)(packet.Z + block.Z)
-                    })
-                    .Insert<NormalMulti>();
-
-                ent.AddChild(child);
-            }
+            SpawnMultiBlocks(commands, ent, multiCache.Value.GetMulti(finalGraphic).Blocks, packet.X, packet.Y, packet.Z);
         }
     }
 
@@ -846,128 +834,133 @@ readonly struct InGamePacketsPlugin : IPlugin
             if (plane.Data == null || plane.Data.Length == 0)
                 continue;
 
-            var reader = new StackDataReader(plane.Data);
-
             switch (plane.PlaneMode)
             {
                 case 0:
-                    {
-                        var entries = plane.Data.Length / 5;
-                        for (var i = 0; i < entries; ++i)
-                        {
-                            var id = reader.ReadUInt16BE();
-                            var offsetX = reader.ReadInt8();
-                            var offsetY = reader.ReadInt8();
-                            var offsetZ = reader.ReadInt8();
-
-                            var child = commands.Spawn()
-                                .Insert(new Graphic() { Value = id })
-                                .Insert(new Hue())
-                                .Insert(new WorldPosition()
-                                {
-                                    X = (ushort)(startX + offsetX),
-                                    Y = (ushort)(startY + offsetY),
-                                    Z = (sbyte)(startZ + offsetZ)
-                                })
-                                .Insert<CustomMulti>();
-
-                            parent.AddChild(child);
-                        }
-
-                        break;
-                    }
-
+                    SpawnHousePlane0(commands, parent, plane.Data, startX, startY, startZ);
+                    break;
                 case 1:
-                    {
-                        var planeZ = plane.PlaneZ;
-                        var z = planeZ > 0 ? (sbyte)(((planeZ - 1) % 4) * 20 + 7) : (sbyte)0;
-                        var entries = plane.Data.Length >> 2;
-
-                        for (var i = 0; i < entries; ++i)
-                        {
-                            var id = reader.ReadUInt16BE();
-                            var offsetX = reader.ReadInt8();
-                            var offsetY = reader.ReadInt8();
-
-                            if (id == 0)
-                                continue;
-
-                            var child = commands.Spawn()
-                                .Insert(new Graphic() { Value = id })
-                                .Insert(new Hue())
-                                .Insert(new WorldPosition()
-                                {
-                                    X = (ushort)(startX + offsetX),
-                                    Y = (ushort)(startY + offsetY),
-                                    Z = (sbyte)(startZ + z)
-                                })
-                                .Insert<CustomMulti>();
-
-                            parent.AddChild(child);
-                        }
-
-                        break;
-                    }
-
+                    SpawnHousePlane1(commands, parent, plane.Data, plane.PlaneZ, startX, startY, startZ);
+                    break;
                 case 2:
-                    {
-                        var planeZ = plane.PlaneZ;
-                        var z = planeZ > 0 ? (sbyte)(((planeZ - 1) % 4) * 20 + 7) : (sbyte)0;
-
-                        short offX;
-                        short offY;
-                        short multiHeight;
-
-                        if (planeZ <= 0)
-                        {
-                            offX = (short)multiRect.X;
-                            offY = (short)multiRect.Y;
-                            multiHeight = (short)(multiRect.Height - multiRect.Y + 2);
-                        }
-                        else if (planeZ <= 4)
-                        {
-                            offX = (short)(multiRect.X + 1);
-                            offY = (short)(multiRect.Y + 1);
-                            multiHeight = (short)(multiRect.Height - multiRect.Y);
-                        }
-                        else
-                        {
-                            offX = (short)multiRect.X;
-                            offY = (short)multiRect.Y;
-                            multiHeight = (short)(multiRect.Height - multiRect.Y + 1);
-                        }
-
-                        if (multiHeight <= 0)
-                            break;
-
-                        var entries = plane.Data.Length >> 1;
-
-                        for (var i = 0; i < entries; ++i)
-                        {
-                            var id = reader.ReadUInt16BE();
-                            if (id == 0)
-                                continue;
-
-                            var relativeX = (sbyte)((i == 0 ? 0 : (i / multiHeight)) + offX);
-                            var relativeY = (sbyte)(i % multiHeight + offY);
-
-                            var child = commands.Spawn()
-                                .Insert(new Graphic() { Value = id })
-                                .Insert(new Hue())
-                                .Insert(new WorldPosition()
-                                {
-                                    X = (ushort)(startX + relativeX),
-                                    Y = (ushort)(startY + relativeY),
-                                    Z = (sbyte)(startZ + z)
-                                })
-                                .Insert<CustomMulti>();
-
-                            parent.AddChild(child);
-                        }
-
-                        break;
-                    }
+                    SpawnHousePlane2(commands, parent, plane.Data, plane.PlaneZ, multiRect, startX, startY, startZ);
+                    break;
             }
+        }
+    }
+
+    // Custom-house plane decoders (0xD8). Each plane mode packs tile ids +
+    // offsets differently; all spawn CustomMulti children off the house origin.
+    static void SpawnHousePlane0(Commands commands, EntityCommands parent, byte[] data, ushort startX, ushort startY, sbyte startZ)
+    {
+        var reader = new StackDataReader(data);
+        var entries = data.Length / 5;
+        for (var i = 0; i < entries; ++i)
+        {
+            var id = reader.ReadUInt16BE();
+            var offsetX = reader.ReadInt8();
+            var offsetY = reader.ReadInt8();
+            var offsetZ = reader.ReadInt8();
+
+            var child = commands.Spawn()
+                .Insert(new Graphic() { Value = id })
+                .Insert(new Hue())
+                .Insert(new WorldPosition()
+                {
+                    X = (ushort)(startX + offsetX),
+                    Y = (ushort)(startY + offsetY),
+                    Z = (sbyte)(startZ + offsetZ)
+                })
+                .Insert<CustomMulti>();
+
+            parent.AddChild(child);
+        }
+    }
+
+    static void SpawnHousePlane1(Commands commands, EntityCommands parent, byte[] data, int planeZ, ushort startX, ushort startY, sbyte startZ)
+    {
+        var reader = new StackDataReader(data);
+        var z = planeZ > 0 ? (sbyte)(((planeZ - 1) % 4) * 20 + 7) : (sbyte)0;
+        var entries = data.Length >> 2;
+
+        for (var i = 0; i < entries; ++i)
+        {
+            var id = reader.ReadUInt16BE();
+            var offsetX = reader.ReadInt8();
+            var offsetY = reader.ReadInt8();
+
+            if (id == 0)
+                continue;
+
+            var child = commands.Spawn()
+                .Insert(new Graphic() { Value = id })
+                .Insert(new Hue())
+                .Insert(new WorldPosition()
+                {
+                    X = (ushort)(startX + offsetX),
+                    Y = (ushort)(startY + offsetY),
+                    Z = (sbyte)(startZ + z)
+                })
+                .Insert<CustomMulti>();
+
+            parent.AddChild(child);
+        }
+    }
+
+    static void SpawnHousePlane2(Commands commands, EntityCommands parent, byte[] data, int planeZ, Rectangle multiRect, ushort startX, ushort startY, sbyte startZ)
+    {
+        var reader = new StackDataReader(data);
+        var z = planeZ > 0 ? (sbyte)(((planeZ - 1) % 4) * 20 + 7) : (sbyte)0;
+
+        short offX;
+        short offY;
+        short multiHeight;
+
+        if (planeZ <= 0)
+        {
+            offX = (short)multiRect.X;
+            offY = (short)multiRect.Y;
+            multiHeight = (short)(multiRect.Height - multiRect.Y + 2);
+        }
+        else if (planeZ <= 4)
+        {
+            offX = (short)(multiRect.X + 1);
+            offY = (short)(multiRect.Y + 1);
+            multiHeight = (short)(multiRect.Height - multiRect.Y);
+        }
+        else
+        {
+            offX = (short)multiRect.X;
+            offY = (short)multiRect.Y;
+            multiHeight = (short)(multiRect.Height - multiRect.Y + 1);
+        }
+
+        if (multiHeight <= 0)
+            return;
+
+        var entries = data.Length >> 1;
+
+        for (var i = 0; i < entries; ++i)
+        {
+            var id = reader.ReadUInt16BE();
+            if (id == 0)
+                continue;
+
+            var relativeX = (sbyte)((i == 0 ? 0 : (i / multiHeight)) + offX);
+            var relativeY = (sbyte)(i % multiHeight + offY);
+
+            var child = commands.Spawn()
+                .Insert(new Graphic() { Value = id })
+                .Insert(new Hue())
+                .Insert(new WorldPosition()
+                {
+                    X = (ushort)(startX + relativeX),
+                    Y = (ushort)(startY + relativeY),
+                    Z = (sbyte)(startZ + z)
+                })
+                .Insert<CustomMulti>();
+
+            parent.AddChild(child);
         }
     }
 
@@ -1203,47 +1196,51 @@ readonly struct InGamePacketsPlugin : IPlugin
                 }
             }
 
-            var data = new PlayerData
-            {
-                Str = packet.Strength.GetValueOrDefault(),
-                Dex = packet.Dexterity.GetValueOrDefault(),
-                Int = packet.Intelligence.GetValueOrDefault(),
-                Weight = packet.Weight.GetValueOrDefault(),
-                WeightMax = packet.WeightMax.GetValueOrDefault(),
-                Gold = packet.Gold.GetValueOrDefault(),
-                StatsCap = packet.StatsCap.GetValueOrDefault(),
-                Followers = packet.Followers.GetValueOrDefault(),
-                FollowersMax = packet.MaxFollowers.GetValueOrDefault(),
-                Luck = packet.Luck.GetValueOrDefault(),
-                DamageMin = packet.DamageMin.GetValueOrDefault(),
-                DamageMax = packet.DamageMax.GetValueOrDefault(),
-                PhysicalRes = packet.PhysicalResistance.GetValueOrDefault(),
-                FireRes = packet.FireResistance.GetValueOrDefault(),
-                ColdRes = packet.ColdResistance.GetValueOrDefault(),
-                PoisonRes = packet.PoisonResistance.GetValueOrDefault(),
-                EnergyRes = packet.EnergyResistance.GetValueOrDefault(),
-                ThithingPoints = packet.TithingPoints.GetValueOrDefault(),
-                IsFemale = packet.IsFemale.GetValueOrDefault(),
-                Race = packet.Race.HasValue ? (RaceType)packet.Race.Value : RaceType.HUMAN,
-                MaxPhysicalRes = packet.MaxPhysicalResistance.GetValueOrDefault(),
-                MaxFireRes = packet.MaxFireResistance.GetValueOrDefault(),
-                MaxColdRes = packet.MaxColdResistance.GetValueOrDefault(),
-                MaxPoisonRes = packet.MaxPoisonResistance.GetValueOrDefault(),
-                MaxEnergyRes = packet.MaxEnergyResistance.GetValueOrDefault(),
-                DefenseChanceInc = packet.DefenseChanceIncrease.GetValueOrDefault(),
-                MaxDefenseChanceInc = packet.MaxDefenseChanceIncrease.GetValueOrDefault(),
-                HitChanceInc = packet.HitChanceIncrease.GetValueOrDefault(),
-                SwingSpeedInc = packet.SwingSpeedIncrease.GetValueOrDefault(),
-                DamageInc = packet.DamageIncrease.GetValueOrDefault(),
-                LowerReagentCost = packet.LowerReagentCost.GetValueOrDefault(),
-                SpellDamageInc = packet.SpellDamageIncrease.GetValueOrDefault(),
-                FasterCastRecovery = packet.FasterCastRecovery.GetValueOrDefault(),
-                FasterCasting = packet.FasterCasting.GetValueOrDefault(),
-                LowerManaCost = packet.LowerManaCost.GetValueOrDefault(),
-            };
-            ent.Insert(data);
+            ent.Insert(BuildPlayerData(packet));
         }
     }
+
+    // Map the 0x11 status packet's optional stat fields onto the PlayerData
+    // component the paperdoll stat panel reads.
+    static PlayerData BuildPlayerData(OnCharacterStatusPacket_0x11 packet)
+        => new PlayerData
+        {
+            Str = packet.Strength.GetValueOrDefault(),
+            Dex = packet.Dexterity.GetValueOrDefault(),
+            Int = packet.Intelligence.GetValueOrDefault(),
+            Weight = packet.Weight.GetValueOrDefault(),
+            WeightMax = packet.WeightMax.GetValueOrDefault(),
+            Gold = packet.Gold.GetValueOrDefault(),
+            StatsCap = packet.StatsCap.GetValueOrDefault(),
+            Followers = packet.Followers.GetValueOrDefault(),
+            FollowersMax = packet.MaxFollowers.GetValueOrDefault(),
+            Luck = packet.Luck.GetValueOrDefault(),
+            DamageMin = packet.DamageMin.GetValueOrDefault(),
+            DamageMax = packet.DamageMax.GetValueOrDefault(),
+            PhysicalRes = packet.PhysicalResistance.GetValueOrDefault(),
+            FireRes = packet.FireResistance.GetValueOrDefault(),
+            ColdRes = packet.ColdResistance.GetValueOrDefault(),
+            PoisonRes = packet.PoisonResistance.GetValueOrDefault(),
+            EnergyRes = packet.EnergyResistance.GetValueOrDefault(),
+            ThithingPoints = packet.TithingPoints.GetValueOrDefault(),
+            IsFemale = packet.IsFemale.GetValueOrDefault(),
+            Race = packet.Race.HasValue ? (RaceType)packet.Race.Value : RaceType.HUMAN,
+            MaxPhysicalRes = packet.MaxPhysicalResistance.GetValueOrDefault(),
+            MaxFireRes = packet.MaxFireResistance.GetValueOrDefault(),
+            MaxColdRes = packet.MaxColdResistance.GetValueOrDefault(),
+            MaxPoisonRes = packet.MaxPoisonResistance.GetValueOrDefault(),
+            MaxEnergyRes = packet.MaxEnergyResistance.GetValueOrDefault(),
+            DefenseChanceInc = packet.DefenseChanceIncrease.GetValueOrDefault(),
+            MaxDefenseChanceInc = packet.MaxDefenseChanceIncrease.GetValueOrDefault(),
+            HitChanceInc = packet.HitChanceIncrease.GetValueOrDefault(),
+            SwingSpeedInc = packet.SwingSpeedIncrease.GetValueOrDefault(),
+            DamageInc = packet.DamageIncrease.GetValueOrDefault(),
+            LowerReagentCost = packet.LowerReagentCost.GetValueOrDefault(),
+            SpellDamageInc = packet.SpellDamageIncrease.GetValueOrDefault(),
+            FasterCastRecovery = packet.FasterCastRecovery.GetValueOrDefault(),
+            FasterCasting = packet.FasterCasting.GetValueOrDefault(),
+            LowerManaCost = packet.LowerManaCost.GetValueOrDefault(),
+        };
 
     // Hue 0x0170 / font 3 mirror legacy GameActions.Print for stat deltas.
     static void SendStatDelta(EventWriter<SystemMessageEvent> queue, string stat, int delta, int value)
@@ -1345,7 +1342,7 @@ readonly struct InGamePacketsPlugin : IPlugin
         ent.Insert(new Hits() { Value = packet.Hits, MaxValue = packet.HitsMax });
     }
 
-    static BodyConvFlags ComputeBodyConvFlags(LockedFeatureFlags flags)
+    internal static BodyConvFlags ComputeBodyConvFlags(LockedFeatureFlags flags)
     {
         BodyConvFlags bcFlags = 0;
 
@@ -1534,7 +1531,7 @@ readonly struct InGamePacketsPlugin : IPlugin
 
     // A few clilocs carry a hardcoded colour in the legacy client (the per-pixel
     // strength-requirement red is skipped — it needs the player's stats).
-    static string ApplyClilocColor(int cliloc, string str, ClientVersion version)
+    internal static string ApplyClilocColor(int cliloc, string str, ClientVersion version)
     {
         switch (cliloc)
         {
