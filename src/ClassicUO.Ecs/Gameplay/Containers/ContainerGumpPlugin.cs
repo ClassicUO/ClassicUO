@@ -45,6 +45,7 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         var disposeOnLogoutFn = DisposeOnLogout;
         var syncProfileFn = SyncProfileToUiScale;
         var dragEndFn = TrackContainerDragEnd;
+        var syncItemZFn = SyncItemZToWindow;
 
         app
             // Profile -> UIScale bridge: the options gump writes Profile; the
@@ -101,26 +102,9 @@ internal readonly struct ContainerGumpPlugin : IPlugin
                 .InStage(Stage.Last)
                 .Build()
 
-            // Sync each item slot's GlobalZIndex to its parent window. Window
-            // root z is bumped by WindowDragPlugin.Drag in Stage.Update (in-
-            // place mutation, no observer fires), and Bevy.UI's z propagation
-            // only covers descendants WITHOUT their own GlobalZIndex — items
-            // carry theirs so they sort against world UI. Run in PostUpdate
-            // (AFTER Drag's bump, BEFORE Last where layout/render snapshot z)
-            // so the lift lands in the SAME frame as the click — PreUpdate
-            // would leave items one frame behind and flicker the bg over them.
-            .AddSystem((
-                Query<Data<ContainerItemUI, GlobalZIndex>> items,
-                Query<Data<GlobalZIndex>, Filter<With<ContainerWindow>>> windows) =>
-            {
-                foreach (var (_, link, itemZ) in items)
-                {
-                    if (!windows.TryGet(link.Ref.Container, out var windowRow)) continue;
-                    var (_, winZ) = windowRow;
-                    if (itemZ.Ref.Value != winZ.Ref.Value)
-                        itemZ.Ref.Value = winZ.Ref.Value;
-                }
-            })
+            // Item-slot z follows its window root every frame; see
+            // SyncItemZToWindow for the timing rationale.
+            .AddSystem(syncItemZFn)
                 .InStage(Stage.PostUpdate)
                 .Build()
 
@@ -144,72 +128,75 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         // the item up and drop it into the grab bag / player backpack, unless
         // the item is itself a container (still opens) or already sits in the
         // player's backpack window.
-        app.AddObserver((
-            On<UiDoubleClick> trig,
-            Res<NetClient> net,
-            Res<Profile> profile,
-            Res<UOFileManager> fileManager,
-            Res<NetworkEntitiesMap> entitiesMap,
-            Query<Data<ContainerItemUI>> itemQ,
-            Query<Data<ContainerWindow>> windowQ,
-            Query<Data<Graphic>> graphicQ,
-            Query<Data<Amount>> amountQ,
-            Query<Data<EquipmentSlots>, Filter<With<Player>>> playerQ,
-            Query<Data<NetworkSerial>> serialQ) =>
+        var dclickFn = OnContainerItemDoubleClick;
+        app.AddObserver(dclickFn);
+    }
+
+    private static void OnContainerItemDoubleClick(
+        On<UiDoubleClick> trig,
+        Res<NetClient> net,
+        Res<Profile> profile,
+        Res<UOFileManager> fileManager,
+        Res<NetworkEntitiesMap> entitiesMap,
+        Query<Data<ContainerItemUI>> itemQ,
+        Query<Data<ContainerWindow>> windowQ,
+        Query<Data<Graphic>> graphicQ,
+        Query<Data<Amount>> amountQ,
+        Query<Data<EquipmentSlots>, Filter<With<Player>>> playerQ,
+        Query<Data<NetworkSerial>> serialQ)
+    {
+        if (!itemQ.TryGet(trig.EntityId, out var itemRow)) return;
+        var (_, link) = itemRow;
+
+        if (profile.Value.DoubleClickToLootInsideContainers)
         {
-            if (!itemQ.TryGet(trig.EntityId, out var itemRow)) return;
-            var (_, link) = itemRow;
-
-            if (profile.Value.DoubleClickToLootInsideContainers)
+            uint containerSerial = 0;
+            if (windowQ.TryGet(link.Ref.Container, out var winRow))
             {
-                uint containerSerial = 0;
-                if (windowQ.TryGet(link.Ref.Container, out var winRow))
-                {
-                    var (_, w) = winRow;
-                    containerSerial = w.Ref.Serial;
-                }
+                var (_, w) = winRow;
+                containerSerial = w.Ref.Serial;
+            }
 
-                uint backpack = 0;
-                foreach (var (_, slots) in playerQ)
+            uint backpack = 0;
+            foreach (var (_, slots) in playerQ)
+            {
+                var bp = slots.Ref[GameLayer.Backpack];
+                if (bp != 0 && serialQ.TryGet(bp, out var bpRow))
                 {
-                    var bp = slots.Ref[GameLayer.Backpack];
-                    if (bp != 0 && serialQ.TryGet(bp, out var bpRow))
-                    {
-                        var (_, ns) = bpRow;
-                        backpack = ns.Ref.Value;
-                    }
-                    break;
+                    var (_, ns) = bpRow;
+                    backpack = ns.Ref.Value;
                 }
+                break;
+            }
 
-                bool isContainerItem = false;
-                ushort amount = 1;
-                if (entitiesMap.Value.TryGet(link.Ref.Serial, out var gameEnt))
+            bool isContainerItem = false;
+            ushort amount = 1;
+            if (entitiesMap.Value.TryGet(link.Ref.Serial, out var gameEnt))
+            {
+                if (graphicQ.TryGet(gameEnt, out var gRow))
                 {
-                    if (graphicQ.TryGet(gameEnt, out var gRow))
-                    {
-                        var (_, g) = gRow;
-                        var tileData = fileManager.Value.TileData.StaticData;
-                        if (g.Ref.Value < tileData.Length)
-                            isContainerItem = tileData[g.Ref.Value].IsContainer;
-                    }
-                    if (amountQ.TryGet(gameEnt, out var aRow))
-                    {
-                        var (_, a) = aRow;
-                        amount = (ushort)Math.Clamp(a.Ref.Value, 1, ushort.MaxValue);
-                    }
+                    var (_, g) = gRow;
+                    var tileData = fileManager.Value.TileData.StaticData;
+                    if (g.Ref.Value < tileData.Length)
+                        isContainerItem = tileData[g.Ref.Value].IsContainer;
                 }
-
-                if (backpack != 0 && containerSerial != backpack && !isContainerItem)
+                if (amountQ.TryGet(gameEnt, out var aRow))
                 {
-                    uint bag = profile.Value.GrabBagSerial != 0 ? profile.Value.GrabBagSerial : backpack;
-                    net.Value.Send_PickUpRequest(link.Ref.Serial, amount);
-                    net.Value.Send_DropRequest(link.Ref.Serial, 0xFFFF, 0xFFFF, 0, 0, bag);
-                    return;
+                    var (_, a) = aRow;
+                    amount = (ushort)Math.Clamp(a.Ref.Value, 1, ushort.MaxValue);
                 }
             }
 
-            net.Value.Send_DoubleClick(link.Ref.Serial);
-        });
+            if (backpack != 0 && containerSerial != backpack && !isContainerItem)
+            {
+                uint bag = profile.Value.GrabBagSerial != 0 ? profile.Value.GrabBagSerial : backpack;
+                net.Value.Send_PickUpRequest(link.Ref.Serial, amount);
+                net.Value.Send_DropRequest(link.Ref.Serial, 0xFFFF, 0xFFFF, 0, 0, bag);
+                return;
+            }
+        }
+
+        net.Value.Send_DoubleClick(link.Ref.Serial);
     }
 
     private static void DisposeOnLogout(
@@ -237,9 +224,7 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         Res<MouseContext> mouse,
         Res<SelectedEntity> selected,
         Res<AssetsServer> assets,
-        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
-        Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>> movables,
-        Query<Data<TinyEcs.Parent>> parents,
+        UiGesturePick pick,
         Query<Data<ContainerItemUI, ComputedNode, UiCustom, Node, GlobalZIndex>> itemQuery,
         Query<Data<ContainerWindow, ComputedNode, UiCustom, GlobalZIndex>> windowQuery)
     {
@@ -251,7 +236,7 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         // container. Occlusion (an item behind a front window, a container
         // behind a paperdoll) falls out of "topmost by paint order" for free —
         // no per-item z-gate needed.
-        var hit = UiPick.Topmost(pos, assets.Value, rendered, parents);
+        var hit = pick.Topmost(pos, assets.Value);
         ulong topItem = 0, topWindow = 0;
         if (hit.Found)
         {
@@ -259,7 +244,7 @@ internal readonly struct ContainerGumpPlugin : IPlugin
                 topItem = hit.Entity;
             else
             {
-                var owner = UiPick.MovableRoot(hit.Entity, movables, parents);
+                var owner = pick.MovableRoot(hit.Entity);
                 if (owner != 0 && windowQuery.Contains(owner))
                     topWindow = owner;
             }
@@ -375,7 +360,7 @@ internal readonly struct ContainerGumpPlugin : IPlugin
     // position (setting 3, consumed once like UIManager.RemovePosition) wins;
     // otherwise OverrideContainerLocationSetting picks near-object / top-right
     // / the shared last-dragged point; otherwise the registry default.
-    private static (float X, float Y) ResolveSpawnPosition(
+    internal static (float X, float Y) ResolveSpawnPosition(
         uint serial,
         int width,
         int height,
@@ -679,19 +664,7 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         {
             var ev = finalBySerial[itemSerial];
 
-            // Despawn any existing slot for this serial. For Remove that's the
-            // whole job; for Add it's the dedup pass — a stale source slot can
-            // linger after a same-container drop (server sends only 0x25, never
-            // 0x29), and its old ComputedNode would still answer the hover hit-
-            // test, so the next pickup grabs the wrong slot and the item looks
-            // duplicated.
-            foreach (var (oldEnt, oldLink) in existingItemsQ)
-            {
-                if (oldLink.Ref.Serial != itemSerial) continue;
-                commands.Entity(oldEnt.Ref).Despawn();
-                if (grabbed.Value.SourceUiEntity == oldEnt.Ref)
-                    grabbed.Value.SourceUiEntity = 0;
-            }
+            DespawnExistingSlot(commands, existingItemsQ, grabbed.Value, itemSerial);
 
             if (ev.Action == ContainerSlotAction.Remove)
                 continue;
@@ -701,132 +674,204 @@ internal readonly struct ContainerGumpPlugin : IPlugin
             // that ContainersPlugin queued this same frame for Graphic/Hue/...
             if (!uiMap.Value.TryGet(ev.ContainerSerial, out var entry)) continue;
 
-            ushort displayed = ev.Graphic;
+            if (ShouldSkipSlot(ev.Graphic, entry, tileData))
+                continue;
 
-            if (displayed < tileData.Length)
-            {
-                ref readonly var td = ref tileData[displayed];
-                var slot = (GameLayer)td.Layer;
-                bool isCorpse = entry.OriginalGraphic == 0x0009;
-                if (isCorpse && td.Layer > 0 && (int)slot < Constants.BAD_CONTAINER_LAYERS.Length
-                    && !Constants.BAD_CONTAINER_LAYERS[(int)slot])
-                    continue;
-                if (td.IsWearable && (slot == GameLayer.Face || slot == GameLayer.Beard || slot == GameLayer.Hair))
-                    continue;
-            }
-
-            // Coins draw a pile sprite (base+1 / base+2) by amount; everything
-            // else draws its own graphic. `displayed` stays the base graphic for
-            // the tiledata/layer logic above.
-            ushort artGraphic = ItemGraphics.Displayed(ev.Graphic, ev.Amount);
-            ushort drawGraphic = entry.IsBoard
-                ? (ushort)(artGraphic - Constants.ITEM_GUMP_TEXTURE_OFFSET)
-                : artGraphic;
-
-            float scale = entry.Scale;
-            int spriteW, spriteH;
-            if (entry.IsBoard)
-            {
-                ref readonly var gi = ref assets.Value.Gumps.GetGump(drawGraphic);
-                spriteW = gi.UV.Width;
-                spriteH = gi.UV.Height;
-            }
-            else
-            {
-                ref readonly var ai = ref assets.Value.Arts.GetArt(drawGraphic);
-                spriteW = ai.UV.Width;
-                spriteH = ai.UV.Height;
-            }
-
-            if (uiScale.Value.ScaleItemsInsideContainers && !entry.IsBoard)
-            {
-                spriteW = (int)(spriteW * scale);
-                spriteH = (int)(spriteH * scale);
-            }
-
-            // Clamp the server-sent slot position into the container's content
-            // bounds so an item dropped/added at an out-of-bounds coord renders
-            // (and stays pickable) inside the gump. Mirrors legacy
-            // ContainerGump bounds math + ClampToContainer: left/top edge is
-            // Bounds.X/Y, right/bottom edge is Bounds.Width/Height (both scaled).
-            float bx = entry.Bounds.X * scale;
-            float by = entry.Bounds.Y * scale;
-            float bw = entry.Bounds.Width * scale;
-            float bh = entry.Bounds.Height * scale;
-
-            float drawX = ev.X * scale;
-            float drawY = (short)ev.Y * scale;
-            if (drawX + spriteW > bw) drawX = bw - spriteW;
-            if (drawY + spriteH > bh) drawY = bh - spriteH;
-            if (drawX < bx) drawX = bx;
-            if (drawY < by) drawY = by;
-
-            // Chessboard (0x091A) renders items shifted up 20px; apply after the
-            // clamp so the bounds check runs in unshifted space.
-            if (entry.Graphic == 0x091A) drawY -= 20 * scale;
-
-            var origHue = ShaderHueTranslator.GetHueVector(ev.Hue, partial: false, alpha: 1f, gump: entry.IsBoard);
-            var hoverHue = ShaderHueTranslator.GetHueVector(0x0035, partial: false, alpha: 1f, gump: entry.IsBoard);
-
-            // Mirror legacy ItemGump.Draw: stackable items with Amount > 1 get
-            // drawn twice (+5/+5 offset) to fake a pile. Coins are excluded
-            // because legacy `IsCoin` skips them too — coin stack visuals come
-            // from a separate piled-graphic asset.
-            bool stacked = false;
-            if (!entry.IsBoard && displayed < tileData.Length)
-            {
-                ref readonly var td = ref tileData[displayed];
-                stacked = ItemGraphics.DrawStacked(ev.Graphic, ev.Amount, td.IsStackable);
-            }
-
-            var itemUi = commands.Spawn()
-                .Insert(new Node
-                {
-                    Display = Display.Flex,
-                    PositionType = PositionType.Absolute,
-                    Left = Val.Px(drawX),
-                    Top = Val.Px(drawY),
-                    Width = Val.Px(spriteW),
-                    Height = Val.Px(spriteH),
-                })
-                .Insert(new UiCustom
-                {
-                    Data = new UOCustomRender
-                    {
-                        Kind = entry.IsBoard ? UOCustomKind.Gump : UOCustomKind.Art,
-                        AssetId = drawGraphic,
-                        Hue = origHue,
-                        Stacked = stacked,
-                    }
-                })
-                .Insert(Interaction.None)
-                .Insert(new ContainerItemUI
-                {
-                    Container = entry.UiEntity,
-                    Serial = ev.ItemSerial,
-                    OriginalHue = origHue,
-                    HoverHue = hoverHue,
-                })
-                // Items share the window's z. Clay's float-root sort is
-                // stable on equal z, so items declared after the window in
-                // tree order draw on top of it. PropagateZ keeps them in
-                // sync on focus bumps, but the FIRST z we hand out has to
-                // be the window's CURRENT z, not entry.ZBase (which was
-                // cached at container-open time). Otherwise late spawns —
-                // e.g. the slot respawned after a drop, after the user has
-                // clicked the window several times — get a stale low z and
-                // render behind the window background until the next focus
-                // bump propagates a new value to them.
-                .Insert(new GlobalZIndex(ResolveCurrentZ(entry, windowZQ)));
-            commands.Entity(entry.ContentEntity).AddChild(itemUi);
+            SpawnItemSlot(commands, assets.Value, uiScale.Value, tileData, ev, entry, windowZQ);
         }
     }
 
-    private static int ResolveCurrentZ(ContainerUiMap.Entry entry, Query<Data<GlobalZIndex>> q)
+    // Despawn any existing slot for this serial. For Remove that's the whole
+    // job; for Add it's the dedup pass — a stale source slot can linger after a
+    // same-container drop (server sends only 0x25, never 0x29), and its old
+    // ComputedNode would still answer the hover hit-test, so the next pickup
+    // grabs the wrong slot and the item looks duplicated.
+    private static void DespawnExistingSlot(
+        Commands commands,
+        Query<Data<ContainerItemUI>> existingItemsQ,
+        GrabbedItem grabbed,
+        uint itemSerial)
+    {
+        foreach (var (oldEnt, oldLink) in existingItemsQ)
+        {
+            if (oldLink.Ref.Serial != itemSerial) continue;
+            commands.Entity(oldEnt.Ref).Despawn();
+            if (grabbed.SourceUiEntity == oldEnt.Ref)
+                grabbed.SourceUiEntity = 0;
+        }
+    }
+
+    // Corpse layers the dataset flags as un-lootable, plus hair/beard/face on
+    // any container, never get a visible slot (legacy ContainerGump filter).
+    internal static bool ShouldSkipSlot(ushort graphic, ContainerUiMap.Entry entry, StaticTiles[] tileData)
+    {
+        if (graphic >= tileData.Length) return false;
+        ref readonly var td = ref tileData[graphic];
+        var slot = (GameLayer)td.Layer;
+        bool isCorpse = entry.OriginalGraphic == 0x0009;
+        if (isCorpse && td.Layer > 0 && (int)slot < Constants.BAD_CONTAINER_LAYERS.Length
+            && !Constants.BAD_CONTAINER_LAYERS[(int)slot])
+            return true;
+        if (td.IsWearable && (slot == GameLayer.Face || slot == GameLayer.Beard || slot == GameLayer.Hair))
+            return true;
+        return false;
+    }
+
+    private static void SpawnItemSlot(
+        Commands commands,
+        AssetsServer assets,
+        UIScale uiScale,
+        StaticTiles[] tileData,
+        ContainerSlotEvent ev,
+        ContainerUiMap.Entry entry,
+        Query<Data<GlobalZIndex>> windowZQ)
+    {
+        ushort displayed = ev.Graphic;
+
+        // Coins draw a pile sprite (base+1 / base+2) by amount; everything else
+        // draws its own graphic. `displayed` stays the base graphic for the
+        // tiledata/layer logic above.
+        ushort artGraphic = ItemGraphics.Displayed(ev.Graphic, ev.Amount);
+        ushort drawGraphic = entry.IsBoard
+            ? (ushort)(artGraphic - Constants.ITEM_GUMP_TEXTURE_OFFSET)
+            : artGraphic;
+
+        var (spriteW, spriteH) = ResolveSpriteSize(assets, uiScale, entry, drawGraphic);
+        var (drawX, drawY) = ClampSlotPosition(ev, entry, spriteW, spriteH);
+
+        var origHue = ShaderHueTranslator.GetHueVector(ev.Hue, partial: false, alpha: 1f, gump: entry.IsBoard);
+        var hoverHue = ShaderHueTranslator.GetHueVector(0x0035, partial: false, alpha: 1f, gump: entry.IsBoard);
+
+        // Mirror legacy ItemGump.Draw: stackable items with Amount > 1 get drawn
+        // twice (+5/+5 offset) to fake a pile. Coins are excluded because legacy
+        // `IsCoin` skips them too — coin stack visuals come from a separate
+        // piled-graphic asset.
+        bool stacked = false;
+        if (!entry.IsBoard && displayed < tileData.Length)
+        {
+            ref readonly var td = ref tileData[displayed];
+            stacked = ItemGraphics.DrawStacked(ev.Graphic, ev.Amount, td.IsStackable);
+        }
+
+        var itemUi = commands.Spawn()
+            .Insert(new Node
+            {
+                Display = Display.Flex,
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(drawX),
+                Top = Val.Px(drawY),
+                Width = Val.Px(spriteW),
+                Height = Val.Px(spriteH),
+            })
+            .Insert(new UiCustom
+            {
+                Data = new UOCustomRender
+                {
+                    Kind = entry.IsBoard ? UOCustomKind.Gump : UOCustomKind.Art,
+                    AssetId = drawGraphic,
+                    Hue = origHue,
+                    Stacked = stacked,
+                }
+            })
+            .Insert(Interaction.None)
+            .Insert(new ContainerItemUI
+            {
+                Container = entry.UiEntity,
+                Serial = ev.ItemSerial,
+                OriginalHue = origHue,
+                HoverHue = hoverHue,
+            })
+            // Items share the window's z. Clay's float-root sort is stable on
+            // equal z, so items declared after the window in tree order draw on
+            // top of it. PropagateZ keeps them in sync on focus bumps, but the
+            // FIRST z we hand out has to be the window's CURRENT z, not
+            // entry.ZBase (which was cached at container-open time). Otherwise
+            // late spawns — e.g. the slot respawned after a drop, after the user
+            // has clicked the window several times — get a stale low z and
+            // render behind the window background until the next focus bump
+            // propagates a new value to them.
+            .Insert(new GlobalZIndex(ResolveCurrentZ(entry, windowZQ)));
+        commands.Entity(entry.ContentEntity).AddChild(itemUi);
+    }
+
+    private static (int W, int H) ResolveSpriteSize(
+        AssetsServer assets, UIScale uiScale, ContainerUiMap.Entry entry, ushort drawGraphic)
+    {
+        int spriteW, spriteH;
+        if (entry.IsBoard)
+        {
+            ref readonly var gi = ref assets.Gumps.GetGump(drawGraphic);
+            spriteW = gi.UV.Width;
+            spriteH = gi.UV.Height;
+        }
+        else
+        {
+            ref readonly var ai = ref assets.Arts.GetArt(drawGraphic);
+            spriteW = ai.UV.Width;
+            spriteH = ai.UV.Height;
+        }
+
+        if (uiScale.ScaleItemsInsideContainers && !entry.IsBoard)
+        {
+            spriteW = (int)(spriteW * entry.Scale);
+            spriteH = (int)(spriteH * entry.Scale);
+        }
+        return (spriteW, spriteH);
+    }
+
+    // Clamp the server-sent slot position into the container's content bounds so
+    // an item dropped/added at an out-of-bounds coord renders (and stays
+    // pickable) inside the gump. Mirrors legacy ContainerGump bounds math +
+    // ClampToContainer: left/top edge is Bounds.X/Y, right/bottom edge is
+    // Bounds.Width/Height (both scaled).
+    internal static (float X, float Y) ClampSlotPosition(
+        ContainerSlotEvent ev, ContainerUiMap.Entry entry, int spriteW, int spriteH)
+    {
+        float scale = entry.Scale;
+        float bx = entry.Bounds.X * scale;
+        float by = entry.Bounds.Y * scale;
+        float bw = entry.Bounds.Width * scale;
+        float bh = entry.Bounds.Height * scale;
+
+        float drawX = ev.X * scale;
+        float drawY = (short)ev.Y * scale;
+        if (drawX + spriteW > bw) drawX = bw - spriteW;
+        if (drawY + spriteH > bh) drawY = bh - spriteH;
+        if (drawX < bx) drawX = bx;
+        if (drawY < by) drawY = by;
+
+        // Chessboard (0x091A) renders items shifted up 20px; apply after the
+        // clamp so the bounds check runs in unshifted space.
+        if (entry.Graphic == 0x091A) drawY -= 20 * scale;
+        return (drawX, drawY);
+    }
+
+    internal static int ResolveCurrentZ(ContainerUiMap.Entry entry, Query<Data<GlobalZIndex>> q)
     {
         if (!q.TryGet(entry.UiEntity, out var zRow)) return entry.ZBase;
         var (_, z) = zRow;
         return z.Ref.Value;
+    }
+
+    // Sync each item slot's GlobalZIndex to its parent window. Window root z is
+    // bumped by WindowDragPlugin.Drag in Stage.Update (in-place mutation, no
+    // observer fires), and Bevy.UI's z propagation only covers descendants
+    // WITHOUT their own GlobalZIndex — items carry theirs so they sort against
+    // world UI. Run in PostUpdate (AFTER Drag's bump, BEFORE Last where
+    // layout/render snapshot z) so the lift lands in the SAME frame as the
+    // click — PreUpdate would leave items one frame behind and flicker the bg
+    // over them.
+    private static void SyncItemZToWindow(
+        Query<Data<ContainerItemUI, GlobalZIndex>> items,
+        Query<Data<GlobalZIndex>, Filter<With<ContainerWindow>>> windows)
+    {
+        foreach (var (_, link, itemZ) in items)
+        {
+            if (!windows.TryGet(link.Ref.Container, out var windowRow)) continue;
+            var (_, winZ) = windowRow;
+            if (itemZ.Ref.Value != winZ.Ref.Value)
+                itemZ.Ref.Value = winZ.Ref.Value;
+        }
     }
 
     private static void AnimateCorpseEye(

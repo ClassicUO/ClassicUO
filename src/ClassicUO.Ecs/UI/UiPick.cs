@@ -138,3 +138,40 @@ internal static class UiPick
         return cur != 0 && movables.Contains(cur) ? cur : 0;
     }
 }
+
+// Composite system param bundling the four queries every UO gump gesture —
+// drag, right-click-close, click-capture claim, container hover-selection —
+// feeds into the shared UiPick hit-test. One param replaces the same four
+// query declarations that were copy-pasted into each gesture system (the
+// divergence that kept WindowDragPlugin and ContainerGumpPlugin co-changing in
+// lockstep). Resolution (Topmost -> MovableRoot) lives here too, so there is a
+// single call site; CompositeSystemParam aggregates each inner query's access
+// so the scheduler still parallelizes correctly.
+internal sealed class UiGesturePick : CompositeSystemParam
+{
+    public readonly Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> Rendered;
+    public readonly Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>> Movables;
+    public readonly Query<Data<TinyEcs.Parent>> Parents;
+    public readonly Query<Data<UiContainsByBounds>> Bounds;
+
+    public UiGesturePick()
+    {
+        Rendered = Add(new Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>>());
+        Movables = Add(new Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>>());
+        Parents = Add(new Query<Data<TinyEcs.Parent>>());
+        Bounds = Add(new Query<Data<UiContainsByBounds>>());
+    }
+
+    // Topmost rendered, pixel-hit, visible element under the cursor — overflow
+    // clip + ContainsByBounds applied. The answer every gesture shares.
+    public UiHit Topmost(Vector2 pos, AssetsServer assets)
+        => UiPick.Topmost(pos, assets, Rendered, Parents, Bounds);
+
+    public ulong MovableRoot(ulong entity)
+        => UiPick.MovableRoot(entity, Movables, Parents);
+
+    // The movable window root under the cursor (0 if none): topmost rendered
+    // element resolved up to its owning UiMovable root.
+    public ulong TopmostMovable(Vector2 pos, AssetsServer assets)
+        => MovableRoot(Topmost(pos, assets).Entity);
+}

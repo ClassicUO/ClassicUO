@@ -64,10 +64,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         Res<MouseContext> mouse,
         Res<SelectedEntity> selected,
         Res<AssetsServer> assets,
-        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
-        Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>> movables,
-        Query<Data<TinyEcs.Parent>> parents,
-        Query<Data<UiContainsByBounds>> boundsQ,
+        UiGesturePick pick,
         Query<Data<ContainerWindow>> containers)
     {
         // Resolve via the SHARED pixel-perfect hit-test, same as drag/pickup, so
@@ -76,10 +73,10 @@ internal readonly struct WindowDragPlugin : IPlugin
         // of its own (server gumps: the hit is a child resizepic/text that walks
         // up to the bare UiMovable root) — those let world clicks trespass through.
         var pos = mouse.Value.Position;
-        var hit = UiPick.Topmost(pos, assets.Value, rendered, parents, boundsQ);
+        var hit = pick.Topmost(pos, assets.Value);
         if (!hit.Found) return;
 
-        var owner = UiPick.MovableRoot(hit.Entity, movables, parents);
+        var owner = pick.MovableRoot(hit.Entity);
         if (owner == 0) return;
         // Container windows have their own item-aware claim
         // (ContainerGumpPlugin.UpdateSelectedFromContainerUI) — don't race it.
@@ -107,10 +104,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         Res<MouseContext> mouse,
         Res<AssetsServer> assets,
         Local<ulong> pressTarget,
-        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> allRenderedQ,
-        Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>> movablesQ,
-        Query<Data<TinyEcs.Parent>> parentsQ,
-        Query<Data<UiContainsByBounds>> boundsQ,
+        UiGesturePick pick,
         Query<Data<UiNoRightClickClose>> noCloseQ,
         Query<Data<ContainerWindow>> containerQuery,
         Query<Data<ServerGump>> serverGumpQuery,
@@ -130,7 +124,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         // consume so the world / movement systems don't see the right press.
         if (once)
         {
-            pressTarget.Value = TopmostMovable(mouse.Value.Position, assets.Value, allRenderedQ, movablesQ, parentsQ, boundsQ);
+            pressTarget.Value = pick.TopmostMovable(mouse.Value.Position, assets.Value);
             if (pressTarget.Value != 0)
                 mouse.Value.Consume(MouseButtonType.Right);
             return;
@@ -154,7 +148,7 @@ internal readonly struct WindowDragPlugin : IPlugin
 
             mouse.Value.Consume(MouseButtonType.Right);
 
-            if (TopmostMovable(mouse.Value.Position, assets.Value, allRenderedQ, movablesQ, parentsQ, boundsQ) != target)
+            if (pick.TopmostMovable(mouse.Value.Position, assets.Value) != target)
                 return; // dragged off — cancel, like UiClick
 
             // Opt-out windows (legacy CanCloseWithRightClick = false, e.g. the
@@ -184,19 +178,6 @@ internal readonly struct WindowDragPlugin : IPlugin
         }
     }
 
-    // The movable window root under the cursor (0 if none): topmost rendered
-    // element resolved to its owning UiMovable root. See UiPick. Without the
-    // walk-to-root a right-click on window A's content fell through to window B
-    // behind it (A's root bg is transparent over its interior) and closed B.
-    private static ulong TopmostMovable(
-        Vector2 pos,
-        AssetsServer assets,
-        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> allRenderedQ,
-        Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>> movablesQ,
-        Query<Data<TinyEcs.Parent>> parentsQ,
-        Query<Data<UiContainsByBounds>> boundsQ)
-        => UiPick.MovableRoot(UiPick.Topmost(pos, assets, allRenderedQ, parentsQ, boundsQ).Entity, movablesQ, parentsQ);
-
     private struct DragAnchor
     {
         public bool Active;
@@ -214,14 +195,11 @@ internal readonly struct WindowDragPlugin : IPlugin
         Res<AssetsServer> assets,
         Res<ForcedWindowDrag> forced,
         Local<DragAnchor> anchor,
-        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
-        Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>> movables,
-        Query<Data<TinyEcs.Parent>> parents,
+        UiGesturePick pick,
         Query<Data<ContainerItemUI>> itemsQ,
         Query<Data<PaperdollEquipUI>> equipQ,
         Query<Data<UiMovableNoDrag>> noDragQ,
-        Query<Data<UiNoWindowDrag>> noWindowDragChildQ,
-        Query<Data<UiContainsByBounds>> boundsQ)
+        Query<Data<UiNoWindowDrag>> noWindowDragChildQ)
     {
         // IsPressed is false on the press-once frame (oldState=Released), so
         // include IsPressedOnce in the "held" check or the latch attempt
@@ -256,7 +234,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         // the cursor so it tracks like legacy AttemptDragControl.
         if (forced.Value.Owner != 0)
         {
-            if (movables.TryGet(forced.Value.Owner, out var forcedRow))
+            if (pick.Movables.TryGet(forced.Value.Owner, out var forcedRow))
             {
                 var ownerF = forced.Value.Owner;
                 var (_, nodeF, zF) = forcedRow;
@@ -287,7 +265,7 @@ internal readonly struct WindowDragPlugin : IPlugin
             // (not just movable roots) is what lets the drag start on a window's
             // opaque child where its own bg is transparent — the paperdoll body
             // and arch interior, a container's slot art, etc.
-            var hit = UiPick.Topmost(pos, assets.Value, rendered, parents, boundsQ);
+            var hit = pick.Topmost(pos, assets.Value);
             if (!hit.Found) return;
 
             // Pickup owns the gesture when the topmost hit is a liftable thing
@@ -301,14 +279,14 @@ internal readonly struct WindowDragPlugin : IPlugin
             // latch a window move that cancels the click.
             if (noWindowDragChildQ.Contains(hit.Entity)) return;
 
-            var owner = UiPick.MovableRoot(hit.Entity, movables, parents);
+            var owner = pick.MovableRoot(hit.Entity);
             if (owner == 0) return;
 
             // nomove windows: still a window (close / click-capture work), but
             // the drag gesture is suppressed.
             if (noDragQ.Contains(owner)) return;
 
-            var (_, node, _) = movables.Get(owner);
+            var (_, node, _) = pick.Movables.Get(owner);
             float ox = node.Ref.Left.Type == ValType.Px ? node.Ref.Left.Value : 0f;
             float oy = node.Ref.Top.Type == ValType.Px ? node.Ref.Top.Value : 0f;
 
@@ -325,13 +303,13 @@ internal readonly struct WindowDragPlugin : IPlugin
             // Bring window to front on focus. Only the root carries a z;
             // LayoutSystem threads it down to every descendant float at layout
             // time, so a single in-place bump lifts the whole window.
-            var (_, _, rootZ) = movables.Get(owner);
+            var (_, _, rootZ) = pick.Movables.Get(owner);
             rootZ.Ref.Value = zCounter.Value.Bump();
         }
 
         if (!anchor.Value.Active) return;
 
-        if (!movables.TryGet(anchor.Value.Owner, out var anchorRow))
+        if (!pick.Movables.TryGet(anchor.Value.Owner, out var anchorRow))
         {
             anchor.Value.Active = false;
             anchor.Value.Owner = 0;
