@@ -13,6 +13,7 @@ internal readonly struct GameplayPlugin : IPlugin
         app.AddPlugin<UseObjectPlugin>();
         app.AddPlugin<MobAnimationsPlugin>();
         app.AddPlugin<PlayerMovementPlugin>();
+        app.AddPlugin<PathfinderPlugin>();
         app.AddPlugin<ContainersPlugin>();
         app.AddPlugin<GumpPlugin>();
         app.AddPlugin<NetworkEntitiesMapPlugin>();

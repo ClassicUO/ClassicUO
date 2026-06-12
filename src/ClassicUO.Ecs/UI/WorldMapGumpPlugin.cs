@@ -1122,7 +1122,7 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
         };
 
         int viewedMap = state.ViewMap >= 0 ? state.ViewMap : gameCtx.Map;
-        int actionRows = 4;
+        int actionRows = 5;
         int menuH = Pad * 2 + (toggles.Length + actionRows) * RowH + (toggles.Length + actionRows - 1) * 2;
 
         // Clamp to the logical surface (the menu is taller than the window and
@@ -1219,6 +1219,64 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
                 st.Value.CenterY = files.Value.Maps.MapsDefaultSize[next, 1] >> 1;
             }
             st.Value.MenuDirty = true;
+        });
+
+        // Pathfind to the map coordinate under the right-click that opened
+        // the menu (state.MenuPos). Only on the player's own facet; no-op if
+        // the click wasn't over the canvas.
+        var walkRow = SpawnMenuRow(commands, rootId, MenuW - Pad * 2, RowH, "Walk To Here");
+        commands.Entity(walkRow).Observe((
+            On<UiClick> _,
+            Commands cmd,
+            Res<Profile> pr,
+            Res<GameContext> ctx,
+            Res<UOFileManager> files,
+            ResMut<WorldMapState> st,
+            EventWriter<PathfindRequest> pathReq,
+            Query<Data<ComputedNode>, Filter<With<WorldMapCanvas>>> canvasQ,
+            Query<Data<Node>, Filter<With<WorldMapWindow>>> winQ,
+            Query<Data<WorldPosition>, Filter<With<Player>>> playerQ,
+            Query<Data<WorldMapMenu>> menuQ,
+            Query<Data<TinyEcs.Children>> kidsQ) =>
+        {
+            foreach (var (ment, _) in menuQ)
+                UiHierarchy.DespawnSubtree(cmd, ment.Ref, kidsQ);
+
+            // Viewing another facet — can't walk there.
+            if (st.Value.ViewMap >= 0 && st.Value.ViewMap != ctx.Value.Map)
+                return;
+
+            if (st.Value.MenuWindow == 0 || !winQ.TryGet(st.Value.MenuWindow, out var winRow))
+                return;
+            var (_, winNode) = winRow;
+            float wx = winNode.Ref.Left.Type == ValType.Px ? winNode.Ref.Left.Value : 0f;
+            float wy = winNode.Ref.Top.Type == ValType.Px ? winNode.Ref.Top.Value : 0f;
+            var cursor = new Vector2(wx + st.Value.MenuPos.X, wy + st.Value.MenuPos.Y);
+
+            foreach (var (_, bb) in canvasQ)
+            {
+                if (cursor.X < bb.Ref.Position.X || cursor.Y < bb.Ref.Position.Y ||
+                    cursor.X >= bb.Ref.Position.X + bb.Ref.Size.X || cursor.Y >= bb.Ref.Position.Y + bb.Ref.Size.Y)
+                    continue;
+
+                float zoom = WorldMapState.Zooms[Math.Clamp(pr.Value.WorldMapZoomIndex, 0, WorldMapState.Zooms.Length - 1)];
+                CanvasToWorld(
+                    (int)(cursor.X - bb.Ref.Position.X), (int)(cursor.Y - bb.Ref.Position.Y),
+                    (int)bb.Ref.Size.X, (int)bb.Ref.Size.Y,
+                    st.Value.CenterX, st.Value.CenterY, zoom, pr.Value.WorldMapFlipMap,
+                    out int worldX, out int worldY);
+
+                int mapIdx = ctx.Value.Map;
+                worldX = Math.Clamp(worldX, 0, files.Value.Maps.MapsDefaultSize[mapIdx, 0] - 1);
+                worldY = Math.Clamp(worldY, 0, files.Value.Maps.MapsDefaultSize[mapIdx, 1] - 1);
+
+                foreach (var (_, ppos) in playerQ)
+                {
+                    pathReq.Send(new PathfindRequest { X = worldX, Y = worldY, Z = ppos.Ref.Z, Distance = 0 });
+                    break;
+                }
+                break;
+            }
         });
 
         var addRow = SpawnMenuRow(commands, rootId, MenuW - Pad * 2, RowH, "Add Marker On Player");

@@ -74,6 +74,125 @@ internal static class InputHandlers
         d.Register("debug.say", DebugSay);
         d.Register("debug.chatState", DebugChatState);
         d.Register("debug.questArrow", DebugQuestArrow);
+        d.Register("debug.profileFlag", DebugProfileFlag);
+        d.Register("debug.pathfindTo", DebugPathfindTo);
+        d.Register("debug.pathfindState", DebugPathfindState);
+    }
+
+    // Test-only: trigger the pathfinder like the world map "Walk To Here"
+    // does. Absolute {x,y} or player-relative {dx,dy}; optional distance.
+    public static JsonRpcResponse DebugPathfindTo(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        int? x = null, y = null;
+        int dx = 0, dy = 0, distance = 0;
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object)
+        {
+            if (p.TryGetProperty("x", out var xe) && xe.TryGetInt32(out var xv)) x = xv;
+            if (p.TryGetProperty("y", out var ye) && ye.TryGetInt32(out var yv)) y = yv;
+            if (p.TryGetProperty("dx", out var dxe) && dxe.TryGetInt32(out var v1)) dx = v1;
+            if (p.TryGetProperty("dy", out var dye) && dye.TryGetInt32(out var v2)) dy = v2;
+            if (p.TryGetProperty("distance", out var de) && de.TryGetInt32(out var dv)) distance = dv;
+        }
+
+        var world = ctx.Runtime.GetWorld();
+        int px = 0, py = 0, pz = 0;
+        var found = false;
+        var q = world.QueryBuilder().With<Player>().With<WorldPosition>().Build();
+        var it = q.Iter();
+        while (it.Next())
+        {
+            var entities = it.Entities();
+            if (entities.Length == 0) continue;
+            ref var wp = ref world.Get<WorldPosition>(entities[0].ID);
+            px = wp.X; py = wp.Y; pz = wp.Z;
+            found = true;
+            break;
+        }
+
+        if (!found)
+            return AgentServer.ErrorResponse(req.Id, JsonRpcErrorCodes.NotInWorld, "no player entity");
+
+        var tx = x ?? px + dx;
+        var ty = y ?? py + dy;
+        ctx.Runtime.SendEvent(new PathfindRequest { X = tx, Y = ty, Z = pz, Distance = distance });
+        return new JsonRpcResponse
+        {
+            Id = req.Id,
+            Result = new JsonObject { ["x"] = tx, ["y"] = ty, ["fromX"] = px, ["fromY"] = py, ["fromZ"] = pz }
+        };
+    }
+
+    // Test-only: dump the pathfinder state + computed path for harness
+    // assertions on auto-walk progress.
+    public static JsonRpcResponse DebugPathfindState(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        var st = ctx.Runtime.GetResource<PathfindState>();
+        var world = ctx.Runtime.GetWorld();
+
+        var result = new JsonObject
+        {
+            ["autoWalking"] = st.AutoWalking,
+            ["searching"] = st.Searching,
+            ["pathSize"] = st.PathSize,
+            ["pointIndex"] = st.PointIndex,
+            ["partial"] = st.Partial,
+            ["run"] = st.Run,
+            ["targetX"] = st.TargetX,
+            ["targetY"] = st.TargetY,
+            ["replanStrikes"] = st.ReplanStrikes,
+            ["bestReplanGoalDist"] = st.BestReplanGoalDist,
+            ["closedCount"] = st.ClosedCount,
+        };
+
+        var q = world.QueryBuilder().With<Player>().With<WorldPosition>().Build();
+        var it = q.Iter();
+        while (it.Next())
+        {
+            var entities = it.Entities();
+            if (entities.Length == 0) continue;
+            ref var wp = ref world.Get<WorldPosition>(entities[0].ID);
+            result["playerX"] = wp.X;
+            result["playerY"] = wp.Y;
+            result["playerZ"] = wp.Z;
+            break;
+        }
+
+        var path = new JsonArray();
+        for (var i = 0; i < st.PathSize && i < 64; i++)
+        {
+            var n = st.Path[i];
+            path.Add(new JsonObject { ["x"] = n.X, ["y"] = n.Y, ["z"] = n.Z, ["dir"] = n.Direction });
+        }
+        result["path"] = path;
+
+        return new JsonRpcResponse { Id = req.Id, Result = result };
+    }
+
+    // Test-only: flip a boolean Profile property by name (e.g. EnablePathfind)
+    // — the options gump works but coordinate-driving its scroll list per
+    // scenario is brittle.
+    public static JsonRpcResponse DebugProfileFlag(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        string? name = null;
+        var value = true;
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object)
+        {
+            if (p.TryGetProperty("name", out var n) && n.ValueKind == JsonValueKind.String)
+                name = n.GetString();
+            if (p.TryGetProperty("value", out var v))
+                value = v.ValueKind == JsonValueKind.True;
+        }
+
+        if (name == null)
+            return new JsonRpcResponse { Id = req.Id, Error = new JsonRpcError { Code = -32602, Message = "missing name" } };
+
+        var profile = ctx.Runtime.GetResource<ClassicUO.Configuration.Profile>();
+        var prop = profile.GetType().GetProperty(name);
+        if (prop == null || prop.PropertyType != typeof(bool))
+            return new JsonRpcResponse { Id = req.Id, Error = new JsonRpcError { Code = -32602, Message = $"no bool property {name}" } };
+
+        prop.SetValue(profile, value);
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["name"] = name, ["value"] = value } };
     }
 
     // Test-only: flip the nameplate "stay active" toggle (synthetic input

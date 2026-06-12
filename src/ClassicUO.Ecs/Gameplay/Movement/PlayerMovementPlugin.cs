@@ -1,7 +1,5 @@
 using System;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Game;
@@ -9,7 +7,6 @@ using ClassicUO.Game.Data;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using TinyEcs;
 using TinyEcs.Bevy;
 
@@ -56,18 +53,28 @@ readonly struct PlayerMovementPlugin : IPlugin
 {
     public void Build(App app)
     {
+        var computeMovementStateFn = ComputeMovementState;
         var enqueuePlayerStepsFn = EnqueuePlayerSteps;
         var parseAcceptedStepsFn = ParseAcceptedSteps;
         var parseDeniedStepsFn = ParseDeniedSteps;
 
         app
             .AddResource(new PlayerStepsContext())
+            .AddResource(new MovementState())
 
             .AddSystem((ResMut<PlayerStepsContext> playerRequestedSteps) =>
             {
                 playerRequestedSteps.Value = new PlayerStepsContext();
             })
             .OnEnter(GameState.GameScreen)
+            .Build()
+
+            // Step state (dead/GM/sea-horse/flying) + character-blocking rule,
+            // shared by manual walking and the pathfinder.
+            .AddSystem(computeMovementStateFn)
+            .InStage(Stage.PreUpdate)
+            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+            .RunIf((Query<Data<Graphic>, With<Player>> q) => q.Count() > 0)
             .Build()
 
             .AddSystem(enqueuePlayerStepsFn)
@@ -108,6 +115,14 @@ readonly struct PlayerMovementPlugin : IPlugin
                               playerRequestedSteps.Value.LastStep < time.Value.Total && playerRequestedSteps.Value.Count < 5 &&
                               playerQuery.Count() > 0;
                    })
+            // MobileSteps clamps at COUNT and overwrites the newest step when
+            // full — don't issue into a full animation queue (see PathfinderPlugin).
+            .RunIf((Query<Data<MobileSteps>, With<Player>> q) =>
+            {
+                foreach ((_, var steps) in q)
+                    return steps.Ref.Index < MobileSteps.COUNT - 1;
+                return false;
+            })
             .Build()
 
             .AddSystem(parseAcceptedStepsFn)
@@ -151,8 +166,58 @@ readonly struct PlayerMovementPlugin : IPlugin
         });
     }
 
+    // Legacy CalculateNewZ preamble + CreateItemList ignoreGameCharacters:
+    // derive how the player steps this frame from its body/flags/mount.
+    static void ComputeMovementState(
+        ResMut<MovementState> moveState,
+        Res<Profile> profile,
+        Res<GameContext> gameCtx,
+        Query<Data<Graphic, Hue>> qLayers,
+        Single<Data<Graphic, ServerFlags, Stamina, EquipmentSlots, PlayerData>,
+            Filter<With<Player>, Optional<ServerFlags>, Optional<Stamina>, Optional<EquipmentSlots>, Optional<PlayerData>>> playerQuery)
+    {
+        (var gfx, var flags, var stamina, var slots, var playerData) = playerQuery.Get();
+
+        var graphic = gfx.Ref.Value;
+        var isGm = graphic == 0x03DB;
+        var isDead = Walkability.IsDeadBody(graphic);
+        var serverFlags = flags.IsValid() ? flags.Ref.Value : Flags.None;
+
+        var stepState = PathStepState.Normal;
+        if (isDead || isGm)
+        {
+            stepState = PathStepState.DeadOrGm;
+        }
+        else if (playerData.IsValid() && playerData.Ref.Race == RaceType.GARGOYLE && serverFlags.HasFlag(Flags.Flying))
+        {
+            stepState = PathStepState.Flying;
+        }
+        else if (slots.IsValid())
+        {
+            var mount = slots.Ref[Layer.Mount];
+            if (mount.IsValid() && qLayers.TryGet(mount, out var mountRow))
+            {
+                (var mountGfx, _) = mountRow;
+                if (mountGfx.Ref.Value == 0x3EB3) // sea horse
+                    stepState = PathStepState.OnSeaHorse;
+            }
+        }
+
+        var staminaFull = !stamina.IsValid() || stamina.Ref.Value >= stamina.Ref.MaxValue;
+
+        moveState.Value.StepState = stepState;
+        moveState.Value.IsGm = isGm;
+        moveState.Value.SmoothDoors = profile.Value.SmoothDoors;
+        moveState.Value.IsParalyzed = serverFlags.HasFlag(Flags.Frozen);
+        // Legacy: characters only block on Felucca with depleted stamina.
+        moveState.Value.IgnoreCharacters =
+            profile.Value.IgnoreStaminaCheck ||
+            stepState == PathStepState.DeadOrGm ||
+            !(!staminaFull && gameCtx.Value.Map == 0);
+    }
+
     static void EnqueuePlayerSteps(
-        Local<List<TerrainInfo>> terrainList,
+        Res<MovementState> moveState,
         Res<UOFileManager> fileManager,
         Res<MouseContext> mouseCtx,
         Res<NetClient> network,
@@ -162,7 +227,7 @@ readonly struct PlayerMovementPlugin : IPlugin
         Res<MultiCache> multiCache,
         Query<Empty, With<HouseRevision>> qHouseRevision,
         Query<Data<Children>> childrenQuery,
-        Query<Data<WorldPosition, Graphic>, Filter<Without<IsTile>, Without<IsStatic>, Without<MobAnimation>>> othersQuery,
+        Query<Data<WorldPosition, Graphic, MobAnimation>, Filter<Without<IsTile>, Without<IsStatic>, Optional<MobAnimation>, Without<Player>>> othersQuery,
         Single<Data<WorldPosition, Facing, MobileSteps, MobAnimation, ServerFlags>, With<Player>> playerQuery,
         Query<Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tilesQuery,
         Query<Data<WorldPosition, Graphic>, Filter<With<IsStatic>, Without<IsTile>, Without<MobAnimation>>> staticsQuery,
@@ -170,9 +235,6 @@ readonly struct PlayerMovementPlugin : IPlugin
         Res<Profile> profile
     )
     {
-        terrainList.Value ??= new();
-        Span<sbyte> diag = [1, -1];
-
         var mousePos = mouseCtx.Value.Position;
 
         var center = new Vector2(camera.Value.Bounds.Right, camera.Value.Bounds.Bottom);
@@ -184,12 +246,59 @@ readonly struct PlayerMovementPlugin : IPlugin
         var facing = mouseDir == Direction.North ? Direction.Mask : mouseDir - 1;
         var run = mouseRange >= Constants.THREESHOLD_MOUSE_WALK_RUN || profile.Value.AlwaysRun;
 
+        TryStep(
+            facing,
+            run,
+            moveState.Value,
+            chunksLoaded.Value,
+            multiCache.Value,
+            qHouseRevision,
+            childrenQuery,
+            othersQuery,
+            tilesQuery,
+            staticsQuery,
+            fileManager.Value.TileData,
+            network.Value,
+            playerRequestedSteps,
+            time.Value.Total,
+            profile.Value,
+            playerQuery
+        );
+    }
+
+    // One walk attempt toward `facing` from the player's end position:
+    // walkability + diagonal rules + turn handling + step enqueue + walk
+    // request packet. Shared by mouse movement and the pathfinder's
+    // auto-walk (legacy PlayerMobile.Walk).
+    // Returns true when a step or a turn was enqueued; false when blocked.
+    internal static bool TryStep(
+        Direction facing,
+        bool run,
+        MovementState moveState,
+        TerrainPlugin.ChunksLoadedMap chunksLoaded,
+        MultiCache multiCache,
+        Query<Empty, With<HouseRevision>> qHouseRevision,
+        Query<Data<Children>> childrenQuery,
+        Query<Data<WorldPosition, Graphic, MobAnimation>, Filter<Without<IsTile>, Without<IsStatic>, Optional<MobAnimation>, Without<Player>>> othersQuery,
+        Query<Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tilesQuery,
+        Query<Data<WorldPosition, Graphic>, Filter<With<IsStatic>, Without<IsTile>, Without<MobAnimation>>> staticsQuery,
+        TileDataLoader tileData,
+        NetClient network,
+        ResMut<PlayerStepsContext> playerRequestedSteps,
+        float timeTotal,
+        Profile profile,
+        Single<Data<WorldPosition, Facing, MobileSteps, MobAnimation, ServerFlags>, With<Player>> playerQuery
+    )
+    {
+        Span<sbyte> diag = [1, -1];
+
         (var worldPos, var dir, var mobSteps, var animation, var flags) = playerQuery.Get();
 
         // Legacy PlayerMobile.Walk: a hidden player is forced to walk when
         // AlwaysRunUnlessHidden is set.
-        if (profile.Value.AlwaysRunUnlessHidden && flags.Ref.Value.HasFlag(Flags.Hidden))
+        if (profile.AlwaysRunUnlessHidden && flags.Ref.Value.HasFlag(Flags.Hidden))
             run = false;
+
         var hasNoSteps = mobSteps.Ref.Index < 0;
         var playerX = worldPos.Ref.X;
         var playerY = worldPos.Ref.Y;
@@ -215,15 +324,15 @@ readonly struct PlayerMovementPlugin : IPlugin
 
         var sameDir = playerDir == facing;
         var canMove = CheckMovement(
-            terrainList.Value,
-            chunksLoaded.Value,
-            multiCache.Value,
+            moveState,
+            chunksLoaded,
+            multiCache,
             qHouseRevision,
             childrenQuery,
             othersQuery,
             tilesQuery,
             staticsQuery,
-            fileManager.Value.TileData,
+            tileData,
             facing,
             ref newX,
             ref newY,
@@ -242,15 +351,15 @@ readonly struct PlayerMovementPlugin : IPlugin
                     var testY = playerY;
                     var testZ = playerZ;
                     canMove = CheckMovement(
-                        terrainList.Value,
-                        chunksLoaded.Value,
-                        multiCache.Value,
+                        moveState,
+                        chunksLoaded,
+                        multiCache,
                         qHouseRevision,
                         childrenQuery,
                         othersQuery,
                         tilesQuery,
                         staticsQuery,
-                        fileManager.Value.TileData,
+                        tileData,
                         testDir,
                         ref testX,
                         ref testY,
@@ -268,15 +377,15 @@ readonly struct PlayerMovementPlugin : IPlugin
                     newY = playerY;
                     newZ = playerZ;
                     canMove = CheckMovement(
-                        terrainList.Value,
-                        chunksLoaded.Value,
-                        multiCache.Value,
+                        moveState,
+                        chunksLoaded,
+                        multiCache,
                         qHouseRevision,
                         childrenQuery,
                         othersQuery,
                         tilesQuery,
                         staticsQuery,
-                        fileManager.Value.TileData,
+                        tileData,
                         newFacing,
                         ref newX,
                         ref newY,
@@ -309,7 +418,7 @@ readonly struct PlayerMovementPlugin : IPlugin
             var isMountedOrFlying = animation.Ref.MountAction != 0xFF || flags.Ref.Value.HasFlag(Flags.Flying);
             var stepTime = sameDir
                 ? MovementSpeed.TimeToCompleteMovement(run, isMountedOrFlying)
-                : (profile.Value.FastRotation ? Constants.TURN_DELAY_FAST : Constants.TURN_DELAY);
+                : (profile.FastRotation ? Constants.TURN_DELAY_FAST : Constants.TURN_DELAY);
             ref var requestedStep = ref playerRequestedSteps.Value.Steps[playerRequestedSteps.Value.Count];
             requestedStep.Sequence = playerRequestedSteps.Value.Sequence;
             requestedStep.X = playerX;
@@ -317,12 +426,11 @@ readonly struct PlayerMovementPlugin : IPlugin
             requestedStep.Z = playerZ;
             requestedStep.Direction = playerDir;
 
-            Console.WriteLine("SEQUENCE: {0}", requestedStep.Sequence);
-            network.Value.Send_WalkRequest(requestedStep.Direction, requestedStep.Sequence, run, 0);
+            network.Send_WalkRequest(requestedStep.Direction, requestedStep.Sequence, run, 0);
 
             playerRequestedSteps.Value.Count = Math.Min(5, playerRequestedSteps.Value.Count + 1);
             playerRequestedSteps.Value.Sequence = (byte)((playerRequestedSteps.Value.Sequence % byte.MaxValue) + 1);
-            playerRequestedSteps.Value.LastStep = time.Value.Total + stepTime;
+            playerRequestedSteps.Value.LastStep = timeTotal + stepTime;
             if (run)
                 requestedStep.Direction |= Direction.Running;
 
@@ -334,8 +442,10 @@ readonly struct PlayerMovementPlugin : IPlugin
             step.Run = run;
 
             if (hasNoSteps)
-                mobSteps.Ref.Time = time.Value.Total;
+                mobSteps.Ref.Time = timeTotal;
         }
+
+        return canMove || !sameDir;
     }
 
     static void ParseAcceptedSteps(
@@ -375,7 +485,6 @@ readonly struct PlayerMovementPlugin : IPlugin
             if (!isBadStep)
             {
                 playerRequestedSteps.Value.ResyncSent = false;
-                // Console.WriteLine("step accepted {0}", playerRequestedSteps.Value.Steps[stepIndex].Sequence);
                 for (var i = 1; i < playerRequestedSteps.Value.Count; i++)
                 {
                     playerRequestedSteps.Value.Steps[i - 1] = playerRequestedSteps.Value.Steps[i];
@@ -405,6 +514,7 @@ readonly struct PlayerMovementPlugin : IPlugin
     static void ParseDeniedSteps(
         EventReader<RejectedStep> rejectedSteps,
         ResMut<PlayerStepsContext> playerRequestedSteps,
+        ResMut<PathfindState> pathfindState,
         Single<Data<WorldPosition, Facing, MobileSteps>, With<Player>> playerQuery
     )
     {
@@ -424,21 +534,26 @@ readonly struct PlayerMovementPlugin : IPlugin
         playerRequestedSteps.Value.Sequence = 0;
         playerRequestedSteps.Value.LastStep = 0;
         playerRequestedSteps.Value.ResyncSent = false;
+
+        // A denied step invalidates the computed path (legacy
+        // Pathfinder.StopAutoWalk on Walk failure).
+        pathfindState.Value.StopAutoWalk();
     }
 
     private static void FillListOfItemsAtPosition(
-        List<TerrainInfo> list,
+        MovementState moveState,
         TerrainPlugin.ChunksLoadedMap chunksLoaded,
         MultiCache multiCache,
         Query<Empty, With<HouseRevision>> qHouseRevision,
         Query<Data<Children>> childrenQuery,
-        Query<Data<WorldPosition, Graphic>, Filter<Without<IsTile>, Without<IsStatic>, Without<MobAnimation>>> othersQuery,
+        Query<Data<WorldPosition, Graphic, MobAnimation>, Filter<Without<IsTile>, Without<IsStatic>, Optional<MobAnimation>, Without<Player>>> othersQuery,
         Query<Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tileQuery,
         Query<Data<WorldPosition, Graphic>, Filter<With<IsStatic>, Without<IsTile>, Without<MobAnimation>>> staticsQuery,
         TileDataLoader tileData,
         int x, int y
     )
     {
+        var list = moveState.Scratch;
         list.Clear();
 
         if (!chunksLoaded.TryGetValue((x >> 3, y >> 3), out var val))
@@ -455,48 +570,13 @@ readonly struct PlayerMovementPlugin : IPlugin
                     if (pos.Ref.X != x || pos.Ref.Y != y)
                         continue;
 
-                    if (!((graphic.Ref.Value < 0x01AE && graphic.Ref.Value != 2) || (graphic.Ref.Value > 0x01B5 && graphic.Ref.Value != 0x1DB)))
+                    if (!Walkability.LandPasses(graphic.Ref.Value))
                         continue;
 
                     ref var landData = ref tileData.LandData[graphic.Ref.Value];
-                    var flags = TerrainFlags.ImpassableOrSurface;
-
-                    if (!landData.IsImpassable)
-                    {
-                        flags = TerrainFlags.ImpassableOrSurface |
-                                TerrainFlags.Surface |
-                                TerrainFlags.Bridge;
-                    }
-
-                    TerrainInfo tinfo;
-                    if (!stretched.IsValid())
-                    {
-                        tinfo = new()
-                        {
-                            Flags = flags,
-                            Z = pos.Ref.Z,
-                            AvgZ = pos.Ref.Z,
-                            Height = pos.Ref.Z,
-                            LandStretched = !Unsafe.IsNullRef(ref stretched.Ref),
-                            LandBounds = default,
-                            RealZ = pos.Ref.Z
-                        };
-                    }
-                    else
-                    {
-                        tinfo = new TerrainInfo()
-                        {
-                            Flags = flags,
-                            Z = stretched.Ref.MinZ,
-                            AvgZ = stretched.Ref.AvgZ,
-                            Height = stretched.Ref.AvgZ - stretched.Ref.MinZ,
-                            LandStretched = !Unsafe.IsNullRef(ref stretched.Ref),
-                            LandBounds = stretched.Ref.Offset,
-                            RealZ = pos.Ref.Z
-                        };
-                    }
-
-                    list.Add(tinfo);
+                    var flags = Walkability.LandFlags(in landData, moveState.StepState);
+                    var stretchedValid = stretched.IsValid();
+                    list.Add(Walkability.MakeLand(flags, pos.Ref.Z, stretchedValid, stretchedValid ? stretched.Ref : default));
                 }
 
                 if (staticsQuery.TryGet(child, out var staticRow))
@@ -506,212 +586,51 @@ readonly struct PlayerMovementPlugin : IPlugin
                         continue;
 
                     ref var staticData = ref tileData.StaticData[graphic.Ref.Value];
-                    TerrainFlags flags = 0;
-
-                    if (staticData.IsImpassable || staticData.IsSurface)
-                    {
-                        flags = TerrainFlags.ImpassableOrSurface;
-                    }
-
-                    if (!staticData.IsImpassable)
-                    {
-                        if (staticData.IsSurface)
-                        {
-                            flags |= TerrainFlags.Surface;
-                        }
-
-                        if (staticData.IsBridge)
-                        {
-                            flags |= TerrainFlags.Bridge;
-                        }
-                    }
+                    var flags = Walkability.StaticFlags(graphic.Ref.Value, in staticData, moveState.StepState, moveState.SmoothDoors, moveState.IsGm);
 
                     if (flags != 0)
-                    {
-                        var tinfo = new TerrainInfo()
-                        {
-                            Flags = flags,
-                            Z = pos.Ref.Z,
-                            AvgZ = pos.Ref.Z + (staticData.IsBridge ? staticData.Height / 2 : staticData.Height),
-                            Height = staticData.Height
-                        };
-
-                        list.Add(tinfo);
-                    }
+                        list.Add(Walkability.MakeStatic(flags, pos.Ref.Z, in staticData));
                 }
             }
         }
 
-        foreach ((var ent, var pos, var graphic) in othersQuery)
+        foreach ((var ent, var pos, var graphic, var anim) in othersQuery)
         {
             if (pos.Ref.X != x || pos.Ref.Y != y)
                 continue;
 
-            var grapicValue = graphic.Ref.Value;
+            // Living characters block (legacy CreateItemList mobile branch).
+            if (anim.IsValid())
+            {
+                if (!moveState.IgnoreCharacters && !Walkability.IsDeadBody(graphic.Ref.Value))
+                    list.Add(Walkability.MakeMobile(pos.Ref.Z));
+                continue;
+            }
+
+            var graphicValue = graphic.Ref.Value;
             // TODO: use Optional<HouseRevision> in query
             if (qHouseRevision.Contains(ent.Ref))
             {
-                var multiInfo = multiCache.GetMulti(grapicValue);
+                var multiInfo = multiCache.GetMulti(graphicValue);
                 if (multiInfo.Id != 0)
-                    grapicValue = multiInfo.Id;
+                    graphicValue = multiInfo.Id;
             }
 
-            ref var staticData = ref tileData.StaticData[grapicValue];
-            TerrainFlags flags = 0;
-
-            if (staticData.IsImpassable || staticData.IsSurface)
-            {
-                flags = TerrainFlags.ImpassableOrSurface;
-            }
-
-            if (!staticData.IsImpassable)
-            {
-                if (staticData.IsSurface)
-                {
-                    flags |= TerrainFlags.Surface;
-                }
-
-                if (staticData.IsBridge)
-                {
-                    flags |= TerrainFlags.Bridge;
-                }
-            }
+            ref var staticData = ref tileData.StaticData[graphicValue];
+            var flags = Walkability.StaticFlags(graphicValue, ref staticData, moveState.StepState, moveState.SmoothDoors, moveState.IsGm);
 
             if (flags != 0)
-            {
-                var tinfo = new TerrainInfo()
-                {
-                    Flags = flags,
-                    Z = pos.Ref.Z,
-                    AvgZ = pos.Ref.Z + (staticData.IsBridge ? staticData.Height / 2 : staticData.Height),
-                    Height = staticData.Height
-                };
-
-                list.Add(tinfo);
-            }
+                list.Add(Walkability.MakeStatic(flags, pos.Ref.Z, in staticData));
         }
-    }
-
-    private static void GetMinMaxZ(
-        List<TerrainInfo> list,
-        TerrainPlugin.ChunksLoadedMap chunksLoaded,
-        MultiCache multiCache,
-        Query<Empty, With<HouseRevision>> qHouseRevision,
-        Query<Data<Children>> childrenQuery,
-        Query<Data<WorldPosition, Graphic>, Filter<Without<IsTile>, Without<IsStatic>, Without<MobAnimation>>> othersQuery,
-        Query<Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tileQuery,
-        Query<Data<WorldPosition, Graphic>, Filter<With<IsStatic>, Without<IsTile>, Without<MobAnimation>>> staticsQuery,
-        TileDataLoader tileData,
-        Direction facing,
-        int playerX, int playerY, int playerZ,
-        out int minZ, out int maxZ
-    )
-    {
-        Span<int> offX = stackalloc int[]
-        {
-            0,
-            1,
-            1,
-            1,
-            0,
-            -1,
-            -1,
-            -1,
-            0,
-            1
-        };
-        Span<int> offY = stackalloc int[]
-        {
-            -1,
-            -1,
-            0,
-            1,
-            1,
-            1,
-            0,
-            -1,
-            -1,
-            -1
-        };
-        var newDir = (byte)facing;
-        newDir &= 7;
-        var newX = (ushort)(playerX + offX[newDir ^ 4]);
-        var newY = (ushort)(playerY + offY[newDir ^ 4]);
-        FillListOfItemsAtPosition(
-            list,
-            chunksLoaded,
-            multiCache,
-            qHouseRevision,
-            childrenQuery,
-            othersQuery,
-            tileQuery,
-            staticsQuery,
-            tileData,
-            newX,
-            newY
-        );
-
-        maxZ = playerZ;
-        minZ = -128;
-        foreach (ref readonly var tinfo in CollectionsMarshal.AsSpan(list))
-        {
-            if (tinfo.AvgZ <= playerZ && tinfo.LandStretched)
-            {
-                var avgZ = getAvgZ(newDir, tinfo.LandBounds, tinfo.RealZ);
-                if (minZ < avgZ)
-                    minZ = avgZ;
-                if (maxZ < avgZ)
-                    maxZ = avgZ;
-
-                static int getAvgZ(int dir, UltimaBatcher2D.YOffsets offs, int curZ)
-                {
-                    int res = getDirZ(((byte)(dir >> 1) + 1) & 3, offs, curZ);
-                    if ((dir & 1) != 0) return res;
-                    return (res + getDirZ(dir >> 1, offs, curZ)) >> 1;
-
-                    static int getDirZ(int dir, UltimaBatcher2D.YOffsets offs, int curZ) => dir switch
-                    {
-                        1 => offs.Right >> 2,
-                        2 => offs.Bottom >> 2,
-                        3 => offs.Left >> 2,
-                        _ => curZ
-                    };
-                }
-            }
-            else
-            {
-                if (tinfo.Flags.HasFlag(TerrainFlags.ImpassableOrSurface) && tinfo.AvgZ <= playerZ && minZ < tinfo.AvgZ)
-                {
-                    minZ = tinfo.AvgZ;
-                }
-
-                if (tinfo.Flags.HasFlag(TerrainFlags.Bridge) && playerZ == tinfo.AvgZ)
-                {
-                    var height = tinfo.Z + tinfo.Height;
-
-                    if (maxZ < height)
-                    {
-                        maxZ = height;
-                    }
-
-                    if (minZ > tinfo.Z)
-                    {
-                        minZ = tinfo.Z;
-                    }
-                }
-            }
-        }
-
-        maxZ += 2;
     }
 
     private static bool CheckMovement(
-        List<TerrainInfo> list,
+        MovementState moveState,
         TerrainPlugin.ChunksLoadedMap chunksLoaded,
         MultiCache multiCache,
         Query<Empty, With<HouseRevision>> qHouseRevision,
         Query<Data<Children>> childrenQuery,
-        Query<Data<WorldPosition, Graphic>, Filter<Without<IsTile>, Without<IsStatic>, Without<MobAnimation>>> othersQuery,
+        Query<Data<WorldPosition, Graphic, MobAnimation>, Filter<Without<IsTile>, Without<IsStatic>, Optional<MobAnimation>, Without<Player>>> othersQuery,
         Query<Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tileQuery,
         Query<Data<WorldPosition, Graphic>, Filter<With<IsStatic>, Without<IsTile>, Without<MobAnimation>>> staticsQuery,
         TileDataLoader tileData,
@@ -719,184 +638,32 @@ readonly struct PlayerMovementPlugin : IPlugin
         ref ushort playerX, ref ushort playerY, ref sbyte playerZ
     )
     {
-        GetNewXY(facing, out var offsetX, out var offsetY);
+        Walkability.GetNewXY(facing, out var offsetX, out var offsetY);
         var newX = (ushort)(playerX + offsetX);
         var newY = (ushort)(playerY + offsetY);
-        GetMinMaxZ(
-            list,
-            chunksLoaded,
-            multiCache,
-            qHouseRevision,
-            childrenQuery,
-            othersQuery,
-            tileQuery,
-            staticsQuery,
-            tileData,
-            facing,
-            newX,
-            newY,
-            playerZ,
-            out var minZ,
-            out var maxZ
-        );
+
+        // Min/max z from the tile behind the destination (legacy
+        // CalculateMinMaxZ: direction ^ 4).
+        var dirIndex = (byte)facing & 7;
+        Walkability.GetNewXY((Direction)(dirIndex ^ 4), out var backX, out var backY);
+        FillListOfItemsAtPosition(
+            moveState, chunksLoaded, multiCache, qHouseRevision, childrenQuery,
+            othersQuery, tileQuery, staticsQuery, tileData,
+            newX + backX, newY + backY);
+        Walkability.GetMinMaxZCore(moveState.Scratch, dirIndex, playerZ, out var minZ, out var maxZ);
 
         FillListOfItemsAtPosition(
-            list,
-            chunksLoaded,
-            multiCache,
-            qHouseRevision,
-            childrenQuery,
-            othersQuery,
-            tileQuery,
-            staticsQuery,
-            tileData,
-            newX,
-            newY
-        );
+            moveState, chunksLoaded, multiCache, qHouseRevision, childrenQuery,
+            othersQuery, tileQuery, staticsQuery, tileData,
+            newX, newY);
 
-        if (list.Count == 0)
-            return false;
+        var z = playerZ;
+        var canMove = Walkability.CalculateNewZCore(moveState.Scratch, moveState.StepState, minZ, maxZ, ref z);
 
-        list.Sort();
-
-        list.Add(new TerrainInfo()
-        {
-            Flags = TerrainFlags.ImpassableOrSurface,
-            Z = 128,
-            AvgZ = 128,
-            Height = 128
-        });
-
-        var result = -128;
-
-        if (playerZ < minZ)
-        {
-            playerZ = (sbyte)minZ;
-        }
-
-        var currentTempZ = 1000000;
-        var currentZ = -128;
-
-        for (int i = 0; i < list.Count; ++i)
-        {
-            var tinfo = list[i];
-
-            if (tinfo.Flags.HasFlag(TerrainFlags.ImpassableOrSurface))
-            {
-                if (tinfo.Z - minZ >= ClassicUO.Game.Constants.DEFAULT_BLOCK_HEIGHT)
-                {
-                    for (int j = i - 1; j >= 0; --j)
-                    {
-                        var temptInfo = list[j];
-
-                        if ((temptInfo.Flags & (TerrainFlags.Surface | TerrainFlags.Bridge)) != 0)
-                        {
-                            if (temptInfo.AvgZ >= currentZ && tinfo.Z - temptInfo.AvgZ >= ClassicUO.Game.Constants.DEFAULT_BLOCK_HEIGHT &&
-                                (temptInfo.AvgZ <= maxZ && temptInfo.Flags.HasFlag(TerrainFlags.Surface) || (temptInfo.Flags.HasFlag(TerrainFlags.Bridge) && temptInfo.Z <= maxZ)))
-                            {
-                                var delta = Math.Abs(playerZ - temptInfo.AvgZ);
-                                if (delta < currentTempZ)
-                                {
-                                    currentTempZ = delta;
-                                    result = temptInfo.AvgZ;
-                                }
-                            }
-                        }
-                    }
-                }
-
-                if (minZ < tinfo.AvgZ)
-                {
-                    minZ = tinfo.AvgZ;
-                }
-
-                if (currentZ < tinfo.AvgZ)
-                {
-                    currentZ = tinfo.AvgZ;
-                }
-            }
-        }
-
-        var canMove = result != -128;
-        playerX = (ushort)(playerX + offsetX);
-        playerY = (ushort)(playerY + offsetY);
-        playerZ = (sbyte)result;
+        playerX = newX;
+        playerY = newY;
+        playerZ = z;
 
         return canMove;
-    }
-
-    private static void GetNewXY(
-        Direction direction,
-        out int offsetX,
-        out int offsetY
-    )
-    {
-        direction &= Direction.Mask;
-        offsetX = 0; offsetY = 0;
-
-        switch (direction)
-        {
-            case Direction.North:
-                offsetY--;
-                break;
-            case Direction.Right:
-                offsetX++;
-                offsetY--;
-                break;
-            case Direction.East:
-                offsetX++;
-                break;
-            case Direction.Down:
-                offsetX++;
-                offsetY++;
-                break;
-            case Direction.South:
-                offsetY++;
-                break;
-            case Direction.Left:
-                offsetX--;
-                offsetY++;
-                break;
-            case Direction.West:
-                offsetX--;
-                break;
-            case Direction.Up:
-                offsetX--;
-                offsetY--;
-                break;
-        }
-    }
-
-    [Flags]
-    private enum TerrainFlags : uint
-    {
-        ImpassableOrSurface = 0x00000001,
-        Surface = 0x00000002,
-        Bridge = 0x00000004,
-        NoDiagonal = 0x00000008
-    }
-
-    private struct TerrainInfo : IComparable<TerrainInfo>
-    {
-        public TerrainFlags Flags;
-        public int Z;
-        public int AvgZ;
-        public int Height;
-        public bool LandStretched;
-        public int LandAvgZ;
-        public UltimaBatcher2D.YOffsets LandBounds;
-        public int RealZ;
-
-        public readonly int CompareTo(TerrainInfo other)
-        {
-            var comparision = Z - other.Z;
-
-            if (comparision == 0)
-            {
-                comparision = Height - other.Height;
-            }
-
-            return comparision;
-        }
     }
 }

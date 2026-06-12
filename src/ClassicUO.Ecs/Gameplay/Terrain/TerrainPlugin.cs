@@ -402,7 +402,7 @@ internal readonly struct TerrainPlugin : IPlugin
         return Math.Max(Math.Abs(x0 - x1), Math.Abs(y0 - y1));
     }
 
-    private static bool ApplyStretch(
+    internal static bool ApplyStretch(
         MapLoader mapLoader,
         TexmapsLoader texmapsLoader,
         int mapIndex,
@@ -484,7 +484,7 @@ internal readonly struct TerrainPlugin : IPlugin
         return isStretched;
     }
 
-    private static sbyte GetTileZ(MapLoader mapLoader, int mapIndex, int x, int y)
+    internal static sbyte GetTileZ(MapLoader mapLoader, int mapIndex, int x, int y)
     {
         static ref Assets.IndexMap getIndex(MapLoader mapLoader, int mapIndex, int x, int y)
         {
