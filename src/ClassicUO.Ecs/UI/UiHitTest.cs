@@ -44,93 +44,99 @@ internal static class UiHitTest
         // treat the whole bounding box as opaque.
         if (custom is null) return true;
 
-        switch (custom.Kind)
+        return custom.Kind switch
         {
             // MiniMap draws its baked texture at native bg-gump size; the bg
             // gump's own alpha mask is the correct hit mask (radar pixels only
             // fill where the frame is opaque), so share the plain Gump path.
-            case UOCustomKind.MiniMap:
-            case UOCustomKind.Gump:
-            {
-                ref readonly var info = ref assets.Gumps.GetGump(custom.AssetId);
-                if (info.Texture == null || info.UV.Width <= 0 || info.UV.Height <= 0)
-                    return true;
-                // Plain Gump draws at native size (scale 1): map the cursor
-                // straight into the source mask.
-                float sx = bb.Size.X / info.UV.Width;
-                float sy = bb.Size.Y / info.UV.Height;
-                if (sx <= 0f || sy <= 0f) return true;
-                int lx = (int)((pos.X - bb.Position.X) / sx);
-                int ly = (int)((pos.Y - bb.Position.Y) / sy);
-                return assets.Gumps.PixelCheck(custom.AssetId, lx, ly);
-            }
-            case UOCustomKind.GumpTiled:
-            {
-                ref readonly var info = ref assets.Gumps.GetGump(custom.AssetId);
-                if (info.Texture == null || info.UV.Width <= 0 || info.UV.Height <= 0)
-                    return true;
-                // Tiled repeats the native sprite across the box (DrawTiled),
-                // so wrap the local coord by the native tile size.
-                int tx = ((int)(pos.X - bb.Position.X)) % info.UV.Width;
-                int ty = ((int)(pos.Y - bb.Position.Y)) % info.UV.Height;
-                return assets.Gumps.PixelCheck(custom.AssetId, tx, ty);
-            }
-            case UOCustomKind.Art:
-            {
-                ref readonly var info = ref assets.Arts.GetArt(custom.AssetId);
-                if (info.Texture == null || info.UV.Width <= 0 || info.UV.Height <= 0)
-                    return true;
-                // Mirrors GuiRenderingPlugin's slot-art size rule: stretch to
-                // bounds when oversized, native + centered otherwise. Two
-                // independent per-axis scales since the oversized branch does
-                // not preserve aspect.
-                float artW = info.UV.Width;
-                float artH = info.UV.Height;
-                float boundW = bb.Size.X;
-                float boundH = bb.Size.Y;
-                float destW, destH, scaleX, scaleY;
-                if (artW > boundW || artH > boundH)
-                {
-                    destW = boundW; destH = boundH;
-                    scaleX = artW / boundW; scaleY = artH / boundH;
-                }
-                else
-                {
-                    destW = artW; destH = artH;
-                    scaleX = 1f; scaleY = 1f;
-                }
-                float ox = bb.Position.X + (boundW - destW) * 0.5f;
-                float oy = bb.Position.Y + (boundH - destH) * 0.5f;
-                if (pos.X >= ox && pos.Y >= oy && pos.X < ox + destW && pos.Y < oy + destH)
-                {
-                    int lx = (int)((pos.X - ox) * scaleX);
-                    int ly = (int)((pos.Y - oy) * scaleY);
-                    if (assets.Arts.PixelCheck(custom.AssetId, lx, ly)) return true;
-                }
-                // Stacked: the pile's second sprite is drawn at +5/+5 at native
-                // size (scale 1), so test it too — the offset half of the pile is
-                // only covered by this sprite.
-                if (custom.Stacked)
-                {
-                    float sx2 = bb.Position.X + StackOffset;
-                    float sy2 = bb.Position.Y + StackOffset;
-                    if (pos.X >= sx2 && pos.Y >= sy2 && pos.X < sx2 + artW && pos.Y < sy2 + artH
-                        && assets.Arts.PixelCheck(custom.AssetId, (int)(pos.X - sx2), (int)(pos.Y - sy2)))
-                        return true;
-                }
-                return false;
-            }
-            case UOCustomKind.GumpNinePatch:
-                // resizepic window bg: pixel-perfect across the 9 slices, exactly
-                // like legacy ResizePic.Contains — a click on a transparent corner
-                // / gap passes through instead of capturing the whole box.
-                return NinePatchHit(assets, custom.AssetId, in bb, pos);
+            UOCustomKind.MiniMap or UOCustomKind.Gump => HitGumpScaled(assets, custom.AssetId, in bb, pos),
+            UOCustomKind.GumpTiled => HitGumpTiled(assets, custom.AssetId, in bb, pos),
+            UOCustomKind.Art => HitArt(assets, custom, in bb, pos),
+            // resizepic window bg: pixel-perfect across the 9 slices, exactly like
+            // legacy ResizePic.Contains — a click on a transparent corner / gap
+            // passes through instead of capturing the whole box.
+            UOCustomKind.GumpNinePatch => NinePatchHit(assets, custom.AssetId, in bb, pos),
+            // None (invisible hit/drag surface) / GumpSlice: solid fill in bounds.
+            _ => true,
+        };
+    }
 
-            default:
-                // None (invisible hit/drag surface) / GumpSlice: solid fill within
-                // bounds.
+    // Plain Gump draws at native size mapped to the box: scale the cursor into
+    // the source mask. MiniMap shares this (its radar fills the bg's mask).
+    private static bool HitGumpScaled(AssetsServer assets, uint assetId, in ComputedNode bb, Vector2 pos)
+    {
+        ref readonly var info = ref assets.Gumps.GetGump(assetId);
+        if (info.Texture == null || info.UV.Width <= 0 || info.UV.Height <= 0)
+            return true;
+        float sx = bb.Size.X / info.UV.Width;
+        float sy = bb.Size.Y / info.UV.Height;
+        if (sx <= 0f || sy <= 0f) return true;
+        int lx = (int)((pos.X - bb.Position.X) / sx);
+        int ly = (int)((pos.Y - bb.Position.Y) / sy);
+        return assets.Gumps.PixelCheck(assetId, lx, ly);
+    }
+
+    // Tiled repeats the native sprite across the box (DrawTiled): wrap the local
+    // coord by the native tile size before sampling the mask.
+    private static bool HitGumpTiled(AssetsServer assets, uint assetId, in ComputedNode bb, Vector2 pos)
+    {
+        ref readonly var info = ref assets.Gumps.GetGump(assetId);
+        if (info.Texture == null || info.UV.Width <= 0 || info.UV.Height <= 0)
+            return true;
+        int tx = ((int)(pos.X - bb.Position.X)) % info.UV.Width;
+        int ty = ((int)(pos.Y - bb.Position.Y)) % info.UV.Height;
+        return assets.Gumps.PixelCheck(assetId, tx, ty);
+    }
+
+    private static bool HitArt(AssetsServer assets, UOCustomRender custom, in ComputedNode bb, Vector2 pos)
+    {
+        ref readonly var info = ref assets.Arts.GetArt(custom.AssetId);
+        if (info.Texture == null || info.UV.Width <= 0 || info.UV.Height <= 0)
+            return true;
+        float artW = info.UV.Width;
+        float artH = info.UV.Height;
+        var (ox, oy, destW, destH, scaleX, scaleY) = ArtDestRect(artW, artH, in bb);
+        if (pos.X >= ox && pos.Y >= oy && pos.X < ox + destW && pos.Y < oy + destH)
+        {
+            int lx = (int)((pos.X - ox) * scaleX);
+            int ly = (int)((pos.Y - oy) * scaleY);
+            if (assets.Arts.PixelCheck(custom.AssetId, lx, ly)) return true;
+        }
+        // Stacked: the pile's second sprite is drawn at +5/+5 at native size
+        // (scale 1), so test it too — the offset half is only covered by it.
+        if (custom.Stacked)
+        {
+            float sx2 = bb.Position.X + StackOffset;
+            float sy2 = bb.Position.Y + StackOffset;
+            if (pos.X >= sx2 && pos.Y >= sy2 && pos.X < sx2 + artW && pos.Y < sy2 + artH
+                && assets.Arts.PixelCheck(custom.AssetId, (int)(pos.X - sx2), (int)(pos.Y - sy2)))
                 return true;
         }
+        return false;
+    }
+
+    // Slot-art destination rect + per-axis source scale: stretch to the bounds
+    // when oversized (independent per-axis scale — aspect not preserved), else
+    // native size centered. Mirrors GuiRenderingPlugin's slot-art size rule.
+    // Pure (no assets) so it is unit-testable.
+    internal static (float Ox, float Oy, float DestW, float DestH, float ScaleX, float ScaleY) ArtDestRect(float artW, float artH, in ComputedNode bb)
+    {
+        float boundW = bb.Size.X;
+        float boundH = bb.Size.Y;
+        float destW, destH, scaleX, scaleY;
+        if (artW > boundW || artH > boundH)
+        {
+            destW = boundW; destH = boundH;
+            scaleX = artW / boundW; scaleY = artH / boundH;
+        }
+        else
+        {
+            destW = artW; destH = artH;
+            scaleX = 1f; scaleY = 1f;
+        }
+        float ox = bb.Position.X + (boundW - destW) * 0.5f;
+        float oy = bb.Position.Y + (boundH - destH) * 0.5f;
+        return (ox, oy, destW, destH, scaleX, scaleY);
     }
 
     // 9-slice pixel hit mirroring legacy ResizePic.Contains + the ECS ninepatch

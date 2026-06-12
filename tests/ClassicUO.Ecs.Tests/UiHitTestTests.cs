@@ -55,4 +55,40 @@ public class UiHitTestTests
         Assert.False(UiHitTest.PixelHit(null, None, bb, new XnaVector2(50, 60)));  // bottom edge
         Assert.True(UiHitTest.PixelHit(null, None, bb, new XnaVector2(109, 59)));  // just inside
     }
+
+    [Fact]
+    public void BoundsOnly_is_a_solid_hit_before_touching_the_alpha_mask()
+    {
+        // A Gump kind would normally sample assets; boundsOnly must short-circuit
+        // to a whole-box hit (UiContainsByBounds) without dereferencing the loader.
+        var gump = new UOCustomRender { Kind = UOCustomKind.Gump, AssetId = 0x1234 };
+        var bb = Box(0, 0, 20, 20);
+        Assert.True(UiHitTest.PixelHit(null, gump, bb, new XnaVector2(5, 5), boundsOnly: true));
+    }
+
+    [Fact]
+    public void Stacked_widens_the_bbox_reject_by_the_pile_offset()
+    {
+        var bb = Box(0, 0, 20, 20);                       // box covers x[0,20)
+        var stacked = new UOCustomRender { Kind = UOCustomKind.None, Stacked = true };
+        var flat = new UOCustomRender { Kind = UOCustomKind.None, Stacked = false };
+        Assert.True(UiHitTest.PixelHit(null, stacked, bb, new XnaVector2(22, 10)));  // within +5 pile extent
+        Assert.False(UiHitTest.PixelHit(null, flat, bb, new XnaVector2(22, 10)));    // past the un-extended box
+    }
+
+    [Fact]
+    public void ArtDestRect_stretches_oversized_art_to_the_bounds()
+    {
+        var (ox, oy, destW, destH, scaleX, scaleY) = UiHitTest.ArtDestRect(100, 100, Box(0, 0, 20, 20));
+        Assert.Equal((0f, 0f, 20f, 20f), (ox, oy, destW, destH));
+        Assert.Equal((5f, 5f), (scaleX, scaleY)); // 100 / 20
+    }
+
+    [Fact]
+    public void ArtDestRect_centers_native_art_at_scale_one()
+    {
+        var (ox, oy, destW, destH, scaleX, scaleY) = UiHitTest.ArtDestRect(10, 10, Box(0, 0, 20, 20));
+        Assert.Equal((5f, 5f, 10f, 10f), (ox, oy, destW, destH)); // centered in the 20x20 box
+        Assert.Equal((1f, 1f), (scaleX, scaleY));
+    }
 }
