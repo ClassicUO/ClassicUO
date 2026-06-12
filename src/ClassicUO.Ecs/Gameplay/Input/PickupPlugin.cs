@@ -19,87 +19,16 @@ internal readonly struct PickupPlugin : IPlugin
     {
         var pickupItemFn = PickupItem;
         var dropItemFn = DropItem;
+        var latchFn = LatchPressTarget;
+        var shouldFirePickupFn = ShouldFirePickup;
+        var pickupEligibleFn = PickupTargetEligible;
 
         app
             .AddResource(new GrabbedItem())
             .AddResource(new LeftPressLatch())
 
-            // Latches whichever entity was the press target on the left-button
-            // edge. UI items / windows under the cursor at click time win over
-            // any stale world hit (SelectedEntity is 1 frame behind, so a
-            // click over a container window can otherwise still see the world
-            // tile the cursor was over a frame ago and latch to that). Items
-            // inside camera bounds without a UI hit fall back to
-            // SelectedEntity (the world hit-test result). Clicks fully outside
-            // camera bounds with no UI under them latch to 0 so window-border
-            // / chrome clicks can't accidentally pick up a world item.
-            .AddSystem((
-                Res<MouseContext> m,
-                Res<SelectedEntity> sel,
-                Res<Camera> camera,
-                Res<AssetsServer> assets,
-                ResMut<LeftPressLatch> latch,
-                Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
-                Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>> movables,
-                Query<Data<TinyEcs.Parent>> parents,
-                Query<Data<ContainerItemUI>> itemsQ,
-                Query<Data<PaperdollEquipUI>> equipQ,
-                Query<Data<ContainerWindow>> containerWinQ,
-                Query<Data<PaperdollWindow>> pdWinQ) =>
-            {
-                // Clear on release edge. NOTE: don't rely on `!IsPressed` to
-                // detect "not held" — IsPressed returns false on the press-
-                // once frame itself (oldState=Released), which would wipe the
-                // latch before we ever set it.
-                if (m.Value.IsReleased(Input.MouseButtonType.Left))
-                {
-                    latch.Value.Entity = 0;
-                    return;
-                }
-
-                if (!m.Value.IsPressedOnce(Input.MouseButtonType.Left))
-                    return;
-
-                var pos = m.Value.Position;
-
-                // One shared topmost pick (UiPick). A container item or
-                // paperdoll equipment directly under the cursor IS the pickup
-                // target; otherwise resolve the owning window and latch it only
-                // if it's a container/paperdoll (drop targeting + the
-                // world-claim bail rely on a UI entity in the latch). Occlusion
-                // — an item sitting behind a front window — falls out of
-                // topmost-by-paint-order, so the old per-item z-gate is gone.
-                var hit = UiPick.Topmost(pos, assets.Value, rendered, parents);
-                ulong topUi = 0;
-                if (hit.Found)
-                {
-                    if (itemsQ.Contains(hit.Entity) || equipQ.Contains(hit.Entity))
-                        topUi = hit.Entity;
-                    else
-                    {
-                        var owner = UiPick.MovableRoot(hit.Entity, movables, parents);
-                        if (owner != 0 && (containerWinQ.Contains(owner) || pdWinQ.Contains(owner)))
-                            topUi = owner;
-                    }
-                }
-
-                if (topUi != 0)
-                {
-                    latch.Value.Entity = topUi;
-                    return;
-                }
-
-                // Outside game viewport AND no container UI hit -> nothing to
-                // pick up. Prevents game-window border clicks from inheriting
-                // a stale world selection.
-                if (!camera.Value.Bounds.Contains((int)pos.X, (int)pos.Y))
-                {
-                    latch.Value.Entity = 0;
-                    return;
-                }
-
-                latch.Value.Entity = sel.Value.Entity;
-            })
+            // Left-press-edge latch; see LatchPressTarget for the rationale.
+            .AddSystem(latchFn)
             .InStage(Stage.First)
             // A press while targeting is the target click (TargetingPlugin owns
             // it) — don't latch a pickup candidate from it.
@@ -115,75 +44,8 @@ internal readonly struct PickupPlugin : IPlugin
             .RunIf((Res<SplitPrompt> split) => !split.Value.Open)
             .RunIf((Commands cmds) => cmds.HasResource<SelectedEntity>() && cmds.HasResource<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial == 0)
-            .RunIf((Res<MouseContext> mouseCtx, Local<float?> holdDeadline, Res<Time> time) =>
-            {
-                // Pickup fires on EITHER trigger:
-                //   1. Left held + mouse dragged >= MIN_PICKUP_DRAG_DISTANCE_PIXELS
-                //      from the press origin.
-                //   2. Left held continuously for >= 1000ms (held-still pickup).
-                // Hold deadline armed on press-once, cleared on release.
-                // Time.Total accumulates in milliseconds (FnaPlugin.cs:46
-                // multiplies frame seconds by 1000f), matching the rest of
-                // the codebase. CLAUDE.md's "seconds" claim is stale.
-                if (mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Left))
-                    holdDeadline.Value = time.Value.Total + 1000f;
-                else if (mouseCtx.Value.IsReleased(Input.MouseButtonType.Left))
-                    holdDeadline.Value = null;
-
-                if (!mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
-                    return false;
-
-                var dragOffset = mouseCtx.Value.DraggingOffset;
-                if (Math.Abs(dragOffset.X) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS
-                    || Math.Abs(dragOffset.Y) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
-                    return true;
-
-                return holdDeadline.Value.HasValue && time.Value.Total >= holdDeadline.Value;
-            })
-            .RunIf((
-                Res<LeftPressLatch> latch,
-                Res<NetworkEntitiesMap> entitiesMap,
-                Query<Data<NetworkSerial>, Filter<With<Items>>> q,
-                Query<Data<ContainerItemUI>> uiItemQ,
-                Query<Data<PaperdollEquipUI>> equipUiQ) =>
-            {
-                // Pickup eligibility is gated on the PRESS-ORIGIN entity, not
-                // the currently hovered one — otherwise dragging the cursor
-                // off the item before the drag-distance threshold trips would
-                // cancel pickup. Mirrors legacy
-                // UIManager.LastControlMouseDown(Left) == this.
-                var ent = latch.Value.Entity;
-                if (!ent.IsValid()) return false;
-                // Items have serials in [0x40000000, 0x80000000). Reject
-                // mobiles / multis / anything else so pickup never fires on
-                // non-items (matches legacy GameActions.OpenCorpse-style
-                // SerialHelper.IsItem guards).
-                if (q.TryGet(ent, out var serialRow))
-                {
-                    var (_, ns) = serialRow;
-                    return SerialHelper.IsItem(ns.Ref.Value);
-                }
-                // Container item UI selections resolve to their backing game
-                // entity via NetworkEntitiesMap. Pickup body re-resolves.
-                if (uiItemQ.TryGet(ent, out var uiItemRow))
-                {
-                    var (_, link) = uiItemRow;
-                    if (!SerialHelper.IsItem(link.Ref.Serial)) return false;
-                    return entitiesMap.Value.TryGet(link.Ref.Serial, out var gameEnt)
-                        && q.Contains(gameEnt);
-                }
-                // Paperdoll equipment overlay -> game entity by ItemSerial.
-                // Mirrors main's PaperDollInteractable.GumpPicEquipment.Update
-                // pickup gate (drag threshold + CanLift).
-                if (equipUiQ.TryGet(ent, out var equipUiRow))
-                {
-                    var (_, link) = equipUiRow;
-                    if (!SerialHelper.IsItem(link.Ref.ItemSerial)) return false;
-                    return entitiesMap.Value.TryGet(link.Ref.ItemSerial, out var gameEnt)
-                        && q.Contains(gameEnt);
-                }
-                return false;
-            })
+            .RunIf(shouldFirePickupFn)
+            .RunIf(pickupEligibleFn)
             .Build()
 
             .AddSystem(dropItemFn)
@@ -300,10 +162,140 @@ internal readonly struct PickupPlugin : IPlugin
         });
     }
 
+    // Latches whichever entity was the press target on the left-button edge.
+    // UI items / windows under the cursor at click time win over any stale
+    // world hit (SelectedEntity is 1 frame behind, so a click over a container
+    // window can otherwise still see the world tile the cursor was over a frame
+    // ago and latch to that). Items inside camera bounds without a UI hit fall
+    // back to SelectedEntity (the world hit-test result). Clicks fully outside
+    // camera bounds with no UI under them latch to 0 so window-border / chrome
+    // clicks can't accidentally pick up a world item.
+    private static void LatchPressTarget(
+        Res<MouseContext> m,
+        Res<SelectedEntity> sel,
+        Res<Camera> camera,
+        Res<AssetsServer> assets,
+        ResMut<LeftPressLatch> latch,
+        UiGesturePick pick,
+        Query<Data<ContainerItemUI>> itemsQ,
+        Query<Data<PaperdollEquipUI>> equipQ,
+        Query<Data<ContainerWindow>> containerWinQ,
+        Query<Data<PaperdollWindow>> pdWinQ)
+    {
+        // Clear on release edge. NOTE: don't rely on `!IsPressed` to detect
+        // "not held" — IsPressed returns false on the press-once frame itself
+        // (oldState=Released), which would wipe the latch before we ever set it.
+        if (m.Value.IsReleased(Input.MouseButtonType.Left))
+        {
+            latch.Value.Entity = 0;
+            return;
+        }
+
+        if (!m.Value.IsPressedOnce(Input.MouseButtonType.Left))
+            return;
+
+        var pos = m.Value.Position;
+
+        // One shared topmost pick (UiPick). A container item or paperdoll
+        // equipment directly under the cursor IS the pickup target; otherwise
+        // resolve the owning window and latch it only if it's a container/
+        // paperdoll. Occlusion falls out of topmost-by-paint-order.
+        var hit = pick.Topmost(pos, assets.Value);
+        ulong topUi = 0;
+        if (hit.Found)
+        {
+            if (itemsQ.Contains(hit.Entity) || equipQ.Contains(hit.Entity))
+                topUi = hit.Entity;
+            else
+            {
+                var owner = pick.MovableRoot(hit.Entity);
+                if (owner != 0 && (containerWinQ.Contains(owner) || pdWinQ.Contains(owner)))
+                    topUi = owner;
+            }
+        }
+
+        if (topUi != 0)
+        {
+            latch.Value.Entity = topUi;
+            return;
+        }
+
+        // Outside game viewport AND no container UI hit -> nothing to pick up.
+        // Prevents game-window border clicks from inheriting a stale selection.
+        if (!camera.Value.Bounds.Contains((int)pos.X, (int)pos.Y))
+        {
+            latch.Value.Entity = 0;
+            return;
+        }
+
+        latch.Value.Entity = sel.Value.Entity;
+    }
+
+    // Pickup fires on EITHER trigger: left held + mouse dragged past
+    // MIN_PICKUP_DRAG_DISTANCE_PIXELS from the press origin, or left held
+    // continuously for >= 1000ms (held-still pickup). Hold deadline armed on
+    // press-once, cleared on release. Time.Total accumulates in milliseconds.
+    private static bool ShouldFirePickup(Res<MouseContext> mouseCtx, Local<float?> holdDeadline, Res<Time> time)
+    {
+        if (mouseCtx.Value.IsPressedOnce(Input.MouseButtonType.Left))
+            holdDeadline.Value = time.Value.Total + 1000f;
+        else if (mouseCtx.Value.IsReleased(Input.MouseButtonType.Left))
+            holdDeadline.Value = null;
+
+        if (!mouseCtx.Value.IsPressed(Input.MouseButtonType.Left))
+            return false;
+
+        var dragOffset = mouseCtx.Value.DraggingOffset;
+        if (Math.Abs(dragOffset.X) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS
+            || Math.Abs(dragOffset.Y) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
+            return true;
+
+        return holdDeadline.Value.HasValue && time.Value.Total >= holdDeadline.Value;
+    }
+
+    // Pickup eligibility is gated on the PRESS-ORIGIN entity, not the currently
+    // hovered one — otherwise dragging the cursor off the item before the
+    // drag-distance threshold trips would cancel pickup. Mirrors legacy
+    // UIManager.LastControlMouseDown(Left) == this. Items have serials in
+    // [0x40000000, 0x80000000); reject mobiles / multis / anything else.
+    private static bool PickupTargetEligible(
+        Res<LeftPressLatch> latch,
+        Res<NetworkEntitiesMap> entitiesMap,
+        Query<Data<NetworkSerial>, Filter<With<Items>>> q,
+        Query<Data<ContainerItemUI>> uiItemQ,
+        Query<Data<PaperdollEquipUI>> equipUiQ)
+    {
+        var ent = latch.Value.Entity;
+        if (!ent.IsValid()) return false;
+        if (q.TryGet(ent, out var serialRow))
+        {
+            var (_, ns) = serialRow;
+            return SerialHelper.IsItem(ns.Ref.Value);
+        }
+        // Container item UI selections resolve to their backing game entity via
+        // NetworkEntitiesMap. Pickup body re-resolves.
+        if (uiItemQ.TryGet(ent, out var uiItemRow))
+        {
+            var (_, link) = uiItemRow;
+            if (!SerialHelper.IsItem(link.Ref.Serial)) return false;
+            return entitiesMap.Value.TryGet(link.Ref.Serial, out var gameEnt)
+                && q.Contains(gameEnt);
+        }
+        // Paperdoll equipment overlay -> game entity by ItemSerial.
+        if (equipUiQ.TryGet(ent, out var equipUiRow))
+        {
+            var (_, link) = equipUiRow;
+            if (!SerialHelper.IsItem(link.Ref.ItemSerial)) return false;
+            return entitiesMap.Value.TryGet(link.Ref.ItemSerial, out var gameEnt)
+                && q.Contains(gameEnt);
+        }
+        return false;
+    }
+
     // A readdress packet acks the pending drop if it touches the held item OR
     // the drop target. The target match is what finalizes a same-graphic merge,
     // where the held serial is consumed and only the target stack updates.
-    private static bool IsDropAck(GrabbedItem grabbed, uint serial)
+    internal static bool IsDropAck(GrabbedItem grabbed, uint serial)
         => grabbed.PendingDrop
         && (serial == grabbed.Serial
             || (grabbed.DropTargetSerial != 0 && serial == grabbed.DropTargetSerial));
@@ -553,7 +545,7 @@ internal readonly struct PickupPlugin : IPlugin
     // Legacy ContainerGump.OnMouseUp drops onto a "pile-like" graphic (sand
     // pile, coin pile, etc) by snapping to the target's slot just like a
     // stackable. Same set of graphics here.
-    private static bool IsPileGraphic(ushort g) => g switch
+    internal static bool IsPileGraphic(ushort g) => g switch
     {
         0x0EFA or 0x2253 or 0x2252 or 0x238C or 0x23A0 or 0x2D50 => true,
         _ => false,
@@ -787,7 +779,7 @@ internal readonly struct PickupPlugin : IPlugin
         return Math.Max(dx, dy) <= Constants.DRAG_ITEMS_DISTANCE;
     }
 
-    private static ulong ResolveRootHolder(ulong start, Query<Data<TinyEcs.Parent>> parentQuery)
+    internal static ulong ResolveRootHolder(ulong start, Query<Data<TinyEcs.Parent>> parentQuery)
     {
         var cur = start;
         for (int i = 0; i < 16; i++)
@@ -820,11 +812,6 @@ internal readonly struct PickupPlugin : IPlugin
         float mx = mouseAbs.X - computed.Position.X;
         float my = mouseAbs.Y - computed.Position.Y;
 
-        // Chessboard rendering shifts items up by 20px (see
-        // SpawnContainerItemUI: drawY subtracts 20 for graphic 0x091A). Reverse
-        // that shift on drop so the server receives the unshifted Y.
-        if (tag.Graphic == 0x091A) my += 20;
-
         int spriteW, spriteH;
         if (tag.IsBoard)
         {
@@ -845,12 +832,25 @@ internal readonly struct PickupPlugin : IPlugin
             }
         }
 
-        // Scaled bounds (chessboard adds 20px to its drop height in legacy).
-        var b = tag.Bounds;
-        float bx = b.X * scale;
-        float by = b.Y * scale;
-        float bw = b.Width * scale;
-        float bh = (b.Height + (tag.Graphic == 0x091A ? 20 : 0)) * scale;
+        // Chessboard (0x091A) renders items shifted up 20px; ClampDropPosition
+        // reverses that so the server receives the unshifted Y.
+        return ClampDropPosition(mx, my, spriteW, spriteH, tag.Bounds, scale, tag.Graphic == 0x091A);
+    }
+
+    // Pure drop-position math, split out of ClampToContainer so it is
+    // unit-testable without an AssetsServer: centre the held sprite on the
+    // cursor's container-local position, clamp into the scaled content bounds
+    // minus the sprite footprint, then reverse the scale back to server space.
+    // `chessboard` shifts the item up 20px and adds 20px to the drop height.
+    internal static (ushort, ushort) ClampDropPosition(
+        float mx, float my, int spriteW, int spriteH, in Rectangle bounds, float scale, bool chessboard)
+    {
+        if (chessboard) my += 20;
+
+        float bx = bounds.X * scale;
+        float by = bounds.Y * scale;
+        float bw = bounds.Width * scale;
+        float bh = (bounds.Height + (chessboard ? 20 : 0)) * scale;
 
         float x = mx - (spriteW / 2f);
         float y = my - (spriteH / 2f);
@@ -860,7 +860,6 @@ internal readonly struct PickupPlugin : IPlugin
         if (x < bx) x = bx;
         if (y < by) y = by;
 
-        // Reverse scale back to server-space coordinates.
         return ((ushort)(x / scale), (ushort)(y / scale));
     }
 }
