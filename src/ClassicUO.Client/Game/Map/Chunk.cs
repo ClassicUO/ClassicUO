@@ -316,20 +316,6 @@ namespace ClassicUO.Game.Map
                     break;
                 }
 
-                // Co-planar same-Z statics: the classic client draws the one
-                // stored EARLIER in statics.mul on top (verified vs client.exe:
-                // 89% of same-Z carpet/floor pairs map-wide store the carpet
-                // before the floor, and carpets render above floors). Default
-                // insertion appends the later-loaded static tail-ward, which
-                // the head->tail draw paints last (on top) — the reverse of
-                // the classic client. Break here so a newly-added static is
-                // inserted BEFORE an equal-priority static, keeping the
-                // earlier-loaded one tail-ward = drawn on top.
-                if (testPriorityZ == priorityZ && obj is Static && o is Static)
-                {
-                    break;
-                }
-
                 found = o;
                 o = o.TNext;
             }
