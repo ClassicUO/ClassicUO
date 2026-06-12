@@ -35,6 +35,28 @@ public class ReparentWipeRepro
         Assert.Equal(pouch.ID, world.GetParent(itemInPouch.ID));
     }
 
+    // Gump teardown leans on this: despawning a window ROOT must cascade to
+    // the whole subtree (RelationshipEntityMapper = DeleteDescendants), so
+    // plugins don't need their own recursive DespawnSubtree walks.
+    [Fact]
+    public void Delete_Root_CascadesToWholeSubtree()
+    {
+        using var world = new World();
+
+        var root = world.Entity();
+        var child = world.Entity();
+        var grandchild = world.Entity();
+
+        world.AddChild(root.ID, child.ID);
+        world.AddChild(child.ID, grandchild.ID);
+
+        world.Delete(root.ID);
+
+        Assert.False(world.Exists(root.ID));
+        Assert.False(world.Exists(child.ID));
+        Assert.False(world.Exists(grandchild.ID));
+    }
+
     [Fact]
     public void RemoveChild_Unlink_KeepsChildren()
     {

@@ -112,7 +112,6 @@ internal sealed class TooltipQueries : CompositeSystemParam
     public readonly Query<Data<PaperdollSlot>> PaperdollSlots;
     public readonly Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> Rendered;
     public readonly Query<Data<Node>, With<TooltipRoot>> Roots;
-    public readonly Query<Data<TinyEcs.Children>> Children;
 
     public TooltipQueries()
     {
@@ -121,7 +120,6 @@ internal sealed class TooltipQueries : CompositeSystemParam
         PaperdollSlots = Add(new Query<Data<PaperdollSlot>>());
         Rendered       = Add(new Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>>());
         Roots          = Add(new Query<Data<Node>, With<TooltipRoot>>());
-        Children       = Add(new Query<Data<TinyEcs.Children>>());
     }
 }
 
@@ -198,11 +196,10 @@ internal readonly struct TooltipPlugin : IPlugin
         var slotQ = q.PaperdollSlots;
         var rendered = q.Rendered;
         var rootQ = q.Roots;
-        var childrenQ = q.Children;
 
         if (!profile.Value.UseTooltip)
         {
-            HideBox(commands, state, childrenQ);
+            HideBox(commands, state);
             state.Value.Serial = 0;
             return;
         }
@@ -254,7 +251,7 @@ internal readonly struct TooltipPlugin : IPlugin
 
         if (serial == 0)
         {
-            HideBox(commands, state, childrenQ);
+            HideBox(commands, state);
             state.Value.Serial = 0;
             return;
         }
@@ -264,7 +261,7 @@ internal readonly struct TooltipPlugin : IPlugin
             state.Value.Serial = serial;
             state.Value.HoverStart = time.Value.Total;
             opl.Value.Request(serial);
-            HideBox(commands, state, childrenQ);   // drop the old box until the new one is ready
+            HideBox(commands, state);   // drop the old box until the new one is ready
         }
 
         if (time.Value.Total - state.Value.HoverStart < profile.Value.TooltipDelayBeforeDisplay)
@@ -286,7 +283,7 @@ internal readonly struct TooltipPlugin : IPlugin
 
         if (needsBuild)
         {
-            HideBox(commands, state, childrenQ);
+            HideBox(commands, state);
 
             byte font = profile.Value.TooltipFont;
             // Base (untagged) text colour: legacy GeneratePixelsUnicode maps
@@ -417,10 +414,10 @@ internal readonly struct TooltipPlugin : IPlugin
         _ => string.Empty,
     };
 
-    private static void HideBox(Commands commands, ResMut<TooltipState> state, Query<Data<TinyEcs.Children>> childrenQ)
+    private static void HideBox(Commands commands, ResMut<TooltipState> state)
     {
         if (state.Value.Root == 0) return;
-        DespawnSubtree(commands, state.Value.Root, childrenQ);
+        commands.Entity(state.Value.Root).Despawn();
         state.Value.Root = 0;
         state.Value.ShownSerial = 0;
         state.Value.ShownRevision = 0;
@@ -428,21 +425,9 @@ internal readonly struct TooltipPlugin : IPlugin
 
     private static void DespawnOnExit(
         Commands commands,
-        ResMut<TooltipState> state,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        ResMut<TooltipState> state)
     {
-        HideBox(commands, state, childrenQ);
+        HideBox(commands, state);
         state.Value.Serial = 0;
-    }
-
-    private static void DespawnSubtree(Commands commands, ulong e, Query<Data<TinyEcs.Children>> childrenQ)
-    {
-        if (childrenQ.TryGet(e, out var kidsRow))
-        {
-            var (_, kids) = kidsRow;
-            foreach (var cid in kids.Ref)
-                DespawnSubtree(commands, cid, childrenQ);
-        }
-        commands.Entity(e).Despawn();
     }
 }

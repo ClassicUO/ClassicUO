@@ -104,11 +104,11 @@ internal readonly struct ServerGumpPlugin : IPlugin
         // Tear down every server gump on logout (return to login screen). No
         // per-gump systems run outside GameScreen, so without this the roots +
         // children linger as orphan Nodes drawn over the login screen.
-        Action<Commands, Query<Data<ServerGump>>, Query<Data<ServerGumpChild>>, Query<Data<TinyEcs.Children>>, ResMut<ServerGumpRegistry>> teardownFn =
-            (cmd, rootsQ, childrenTagQ, childrenQ, registry) =>
+        Action<Commands, Query<Data<ServerGump>>, Query<Data<ServerGumpChild>>, ResMut<ServerGumpRegistry>> teardownFn =
+            (cmd, rootsQ, childrenTagQ, registry) =>
             {
                 foreach (var (ent, _) in rootsQ)
-                    DespawnSubtree(cmd, ent.Ref, childrenQ);
+                    cmd.Entity(ent.Ref).Despawn();
                 // Defensive: drop any child whose root was already despawned
                 // (e.g. a server close mid-frame) so none survive the exit.
                 foreach (var (ent, _) in childrenTagQ)
@@ -261,18 +261,7 @@ internal readonly struct ServerGumpPlugin : IPlugin
         }
     }
 
-    private static void DespawnSubtree(Commands commands, ulong e, Query<Data<TinyEcs.Children>> childrenQ)
-    {
-        if (childrenQ.TryGet(e, out var childrenRow))
-        {
-            var (_, kids) = childrenRow;
-            foreach (var cid in kids.Ref)
-                DespawnSubtree(commands, cid, childrenQ);
-        }
-        commands.Entity(e).Despawn();
-    }
-
-    // A checkertrans tagged this child as overlapping, so set its alpha to 0.5
+// A checkertrans tagged this child as overlapping, so set its alpha to 0.5
     // and drop the tag. Legacy ApplyTrans assigns child.Alpha = 0.5 ABSOLUTELY,
     // so set the hue vector's Z (the shader alpha) to 0.5 — idempotent, so a
     // re-run before the deferred tag removal applies can't compound it to 0.25.

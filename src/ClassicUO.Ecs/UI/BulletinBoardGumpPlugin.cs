@@ -129,7 +129,7 @@ internal readonly struct BulletinBoardGumpPlugin : IPlugin
         // Re-open replaces (legacy GetGump(serial)?.Dispose() + Add).
         foreach (var (ent, win) in p.BoardsQ)
             if (win.Ref.Serial == serial)
-                DespawnSubtree(commands, ent.Ref, p.ChildrenQ);
+                commands.Entity(ent.Ref).Despawn();
 
         var builder = p.Builder.Value;
         var root = builder.SpawnUOGump(commands, BoardGraphic, Vector3.UnitZ, new Vector2(180, 60), p.ZCounter.Value);
@@ -196,7 +196,7 @@ internal readonly struct BulletinBoardGumpPlugin : IPlugin
             if (win.Ref.Serial != board) continue;
 
             if (win.Ref.Rows.Remove(msgSerial, out var old))
-                DespawnSubtree(commands, old, p.ChildrenQ);
+                commands.Entity(old).Despawn();
 
             var row = commands.Spawn()
                 .Insert(new Node
@@ -232,7 +232,7 @@ internal readonly struct BulletinBoardGumpPlugin : IPlugin
         // One message window per board at a time (legacy disposes the previous).
         foreach (var (ent, win) in p.ItemsQ)
             if (win.Ref.Board == board)
-                DespawnSubtree(commands, ent.Ref, p.ChildrenQ);
+                commands.Entity(ent.Ref).Despawn();
 
         var assets = p.Assets.Value;
         var builder = p.Builder.Value;
@@ -352,7 +352,7 @@ internal readonly struct BulletinBoardGumpPlugin : IPlugin
                     var (_, w) = itemRow;
                     net.Value.Send_BulletinBoardPostMessage(capBoard, capMsg,
                         ReadSingleLine(bp, w.Ref.SubjectGlyph), ReadMultiline(bp, w.Ref.BodyGlyph));
-                    DespawnSubtree(cmd, capRoot, bp.ChildrenQ);
+                    cmd.Entity(capRoot).Despawn();
                 });
                 commands.AddChild(rootId, postBtn.Id);
                 break;
@@ -380,7 +380,7 @@ internal readonly struct BulletinBoardGumpPlugin : IPlugin
                 removeBtn.Observe((On<UiClick> _, Res<NetClient> net, Commands cmd, BulletinParams bp) =>
                 {
                     net.Value.Send_BulletinBoardRemoveMessage(capBoard, capMsg);
-                    DespawnSubtree(cmd, capRoot, bp.ChildrenQ);
+                    cmd.Entity(capRoot).Despawn();
                 });
                 commands.AddChild(rootId, removeBtn.Id);
                 break;
@@ -454,25 +454,13 @@ internal readonly struct BulletinBoardGumpPlugin : IPlugin
         Commands commands,
         Query<Data<BulletinBoardWindow>> boardsQ,
         Query<Data<BulletinItemWindow>> itemsQ,
-        Query<Data<TinyEcs.Children>> childrenQ,
         ResMut<BulletinPendingRows> pending)
     {
         pending.Value.Clear();
         foreach (var (ent, _) in boardsQ)
-            DespawnSubtree(commands, ent.Ref, childrenQ);
+            commands.Entity(ent.Ref).Despawn();
         foreach (var (ent, _) in itemsQ)
-            DespawnSubtree(commands, ent.Ref, childrenQ);
-    }
-
-    private static void DespawnSubtree(Commands commands, ulong e, Query<Data<TinyEcs.Children>> childrenQ)
-    {
-        if (childrenQ.TryGet(e, out var childrenRow))
-        {
-            var (_, kids) = childrenRow;
-            foreach (var cid in kids.Ref)
-                DespawnSubtree(commands, cid, childrenQ);
-        }
-        commands.Entity(e).Despawn();
+            commands.Entity(ent.Ref).Despawn();
     }
 
     private static int GumpW(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Width; }
@@ -575,7 +563,6 @@ internal sealed class BulletinParams : CompositeSystemParam
     public readonly Query<Data<BulletinItemWindow>> ItemsQ;
     public readonly Query<Data<Text>> TextQ;
     public readonly Query<Data<UiCustom>> CustomQ;
-    public readonly Query<Data<TinyEcs.Children>> ChildrenQ;
 
     public BulletinParams()
     {
@@ -588,7 +575,6 @@ internal sealed class BulletinParams : CompositeSystemParam
         ItemsQ = Add(new Query<Data<BulletinItemWindow>>());
         TextQ = Add(new Query<Data<Text>>());
         CustomQ = Add(new Query<Data<UiCustom>>());
-        ChildrenQ = Add(new Query<Data<TinyEcs.Children>>());
     }
 }
 

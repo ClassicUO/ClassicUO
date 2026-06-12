@@ -95,8 +95,7 @@ internal readonly struct MapGumpPlugin : IPlugin
             Commands commands,
             Res<GumpBuilder> builder,
             Query<Data<MapWindow>> windowsQ,
-            Query<Data<Node>> nodeQ,
-            Query<Data<TinyEcs.Children>> childrenQ) =>
+            Query<Data<Node>> nodeQ) =>
         {
             var k = trig.Event.Packet;
             foreach (var (ent, win) in windowsQ)
@@ -108,7 +107,7 @@ internal readonly struct MapGumpPlugin : IPlugin
                         AddPin(commands, builder.Value, ref win.Ref, k.X, k.Y);
                         break;
                     case MapMessageType.Clear:
-                        ClearPins(commands, ref win.Ref, childrenQ);
+                        ClearPins(commands, ref win.Ref);
                         break;
                     case MapMessageType.EditResponse:
                         win.Ref.PlotState = k.PlotEnabled ? 1 : 0;
@@ -145,7 +144,7 @@ internal readonly struct MapGumpPlugin : IPlugin
         // gump; one live window per map item keeps the pin state unambiguous).
         foreach (var (ent, win) in p.WindowsQ)
             if (win.Ref.Serial == serial)
-                DespawnSubtree(commands, ent.Ref, p.ChildrenQ);
+                commands.Entity(ent.Ref).Despawn();
 
         var assets = p.Assets.Value;
         var builder = p.Builder.Value;
@@ -213,12 +212,12 @@ internal readonly struct MapGumpPlugin : IPlugin
             TogglePlot(capRoot, capSerial, net.Value, wq, nq));
         stop.Observe((On<UiClick> _, Res<NetClient> net, Query<Data<MapWindow>> wq, Query<Data<Node>> nq) =>
             TogglePlot(capRoot, capSerial, net.Value, wq, nq));
-        clear.Observe((On<UiClick> _, Res<NetClient> net, Commands cmd, Query<Data<MapWindow>> wq, Query<Data<TinyEcs.Children>> kidsQ) =>
+        clear.Observe((On<UiClick> _, Res<NetClient> net, Commands cmd, Query<Data<MapWindow>> wq) =>
         {
             net.Value.Send_MapMessage(capSerial, 5, 0, unchecked((ushort)-24), unchecked((ushort)-31));
             if (!wq.TryGet(capRoot, out var winRow)) return;
             var (_, w) = winRow;
-            ClearPins(cmd, ref w.Ref, kidsQ);
+            ClearPins(cmd, ref w.Ref);
         });
 
         commands.Entity(rootId).Insert(new MapWindow
@@ -296,10 +295,10 @@ internal readonly struct MapGumpPlugin : IPlugin
         win.Render.Points.Add(new Vector2(x, y));
     }
 
-    private static void ClearPins(Commands commands, ref MapWindow win, Query<Data<TinyEcs.Children>> childrenQ)
+    private static void ClearPins(Commands commands, ref MapWindow win)
     {
         foreach (var e in win.PinEnts)
-            DespawnSubtree(commands, e, childrenQ);
+            commands.Entity(e).Despawn();
         win.PinEnts.Clear();
         win.Render.Points.Clear();
     }
@@ -375,22 +374,10 @@ internal readonly struct MapGumpPlugin : IPlugin
 
     private static void DespawnAll(
         Commands commands,
-        Query<Data<MapWindow>> windowsQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<MapWindow>> windowsQ)
     {
         foreach (var (ent, _) in windowsQ)
-            DespawnSubtree(commands, ent.Ref, childrenQ);
-    }
-
-    private static void DespawnSubtree(Commands commands, ulong e, Query<Data<TinyEcs.Children>> childrenQ)
-    {
-        if (childrenQ.TryGet(e, out var kidsRow))
-        {
-            var (_, kids) = kidsRow;
-            foreach (var cid in kids.Ref)
-                DespawnSubtree(commands, cid, childrenQ);
-        }
-        commands.Entity(e).Despawn();
+            commands.Entity(ent.Ref).Despawn();
     }
 
     private static int GumpW(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Width; }
@@ -429,7 +416,6 @@ internal sealed class MapGumpParams : CompositeSystemParam
     public readonly Res<UiZCounter> ZCounter;
     public readonly ResMut<MapTextureRegistry> MapTextures;
     public readonly Query<Data<MapWindow>> WindowsQ;
-    public readonly Query<Data<TinyEcs.Children>> ChildrenQ;
 
     public MapGumpParams()
     {
@@ -438,7 +424,6 @@ internal sealed class MapGumpParams : CompositeSystemParam
         ZCounter = Add(new Res<UiZCounter>());
         MapTextures = Add(new ResMut<MapTextureRegistry>());
         WindowsQ = Add(new Query<Data<MapWindow>>());
-        ChildrenQ = Add(new Query<Data<TinyEcs.Children>>());
     }
 }
 

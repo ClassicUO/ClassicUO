@@ -107,13 +107,12 @@ internal readonly struct MenuGumpPlugin : IPlugin
             Commands commands,
             Res<NetClient> net,
             Query<Data<MenuIconItem>> itemQ,
-            Query<Data<MenuGumpWindow>> winQ,
-            Query<Data<TinyEcs.Children>> childrenQ) =>
+            Query<Data<MenuGumpWindow>> winQ) =>
         {
             if (!itemQ.TryGet(trig.EntityId, out var itemRow)) return;
             var (_, it) = itemRow;
             net.Value.Send_MenuResponse(it.Ref.Serial, it.Ref.ServerMenuId, it.Ref.Index, it.Ref.Graphic, it.Ref.Hue);
-            CloseAnswered(commands, it.Ref.Serial, winQ, childrenQ);
+            CloseAnswered(commands, it.Ref.Serial, winQ);
         });
 
         // Right-click close (WindowDragPlugin despawns the UiMovable root) -> the
@@ -250,10 +249,10 @@ internal readonly struct MenuGumpPlugin : IPlugin
         var cancel = builder.AddButton(commands, (0x1450, 0x1451, 0x1450), Vector3.UnitZ, new Vector2(70, buttonsY))
             .Insert<UiNoWindowDrag>();
         cancel.Observe((On<UiClick> _, Commands cmd, Res<NetClient> net,
-                        Query<Data<MenuGumpWindow>> winQ, Query<Data<TinyEcs.Children>> childrenQ) =>
+                        Query<Data<MenuGumpWindow>> winQ) =>
         {
             net.Value.Send_GrayMenuResponse(serial, menuId, 0);
-            CloseAnswered(cmd, serial, winQ, childrenQ);
+            CloseAnswered(cmd, serial, winQ);
         });
         commands.AddChild(rootId, cancel.Id);
 
@@ -261,14 +260,14 @@ internal readonly struct MenuGumpPlugin : IPlugin
             .Insert<UiNoWindowDrag>();
         cont.Observe((On<UiClick> _, Commands cmd, Res<NetClient> net,
                       Query<Data<MenuRadio, Checkbox>> radiosQ,
-                      Query<Data<MenuGumpWindow>> winQ, Query<Data<TinyEcs.Children>> childrenQ) =>
+                      Query<Data<MenuGumpWindow>> winQ) =>
         {
             ushort chosen = 0;
             foreach (var (_, r, cb) in radiosQ)
                 if (r.Ref.Root == rootId && cb.Ref.Checked) { chosen = r.Ref.Index; break; }
             if (chosen == 0) return; // legacy: nothing selected -> no-op
             net.Value.Send_GrayMenuResponse(serial, menuId, chosen);
-            CloseAnswered(cmd, serial, winQ, childrenQ);
+            CloseAnswered(cmd, serial, winQ);
         });
         commands.AddChild(rootId, cont.Id);
 
@@ -288,14 +287,13 @@ internal readonly struct MenuGumpPlugin : IPlugin
     // its subtree.
     private static void CloseAnswered(
         Commands commands, uint serial,
-        Query<Data<MenuGumpWindow>> winQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<MenuGumpWindow>> winQ)
     {
         foreach (var (ent, win) in winQ)
         {
             if (win.Ref.Serial != serial) continue;
             win.Ref.Responded = true; // in-place; visible to OnRemove this frame
-            DespawnSubtree(commands, ent.Ref, childrenQ);
+            commands.Entity(ent.Ref).Despawn();
             break;
         }
     }
@@ -328,27 +326,15 @@ internal readonly struct MenuGumpPlugin : IPlugin
 
     private static void DisposeOnLogout(
         Commands commands,
-        Query<Data<MenuGumpWindow>> winQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<MenuGumpWindow>> winQ)
     {
         // Mark answered so the OnRemove cancel reply doesn't fire during teardown
         // (the socket is already disconnecting).
         foreach (var (ent, win) in winQ)
         {
             win.Ref.Responded = true;
-            DespawnSubtree(commands, ent.Ref, childrenQ);
+            commands.Entity(ent.Ref).Despawn();
         }
-    }
-
-    private static void DespawnSubtree(Commands commands, ulong entity, Query<Data<TinyEcs.Children>> childrenQ)
-    {
-        if (childrenQ.TryGet(entity, out var childrenRow))
-        {
-            var (_, kids) = childrenRow;
-            foreach (var cid in kids.Ref)
-                DespawnSubtree(commands, cid, childrenQ);
-        }
-        commands.Entity(entity).Despawn();
     }
 
 #if AGENT_BUILD

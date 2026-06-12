@@ -157,7 +157,6 @@ internal readonly struct TradingGumpPlugin : IPlugin
             Commands commands,
             ResMut<TradeUiMap> uiMap,
             Query<Data<TradeWindow>> windowQ,
-            Query<Data<TinyEcs.Children>> childrenQ,
             Query<Data<UiCustom>> customQ) =>
         {
             var p = trig.Event.Packet;
@@ -167,7 +166,7 @@ internal readonly struct TradingGumpPlugin : IPlugin
             switch (p.Type)
             {
                 case 1:
-                    DespawnSubtree(commands, entry.UiEntity, childrenQ);
+                    commands.Entity(entry.UiEntity).Despawn();
                     uiMap.Value.Remove(p.Serial);
                     break;
 
@@ -555,23 +554,11 @@ internal readonly struct TradingGumpPlugin : IPlugin
 
     private static void DisposeOnLogout(
         Commands commands,
-        ResMut<TradeUiMap> uiMap,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        ResMut<TradeUiMap> uiMap)
     {
         foreach (var entry in uiMap.Value.Entries)
-            DespawnSubtree(commands, entry.UiEntity, childrenQ);
+            commands.Entity(entry.UiEntity).Despawn();
         uiMap.Value.Clear();
-    }
-
-    private static void DespawnSubtree(Commands commands, ulong entity, Query<Data<TinyEcs.Children>> childrenQ)
-    {
-        if (childrenQ.TryGet(entity, out var kidsRow))
-        {
-            var (_, kids) = kidsRow;
-            foreach (var cid in kids.Ref)
-                DespawnSubtree(commands, cid, childrenQ);
-        }
-        commands.Entity(entity).Despawn();
     }
 
 #if AGENT_BUILD

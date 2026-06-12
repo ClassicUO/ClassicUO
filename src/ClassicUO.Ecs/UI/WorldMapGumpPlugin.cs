@@ -299,10 +299,10 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
             .Insert(Interaction.None)
             .Insert<UiNoWindowDrag>()
             .Insert<WorldMapCloseBtn>()
-            .Observe((On<UiClick> _, Commands cmd, Query<Data<WorldMapWindow>> winQ, Query<Data<TinyEcs.Children>> kidsQ) =>
+            .Observe((On<UiClick> _, Commands cmd, Query<Data<WorldMapWindow>> winQ) =>
             {
                 foreach (var (ent, _) in winQ)
-                    UiHierarchy.DespawnSubtree(cmd, ent.Ref, kidsQ);
+                    cmd.Entity(ent.Ref).Despawn();
             });
         commands.AddChild(rootId, close.Id);
 
@@ -329,11 +329,10 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
     private static void DespawnAll(
         Commands commands,
         ResMut<WorldMapState> state,
-        Query<Data<WorldMapWindow>> windowsQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<WorldMapWindow>> windowsQ)
     {
         foreach (var (ent, _) in windowsQ)
-            UiHierarchy.DespawnSubtree(commands, ent.Ref, childrenQ);
+            commands.Entity(ent.Ref).Despawn();
         state.Value.DisposeTexture();
         state.Value.Scrolling = false;
         state.Value.ViewMap = -1;
@@ -992,8 +991,7 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
         Query<Data<TinyEcs.Parent>> parentsQ,
         Query<Data<UiContainsByBounds>> boundsQ,
         Query<Data<WorldMapWindow>> windowsQ,
-        Query<Data<ComputedNode>, Filter<With<WorldMapMenu>>> menuQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<ComputedNode>, Filter<With<WorldMapMenu>>> menuQ)
     {
         var state = stateRes.Value;
         var pos = mouse.Value.Position;
@@ -1011,7 +1009,7 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
             if (!insideMenu &&
                 (mouse.Value.IsPressedOnce(MouseButtonType.Left) || mouse.Value.IsPressedOnce(MouseButtonType.Right)))
             {
-                UiHierarchy.DespawnSubtree(commands, ment.Ref, childrenQ);
+                commands.Entity(ment.Ref).Despawn();
                 pressTarget.Value = 0;
             }
         }
@@ -1069,8 +1067,7 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
         Res<GameContext> gameCtx,
         ResMut<WorldMapState> stateRes,
         Query<Data<WorldMapMenu>> menuQ,
-        Query<Data<Node>, Filter<With<WorldMapWindow>>> windowsQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<Node>, Filter<With<WorldMapWindow>>> windowsQ)
     {
         var state = stateRes.Value;
         if (!state.MenuDirty)
@@ -1078,7 +1075,7 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
         state.MenuDirty = false;
 
         foreach (var (ent, _) in menuQ)
-            UiHierarchy.DespawnSubtree(commands, ent.Ref, childrenQ);
+            commands.Entity(ent.Ref).Despawn();
 
         if (state.MenuWindow == 0 || !windowsQ.TryGet(state.MenuWindow, out var winRow))
             return;
@@ -1236,11 +1233,10 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
             Query<Data<ComputedNode>, Filter<With<WorldMapCanvas>>> canvasQ,
             Query<Data<Node>, Filter<With<WorldMapWindow>>> winQ,
             Query<Data<WorldPosition>, Filter<With<Player>>> playerQ,
-            Query<Data<WorldMapMenu>> menuQ,
-            Query<Data<TinyEcs.Children>> kidsQ) =>
+            Query<Data<WorldMapMenu>> menuQ) =>
         {
             foreach (var (ment, _) in menuQ)
-                UiHierarchy.DespawnSubtree(cmd, ment.Ref, kidsQ);
+                cmd.Entity(ment.Ref).Despawn();
 
             // Viewing another facet — can't walk there.
             if (st.Value.ViewMap >= 0 && st.Value.ViewMap != ctx.Value.Map)
@@ -1305,11 +1301,10 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
         commands.Entity(closeRow).Observe((
             On<UiClick> _,
             Commands cmd,
-            Query<Data<WorldMapWindow>> winQ,
-            Query<Data<TinyEcs.Children>> kidsQ) =>
+            Query<Data<WorldMapWindow>> winQ) =>
         {
             foreach (var (ent, _) in winQ)
-                UiHierarchy.DespawnSubtree(cmd, ent.Ref, kidsQ);
+                cmd.Entity(ent.Ref).Despawn();
         });
     }
 

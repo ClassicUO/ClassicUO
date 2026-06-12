@@ -126,49 +126,37 @@ internal readonly struct MessageBoxGumpPlugin : IPlugin
             int cancelW = GumpW(assets, CancelN);
             int okX = w / 2 - cancelW;
             var ok = builder.AddButton(commands, (OkN, OkP, OkO), Vector3.UnitZ, new Vector2(okX, buttonY));
-            ok.Observe((On<UiClick> _, Commands cmd, Query<Data<TinyEcs.Children>> childrenQ) =>
-                Close(cmd, rootId, kind, true, childrenQ));
+            ok.Observe((On<UiClick> _, Commands cmd) =>
+                Close(cmd, rootId, kind, true));
             commands.AddChild(rootId, ok.Id);
 
             var cancel = builder.AddButton(commands, (CancelN, CancelP, CancelO), Vector3.UnitZ, new Vector2(okX + okW + 5, buttonY));
-            cancel.Observe((On<UiClick> _, Commands cmd, Query<Data<TinyEcs.Children>> childrenQ) =>
-                Close(cmd, rootId, kind, false, childrenQ));
+            cancel.Observe((On<UiClick> _, Commands cmd) =>
+                Close(cmd, rootId, kind, false));
             commands.AddChild(rootId, cancel.Id);
         }
         else
         {
             var ok = builder.AddButton(commands, (OkN, OkP, OkO), Vector3.UnitZ, new Vector2((w - okW) / 2, buttonY));
-            ok.Observe((On<UiClick> _, Commands cmd, Query<Data<TinyEcs.Children>> childrenQ) =>
-                Close(cmd, rootId, kind, true, childrenQ));
+            ok.Observe((On<UiClick> _, Commands cmd) =>
+                Close(cmd, rootId, kind, true));
             commands.AddChild(rootId, ok.Id);
         }
     }
 
     // Emit the result trigger then despawn the dialog subtree.
-    private static void Close(Commands commands, ulong rootId, int kind, bool ok, Query<Data<TinyEcs.Children>> childrenQ)
+    private static void Close(Commands commands, ulong rootId, int kind, bool ok)
     {
         commands.EmitTrigger(new MessageBoxResult { Kind = kind, Ok = ok });
-        DespawnSubtree(commands, rootId, childrenQ);
+        commands.Entity(rootId).Despawn();
     }
 
     private static void Despawn(
         Commands commands,
-        Query<Data<MessageBoxWindow>> windowsQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<MessageBoxWindow>> windowsQ)
     {
         foreach (var (ent, _) in windowsQ)
-            DespawnSubtree(commands, ent.Ref, childrenQ);
-    }
-
-    private static void DespawnSubtree(Commands commands, ulong e, Query<Data<TinyEcs.Children>> childrenQ)
-    {
-        if (childrenQ.TryGet(e, out var childrenRow))
-        {
-            var (_, kids) = childrenRow;
-            foreach (var cid in kids.Ref)
-                DespawnSubtree(commands, cid, childrenQ);
-        }
-        commands.Entity(e).Despawn();
+            commands.Entity(ent.Ref).Despawn();
     }
 
     private static int GumpW(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Width; }

@@ -761,22 +761,10 @@ internal readonly struct JournalPlugin : IPlugin
 
     private static void Despawn(
         Commands commands,
-        Query<Data<JournalWindow>> windowsQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<JournalWindow>> windowsQ)
     {
         foreach (var (ent, _) in windowsQ)
-            DespawnSubtree(commands, ent.Ref, childrenQ);
-    }
-
-    private static void DespawnSubtree(Commands commands, ulong entity, Query<Data<TinyEcs.Children>> childrenQ)
-    {
-        if (childrenQ.TryGet(entity, out var kidsRow))
-        {
-            var (_, kids) = kidsRow;
-            foreach (var cid in kids.Ref)
-                DespawnSubtree(commands, cid, childrenQ);
-        }
-        commands.Entity(entity).Despawn();
+            commands.Entity(ent.Ref).Despawn();
     }
 
     // --- helpers ---------------------------------------------------------

@@ -945,21 +945,10 @@ internal readonly struct SkillsGumpPlugin : IPlugin
             {
                 var (_, kids) = kidsRow;
                 foreach (var cid in kids.Ref)
-                    DespawnSubtree(commands, cid, childrenQ);
+                    commands.Entity(cid).Despawn();
             }
             commands.Entity(root).Despawn();
         }
-    }
-
-    private static void DespawnSubtree(Commands commands, ulong e, Query<Data<TinyEcs.Children>> childrenQ)
-    {
-        if (childrenQ.TryGet(e, out var kidsRow))
-        {
-            var (_, kids) = kidsRow;
-            foreach (var cid in kids.Ref)
-                DespawnSubtree(commands, cid, childrenQ);
-        }
-        commands.Entity(e).Despawn();
     }
 }
 

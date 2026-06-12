@@ -518,22 +518,11 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
     private static void Despawn(
         Commands commands,
         Query<Data<SpellbookWindow>> windowsQ,
-        Query<Data<SpellCastButton>> castButtonsQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<SpellCastButton>> castButtonsQ)
     {
         foreach (var (ent, _) in windowsQ)
-            DespawnSubtree(commands, ent.Ref, childrenQ);
+            commands.Entity(ent.Ref).Despawn();
         foreach (var (ent, _) in castButtonsQ)
-            DespawnSubtree(commands, ent.Ref, childrenQ);
-    }
-
-    private static void DespawnSubtree(Commands commands, ulong e, Query<Data<TinyEcs.Children>> childrenQ)
-    {
-        if (childrenQ.TryGet(e, out var childrenRow))
-        {
-            var (_, kids) = childrenRow;
-            foreach (var cid in kids.Ref) DespawnSubtree(commands, cid, childrenQ);
-        }
-        commands.Entity(e).Despawn();
+            commands.Entity(ent.Ref).Despawn();
     }
 }

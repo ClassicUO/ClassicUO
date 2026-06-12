@@ -319,8 +319,7 @@ internal readonly struct NameplatePlugin : IPlugin
         Res<NetClient> net,
         Query<Data<NetworkSerial, WorldPosition, Graphic, Notoriety>,
             Filter<Without<ContainedInto>, Without<IsMulti>, Optional<Notoriety>>> worldQ,
-        Query<Data<NameplateUI>> platesQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<NameplateUI>> platesQ)
     {
         var st = state.Value;
 
@@ -332,7 +331,7 @@ internal readonly struct NameplatePlugin : IPlugin
             st.ShowHpBar = profile.Value.NameOverheadShowHpBar;
             foreach (var plate in st.Plates.Values)
                 if (platesQ.Contains(plate))
-                    UiHierarchy.DespawnSubtree(commands, plate, childrenQ);
+                    commands.Entity(plate).Despawn();
             st.Plates.Clear();
         }
 
@@ -341,7 +340,7 @@ internal readonly struct NameplatePlugin : IPlugin
             if (st.Plates.Count > 0)
             {
                 foreach (var plate in st.Plates.Values)
-                    UiHierarchy.DespawnSubtree(commands, plate, childrenQ);
+                    commands.Entity(plate).Despawn();
                 st.Plates.Clear();
             }
             st.StatusRequested.Clear();
@@ -383,7 +382,7 @@ internal readonly struct NameplatePlugin : IPlugin
                 if (eligible.Contains(s)) continue;
                 (dead ??= new()).Add(s);
                 if (platesQ.Contains(plate))
-                    UiHierarchy.DespawnSubtree(commands, plate, childrenQ);
+                    commands.Entity(plate).Despawn();
             }
             if (dead != null)
                 foreach (var s in dead)
@@ -752,8 +751,7 @@ internal readonly struct NameplatePlugin : IPlugin
         Local<ulong> pressTarget,
         Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
         Query<Data<TinyEcs.Parent>> parents,
-        Query<Data<NameplateUI>> platesQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<NameplateUI>> platesQ)
     {
         bool once = mouse.Value.IsPressedOnce(MouseButtonType.Right);
         bool held = mouse.Value.IsPressed(MouseButtonType.Right);
@@ -793,7 +791,7 @@ internal readonly struct NameplatePlugin : IPlugin
             var (_, plate) = plateRow;
             state.Value.Closed.Add(plate.Ref.Serial);
             state.Value.Plates.Remove(plate.Ref.Serial);
-            UiHierarchy.DespawnSubtree(commands, target, childrenQ);
+            commands.Entity(target).Despawn();
         }
     }
 
@@ -986,14 +984,13 @@ internal readonly struct NameplatePlugin : IPlugin
         Commands commands,
         Res<NameplateState> state,
         Query<Data<NameplateUI>> platesQ,
-        Query<Data<Node>, Filter<With<NameplateMenuWindow>>> menuQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<Node>, Filter<With<NameplateMenuWindow>>> menuQ)
     {
         foreach (var plate in state.Value.Plates.Values)
             if (platesQ.Contains(plate))
-                UiHierarchy.DespawnSubtree(commands, plate, childrenQ);
+                commands.Entity(plate).Despawn();
         if (state.Value.MenuEntity != 0 && menuQ.Contains(state.Value.MenuEntity))
-            UiHierarchy.DespawnSubtree(commands, state.Value.MenuEntity, childrenQ);
+            commands.Entity(state.Value.MenuEntity).Despawn();
 
         state.Value.Plates.Clear();
         state.Value.Closed.Clear();

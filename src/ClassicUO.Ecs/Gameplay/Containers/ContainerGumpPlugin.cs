@@ -216,31 +216,16 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         Commands commands,
         Res<ContainerUiMap> uiMap,
         Res<GrabbedItem> grabbed,
-        Query<Data<TinyEcs.Children>, Filter<With<ContainerWindow>>> windowsQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<TinyEcs.Children>, Filter<With<ContainerWindow>>> windowsQ)
     {
         foreach (var (ent, _) in windowsQ)
-            DespawnSubtree(commands, ent.Ref, childrenQ);
+            commands.Entity(ent.Ref).Despawn();
         uiMap.Value.Clear();
 
         // Drop held-item state too — server side will reset on relog and we
         // don't want a stale SourceUiEntity id pointing at a despawned slot.
         grabbed.Value.Clear();
         grabbed.Value.SourceUiEntity = 0;
-    }
-
-    private static void DespawnSubtree(
-        Commands commands,
-        ulong entity,
-        Query<Data<TinyEcs.Children>> childrenQ)
-    {
-        if (childrenQ.TryGet(entity, out var childrenRow))
-        {
-            var (_, kids) = childrenRow;
-            foreach (var cid in kids.Ref)
-                DespawnSubtree(commands, cid, childrenQ);
-        }
-        commands.Entity(entity).Despawn();
     }
 
     // Mirrors the legacy ItemGump.OnMouseOver path: when the cursor is over a

@@ -137,7 +137,7 @@ internal readonly struct BookGumpPlugin : IPlugin
         foreach (var (ent, win) in p.ExistingQ)
         {
             if (win.Ref.Serial != serial) continue;
-            DespawnSubtree(commands, ent.Ref, p.ChildrenQ);
+            commands.Entity(ent.Ref).Despawn();
         }
 
         var assets = p.Assets.Value;
@@ -718,22 +718,10 @@ internal readonly struct BookGumpPlugin : IPlugin
 
     private static void Despawn(
         Commands commands,
-        Query<Data<TinyEcs.Children>, Filter<With<BookWindow>>> windowsQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<TinyEcs.Children>, Filter<With<BookWindow>>> windowsQ)
     {
         foreach (var (ent, _) in windowsQ)
-            DespawnSubtree(commands, ent.Ref, childrenQ);
-    }
-
-    private static void DespawnSubtree(Commands commands, ulong entity, Query<Data<TinyEcs.Children>> childrenQ)
-    {
-        if (childrenQ.TryGet(entity, out var kidsRow))
-        {
-            var (_, kids) = kidsRow;
-            foreach (var cid in kids.Ref)
-                DespawnSubtree(commands, cid, childrenQ);
-        }
-        commands.Entity(entity).Despawn();
+            commands.Entity(ent.Ref).Despawn();
     }
 
     private static int GumpW(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Width; }
@@ -815,7 +803,6 @@ internal sealed class BookParams : CompositeSystemParam
     public readonly Res<UiZCounter> ZCounter;
     public readonly Res<NetClient> Net;
     public readonly Query<Data<BookWindow>> ExistingQ;
-    public readonly Query<Data<TinyEcs.Children>> ChildrenQ;
 
     public BookParams()
     {
@@ -824,7 +811,6 @@ internal sealed class BookParams : CompositeSystemParam
         ZCounter = Add(new Res<UiZCounter>());
         Net = Add(new Res<NetClient>());
         ExistingQ = Add(new Query<Data<BookWindow>>());
-        ChildrenQ = Add(new Query<Data<TinyEcs.Children>>());
     }
 }
 

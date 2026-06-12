@@ -83,8 +83,8 @@ internal readonly struct LogoutGumpPlugin : IPlugin
         commands.AddChild(rootId, label.Id);
 
         var cancel = builder.AddButton(commands, (CancelN, CancelP, CancelO), Vector3.UnitZ, new Vector2(37, 75));
-        cancel.Observe((On<UiClick> _, Commands cmd, Query<Data<TinyEcs.Children>> childrenQ) =>
-            DespawnSubtree(cmd, rootId, childrenQ));
+        cancel.Observe((On<UiClick> _, Commands cmd) =>
+            cmd.Entity(rootId).Despawn());
         commands.AddChild(rootId, cancel.Id);
 
         var ok = builder.AddButton(commands, (OkN, OkP, OkO), Vector3.UnitZ, new Vector2(100, 75));
@@ -93,11 +93,10 @@ internal readonly struct LogoutGumpPlugin : IPlugin
                     Res<NetClient> net,
                     Res<GameContext> ctx,
                     ResMut<LogoutState> logout,
-                    ResMut<NextState<GameState>> state,
-                    Query<Data<TinyEcs.Children>> childrenQ) =>
+                    ResMut<NextState<GameState>> state) =>
         {
             Ok(net.Value, ctx.Value, logout.Value, state.Value);
-            DespawnSubtree(cmd, rootId, childrenQ);
+            cmd.Entity(rootId).Despawn();
         });
         commands.AddChild(rootId, ok.Id);
     }
@@ -145,21 +144,9 @@ internal readonly struct LogoutGumpPlugin : IPlugin
 
     private static void Despawn(
         Commands commands,
-        Query<Data<LogoutGumpWindow>> windowsQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<LogoutGumpWindow>> windowsQ)
     {
         foreach (var (ent, _) in windowsQ)
-            DespawnSubtree(commands, ent.Ref, childrenQ);
-    }
-
-    private static void DespawnSubtree(Commands commands, ulong e, Query<Data<TinyEcs.Children>> childrenQ)
-    {
-        if (childrenQ.TryGet(e, out var childrenRow))
-        {
-            var (_, kids) = childrenRow;
-            foreach (var cid in kids.Ref)
-                DespawnSubtree(commands, cid, childrenQ);
-        }
-        commands.Entity(e).Despawn();
+            commands.Entity(ent.Ref).Despawn();
     }
 }

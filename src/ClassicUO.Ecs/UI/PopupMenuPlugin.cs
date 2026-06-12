@@ -151,8 +151,7 @@ internal readonly struct PopupMenuPlugin : IPlugin
         Res<UOFileManager> files,
         Res<GumpBuilder> builder,
         Res<UiZCounter> z,
-        Query<Data<PopupMenuRoot>> existingQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<PopupMenuRoot>> existingQ)
     {
         if (!state.Value.HasPending) return;
         state.Value.HasPending = false;
@@ -163,7 +162,7 @@ internal readonly struct PopupMenuPlugin : IPlugin
 
         // Only one popup at a time — drop any open one.
         foreach (var (ent, _) in existingQ)
-            DespawnSubtree(commands, ent.Ref, childrenQ);
+            commands.Entity(ent.Ref).Despawn();
 
         // Layout pass mirrors legacy PopupMenuGump: stack labels from y=10, size
         // the background to the widest label (+20) and the total height. The
@@ -333,8 +332,7 @@ internal readonly struct PopupMenuPlugin : IPlugin
         Res<NetClient> net,
         Commands commands,
         Query<Data<ComputedNode>, With<PopupMenuRoot>> popupQ,
-        Query<Data<ComputedNode, PopupMenuRow>> rowsQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<ComputedNode, PopupMenuRow>> rowsQ)
     {
         bool leftDown = mouse.Value.IsPressedOnce(MouseButtonType.Left);
         bool leftUp = mouse.Value.IsReleased(MouseButtonType.Left);
@@ -352,7 +350,7 @@ internal readonly struct PopupMenuPlugin : IPlugin
 
         if (rightDown)
         {
-            CloseAll(commands, popupQ, childrenQ);
+            CloseAll(commands, popupQ);
             mouse.Value.Consume(MouseButtonType.Right);
             return;
         }
@@ -362,7 +360,7 @@ internal readonly struct PopupMenuPlugin : IPlugin
             if (over)
                 mouse.Value.Consume(MouseButtonType.Left);   // defer to release
             else
-                CloseAll(commands, popupQ, childrenQ);        // pressed away → dismiss
+                CloseAll(commands, popupQ);        // pressed away → dismiss
             return;
         }
 
@@ -373,17 +371,16 @@ internal readonly struct PopupMenuPlugin : IPlugin
             net.Value.Send_PopupMenuSelection(row.Ref.Serial, row.Ref.Index);
             break;
         }
-        CloseAll(commands, popupQ, childrenQ);
+        CloseAll(commands, popupQ);
         mouse.Value.Consume(MouseButtonType.Left);
     }
 
     private static void CloseAll(
         Commands commands,
-        Query<Data<ComputedNode>, With<PopupMenuRoot>> popupQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<ComputedNode>, With<PopupMenuRoot>> popupQ)
     {
         foreach (var (ent, _) in popupQ)
-            DespawnSubtree(commands, ent.Ref, childrenQ);
+            commands.Entity(ent.Ref).Despawn();
     }
 
     // Translucent white bar under the hovered row (legacy HitBox MouseIsOver).
@@ -405,22 +402,10 @@ internal readonly struct PopupMenuPlugin : IPlugin
 
     private static void PopupMenuDespawnAll(
         Commands commands,
-        Query<Data<PopupMenuRoot>> popupQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<PopupMenuRoot>> popupQ)
     {
         foreach (var (ent, _) in popupQ)
-            DespawnSubtree(commands, ent.Ref, childrenQ);
-    }
-
-    private static void DespawnSubtree(Commands commands, ulong e, Query<Data<TinyEcs.Children>> childrenQ)
-    {
-        if (childrenQ.TryGet(e, out var childrenRow))
-        {
-            var (_, kids) = childrenRow;
-            foreach (var cid in kids.Ref)
-                DespawnSubtree(commands, cid, childrenQ);
-        }
-        commands.Entity(e).Despawn();
+            commands.Entity(ent.Ref).Despawn();
     }
 
     private static bool Contains(in ComputedNode bb, Vector2 p)

@@ -241,10 +241,9 @@ internal readonly struct SplitMenuPlugin : IPlugin
             Commands cmds,
             Query<Data<SplitMenuWindow>> winQ,
             Query<Data<Slider>> sliderQ,
-            Query<Data<Node>> nodeQ,
-            Query<Data<TinyEcs.Children>> childrenQ) =>
+            Query<Data<Node>> nodeQ) =>
         {
-            Commit(rootId, grabbed.Value, net.Value, cmds, winQ, sliderQ, nodeQ, childrenQ);
+            Commit(rootId, grabbed.Value, net.Value, cmds, winQ, sliderQ, nodeQ);
         });
 
         commands.Entity(rootId).Insert(new SplitMenuWindow
@@ -368,13 +367,12 @@ internal readonly struct SplitMenuPlugin : IPlugin
         Commands commands,
         Query<Data<SplitMenuWindow>> winQ,
         Query<Data<Slider>> sliderQ,
-        Query<Data<Node>> nodeQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<Node>> nodeQ)
     {
         if (!kb.Value.IsPressedOnce(Microsoft.Xna.Framework.Input.Keys.Enter)) return;
         foreach (var (ent, _) in winQ)
         {
-            Commit(ent.Ref, grabbed.Value, net.Value, commands, winQ, sliderQ, nodeQ, childrenQ);
+            Commit(ent.Ref, grabbed.Value, net.Value, commands, winQ, sliderQ, nodeQ);
             return;
         }
     }
@@ -388,8 +386,7 @@ internal readonly struct SplitMenuPlugin : IPlugin
         Commands commands,
         Query<Data<SplitMenuWindow>> winQ,
         Query<Data<Slider>> sliderQ,
-        Query<Data<Node>> nodeQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<Node>> nodeQ)
     {
         if (!winQ.TryGet(rootId, out var winRow)) return;
         var (_, w) = winRow;
@@ -427,24 +424,13 @@ internal readonly struct SplitMenuPlugin : IPlugin
             node.Ref.Display = Display.None;
         }
 
-        DespawnSubtree(commands, rootId, childrenQ);
+        commands.Entity(rootId).Despawn();
     }
 
     private static void DespawnAll(
         Commands commands,
-        Query<Data<SplitMenuWindow>> winQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<SplitMenuWindow>> winQ)
     {
-        foreach (var (ent, _) in winQ) DespawnSubtree(commands, ent.Ref, childrenQ);
-    }
-
-    private static void DespawnSubtree(Commands commands, ulong e, Query<Data<TinyEcs.Children>> childrenQ)
-    {
-        if (childrenQ.TryGet(e, out var kidsRow))
-        {
-            var (_, kids) = kidsRow;
-            foreach (var cid in kids.Ref) DespawnSubtree(commands, cid, childrenQ);
-        }
-        commands.Entity(e).Despawn();
+        foreach (var (ent, _) in winQ) commands.Entity(ent.Ref).Despawn();
     }
 }

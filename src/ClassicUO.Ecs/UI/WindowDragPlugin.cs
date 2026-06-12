@@ -114,7 +114,6 @@ internal readonly struct WindowDragPlugin : IPlugin
         Query<Data<UiNoRightClickClose>> noCloseQ,
         Query<Data<ContainerWindow>> containerQuery,
         Query<Data<ServerGump>> serverGumpQuery,
-        Query<Data<TinyEcs.Children>> childrenQ,
         Res<NetClient> net,
         ResMut<ServerGumpRegistry> serverGumpRegistry,
         EventWriter<ContainerClosedEvent> closedWriter,
@@ -181,7 +180,7 @@ internal readonly struct WindowDragPlugin : IPlugin
                     serverGumpRegistry.Value.ByGumpId.Remove(sg.Ref.GumpId);
             }
 
-            UiHierarchy.DespawnSubtree(commands, target, childrenQ);
+            commands.Entity(target).Despawn();
         }
     }
 

@@ -187,7 +187,7 @@ internal readonly struct HealthBarPlugin : IPlugin
             if (w.Ref.IsPlayer)
             {
                 StatusBarPlugin.OpenOrFocus(commands, builder.Value, assets.Value, gameCtx.Value, profile.Value, zCounter.Value, p.Status);
-                DespawnSubtree(commands, win, p.Children);
+                commands.Entity(win).Despawn();
             }
             else
             {
@@ -239,7 +239,7 @@ internal readonly struct HealthBarPlugin : IPlugin
             }
             OpenForSerial(commands, builder.Value, assets.Value, gameCtx.Value, zCounter.Value,
                 net.Value, party.Value, gameCtx.Value.PlayerSerial, spawn, center: false, p.Hb);
-            DespawnSubtree(commands, target, p.Children);
+            commands.Entity(target).Despawn();
         }
     }
 
@@ -542,7 +542,7 @@ internal readonly struct HealthBarPlugin : IPlugin
             {
                 var (_, kids) = kidsRow;
                 foreach (var cid in kids.Ref)
-                    DespawnSubtree(commands, cid, childrenQ);
+                    commands.Entity(cid).Despawn();
             }
 
             ushort bgId = win.Ref.IsPlayer ? BACKGROUND_NORMAL : BACKGROUND_MOBILE;
@@ -585,7 +585,6 @@ internal readonly struct HealthBarPlugin : IPlugin
         Res<NetworkEntitiesMap> entities,
         Res<NetClient> net,
         Res<ClassicUO.Configuration.Profile> profile,
-        Query<Data<TinyEcs.Children>> childrenQ,
         Query<Data<Hits>> hitsQ,
         Query<Data<Mana>> manaQ,
         Query<Data<Stamina>> stamQ,
@@ -683,7 +682,7 @@ internal readonly struct HealthBarPlugin : IPlugin
                         && (profile.Value.CloseHealthBarType == 1
                             || (profile.Value.CloseHealthBarType == 2 && win.Ref.WasDead)))
                     {
-                        DespawnSubtree(commands, ent.Ref, childrenQ);
+                        commands.Entity(ent.Ref).Despawn();
                         continue;
                     }
                 }
@@ -753,22 +752,10 @@ internal readonly struct HealthBarPlugin : IPlugin
 
     private static void Despawn(
         Commands commands,
-        Query<Data<HealthBarWindow>> windowsQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<HealthBarWindow>> windowsQ)
     {
         foreach (var (ent, _) in windowsQ)
-            DespawnSubtree(commands, ent.Ref, childrenQ);
-    }
-
-    private static void DespawnSubtree(Commands commands, ulong entity, Query<Data<TinyEcs.Children>> childrenQ)
-    {
-        if (childrenQ.TryGet(entity, out var kidsRow))
-        {
-            var (_, kids) = kidsRow;
-            foreach (var cid in kids.Ref)
-                DespawnSubtree(commands, cid, childrenQ);
-        }
-        commands.Entity(entity).Despawn();
+            commands.Entity(ent.Ref).Despawn();
     }
 }
 
@@ -786,7 +773,6 @@ internal sealed class HbInteractParams : CompositeSystemParam
     public readonly Query<Data<Node>> Nodes;
     public readonly Query<Data<UOButton>> Buttons;
     public readonly Query<Data<StatLockButton>> LockButtons;
-    public readonly Query<Data<TinyEcs.Children>> Children;
 
     public HbInteractParams()
     {
@@ -798,6 +784,5 @@ internal sealed class HbInteractParams : CompositeSystemParam
         Nodes       = Add(new Query<Data<Node>>());
         Buttons     = Add(new Query<Data<UOButton>>());
         LockButtons = Add(new Query<Data<StatLockButton>>());
-        Children    = Add(new Query<Data<TinyEcs.Children>>());
     }
 }

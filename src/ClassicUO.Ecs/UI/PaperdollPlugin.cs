@@ -134,25 +134,10 @@ internal readonly struct PaperdollPlugin : IPlugin
 
     private static void DisposeOnLogout(
         Commands commands,
-        Query<Data<TinyEcs.Children>, Filter<With<PaperdollWindow>>> windowsQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<TinyEcs.Children>, Filter<With<PaperdollWindow>>> windowsQ)
     {
         foreach (var (ent, _) in windowsQ)
-            DespawnSubtree(commands, ent.Ref, childrenQ);
-    }
-
-    private static void DespawnSubtree(
-        Commands commands,
-        ulong entity,
-        Query<Data<TinyEcs.Children>> childrenQ)
-    {
-        if (childrenQ.TryGet(entity, out var kidsRow))
-        {
-            var (_, kids) = kidsRow;
-            foreach (var cid in kids.Ref)
-                DespawnSubtree(commands, cid, childrenQ);
-        }
-        commands.Entity(entity).Despawn();
+            commands.Entity(ent.Ref).Despawn();
     }
 
     private static void SpawnOnOpenPaperdoll(

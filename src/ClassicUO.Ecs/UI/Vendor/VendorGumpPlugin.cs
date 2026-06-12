@@ -101,12 +101,11 @@ internal readonly struct VendorGumpPlugin : IPlugin
         app.AddObserver((
             On<ContainerClosedEvent> trig,
             Commands commands,
-            Query<Data<VendorWindow>> windowsQ,
-            Query<Data<TinyEcs.Children>> childrenQ) =>
+            Query<Data<VendorWindow>> windowsQ) =>
         {
             foreach (var (ent, w) in windowsQ)
                 if (w.Ref.Vendor == trig.Event.Serial)
-                    DespawnSubtree(commands, ent.Ref, childrenQ);
+                    commands.Entity(ent.Ref).Despawn();
         });
 
         // Clicks on the vendor surfaces go through a bbox poll (PreUpdate +
@@ -718,8 +717,7 @@ internal readonly struct VendorGumpPlugin : IPlugin
         Query<Data<ComputedNode, VendorActionButton>> actQ,
         Query<Data<ComputedNode, VendorTxnButton>> txnQ,
         Query<Data<ComputedNode, VendorShopRow>> rowQ,
-        Query<Data<VendorWindow>> windowsQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<VendorWindow>> windowsQ)
     {
         bool held = mouse.Value.IsPressed(MouseButtonType.Left) || mouse.Value.IsPressedOnce(MouseButtonType.Left);
         if (!held)
@@ -766,7 +764,7 @@ internal readonly struct VendorGumpPlugin : IPlugin
         foreach (var (_, bb, a) in actQ)
         {
             if (!Contains(bb.Ref, p)) continue;
-            if (a.Ref.Action == 0) DoAccept(a.Ref.Window, windowsQ, net.Value, ctx.Value, commands, childrenQ);
+            if (a.Ref.Action == 0) DoAccept(a.Ref.Window, windowsQ, net.Value, ctx.Value, commands);
             else ClearTxn(a.Ref.Window, windowsQ);
             gate.Value.Mode = ActiveDrag.UIWindow; claimed.Value = true; return;
         }
@@ -862,7 +860,7 @@ internal readonly struct VendorGumpPlugin : IPlugin
         w.Ref.Dirty = true;
     }
 
-    private static void DoAccept(ulong rootId, Query<Data<VendorWindow>> wq, NetClient net, GameContext ctx, Commands commands, Query<Data<TinyEcs.Children>> childrenQ)
+    private static void DoAccept(ulong rootId, Query<Data<VendorWindow>> wq, NetClient net, GameContext ctx, Commands commands)
     {
         if (!wq.TryGet(rootId, out var winRow)) return;
         var (ent, w) = winRow;
@@ -874,7 +872,7 @@ internal readonly struct VendorGumpPlugin : IPlugin
             if (w.Ref.IsBuy) net.Send_BuyRequest(w.Ref.Vendor, items);
             else net.Send_SellRequest(w.Ref.Vendor, items);
         }
-        DespawnSubtree(commands, ent.Ref, childrenQ);
+        commands.Entity(ent.Ref).Despawn();
     }
 
     // Bottom-center handle drag adjusts BodyHeight; rebuild repositions panels.
@@ -1014,24 +1012,13 @@ internal readonly struct VendorGumpPlugin : IPlugin
     {
         if (parent == 0 || !childrenQ.TryGet(parent, out var kidsRow)) return;
         var (_, kids) = kidsRow;
-        foreach (var cid in kids.Ref) DespawnSubtree(commands, cid, childrenQ);
+        foreach (var cid in kids.Ref) commands.Entity(cid).Despawn();
     }
 
     private static void DespawnAll(
         Commands commands,
-        Query<Data<VendorWindow>> windowsQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<VendorWindow>> windowsQ)
     {
-        foreach (var (ent, _) in windowsQ) DespawnSubtree(commands, ent.Ref, childrenQ);
-    }
-
-    private static void DespawnSubtree(Commands commands, ulong e, Query<Data<TinyEcs.Children>> childrenQ)
-    {
-        if (childrenQ.TryGet(e, out var kidsRow))
-        {
-            var (_, kids) = kidsRow;
-            foreach (var cid in kids.Ref) DespawnSubtree(commands, cid, childrenQ);
-        }
-        commands.Entity(e).Despawn();
+        foreach (var (ent, _) in windowsQ) commands.Entity(ent.Ref).Despawn();
     }
 }

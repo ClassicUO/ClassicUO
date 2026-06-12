@@ -119,7 +119,7 @@ internal readonly struct ProfileGumpPlugin : IPlugin
         foreach (var (ent, win, kids) in p.ExistingQ)
         {
             if (win.Ref.Serial != packet.Serial) continue;
-            DespawnSubtree(commands, ent.Ref, p.ChildrenQ);
+            commands.Entity(ent.Ref).Despawn();
         }
 
         var assets = p.Assets.Value;
@@ -428,22 +428,10 @@ internal readonly struct ProfileGumpPlugin : IPlugin
 
     private static void Despawn(
         Commands commands,
-        Query<Data<TinyEcs.Children>, Filter<With<ProfileWindow>>> windowsQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<TinyEcs.Children>, Filter<With<ProfileWindow>>> windowsQ)
     {
         foreach (var (ent, _) in windowsQ)
-            DespawnSubtree(commands, ent.Ref, childrenQ);
-    }
-
-    private static void DespawnSubtree(Commands commands, ulong entity, Query<Data<TinyEcs.Children>> childrenQ)
-    {
-        if (childrenQ.TryGet(entity, out var childrenRow))
-        {
-            var (_, kids) = childrenRow;
-            foreach (var cid in kids.Ref)
-                DespawnSubtree(commands, cid, childrenQ);
-        }
-        commands.Entity(entity).Despawn();
+            commands.Entity(ent.Ref).Despawn();
     }
 
     private static int GumpW(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Width; }
@@ -493,7 +481,6 @@ internal sealed class ProfileParams : CompositeSystemParam
     public readonly Res<GameContext> GameCtx;
     public readonly ResMut<ProfileEditOverride> EditOverride;
     public readonly Query<Data<ProfileWindow, TinyEcs.Children>> ExistingQ;
-    public readonly Query<Data<TinyEcs.Children>> ChildrenQ;
 
     public ProfileParams()
     {
@@ -503,7 +490,6 @@ internal sealed class ProfileParams : CompositeSystemParam
         GameCtx = Add(new Res<GameContext>());
         EditOverride = Add(new ResMut<ProfileEditOverride>());
         ExistingQ = Add(new Query<Data<ProfileWindow, TinyEcs.Children>>());
-        ChildrenQ = Add(new Query<Data<TinyEcs.Children>>());
     }
 }
 

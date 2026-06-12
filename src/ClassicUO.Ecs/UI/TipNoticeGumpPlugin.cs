@@ -155,22 +155,20 @@ internal readonly struct TipNoticeGumpPlugin : IPlugin
             // this scroll; the server replies with the adjacent tip.
             var prev = builder.AddButton(commands, (PrevArrow, PrevArrow, PrevArrow), Vector3.UnitZ, new Vector2(35, Height - ButtonsFromBottom));
             prev.Observe((On<UiClick> _, Commands cmd, Res<NetClient> net,
-                Query<Data<TinyEcs.Children>, Filter<With<TipNoticeWindow>>> winQ,
-                Query<Data<TinyEcs.Children>> kidsQ) =>
+                Query<Data<TinyEcs.Children>, Filter<With<TipNoticeWindow>>> winQ) =>
             {
                 net.Value.Send_TipRequest(tipSerial, 0);
-                DespawnAll(cmd, winQ, kidsQ);
+                DespawnAll(cmd, winQ);
             });
             commands.AddChild(rootId, prev.Id);
             prevId = prev.Id;
 
             var next = builder.AddButton(commands, (NextArrow, NextArrow, NextArrow), Vector3.UnitZ, new Vector2(240, Height - ButtonsFromBottom));
             next.Observe((On<UiClick> _, Commands cmd, Res<NetClient> net,
-                Query<Data<TinyEcs.Children>, Filter<With<TipNoticeWindow>>> winQ,
-                Query<Data<TinyEcs.Children>> kidsQ) =>
+                Query<Data<TinyEcs.Children>, Filter<With<TipNoticeWindow>>> winQ) =>
             {
                 net.Value.Send_TipRequest(tipSerial, 1);
-                DespawnAll(cmd, winQ, kidsQ);
+                DespawnAll(cmd, winQ);
             });
             commands.AddChild(rootId, next.Id);
             nextId = next.Id;
@@ -301,28 +299,15 @@ internal readonly struct TipNoticeGumpPlugin : IPlugin
 
     private static void Despawn(
         Commands commands,
-        Query<Data<TinyEcs.Children>, Filter<With<TipNoticeWindow>>> windowsQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
-        => DespawnAll(commands, windowsQ, childrenQ);
+        Query<Data<TinyEcs.Children>, Filter<With<TipNoticeWindow>>> windowsQ)
+        => DespawnAll(commands, windowsQ);
 
     private static void DespawnAll(
         Commands commands,
-        Query<Data<TinyEcs.Children>, Filter<With<TipNoticeWindow>>> windowsQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<TinyEcs.Children>, Filter<With<TipNoticeWindow>>> windowsQ)
     {
         foreach (var (ent, _) in windowsQ)
-            DespawnSubtree(commands, ent.Ref, childrenQ);
-    }
-
-    private static void DespawnSubtree(Commands commands, ulong entity, Query<Data<TinyEcs.Children>> childrenQ)
-    {
-        if (childrenQ.TryGet(entity, out var kidsRow))
-        {
-            var (_, kids) = kidsRow;
-            foreach (var cid in kids.Ref)
-                DespawnSubtree(commands, cid, childrenQ);
-        }
-        commands.Entity(entity).Despawn();
+            commands.Entity(ent.Ref).Despawn();
     }
 
     private static int GumpW(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Width; }
