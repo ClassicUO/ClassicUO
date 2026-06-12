@@ -843,21 +843,29 @@ internal readonly struct VendorGumpPlugin : IPlugin
         var (_, w) = winRow;
         if (!w.Ref.Items.TryGetValue(serial, out var entry)) return;
         int chosen = w.Ref.Txn.TryGetValue(serial, out var cc) ? cc : 0;
+        int next = NextTxnQty(chosen, entry.Amount, dir, shift);
+        // Buy at max stock is a no-op (don't dirty the window); every other
+        // edge — incl. a decrement of an absent item — falls through and rebuilds.
+        if (dir > 0 && next == chosen) return;
+        if (next <= 0) w.Ref.Txn.Remove(serial);
+        else w.Ref.Txn[serial] = next;
+        w.Ref.Dirty = true;
+    }
+
+    // Chosen quantity after a +/- vendor click. shift = "all" (buy remaining
+    // stock / clear the line), else step by 1. Buy (dir>0) clamps to remaining
+    // stock (returns `chosen` unchanged at the cap); sell-down floors at 0,
+    // where 0 means "remove from the transaction". Pure — see VendorTests.
+    internal static int NextTxnQty(int chosen, int stock, int dir, bool shift)
+    {
         if (dir > 0)
         {
-            int remaining = entry.Amount - chosen;
-            if (remaining <= 0) return;
-            int add = shift ? remaining : 1;
-            w.Ref.Txn[serial] = chosen + add;
+            int remaining = stock - chosen;
+            if (remaining <= 0) return chosen;
+            return chosen + (shift ? remaining : 1);
         }
-        else
-        {
-            int sub = shift ? chosen : 1;
-            int next = chosen - sub;
-            if (next <= 0) w.Ref.Txn.Remove(serial);
-            else w.Ref.Txn[serial] = next;
-        }
-        w.Ref.Dirty = true;
+        int next = chosen - (shift ? chosen : 1);
+        return next < 0 ? 0 : next;
     }
 
     private static void DoAccept(ulong rootId, Query<Data<VendorWindow>> wq, NetClient net, GameContext ctx, Commands commands)
