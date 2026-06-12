@@ -173,6 +173,14 @@ public struct ScreenPositionOffset
     public Vector2 Value;
 }
 
+// Per-entity render alpha (0 invisible .. 0xFF opaque), stepped toward its
+// target by the render pass each ALPHA_TIME tick (legacy GameObject.AlphaHue).
+// Starts at 0 so newly seen objects fade in.
+internal struct AlphaFade
+{
+    public byte Value;
+}
+
 internal struct IsStatic;
 internal struct IsTile;
 internal struct Items;

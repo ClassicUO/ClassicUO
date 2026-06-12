@@ -77,12 +77,18 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
             .AddSystem((Commands commands,
                         Query<Data<WorldPosition>, Without<ScreenPosition>> query2,
-                        Query<Data<WorldPosition, ScreenPosition>, Changed<WorldPosition>> query) =>
+                        Query<Data<WorldPosition, ScreenPosition>, Changed<WorldPosition>> query,
+                        Query<Data<WorldPosition>, Without<AlphaFade>> queryNoFade) =>
             {
                 foreach ((var ent, var worldPos) in query2)
                 {
                     var iso = worldPos.Ref.WorldToScreen();
                     commands.Entity(ent.Ref).Insert(new ScreenPosition() { Value = iso });
+                }
+
+                foreach ((var ent, _) in queryNoFade)
+                {
+                    commands.Entity(ent.Ref).Insert(new AlphaFade());
                 }
 
                 foreach ((var worldPos, var screenPos) in query)
@@ -166,11 +172,11 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         Query<Data<Graphic, Hue>> qLayers,
         Query<Empty, With<NormalMulti>> qNormalMultis,
         Single<Data<WorldPosition>, With<Player>> queryPlayer,
-        Query<Data<WorldPosition, ScreenPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> queryTiles,
-        Query<Data<WorldPosition, ScreenPosition, Graphic, Hue, Amount, NetworkSerial>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>, Optional<Amount>, Optional<NetworkSerial>>> queryStatics,
-        Query<Data<WorldPosition, Graphic, Hue, NetworkSerial, ScreenPositionOffset, Facing, MobAnimation, MobileSteps, ServerFlags, Notoriety>,
+        Query<Data<WorldPosition, ScreenPosition, Graphic, TileStretched, AlphaFade>, Filter<With<IsTile>, Optional<TileStretched>>> queryTiles,
+        Query<Data<WorldPosition, ScreenPosition, Graphic, Hue, Amount, NetworkSerial, AlphaFade>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>, Optional<Amount>, Optional<NetworkSerial>>> queryStatics,
+        Query<Data<WorldPosition, Graphic, Hue, NetworkSerial, ScreenPositionOffset, Facing, MobAnimation, MobileSteps, ServerFlags, Notoriety, AlphaFade>,
             Filter<Without<ContainedInto>, Optional<Facing>, Optional<MobAnimation>, Optional<MobileSteps>, Optional<ServerFlags>, Optional<Notoriety>>> queryBodyOnly,
-        Query<Data<EquipmentSlots, ScreenPositionOffset, WorldPosition, Graphic, Facing, MobileSteps, MobAnimation, ServerFlags, Notoriety>,
+        Query<Data<EquipmentSlots, ScreenPositionOffset, WorldPosition, Graphic, Facing, MobileSteps, MobAnimation, ServerFlags, Notoriety, AlphaFade>,
             Filter<Without<ContainedInto>, Optional<MobileSteps>, Optional<MobAnimation>, Optional<ServerFlags>, Optional<Notoriety>>> queryEquipmentSlots
     )
     {
@@ -212,8 +218,16 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             waterScale = new Vector2(1.1f + sin * 0.1f, 1.1f + cos * 0.5f * 0.1f);
         }
 
+        // Fade tick — legacy GameScene._alphaChanged: alpha steps at most once
+        // per ALPHA_TIME ms, not per frame.
+        var alphaChanged = time.Value.Total > scratch.Value.AlphaTime;
+        if (alphaChanged)
+            scratch.Value.AlphaTime = time.Value.Total + Constants.ALPHA_TIME;
+
         var fx = new WorldFx
         {
+            AlphaChanged = alphaChanged,
+            ObjectsFading = profile.Value.UseObjectsFading,
             GrayWorld = playerDead && profile.Value.EnableBlackWhiteEffect,
             ViewRange = gameCtx.Value.MaxObjectsDistance,
             PlayerX = playerX,
@@ -334,12 +348,69 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         public bool CotFull, CotGradient;
         public float CotRadiusSq;
         public Vector2 CotCenter;       // player iso screen pos
+        public bool AlphaChanged;       // ALPHA_TIME tick elapsed this frame
+        public bool ObjectsFading;      // Profile.UseObjectsFading
     }
 
     private struct RenderScratch
     {
         public (int lastPosX, int lastPosY, int lastPosZ)? LastPos;
         public MaxZInfo ZInfo;
+        public float AlphaTime;
+    }
+
+    // Legacy GameSceneDrawingSorting.ProcessAlpha: step the entity's alpha
+    // toward its target (0 hidden, 178 translucent, 0xFF visible) once per
+    // ALPHA_TIME tick. Returns false when the object is fully faded out and
+    // can be skipped entirely.
+    private static bool ProcessFade(ref byte alpha, bool hidden, bool translucent, ref readonly WorldFx fx)
+    {
+        if (hidden)
+            return fx.AlphaChanged ? CalculateAlpha(ref alpha, 0, fx.ObjectsFading) : alpha != 0;
+
+        if (translucent)
+        {
+            if (fx.AlphaChanged)
+                CalculateAlpha(ref alpha, 178, fx.ObjectsFading);
+            return true;
+        }
+
+        // NOTE: legacy excludes foliage from the fade-in branch because the
+        // foliage-transparency system owns its alpha; that system isn't
+        // ported yet, so foliage fades in like any other static here.
+        if (fx.AlphaChanged && alpha != 0xFF)
+            CalculateAlpha(ref alpha, 0xFF, fx.ObjectsFading);
+        return true;
+    }
+
+    private static bool CalculateAlpha(ref byte alphaHue, int maxAlpha, bool useObjectsFading)
+    {
+        if (!useObjectsFading)
+        {
+            alphaHue = (byte)maxAlpha;
+            return maxAlpha != 0;
+        }
+
+        var result = false;
+        var alpha = (int)alphaHue;
+
+        if (alpha > maxAlpha)
+        {
+            alpha -= 25;
+            if (alpha < maxAlpha)
+                alpha = maxAlpha;
+            result = true;
+        }
+        else if (alpha < maxAlpha)
+        {
+            alpha += 25;
+            if (alpha > maxAlpha)
+                alpha = maxAlpha;
+            result = true;
+        }
+
+        alphaHue = (byte)alpha;
+        return result;
     }
 
     // Legacy Mobile.IsDead graphics (ghost bodies).
@@ -390,7 +461,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         Vector2 center,
         Vector2 mousePos,
         Rectangle cameraBounds,
-        Query<Data<WorldPosition, ScreenPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> queryTiles)
+        Query<Data<WorldPosition, ScreenPosition, Graphic, TileStretched, AlphaFade>, Filter<With<IsTile>, Optional<TileStretched>>> queryTiles)
     {
         // Cache frequently accessed resources
         var tileDataCache = fileManager.Value.TileData;
@@ -398,11 +469,11 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         var arts = assetsServer.Value.Arts;
 
         // Process all tiles in one pass
-        foreach (var (entity, worldPos, screenPos, graphic, stretched) in queryTiles)
+        foreach (var (entity, worldPos, screenPos, graphic, stretched, fade) in queryTiles)
         {
-            // Early filtering
+            // Early filtering — fully faded and no tick this frame: skip cheap.
             var hide = backupZInfo.MaxZGround.HasValue && worldPos.Ref.Z > backupZInfo.MaxZGround;
-            if (!calculateZ && hide)
+            if (!calculateZ && hide && !fx.AlphaChanged && fade.Ref.Value == 0)
                 continue;
 
             // Calculate position only once
@@ -426,8 +497,10 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 }
             }
 
-            if (hide)
+            if (!ProcessFade(ref fade.Ref.Value, hide, false, in fx))
                 continue;
+
+            var alpha = fade.Ref.Value / 255f;
 
             // Legacy LandView hue chain: highlight > out-of-range > dead gray.
             ushort hueOverride = 0;
@@ -452,8 +525,8 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
                 var depthZ = Isometric.GetDepthZ(worldPos.Ref.X, worldPos.Ref.Y, stretched.Ref.AvgZ - 2);
                 var color = hueOverride != 0
-                    ? new Vector3(hueOverride - 1, ShaderHueTranslator.SHADER_LAND_HUED, 1f)
-                    : new Vector3(0, ShaderHueTranslator.SHADER_LAND, 1f);
+                    ? new Vector3(hueOverride - 1, ShaderHueTranslator.SHADER_LAND_HUED, alpha)
+                    : new Vector3(0, ShaderHueTranslator.SHADER_LAND, alpha);
 
                 selectedEntity.Value.IsPointInStretchedLand(
                     entity.Ref,
@@ -488,8 +561,8 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
                 var depthZ = Isometric.GetDepthZ(worldPos.Ref.X, worldPos.Ref.Y, worldPos.Ref.Z - 2);
                 var color = hueOverride != 0
-                    ? new Vector3(hueOverride - 1, ShaderHueTranslator.SHADER_HUED, 1f)
-                    : Vector3.UnitZ;
+                    ? new Vector3(hueOverride - 1, ShaderHueTranslator.SHADER_HUED, alpha)
+                    : new Vector3(0, 0, alpha);
 
                 selectedEntity.Value.IsPointInLand(entity.Ref, depthZ, mousePos, position);
 
@@ -547,14 +620,14 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         Vector2 mousePos,
         Rectangle cameraBounds,
         Query<Empty, With<NormalMulti>> qNormalMultis,
-        Query<Data<WorldPosition, ScreenPosition, Graphic, Hue, Amount, NetworkSerial>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>, Optional<Amount>, Optional<NetworkSerial>>> queryStatics)
+        Query<Data<WorldPosition, ScreenPosition, Graphic, Hue, Amount, NetworkSerial, AlphaFade>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>, Optional<Amount>, Optional<NetworkSerial>>> queryStatics)
     {
         // Cache frequently accessed resources
         var tileDataCache = fileManager.Value.TileData;
         var arts = assetsServer.Value.Arts;
 
         // Process all statics in one pass with optimized property access
-        foreach (var (entity, worldPos, screenPos, graphic, hue, amount, serial) in queryStatics)
+        foreach (var (entity, worldPos, screenPos, graphic, hue, amount, serial, fade) in queryStatics)
         {
             ref readonly var tileData = ref tileDataCache.StaticData[graphic.Ref.Value];
             int amountVal = amount.IsValid() ? amount.Ref.Value : 1;
@@ -590,7 +663,8 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
             var hide = tileData.IsRoof && (!backupZInfo.DrawRoof || !profile.DrawRoofs);
             hide |= maxZ.HasValue && worldPos.Ref.Z >= maxZ;
-            if (!calculateZ && hide)
+            // Fully faded and no tick this frame: skip before art/bounds work.
+            if (!calculateZ && hide && !fx.AlphaChanged && fade.Ref.Value == 0)
                 continue;
 
             // Calculate position only once
@@ -655,7 +729,11 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 }
             }
 
-            if (hide)
+            // Fading-out objects (above maxZ / hidden roofs) keep drawing until
+            // the alpha reaches 0; selection is suppressed meanwhile (legacy
+            // meshed-static path).
+            var fadingOut = hide;
+            if (!ProcessFade(ref fade.Ref.Value, hide, tileData.IsTranslucent, in fx))
                 continue;
 
             // Position calculation
@@ -723,11 +801,13 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 hueValue = 0x0035;
             }
 
+            alpha *= fade.Ref.Value / 255f;
+
             var color = Renderer.ShaderHueTranslator.GetHueVector(hueValue, partialHue, alpha, circletrans: circleTrans);
 
             // Selection checking
             var p = mousePos - position;
-            if (assetsServer.Value.Arts.PixelCheck(drawGraphic, (int)p.X, (int)p.Y))
+            if (!fadingOut && assetsServer.Value.Arts.PixelCheck(drawGraphic, (int)p.X, (int)p.Y))
                 selectedEntity.Value.Set(entity.Ref, depthZ);
 
             // Trees, foliage and rocks cast a flat shadow (legacy StaticView →
@@ -805,17 +885,21 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         int? maxZ,
         Vector2 center,
         Vector2 mousePos,
-        Query<Data<WorldPosition, Graphic, Hue, NetworkSerial, ScreenPositionOffset, Facing, MobAnimation, MobileSteps, ServerFlags, Notoriety>,
+        Query<Data<WorldPosition, Graphic, Hue, NetworkSerial, ScreenPositionOffset, Facing, MobAnimation, MobileSteps, ServerFlags, Notoriety, AlphaFade>,
             Filter<Without<ContainedInto>, Optional<Facing>, Optional<MobAnimation>, Optional<MobileSteps>, Optional<ServerFlags>, Optional<Notoriety>>> queryBodyOnly)
     {
         // Cache animation service
         var animations = assetsServer.Value.Animations;
 
-        foreach (var (entity, pos, graphic, hue, serial, offset, direction, animation, steps, sFlags, notoriety) in queryBodyOnly)
+        foreach (var (entity, pos, graphic, hue, serial, offset, direction, animation, steps, sFlags, notoriety, fade) in queryBodyOnly)
         {
-            // Early filtering
-            if (maxZ.HasValue && pos.Ref.Z >= maxZ)
+            // Early filtering — fade out above maxZ instead of hard-culling.
+            // The body owns the fade step; RenderEquipment reads the value.
+            var aboveMaxZ = maxZ.HasValue && pos.Ref.Z >= maxZ;
+            if (!ProcessFade(ref fade.Ref.Value, aboveMaxZ, false, in fx))
                 continue;
+
+            var fadeAlpha = fade.Ref.Value / 255f;
 
             var priorityZ = pos.Ref.Z;
             var iso = pos.Ref.WorldToScreen();
@@ -884,7 +968,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             position.Y -= frame.UV.Height + frame.Center.Y;
 
             var depthZ = Isometric.GetDepthZ(pos.Ref.X, pos.Ref.Y, priorityZ);
-            var color = ShaderHueTranslator.GetHueVector(FixHue(uoHue));
+            var color = ShaderHueTranslator.GetHueVector(FixHue(uoHue), false, fadeAlpha);
             position += offset.Ref.Value;
 
             // Adjust depth based on offset
@@ -905,11 +989,11 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             {
                 color.X = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE - 1;
                 color.Y = ShaderHueTranslator.SHADER_HUED;
-                color.Z = 1f;
+                color.Z = fadeAlpha;
             }
 
             // Selection checking
-            if (animations.PixelCheck(
+            if (!aboveMaxZ && animations.PixelCheck(
                 graphic.Ref.Value,
                 animAction,
                 (byte)dir,
@@ -998,7 +1082,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         Vector2 center,
         Vector2 mousePos,
         Query<Data<Graphic, Hue>> qLayers,
-        Query<Data<EquipmentSlots, ScreenPositionOffset, WorldPosition, Graphic, Facing, MobileSteps, MobAnimation, ServerFlags, Notoriety>,
+        Query<Data<EquipmentSlots, ScreenPositionOffset, WorldPosition, Graphic, Facing, MobileSteps, MobAnimation, ServerFlags, Notoriety, AlphaFade>,
             Filter<Without<ContainedInto>, Optional<MobileSteps>, Optional<MobAnimation>, Optional<ServerFlags>, Optional<Notoriety>>> queryEquipmentSlots)
     {
         // Cache frequently accessed resources
@@ -1011,11 +1095,15 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         Span<Layer> rawOrder = stackalloc Layer[PaperdollOrder.N];
         Span<Layer> drawOrder = stackalloc Layer[PaperdollOrder.N];
 
-        foreach (var (entity, slots, offset, pos, graphic, _, steps, animation, sFlags, notoriety) in queryEquipmentSlots)
+        foreach (var (entity, slots, offset, pos, graphic, _, steps, animation, sFlags, notoriety, fade) in queryEquipmentSlots)
         {
-            // Early filtering
-            if (maxZ.HasValue && pos.Ref.Z >= maxZ)
+            // Early filtering — RenderBodies already stepped this mobile's
+            // fade this frame; equipment only mirrors the value.
+            var aboveMaxZ = maxZ.HasValue && pos.Ref.Z >= maxZ;
+            if (aboveMaxZ && fade.Ref.Value == 0)
                 continue;
+
+            var fadeAlpha = fade.Ref.Value / 255f;
 
             if (!Races.IsHuman(graphic.Ref.Value))
                 continue;
@@ -1147,18 +1235,19 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 position.Y -= frame.UV.Height + frame.Center.Y;
 
                 var color = ShaderHueTranslator.GetHueVector(
-                    FixHue(overrideHue != 0 ? overrideHue : hueLayer != 0 ? hueLayer : baseHue));
+                    FixHue(overrideHue != 0 ? overrideHue : hueLayer != 0 ? hueLayer : baseHue),
+                    false, fadeAlpha);
                 position += offset.Ref.Value;
 
                 if (highlighted)
                 {
                     color.X = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE - 1;
                     color.Y = ShaderHueTranslator.SHADER_HUED;
-                    color.Z = 1f;
+                    color.Z = fadeAlpha;
                 }
 
                 // Selection checking
-                if (animations.PixelCheck(
+                if (!aboveMaxZ && animations.PixelCheck(
                         animId,
                         animAction,
                         (byte)dir,
