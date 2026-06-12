@@ -367,7 +367,7 @@ internal readonly struct TooltipPlugin : IPlugin
     // ClientBounds). UiSurface.LogicalSize IS the Clay layout space — the same
     // logical pixels as the mouse / Node coords — so the box never spills past
     // the real window edges.
-    private static (float X, float Y) ClampToScreen(Vector2 pos, int boxW, int boxH, UiSurface surface)
+    internal static (float X, float Y) ClampToScreen(Vector2 pos, int boxW, int boxH, UiSurface surface)
     {
         float w = surface.LogicalSize.X;
         float h = surface.LogicalSize.Y;
@@ -380,7 +380,7 @@ internal readonly struct TooltipPlugin : IPlugin
 
     // Name is coloured like legacy ReadProperties: items always yellow, mobiles
     // by notoriety. Property lines follow in white.
-    private static string BuildHtml(uint serial, in ObjectPropertyLists.Entry e, NotorietyFlag noto)
+    internal static string BuildHtml(uint serial, in ObjectPropertyLists.Entry e, NotorietyFlag noto)
     {
         var sb = new StringBuilder();
         bool item = ClassicUO.Game.SerialHelper.IsItem(serial);
