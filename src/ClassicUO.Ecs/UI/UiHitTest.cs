@@ -10,6 +10,12 @@ internal static class UiHitTest
     // sprite drawn in GuiRenderingPlugin.
     private const float StackOffset = 5f;
 
+    // Plain bounding-box point test. For plugins scanning their OWN elements
+    // (top bar handles, popup rows); full picking goes through UiPick.Topmost.
+    public static bool Contains(in ComputedNode bb, Vector2 pos)
+        => pos.X >= bb.Position.X && pos.Y >= bb.Position.Y
+        && pos.X < bb.Position.X + bb.Size.X && pos.Y < bb.Position.Y + bb.Size.Y;
+
     // True when pos lands on an OPAQUE pixel of the entity's UO sprite.
     // Mirrors main's Gumps/Arts PixelCheck: a click inside the bounding box
     // but over a fully-transparent pixel misses the sprite and passes through

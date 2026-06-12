@@ -32,8 +32,7 @@ internal readonly struct TopBarPlugin : IPlugin
 {
     private const int BarHeight = 27;
     private const int CaptionTop = 5; // resting caption Y; +1 when the button is pressed
-    private static ClayColor s_capNormal = new(0, 0, 0, 255);
-    private static ClayColor s_capHover = new(238, 238, 49, 255);
+    private static readonly ClayColor s_capNormal = new(0, 0, 0, 255);
 
     public void Build(App app)
     {
@@ -97,18 +96,16 @@ internal readonly struct TopBarPlugin : IPlugin
         Res<GameContext> gameCtx,
         Res<ClassicUO.Configuration.Profile> profile,
         Local<bool> spawnQueued,
-        Query<Data<Node>, Filter<With<IsTopBar>>> roots,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<Node>, Filter<With<IsTopBar>>> roots)
     {
-        bool exists = false;
-        foreach (var _ in roots) { exists = true; break; }
+        bool exists = roots.Count() > 0;
         if (exists) spawnQueued.Value = false;
 
         if (profile.Value.TopbarGumpIsDisabled)
         {
             spawnQueued.Value = false;
             if (exists)
-                Despawn(commands, roots, childrenQ);
+                Despawn(commands, roots);
             return;
         }
 
@@ -134,7 +131,7 @@ internal readonly struct TopBarPlugin : IPlugin
         var startX = 30;
         for (var i = 0; i < s_buttons.Length; i++)
         {
-            if (!hasUOStore && (int)s_buttons[i].id >= (int)Buttons.UOStore) break;
+            if (!hasUOStore && s_buttons[i].id >= Buttons.UOStore) break;
             startX += (s_buttons[i].sizeKind == 1 ? largeWidth : smallWidth) + 1;
         }
         var totalWidth = startX + 1;
@@ -196,16 +193,16 @@ internal readonly struct TopBarPlugin : IPlugin
         // Caption hues: legacy RighClickableButton(normalHue:0, hoverHue:0x0036).
         // hue 0 renders black; hover swaps to hue 0x0036's colour (a yellow).
         // The caption (Text, no UiCustom) isn't hit-testable, so hover is driven
-        // off the parent BUTTON's Interaction in PressOffsetCaptions.
-        s_capNormal = new ClayColor(0, 0, 0, 255);
+        // off the parent BUTTON's Interaction in PressOffsetCaptions. The hover
+        // colour rides on each caption's TopBarCaption component.
         uint hc = UoFontRuntime.Hues != null ? UoFontRuntime.Hues.GetPolygoneColor(0x1F, 0x36) : 0x00FFFFFFu;
-        s_capHover = new ClayColor((int)(hc & 0xFF), (int)((hc >> 8) & 0xFF), (int)((hc >> 16) & 0xFF), 255);
+        var capHover = new ClayColor((int)(hc & 0xFF), (int)((hc >> 8) & 0xFF), (int)((hc >> 16) & 0xFF), 255);
 
         var x = 30;
         for (var i = 0; i < s_buttons.Length; i++)
         {
             var (sizeKind, caption, btnId) = s_buttons[i];
-            if (!hasUOStore && (int)btnId >= (int)Buttons.UOStore) break;
+            if (!hasUOStore && btnId >= Buttons.UOStore) break;
 
             var w = sizeKind == 1 ? largeWidth : smallWidth;
             var h = sizeKind == 1 ? largeHeight : smallHeight;
@@ -242,9 +239,9 @@ internal readonly struct TopBarPlugin : IPlugin
                 // Legacy uses unicode font 1, hue 0 — which renders BLACK, not
                 // white (the top-bar captions are dark on the marble button).
                 .Insert(new TextFont { FontId = 1, Size = 12 })
-                .Insert(new TextColor(new ClayColor(0, 0, 0, 255)))
+                .Insert(new TextColor(s_capNormal))
                 .Insert(Interaction.None)
-                .Insert<TopBarCaption>();
+                .Insert(new TopBarCaption { Hover = capHover });
             commands.AddChild(btn.Id, label.Id);
 
             WireButton(btn, btnId);
@@ -334,22 +331,7 @@ internal readonly struct TopBarPlugin : IPlugin
             // whole bar and sits under the buttons. Any press over it CLAIMS the
             // gesture so WindowDragPlugin / pickup don't grab a gump beneath the
             // bar (the bar is on top). Buttons still fire their UiClick.
-            bool overBar = false;
-            int barTop = int.MinValue;
-            foreach (var (_, bb, node) in handlesQ)
-            {
-                if (node.Ref.Display == Display.None) continue;
-                if (bb.Ref.PaintOrder > barTop) barTop = bb.Ref.PaintOrder;
-                if (Inside(bb.Ref, pos)) overBar = true;
-            }
-            if (!overBar) return;
-            // Buttons paint above the bg handle; fold them into the threshold so
-            // the bar's own controls aren't mistaken for a gump stacked above.
-            foreach (var (_, bb, node) in buttonsQ)
-            {
-                if (node.Ref.Display == Display.None) continue;
-                if (bb.Ref.PaintOrder > barTop) barTop = bb.Ref.PaintOrder;
-            }
+            if (!ScanBar(pos, handlesQ, buttonsQ, out var barTop, out var overButton)) return;
 
             // A gump painted above the bar at this pixel owns the gesture — bail
             // WITHOUT claiming the gate so WindowDragPlugin (Stage.Update) can
@@ -362,13 +344,6 @@ internal readonly struct TopBarPlugin : IPlugin
 
             // Only the bg/arrow area drags the bar; a press on a button just
             // claims the gate and lets the button's own UiClick run.
-            bool overButton = false;
-            foreach (var (_, bb, node) in buttonsQ)
-            {
-                if (node.Ref.Display == Display.None) continue;
-                if (Inside(bb.Ref, pos)) { overButton = true; break; }
-            }
-
             if (!overButton)
             {
                 foreach (var (ent, node) in rootQ)
@@ -405,20 +380,7 @@ internal readonly struct TopBarPlugin : IPlugin
         Query<Data<Node>, Filter<With<IsTopBar>>> rootQ)
     {
         var pos = mouse.Value.Position;
-        bool over = false;
-        int barTop = int.MinValue;
-        foreach (var (_, bb, node) in handlesQ)
-        {
-            if (node.Ref.Display == Display.None) continue;
-            if (bb.Ref.PaintOrder > barTop) barTop = bb.Ref.PaintOrder;
-            if (Inside(bb.Ref, pos)) over = true;
-        }
-        if (!over) return;
-        foreach (var (_, bb, node) in buttonsQ)
-        {
-            if (node.Ref.Display == Display.None) continue;
-            if (bb.Ref.PaintOrder > barTop) barTop = bb.Ref.PaintOrder;
-        }
+        if (!ScanBar(pos, handlesQ, buttonsQ, out var barTop, out _)) return;
 
         // Gump painted above the bar here owns the right-click (close-on-right
         // click) — don't consume it for the bar reset.
@@ -432,9 +394,36 @@ internal readonly struct TopBarPlugin : IPlugin
         }
     }
 
-    private static bool Inside(in ComputedNode bb, Vector2 p)
-        => p.X >= bb.Position.X && p.Y >= bb.Position.Y
-        && p.X < bb.Position.X + bb.Size.X && p.Y < bb.Position.Y + bb.Size.Y;
+    // One pass over the bar's own elements: false when `pos` misses the visible
+    // bg / minimized-arrow handle. `barTop` is the bar's topmost PaintOrder —
+    // buttons paint above the bg, fold them in so the bar's own controls aren't
+    // mistaken for a gump stacked above. `overButton` = pos inside a visible
+    // button (a press there activates the button instead of dragging).
+    private static bool ScanBar(
+        Vector2 pos,
+        Query<Data<ComputedNode, Node>, Filter<With<TopBarDragHandle>>> handlesQ,
+        Query<Data<ComputedNode, Node>, Filter<With<TopBarButton>>> buttonsQ,
+        out int barTop,
+        out bool overButton)
+    {
+        bool overBar = false;
+        barTop = int.MinValue;
+        overButton = false;
+        foreach (var (_, bb, node) in handlesQ)
+        {
+            if (node.Ref.Display == Display.None) continue;
+            if (bb.Ref.PaintOrder > barTop) barTop = bb.Ref.PaintOrder;
+            if (UiHitTest.Contains(bb.Ref, pos)) overBar = true;
+        }
+        if (!overBar) return false;
+        foreach (var (_, bb, node) in buttonsQ)
+        {
+            if (node.Ref.Display == Display.None) continue;
+            if (bb.Ref.PaintOrder > barTop) barTop = bb.Ref.PaintOrder;
+            if (UiHitTest.Contains(bb.Ref, pos)) overButton = true;
+        }
+        return true;
+    }
 
     // True when ANY UO element is painted above the bar at `pos` — including a
     // gump window's CHILD sprites (container items, paperdoll body/equipment),
@@ -525,9 +514,6 @@ internal readonly struct TopBarPlugin : IPlugin
                              Query<Data<JournalWindow>> existing) =>
                     JournalPlugin.OpenOrFocus(cmd, gb.Value, assets.Value, z.Value, existing));
                 break;
-            case Buttons.Chat:
-                btn.Observe((On<UiClick> _) => Console.WriteLine("[TopBar] Chat — no ECS gump yet"));
-                break;
             case Buttons.WorldMap:
                 btn.Observe((On<UiClick> _,
                              Commands cmd,
@@ -549,14 +535,13 @@ internal readonly struct TopBarPlugin : IPlugin
                              Query<Data<OptionsWindow>> existing) =>
                     OptionsGumpPlugin.OpenOrFocus(cmd, z.Value, surf.Value, st.Value, existing));
                 break;
+            case Buttons.Chat:
             case Buttons.NetStats:
-                btn.Observe((On<UiClick> _) => Console.WriteLine("[TopBar] NetStats — no ECS gump yet"));
-                break;
             case Buttons.UOStore:
-                btn.Observe((On<UiClick> _) => Console.WriteLine("[TopBar] UO Store — no ECS path yet"));
-                break;
             case Buttons.GlobalChat:
-                btn.Observe((On<UiClick> _) => Console.WriteLine("[TopBar] Global Chat — not implemented (matches legacy)"));
+                // `id` is an immutable enum value — safe to capture in the
+                // stored observer lambda.
+                btn.Observe((On<UiClick> _) => Console.WriteLine($"[TopBar] {id} — no ECS gump yet"));
                 break;
 
             case Buttons.Info:
@@ -570,10 +555,10 @@ internal readonly struct TopBarPlugin : IPlugin
     //   * pressed -> caption +1px down (yoffset = IsClicked ? 1 : 0)
     //   * hovered/pressed -> caption recoloured to hoverHue 0x0036, else hue 0.
     private static void PressOffsetCaptions(
-        Query<Data<Interaction, Node, TextColor, TinyEcs.Parent>, Filter<With<TopBarCaption>>> captionsQ,
+        Query<Data<Interaction, Node, TextColor, TinyEcs.Parent, TopBarCaption>> captionsQ,
         Query<Data<Interaction>> interQ)
     {
-        foreach (var (_, capInter, node, color, parent) in captionsQ)
+        foreach (var (_, capInter, node, color, parent, cap) in captionsQ)
         {
             // The caption captures the press when clicked over the text; the
             // parent button captures it when clicked on the bare button face.
@@ -589,28 +574,18 @@ internal readonly struct TopBarPlugin : IPlugin
             bool over = pressed
                      || capInter.Ref == Interaction.Hovered || btnInter == Interaction.Hovered;
             node.Ref.Top = Val.Px(pressed ? CaptionTop + 1 : CaptionTop);
-            color.Ref.Value = over ? s_capHover : s_capNormal;
+            color.Ref.Value = over ? cap.Ref.Hover : s_capNormal;
         }
     }
 
     private static void Despawn(
         Commands commands,
-        Query<Data<Node>, Filter<With<IsTopBar>>> roots,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<Node>, Filter<With<IsTopBar>>> roots)
     {
+        // TinyEcs' Parent/Children mapper is CleanupPolicy.DeleteDescendants —
+        // despawning the root cascades to the whole subtree.
         foreach (var (ent, _) in roots)
-            DespawnSubtree(commands, ent.Ref, childrenQ);
-    }
-
-    private static void DespawnSubtree(Commands commands, ulong entity, Query<Data<TinyEcs.Children>> childrenQ)
-    {
-        if (childrenQ.TryGet(entity, out var childrenRow))
-        {
-            var (_, kids) = childrenRow;
-            foreach (var cid in kids.Ref)
-                DespawnSubtree(commands, cid, childrenQ);
-        }
-        commands.Entity(entity).Despawn();
+            commands.Entity(ent.Ref).Despawn();
     }
 }
 
@@ -619,4 +594,7 @@ internal struct TopBarFull;       // wraps the expanded bar; hidden when minimiz
 internal struct TopBarArrow;      // minimized expand-arrow; hidden when expanded
 internal struct TopBarButton;     // clickable buttons (skipped as drag latch targets)
 internal struct TopBarDragHandle; // bg + arrow: press here to drag the bar
-internal struct TopBarCaption;    // button caption; nudges down +1px while pressed
+internal struct TopBarCaption     // button caption; nudges down +1px while pressed
+{
+    public Clay.Color Hover;      // hue 0x0036 colour, resolved once at spawn
+}
