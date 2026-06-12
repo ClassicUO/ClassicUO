@@ -250,47 +250,7 @@ internal readonly struct StatusBarPlugin : IPlugin
 
         foreach (var (_, text, node, label) in labelsQ)
         {
-            text.Ref.Value = label.Ref.Field switch
-            {
-                StatusField.Name => gameCtx.Value.PlayerName ?? string.Empty,
-                StatusField.Sex => d.IsFemale ? "Female" : "Male",
-                StatusField.Strength => d.Str.ToString(),
-                StatusField.Dexterity => d.Dex.ToString(),
-                StatusField.Intelligence => d.Int.ToString(),
-                StatusField.Hits => hits.Value.ToString(),
-                StatusField.HitsMax => hits.MaxValue.ToString(),
-                StatusField.Mana => mana.Value.ToString(),
-                StatusField.ManaMax => mana.MaxValue.ToString(),
-                StatusField.Stamina => stam.Value.ToString(),
-                StatusField.StaminaMax => stam.MaxValue.ToString(),
-                StatusField.HitsCombined => $"{hits.Value}/{hits.MaxValue}",
-                StatusField.ManaCombined => $"{mana.Value}/{mana.MaxValue}",
-                StatusField.StaminaCombined => $"{stam.Value}/{stam.MaxValue}",
-                StatusField.WeightCombined => $"{d.Weight}/{d.WeightMax}",
-                StatusField.ArmorOld => d.PhysicalRes.ToString(),
-                StatusField.Weight => d.Weight.ToString(),
-                StatusField.WeightMax => d.WeightMax.ToString(),
-                StatusField.StatCap => d.StatsCap.ToString(),
-                StatusField.Luck => d.Luck.ToString(),
-                StatusField.Gold => d.Gold.ToString(),
-                StatusField.Damage => $"{d.DamageMin}-{d.DamageMax}",
-                StatusField.Followers => $"{d.Followers}/{d.FollowersMax}",
-                StatusField.HitChanceInc => d.HitChanceInc.ToString(),
-                StatusField.DefenseChanceInc => $"{d.DefenseChanceInc}/{d.MaxDefenseChanceInc}",
-                StatusField.SwingSpeedInc => d.SwingSpeedInc.ToString(),
-                StatusField.DamageInc => d.DamageInc.ToString(),
-                StatusField.LowerManaCost => d.LowerManaCost.ToString(),
-                StatusField.LowerReagentCost => d.LowerReagentCost.ToString(),
-                StatusField.SpellDamageInc => d.SpellDamageInc.ToString(),
-                StatusField.FasterCasting => d.FasterCasting.ToString(),
-                StatusField.FasterCastRecovery => d.FasterCastRecovery.ToString(),
-                StatusField.Armor => $"{d.PhysicalRes}/{d.MaxPhysicalRes}",
-                StatusField.FireRes => $"{d.FireRes}/{d.MaxFireRes}",
-                StatusField.ColdRes => $"{d.ColdRes}/{d.MaxColdRes}",
-                StatusField.PoisonRes => $"{d.PoisonRes}/{d.MaxPoisonRes}",
-                StatusField.EnergyRes => $"{d.EnergyRes}/{d.MaxEnergyRes}",
-                _ => string.Empty,
-            };
+            text.Ref.Value = FormatField(label.Ref.Field, in d, in hits, in mana, in stam, gameCtx.Value.PlayerName ?? string.Empty);
 
             // Center the value inside its box (legacy TS_CENTER columns).
             if (label.Ref.CenterW > 0 && UoFontRuntime.Fonts != null)
@@ -300,6 +260,53 @@ internal readonly struct StatusBarPlugin : IPlugin
             }
         }
     }
+
+    // Map a status field to its display string from the player's live stats.
+    // Pure (no ECS / render) so it is unit-testable; the Refresh system just
+    // pipes the resolved player components in. Mirrors legacy StatusGump label
+    // text (combined "cur/max" vs single value per field).
+    internal static string FormatField(StatusField field, in PlayerData d, in Hits hits, in Mana mana, in Stamina stam, string playerName)
+        => field switch
+        {
+            StatusField.Name => playerName ?? string.Empty,
+            StatusField.Sex => d.IsFemale ? "Female" : "Male",
+            StatusField.Strength => d.Str.ToString(),
+            StatusField.Dexterity => d.Dex.ToString(),
+            StatusField.Intelligence => d.Int.ToString(),
+            StatusField.Hits => hits.Value.ToString(),
+            StatusField.HitsMax => hits.MaxValue.ToString(),
+            StatusField.Mana => mana.Value.ToString(),
+            StatusField.ManaMax => mana.MaxValue.ToString(),
+            StatusField.Stamina => stam.Value.ToString(),
+            StatusField.StaminaMax => stam.MaxValue.ToString(),
+            StatusField.HitsCombined => $"{hits.Value}/{hits.MaxValue}",
+            StatusField.ManaCombined => $"{mana.Value}/{mana.MaxValue}",
+            StatusField.StaminaCombined => $"{stam.Value}/{stam.MaxValue}",
+            StatusField.WeightCombined => $"{d.Weight}/{d.WeightMax}",
+            StatusField.ArmorOld => d.PhysicalRes.ToString(),
+            StatusField.Weight => d.Weight.ToString(),
+            StatusField.WeightMax => d.WeightMax.ToString(),
+            StatusField.StatCap => d.StatsCap.ToString(),
+            StatusField.Luck => d.Luck.ToString(),
+            StatusField.Gold => d.Gold.ToString(),
+            StatusField.Damage => $"{d.DamageMin}-{d.DamageMax}",
+            StatusField.Followers => $"{d.Followers}/{d.FollowersMax}",
+            StatusField.HitChanceInc => d.HitChanceInc.ToString(),
+            StatusField.DefenseChanceInc => $"{d.DefenseChanceInc}/{d.MaxDefenseChanceInc}",
+            StatusField.SwingSpeedInc => d.SwingSpeedInc.ToString(),
+            StatusField.DamageInc => d.DamageInc.ToString(),
+            StatusField.LowerManaCost => d.LowerManaCost.ToString(),
+            StatusField.LowerReagentCost => d.LowerReagentCost.ToString(),
+            StatusField.SpellDamageInc => d.SpellDamageInc.ToString(),
+            StatusField.FasterCasting => d.FasterCasting.ToString(),
+            StatusField.FasterCastRecovery => d.FasterCastRecovery.ToString(),
+            StatusField.Armor => $"{d.PhysicalRes}/{d.MaxPhysicalRes}",
+            StatusField.FireRes => $"{d.FireRes}/{d.MaxFireRes}",
+            StatusField.ColdRes => $"{d.ColdRes}/{d.MaxColdRes}",
+            StatusField.PoisonRes => $"{d.PoisonRes}/{d.MaxPoisonRes}",
+            StatusField.EnergyRes => $"{d.EnergyRes}/{d.MaxEnergyRes}",
+            _ => string.Empty,
+        };
 
     private static void Despawn(
         Commands commands,
