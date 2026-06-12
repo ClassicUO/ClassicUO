@@ -145,6 +145,14 @@ Full constants in `src/ClassicUO.Agent.Contracts/RpcVerbs.cs`. Highlights:
   `dotnet bin/agent/net10.0/cuo.agent.dll` spawns leave it behind. Delete
   manually before re-spawning if the rig won't come back up.
 
+## Cleanup
+
+Delete debugging artifacts when done. Screenshots (`*.png` from `rpc-shot`),
+dumped JSON (`gump.tree` / `world.dumpState` / `debug.dumpLayout` output,
+`flow.json` scratch scripts) are throwaway — remove them before finishing a
+task. Do not commit them. Keep the repo clean; only `.runtime/` (gitignored)
+is allowed on-disk state.
+
 ## Build flavor switch
 
 All agent code gated on `AGENT_BUILD` (defined by
