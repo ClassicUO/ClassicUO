@@ -440,15 +440,9 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                         var rb = assets.Arts.GetRealArtBounds(custom.AssetId);
                         if (rb.Width > 0 && rb.Height > 0)
                         {
-                            int boxW = bb.Width  > 0 ? (int)bb.Width  : rb.Width;
-                            int boxH = bb.Height > 0 ? (int)bb.Height : rb.Height;
-                            int dW = rb.Width  < boxW ? rb.Width  : boxW;
-                            int dH = rb.Height < boxH ? rb.Height : boxH;
-                            int oX = rb.Width  < boxW ? (boxW >> 1) - (dW >> 1) : 0;
-                            int oY = rb.Height < boxH ? (boxH >> 1) - (dH >> 1) : 0;
                             b.Draw(
                                 info.Texture,
-                                new Rectangle((int)bb.X + oX, (int)bb.Y + oY, dW, dH),
+                                RealBoundsRect(bb.X, bb.Y, bb.Width, bb.Height, rb),
                                 new Rectangle(info.UV.X + rb.X, info.UV.Y + rb.Y, rb.Width, rb.Height),
                                 custom.Hue,
                                 0f,
@@ -459,34 +453,9 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                         }
                     }
 
-                    // Size rule for slot-clamped item art:
-                    //   * item bounds > slot in either dim → fill slot bounds
-                    //     exactly (no aspect preserve; UO item art is roughly
-                    //     square so distortion is mild),
-                    //   * item bounds ≤ slot in both dims → draw at native
-                    //     size, centered.
-                    // Replaces aspect-preserve "contain" which shrunk elongated
-                    // art so the short dim looked very small in the slot.
-                    float artW = info.UV.Width;
-                    float artH = info.UV.Height;
-                    float boundW = bb.Width  > 0 ? bb.Width  : artW;
-                    float boundH = bb.Height > 0 ? bb.Height : artH;
-                    float destW, destH;
-                    if (artW > boundW || artH > boundH)
-                    {
-                        destW = boundW;
-                        destH = boundH;
-                    }
-                    else
-                    {
-                        destW = artW;
-                        destH = artH;
-                    }
-                    var destRect = new Rectangle(
-                        (int)(bb.X + (boundW - destW) * 0.5f),
-                        (int)(bb.Y + (boundH - destH) * 0.5f),
-                        (int)destW,
-                        (int)destH);
+                    // Slot-clamped item art: fill the slot when larger in either
+                    // dim, else native-size centered (see FitCenteredRect).
+                    var destRect = FitCenteredRect(bb.X, bb.Y, bb.Width, bb.Height, info.UV.Width, info.UV.Height);
                     b.Draw(
                         info.Texture,
                         destRect,
@@ -589,20 +558,9 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                 // Same size rule as Art/Land: fit to the node box when the frame
                 // exceeds it (a horse body in a 44px vendor row), else native
                 // centered. Legacy ShopItem clamps the same way (min(size, 45)).
-                float aw = frame.UV.Width;
-                float ah = frame.UV.Height;
-                float abw = bb.Width  > 0 ? bb.Width  : aw;
-                float abh = bb.Height > 0 ? bb.Height : ah;
-                float adw, adh;
-                if (aw > abw || ah > abh) { adw = abw; adh = abh; }
-                else { adw = aw; adh = ah; }
                 b.Draw(
                     frame.Texture,
-                    new Rectangle(
-                        (int)(bb.X + (abw - adw) * 0.5f),
-                        (int)(bb.Y + (abh - adh) * 0.5f),
-                        (int)adw,
-                        (int)adh),
+                    FitCenteredRect(bb.X, bb.Y, bb.Width, bb.Height, frame.UV.Width, frame.UV.Height),
                     frame.UV,
                     custom.Hue,
                     0f,
@@ -655,20 +613,9 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                 ref readonly var info = ref assets.Arts.GetLand(custom.AssetId);
                 if (info.Texture == null || info.UV.Width <= 0 || info.UV.Height <= 0)
                     break;
-                float lw = info.UV.Width;
-                float lh = info.UV.Height;
-                float lbw = bb.Width  > 0 ? bb.Width  : lw;
-                float lbh = bb.Height > 0 ? bb.Height : lh;
-                float ldw, ldh;
-                if (lw > lbw || lh > lbh) { ldw = lbw; ldh = lbh; }
-                else { ldw = lw; ldh = lh; }
                 b.Draw(
                     info.Texture,
-                    new Rectangle(
-                        (int)(bb.X + (lbw - ldw) * 0.5f),
-                        (int)(bb.Y + (lbh - ldh) * 0.5f),
-                        (int)ldw,
-                        (int)ldh),
+                    FitCenteredRect(bb.X, bb.Y, bb.Width, bb.Height, info.UV.Width, info.UV.Height),
                     info.UV,
                     custom.Hue,
                     0f,
@@ -779,7 +726,40 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                 g8.UV, hue, z);
     }
 
-    private static XnaColor ToXnaColor(ClayColor c)
+    // Size rule shared by the Art / Animation / Land custom draws: art larger
+    // than the node box in either dim fills the box exactly (UO sprites are
+    // roughly square, so the mild distortion beats aspect-preserve shrinking);
+    // art that fits draws native-size, centered. A zero box dim falls back to
+    // the art's own size. Pure geometry — unit-tested.
+    internal static Rectangle FitCenteredRect(float boxX, float boxY, float boxW, float boxH, float artW, float artH)
+    {
+        float bw = boxW > 0 ? boxW : artW;
+        float bh = boxH > 0 ? boxH : artH;
+        float dw, dh;
+        if (artW > bw || artH > bh) { dw = bw; dh = bh; }
+        else { dw = artW; dh = artH; }
+        return new Rectangle(
+            (int)(boxX + (bw - dw) * 0.5f),
+            (int)(boxY + (bh - dh) * 0.5f),
+            (int)dw, (int)dh);
+    }
+
+    // Paperdoll slot art (UOCustomKind.Art + ArtRealBounds): the source is
+    // cropped to the art's real (non-transparent) bounds, then that region is
+    // centered in the node box when it fits, or pinned to the corner when it
+    // fills. Mirrors OOP PaperdollGump.ItemGumpFixed. Pure — unit-tested.
+    internal static Rectangle RealBoundsRect(float boxX, float boxY, float boxW, float boxH, Rectangle realBounds)
+    {
+        int bw = boxW > 0 ? (int)boxW : realBounds.Width;
+        int bh = boxH > 0 ? (int)boxH : realBounds.Height;
+        int dW = realBounds.Width  < bw ? realBounds.Width  : bw;
+        int dH = realBounds.Height < bh ? realBounds.Height : bh;
+        int oX = realBounds.Width  < bw ? (bw >> 1) - (dW >> 1) : 0;
+        int oY = realBounds.Height < bh ? (bh >> 1) - (dH >> 1) : 0;
+        return new Rectangle((int)boxX + oX, (int)boxY + oY, dW, dH);
+    }
+
+    internal static XnaColor ToXnaColor(ClayColor c)
     {
         // Clay.Color stores floats in 0..255 range (see Color.cs in Clay.NET).
         return new XnaColor(

@@ -99,7 +99,6 @@ internal readonly struct GameCursorPlugin : IPlugin
             }
         }
 
-        int war = warMode ? 1 : 0;
         var mousePos = mouseCtx.Value.Position;
 
         // Topmost UI element under the cursor — drives the over-world test below.
@@ -140,38 +139,48 @@ internal readonly struct GameCursorPlugin : IPlugin
         else if (mouseCtx.Value.DraggingOffset != Vector2.Zero)
             cursorState.Value.DragHandLatched = true;
 
-        int index;
-        if (targeting.Value.IsTargeting)
+        // Over the game world (no gump on top of the viewport) -> directional
+        // hand. The GameWindowUI viewport node itself is a UI hit (it carries
+        // BackgroundColor), so a hit on IT still counts as "over world".
+        bool overWorld = inGame
+                      && camera.Value.Bounds.Contains((int)mousePos.X, (int)mousePos.Y)
+                      && (!hit.Found || gameWindowQ.Contains(hit.Entity));
+        int worldDirection = 9;
+        if (overWorld)
         {
-            index = 12; // targeting reticle
-        }
-        else if (gateDragging && cursorState.Value.DragHandLatched)
-        {
-            index = 8; // drag/grab hand
-        }
-        else if (hovered != 0 && IsTextInput(hovered, textInputQ, children))
-        {
-            index = 14; // text-input I-beam
-        }
-        else if (inGame
-                 && camera.Value.Bounds.Contains((int)mousePos.X, (int)mousePos.Y)
-                 && (!hit.Found || gameWindowQ.Contains(hit.Entity)))
-        {
-            // Over the game world (no gump on top of the viewport) -> directional
-            // hand. The GameWindowUI viewport node itself is a UI hit (it carries
-            // BackgroundColor), so a hit on IT still counts as "over world".
             int cx = camera.Value.Bounds.X + (camera.Value.Bounds.Width >> 1);
             int cy = camera.Value.Bounds.Y + (camera.Value.Bounds.Height >> 1);
-            index = GameCursor.GetMouseDirection(cx, cy, (int)mousePos.X, (int)mousePos.Y, 1);
-        }
-        else
-        {
-            index = 9; // neutral hand
+            worldDirection = GameCursor.GetMouseDirection(cx, cy, (int)mousePos.X, (int)mousePos.Y, 1);
         }
 
-        ushort graphic = s_cursorData[war, index];
+        int index = PickCursorIndex(
+            targeting: targeting.Value.IsTargeting,
+            dragging: gateDragging && cursorState.Value.DragHandLatched,
+            textInput: hovered != 0 && IsTextInput(hovered, textInputQ, children),
+            overWorld: overWorld,
+            worldDirectionIndex: worldDirection);
+
+        ushort graphic = CursorGraphic(warMode, index);
         DrawCursor(batch.Value, assets.Value, game.Value, cursorState.Value, gameCtx.Value, mousePos, graphic, warMode, inGame);
     }
+
+    // Legacy GameCursor.AssignGraphicByState priority: targeting reticle (12) >
+    // drag/grab hand (8) > text-input I-beam (14) > over-world directional hand
+    // (0..7) > neutral hand (9). Loading (13) isn't tracked in the ECS. Pure so
+    // the precedence is unit-tested without a render context.
+    internal static int PickCursorIndex(bool targeting, bool dragging, bool textInput, bool overWorld, int worldDirectionIndex)
+    {
+        if (targeting) return 12;
+        if (dragging) return 8;
+        if (textInput) return 14;
+        if (overWorld) return worldDirectionIndex;
+        return 9;
+    }
+
+    // Resolve the cursor art id: war-mode picks the 0x2053-row, peace the
+    // 0x206A-row; index is the AssignGraphicByState slot above.
+    internal static ushort CursorGraphic(bool warMode, int index)
+        => s_cursorData[warMode ? 1 : 0, index];
 
     // `hovered` is the interactive element Clay flagged this frame — the editable
     // field's hittable frame (the nine-patch input box / split-menu value row that

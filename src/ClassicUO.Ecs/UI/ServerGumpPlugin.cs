@@ -459,10 +459,7 @@ internal readonly struct ServerGumpPlugin : IPlugin
             if (Eq(entry, "resizepic"))
             {
                 // resizepic x y id w h
-                if (gparams.Count >= 6 &&
-                    int.TryParse(gparams[1], out var rx) && int.TryParse(gparams[2], out var ry) &&
-                    ushort.TryParse(gparams[3], out var rid) &&
-                    int.TryParse(gparams[4], out var rw) && int.TryParse(gparams[5], out var rh))
+                if (ServerGumpCommand.TryResizePic(gparams, out var a))
                 {
                     // Background panel — a normal child at its gump-local
                     // (rx,ry). The root is a frame at the gump origin (x,y) so
@@ -472,129 +469,98 @@ internal readonly struct ServerGumpPlugin : IPlugin
                     // every other control by (rx,ry) and pushed edge content —
                     // text, CANCEL — outside the panel on gumps with a nonzero
                     // resizepic origin.)
-                    childId = p.Builder.Value.AddGumpNinePatch(commands, rid, Vector3.UnitZ,
-                        new Vector2(rx, ry), new Vector2(rw, rh)).Id;
-                    cx0 = rx; cy0 = ry; cw0 = rw; ch0 = rh;
+                    childId = p.Builder.Value.AddGumpNinePatch(commands, a.Id, Vector3.UnitZ,
+                        new Vector2(a.X, a.Y), new Vector2(a.W, a.H)).Id;
+                    cx0 = a.X; cy0 = a.Y; cw0 = a.W; ch0 = a.H;
                 }
             }
             else if (Eq(entry, "gumppic") || Eq(entry, "tilepicasgumppic"))
             {
-                if (gparams.Count >= 4 &&
-                    int.TryParse(gparams[1], out var gx) && int.TryParse(gparams[2], out var gy) &&
-                    ushort.TryParse(gparams[3], out var gid))
+                if (ServerGumpCommand.TryGumpPic(gparams, out var a))
                 {
                     var hue = ParseHueArg(gparams, 4);
-                    var info = p.Assets.Value.Gumps.GetGump(gid);
-                    childId = p.Builder.Value.AddGump(commands, gid, ToShaderHue(hue), new Vector2(gx, gy)).Id;
-                    cx0 = gx; cy0 = gy; cw0 = info.UV.Width; ch0 = info.UV.Height;
+                    var info = p.Assets.Value.Gumps.GetGump(a.Id);
+                    childId = p.Builder.Value.AddGump(commands, a.Id, ToShaderHue(hue), new Vector2(a.X, a.Y)).Id;
+                    cx0 = a.X; cy0 = a.Y; cw0 = info.UV.Width; ch0 = info.UV.Height;
                 }
             }
             else if (Eq(entry, "gumppichued") || Eq(entry, "gumppicphued"))
             {
-                if (gparams.Count >= 5 &&
-                    int.TryParse(gparams[1], out var gx) && int.TryParse(gparams[2], out var gy) &&
-                    ushort.TryParse(gparams[3], out var gid))
+                if (ServerGumpCommand.TryGumpPicHued(gparams, out var a))
                 {
                     var hue = UInt16Converter.Parse(gparams[4]);
-                    var info = p.Assets.Value.Gumps.GetGump(gid);
-                    childId = p.Builder.Value.AddGump(commands, gid, ToShaderHue(hue), new Vector2(gx, gy)).Id;
-                    cx0 = gx; cy0 = gy; cw0 = info.UV.Width; ch0 = info.UV.Height;
+                    var info = p.Assets.Value.Gumps.GetGump(a.Id);
+                    childId = p.Builder.Value.AddGump(commands, a.Id, ToShaderHue(hue), new Vector2(a.X, a.Y)).Id;
+                    cx0 = a.X; cy0 = a.Y; cw0 = info.UV.Width; ch0 = info.UV.Height;
                 }
             }
             else if (Eq(entry, "gumppictiled"))
             {
-                if (gparams.Count >= 6 &&
-                    int.TryParse(gparams[1], out var gx) && int.TryParse(gparams[2], out var gy) &&
-                    int.TryParse(gparams[3], out var gw) && int.TryParse(gparams[4], out var gh) &&
-                    ushort.TryParse(gparams[5], out var gid))
+                if (ServerGumpCommand.TryGumpPicTiled(gparams, out var a))
                 {
-                    childId = p.Builder.Value.AddGumpTiled(commands, gid, Vector3.UnitZ,
-                        new Vector2(gx, gy), new Vector2(gw, gh)).Id;
-                    cx0 = gx; cy0 = gy; cw0 = gw; ch0 = gh;
+                    childId = p.Builder.Value.AddGumpTiled(commands, a.Id, Vector3.UnitZ,
+                        new Vector2(a.X, a.Y), new Vector2(a.W, a.H)).Id;
+                    cx0 = a.X; cy0 = a.Y; cw0 = a.W; ch0 = a.H;
                 }
             }
             else if (Eq(entry, "tilepic") || Eq(entry, "tilepichue"))
             {
-                if (gparams.Count >= 4 &&
-                    int.TryParse(gparams[1], out var tx) && int.TryParse(gparams[2], out var ty) &&
-                    ushort.TryParse(gparams[3], out var tg))
+                if (ServerGumpCommand.TryTilePic(gparams, out var a))
                 {
                     var hue = gparams.Count >= 5 ? UInt16Converter.Parse(gparams[4]) : (ushort)0;
-                    var info = p.Assets.Value.Arts.GetArt(tg);
-                    childId = p.Builder.Value.AddArt(commands, tg, ToShaderHue(hue), new Vector2(tx, ty)).Id;
-                    cx0 = tx; cy0 = ty; cw0 = info.UV.Width; ch0 = info.UV.Height;
+                    var info = p.Assets.Value.Arts.GetArt(a.Id);
+                    childId = p.Builder.Value.AddArt(commands, a.Id, ToShaderHue(hue), new Vector2(a.X, a.Y)).Id;
+                    cx0 = a.X; cy0 = a.Y; cw0 = info.UV.Width; ch0 = info.UV.Height;
                 }
             }
             else if (Eq(entry, "button"))
             {
-                if (gparams.Count >= 5 &&
-                    int.TryParse(gparams[1], out var bx) && int.TryParse(gparams[2], out var by) &&
-                    ushort.TryParse(gparams[3], out var normal) && ushort.TryParse(gparams[4], out var pressed))
+                if (ServerGumpCommand.TryButton(gparams, out var a))
                 {
-                    var action = gparams.Count >= 6 ? SafeInt(gparams[5]) : 0;
-                    var toPage = gparams.Count >= 7 ? SafeInt(gparams[6]) : 0;
-                    var btnId = gparams.Count >= 8 ? SafeInt(gparams[7]) : 0;
+                    var btn = p.Builder.Value.AddButton(commands, (a.Normal, a.Pressed, a.Normal),
+                        Vector3.UnitZ, new Vector2(a.X, a.Y));
 
-                    var btn = p.Builder.Value.AddButton(commands, (normal, pressed, normal),
-                        Vector3.UnitZ, new Vector2(bx, by));
-
-                    WireButtonAction(btn, sender, gumpId, rootId, action, btnId, toPage);
+                    WireButtonAction(btn, sender, gumpId, rootId, a.Action, a.BtnId, a.ToPage);
                     childId = btn.Id;
 
-                    var binfo = p.Assets.Value.Gumps.GetGump(normal);
-                    cx0 = bx; cy0 = by; cw0 = binfo.UV.Width; ch0 = binfo.UV.Height;
+                    var binfo = p.Assets.Value.Gumps.GetGump(a.Normal);
+                    cx0 = a.X; cy0 = a.Y; cw0 = binfo.UV.Width; ch0 = binfo.UV.Height;
                 }
             }
             else if (Eq(entry, "text"))
             {
                 // text x y hue lineId
-                if (gparams.Count >= 5 &&
-                    int.TryParse(gparams[1], out var tx) && int.TryParse(gparams[2], out var ty) &&
-                    ushort.TryParse(gparams[3], out var thue) &&
-                    int.TryParse(gparams[4], out var lid))
+                if (ServerGumpCommand.TryText(gparams, out var a))
                 {
-                    var text = SafeLine(lines, lid);
-                    var color = HueToClayColor(p.Files.Value.Hues, thue);
-                    childId = SpawnText(commands, new Vector2(tx, ty), text, color);
-                    cx0 = tx; cy0 = ty; cw0 = 0; ch0 = 16;
+                    var text = SafeLine(lines, a.LineId);
+                    var color = HueToClayColor(p.Files.Value.Hues, a.Hue);
+                    childId = SpawnText(commands, new Vector2(a.X, a.Y), text, color);
+                    cx0 = a.X; cy0 = a.Y; cw0 = 0; ch0 = 16;
                 }
             }
             else if (Eq(entry, "croppedtext"))
             {
-                if (gparams.Count >= 7 &&
-                    int.TryParse(gparams[1], out var tx) && int.TryParse(gparams[2], out var ty) &&
-                    int.TryParse(gparams[3], out var tw) && int.TryParse(gparams[4], out var th) &&
-                    ushort.TryParse(gparams[5], out var thue) &&
-                    int.TryParse(gparams[6], out var lid))
+                if (ServerGumpCommand.TryCroppedText(gparams, out var a))
                 {
-                    var text = SafeLine(lines, lid);
-                    childId = SpawnWrappedText(commands, new Vector2(tx, ty), new Vector2(tw, th), text, thue, false, false, isHtml: false, out _);
-                    cx0 = tx; cy0 = ty; cw0 = tw; ch0 = th;
+                    var text = SafeLine(lines, a.LineId);
+                    childId = SpawnWrappedText(commands, new Vector2(a.X, a.Y), new Vector2(a.W, a.H), text, a.Hue, false, false, isHtml: false, out _);
+                    cx0 = a.X; cy0 = a.Y; cw0 = a.W; ch0 = a.H;
                 }
             }
             else if (Eq(entry, "htmlgump"))
             {
                 // htmlgump x y w h lineId hasBg hasScroll
-                if (gparams.Count >= 6 &&
-                    int.TryParse(gparams[1], out var tx) && int.TryParse(gparams[2], out var ty) &&
-                    int.TryParse(gparams[3], out var tw) && int.TryParse(gparams[4], out var th) &&
-                    int.TryParse(gparams[5], out var lid))
+                if (ServerGumpCommand.TryHtmlBlock(gparams, out var a) && int.TryParse(gparams[5], out var lid))
                 {
-                    bool hasBg = gparams.Count >= 7 && gparams[6] == "1";
-                    bool hasScroll = gparams.Count >= 8 && gparams[7] != "0";
                     var text = SafeLine(lines, lid);
-                    childId = RenderHtmlBlock(commands, p.Builder.Value, p.Assets.Value, tx, ty, tw, th, hasBg, hasScroll, text, 0, page, group, rootId);
-                    cx0 = tx; cy0 = ty; cw0 = tw; ch0 = th;
+                    childId = RenderHtmlBlock(commands, p.Builder.Value, p.Assets.Value, a.X, a.Y, a.W, a.H, a.HasBg, a.HasScroll, text, 0, page, group, rootId);
+                    cx0 = a.X; cy0 = a.Y; cw0 = a.W; ch0 = a.H;
                 }
             }
             else if (Eq(entry, "xmfhtmlgump") || Eq(entry, "xmfhtmlgumpcolor"))
             {
-                if (gparams.Count >= 6 &&
-                    int.TryParse(gparams[1], out var tx) && int.TryParse(gparams[2], out var ty) &&
-                    int.TryParse(gparams[3], out var tw) && int.TryParse(gparams[4], out var th))
+                if (ServerGumpCommand.TryHtmlBlock(gparams, out var a))
                 {
-                    bool hasBg = gparams.Count >= 7 && gparams[6] == "1";
-                    bool hasScroll = gparams.Count >= 8 && gparams[7] != "0";
                     var cliloc = ParseClilocId(gparams[5]);
                     var text = p.Files.Value.Clilocs.GetString(cliloc) ?? string.Empty;
                     // xmfhtmlgumpcolor carries an HTML start colour in gparams[8];
@@ -603,19 +569,15 @@ internal readonly struct ServerGumpPlugin : IPlugin
                     int htmlHue = 0;
                     if (Eq(entry, "xmfhtmlgumpcolor") && gparams.Count >= 9 && int.TryParse(gparams[8], out var hc))
                         htmlHue = hc == 0x7FFF ? 0x00FFFFFF : hc;
-                    childId = RenderHtmlBlock(commands, p.Builder.Value, p.Assets.Value, tx, ty, tw, th, hasBg, hasScroll, text, htmlHue, page, group, rootId);
-                    cx0 = tx; cy0 = ty; cw0 = tw; ch0 = th;
+                    childId = RenderHtmlBlock(commands, p.Builder.Value, p.Assets.Value, a.X, a.Y, a.W, a.H, a.HasBg, a.HasScroll, text, htmlHue, page, group, rootId);
+                    cx0 = a.X; cy0 = a.Y; cw0 = a.W; ch0 = a.H;
                 }
             }
             else if (Eq(entry, "xmfhtmltok"))
             {
                 // xmfhtmltok x y w h hasBg hasScroll color clilocId @arg1@ ...
-                if (gparams.Count >= 9 &&
-                    int.TryParse(gparams[1], out var tx) && int.TryParse(gparams[2], out var ty) &&
-                    int.TryParse(gparams[3], out var tw) && int.TryParse(gparams[4], out var th))
+                if (ServerGumpCommand.TryXmfHtmlTok(gparams, out var a))
                 {
-                    bool hasBg = gparams[5] == "1";
-                    bool hasScroll = gparams[6] != "0";
                     // gparams[7] is the HTML start colour (0x7FFF → default white).
                     int htmlHue = 0;
                     if (int.TryParse(gparams[7], out var hc))
@@ -632,21 +594,18 @@ internal readonly struct ServerGumpPlugin : IPlugin
                     {
                         text = p.Files.Value.Clilocs.GetString(cliloc) ?? string.Empty;
                     }
-                    childId = RenderHtmlBlock(commands, p.Builder.Value, p.Assets.Value, tx, ty, tw, th, hasBg, hasScroll, text, htmlHue, page, group, rootId);
-                    cx0 = tx; cy0 = ty; cw0 = tw; ch0 = th;
+                    childId = RenderHtmlBlock(commands, p.Builder.Value, p.Assets.Value, a.X, a.Y, a.W, a.H, a.HasBg, a.HasScroll, text, htmlHue, page, group, rootId);
+                    cx0 = a.X; cy0 = a.Y; cw0 = a.W; ch0 = a.H;
                 }
             }
             else if (Eq(entry, "checkbox") || Eq(entry, "radio"))
             {
-                if (gparams.Count >= 5 &&
-                    int.TryParse(gparams[1], out var cx) && int.TryParse(gparams[2], out var cy) &&
-                    ushort.TryParse(gparams[3], out var uncheckedId) && ushort.TryParse(gparams[4], out var checkedId))
+                if (ServerGumpCommand.TryCheck(gparams, out var a))
                 {
-                    var initial = gparams.Count >= 6 && SafeInt(gparams[5]) != 0;
-                    var assetId = initial ? checkedId : uncheckedId;
+                    var assetId = a.Initial ? a.CheckedId : a.UncheckedId;
                     var info = p.Assets.Value.Gumps.GetGump(assetId);
-                    childId = p.Builder.Value.AddGump(commands, assetId, Vector3.UnitZ, new Vector2(cx, cy)).Id;
-                    cx0 = cx; cy0 = cy; cw0 = info.UV.Width; ch0 = info.UV.Height;
+                    childId = p.Builder.Value.AddGump(commands, assetId, Vector3.UnitZ, new Vector2(a.X, a.Y)).Id;
+                    cx0 = a.X; cy0 = a.Y; cw0 = info.UV.Width; ch0 = info.UV.Height;
                 }
             }
             else if (Eq(entry, "textentry") || Eq(entry, "textentrylimited"))
@@ -694,29 +653,21 @@ internal readonly struct ServerGumpPlugin : IPlugin
             else if (Eq(entry, "picinpic") || Eq(entry, "picinpichued") || Eq(entry, "picinpicphued"))
             {
                 // picinpic x y id sx sy sw sh — render the source sprite at dest (crop unsupported v1).
-                if (gparams.Count >= 8 &&
-                    int.TryParse(gparams[1], out var px) && int.TryParse(gparams[2], out var py) &&
-                    ushort.TryParse(gparams[3], out var pid) &&
-                    int.TryParse(gparams[6], out var pw) && int.TryParse(gparams[7], out var ph))
+                if (ServerGumpCommand.TryPicInPic(gparams, out var a))
                 {
-                    childId = p.Builder.Value.AddGump(commands, pid, Vector3.UnitZ, new Vector2(px, py)).Id;
-                    cx0 = px; cy0 = py; cw0 = pw; ch0 = ph;
+                    childId = p.Builder.Value.AddGump(commands, a.Id, Vector3.UnitZ, new Vector2(a.X, a.Y)).Id;
+                    cx0 = a.X; cy0 = a.Y; cw0 = a.W; ch0 = a.H;
                 }
             }
             else if (Eq(entry, "buttontileart"))
             {
                 // buttontileart x y normal pressed action toPage buttonId tileId hue tileX tileY
                 // Render: button background sprite + overlay tile (art) on top.
-                if (gparams.Count >= 5 &&
-                    int.TryParse(gparams[1], out var bx) && int.TryParse(gparams[2], out var by) &&
-                    ushort.TryParse(gparams[3], out var normal) && ushort.TryParse(gparams[4], out var pressed))
+                if (ServerGumpCommand.TryButton(gparams, out var a))
                 {
-                    var action = gparams.Count >= 6 ? SafeInt(gparams[5]) : 0;
-                    var toPage = gparams.Count >= 7 ? SafeInt(gparams[6]) : 0;
-                    var btnId  = gparams.Count >= 8 ? SafeInt(gparams[7]) : 0;
-                    var btn = p.Builder.Value.AddButton(commands, (normal, pressed, normal),
-                        Vector3.UnitZ, new Vector2(bx, by));
-                    WireButtonAction(btn, sender, gumpId, rootId, action, btnId, toPage);
+                    var btn = p.Builder.Value.AddButton(commands, (a.Normal, a.Pressed, a.Normal),
+                        Vector3.UnitZ, new Vector2(a.X, a.Y));
+                    WireButtonAction(btn, sender, gumpId, rootId, a.Action, a.BtnId, a.ToPage);
                     // Overlay tile art (parts[8] = tileId, parts[9] = hue, parts[10,11] = tileX,tileY).
                     if (gparams.Count >= 12 &&
                         ushort.TryParse(gparams[8], out var tileId) &&
@@ -724,13 +675,13 @@ internal readonly struct ServerGumpPlugin : IPlugin
                         int.TryParse(gparams[10], out var tileX) && int.TryParse(gparams[11], out var tileY))
                     {
                         var tile = p.Builder.Value.AddArt(commands, tileId,
-                            ToShaderHue(tileHue), new Vector2(bx + tileX, by + tileY));
+                            ToShaderHue(tileHue), new Vector2(a.X + tileX, a.Y + tileY));
                         commands.Entity(tile.Id).Insert(new ServerGumpChild { RootEntity = rootId, Page = page, Group = group });
                         commands.AddChild(rootId, tile.Id);
                     }
                     childId = btn.Id;
-                    var binfo = p.Assets.Value.Gumps.GetGump(normal);
-                    cx0 = bx; cy0 = by; cw0 = binfo.UV.Width; ch0 = binfo.UV.Height;
+                    var binfo = p.Assets.Value.Gumps.GetGump(a.Normal);
+                    cx0 = a.X; cy0 = a.Y; cw0 = binfo.UV.Width; ch0 = binfo.UV.Height;
                 }
             }
             else if (Eq(entry, "checkertrans"))
@@ -741,16 +692,14 @@ internal readonly struct ServerGumpPlugin : IPlugin
                 //      panel underneath goes see-through;
                 //   2) a translucent black 0.5 box over the rect for the
                 //      darkened-glass look.
-                if (gparams.Count >= 5 &&
-                    int.TryParse(gparams[1], out var cx) && int.TryParse(gparams[2], out var cy) &&
-                    int.TryParse(gparams[3], out var cw) && int.TryParse(gparams[4], out var ch))
+                if (ServerGumpCommand.TryRect(gparams, out var a))
                 {
-                    int cx2 = cx + cw, cy2 = cy + ch;
+                    int cx2 = a.X + a.W, cy2 = a.Y + a.H;
                     foreach (var pe in placed)
                     {
                         if (pe.Page != 0 && pe.Page != page) continue;
-                        bool overlap = cx < pe.X + pe.W && pe.X < cx2
-                                    && cy < pe.Y + pe.H && pe.Y < cy2;
+                        bool overlap = a.X < pe.X + pe.W && pe.X < cx2
+                                    && a.Y < pe.Y + pe.H && pe.Y < cy2;
                         if (overlap)
                             commands.Entity(pe.Id).Insert<CheckerTransDim>();
                     }
@@ -760,12 +709,12 @@ internal readonly struct ServerGumpPlugin : IPlugin
                         {
                             Display = Display.Flex,
                             PositionType = PositionType.Absolute,
-                            Left = Val.Px(cx), Top = Val.Px(cy),
-                            Width = Val.Px(cw), Height = Val.Px(ch),
+                            Left = Val.Px(a.X), Top = Val.Px(a.Y),
+                            Width = Val.Px(a.W), Height = Val.Px(a.H),
                         })
                         .Insert(new BackgroundColor(new ClayColor(0, 0, 0, 128)))
                         .Id;
-                    cx0 = cx; cy0 = cy; cw0 = cw; ch0 = ch;
+                    cx0 = a.X; cy0 = a.Y; cw0 = a.W; ch0 = a.H;
                 }
             }
             else

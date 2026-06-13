@@ -140,4 +140,146 @@ public class ServerGumpParseTests
     [Fact]
     public void HtmlInnerRect_bg_and_scroll_combine_insets()
         => Assert.Equal((14, 24, 76, 42), ServerGumpPlugin.HtmlInnerRect(10, 20, 100, 50, hasBg: true, hasScroll: true));
+
+    // --- Per-command numeric arg parsing (ServerGumpCommand) -----------------
+    // Each Try* mirrors the exact inline guard BuildGump used to carry: same
+    // minimum token count, same int/ushort widths, same field order. A
+    // malformed (short / non-numeric) command must return false and spawn
+    // nothing, not throw — these run on raw server bytes.
+
+    static string[] T(params string[] s) => s;
+
+    [Fact]
+    public void TryResizePic_parses_x_y_id_w_h()
+    {
+        Assert.True(ServerGumpCommand.TryResizePic(T("resizepic", "10", "20", "9200", "100", "50"), out var a));
+        Assert.Equal(new ServerGumpCommand.ResizePic(10, 20, 9200, 100, 50), a);
+    }
+
+    [Theory]
+    [InlineData("resizepic", "10", "20", "9200", "100")]      // one short
+    [InlineData("resizepic", "x", "20", "9200", "100", "50")] // non-numeric x
+    public void TryResizePic_rejects_malformed(params string[] gp)
+        => Assert.False(ServerGumpCommand.TryResizePic(gp, out _));
+
+    [Fact]
+    public void TryGumpPic_parses_pos_and_id()
+    {
+        Assert.True(ServerGumpCommand.TryGumpPic(T("gumppic", "5", "6", "100"), out var a));
+        Assert.Equal(new ServerGumpCommand.PicAt(5, 6, 100), a);
+    }
+
+    [Fact]
+    public void TryGumpPic_rejects_short()
+        => Assert.False(ServerGumpCommand.TryGumpPic(T("gumppic", "5", "6"), out _));
+
+    [Fact]
+    public void TryGumpPicHued_requires_five_tokens()
+    {
+        Assert.False(ServerGumpCommand.TryGumpPicHued(T("gumppichued", "5", "6", "100"), out _));
+        Assert.True(ServerGumpCommand.TryGumpPicHued(T("gumppichued", "5", "6", "100", "33"), out var a));
+        Assert.Equal(new ServerGumpCommand.PicAt(5, 6, 100), a);
+    }
+
+    [Fact]
+    public void TryGumpPicTiled_field_order_is_x_y_w_h_id()
+    {
+        Assert.True(ServerGumpCommand.TryGumpPicTiled(T("gumppictiled", "1", "2", "30", "40", "9000"), out var a));
+        Assert.Equal(new ServerGumpCommand.GumpPicTiled(1, 2, 30, 40, 9000), a);
+    }
+
+    [Fact]
+    public void TryTilePic_parses_pos_and_id()
+    {
+        Assert.True(ServerGumpCommand.TryTilePic(T("tilepic", "8", "9", "3850"), out var a));
+        Assert.Equal(new ServerGumpCommand.PicAt(8, 9, 3850), a);
+    }
+
+    [Fact]
+    public void TryButton_defaults_optional_action_fields_to_zero()
+    {
+        Assert.True(ServerGumpCommand.TryButton(T("button", "10", "20", "247", "248"), out var a));
+        Assert.Equal(new ServerGumpCommand.Button(10, 20, 247, 248, 0, 0, 0), a);
+    }
+
+    [Fact]
+    public void TryButton_reads_action_topage_btnId()
+    {
+        Assert.True(ServerGumpCommand.TryButton(T("button", "10", "20", "247", "248", "1", "0", "7"), out var a));
+        Assert.Equal(new ServerGumpCommand.Button(10, 20, 247, 248, 1, 0, 7), a);
+    }
+
+    [Fact]
+    public void TryButton_rejects_short()
+        => Assert.False(ServerGumpCommand.TryButton(T("button", "10", "20", "247"), out _));
+
+    [Fact]
+    public void TryText_parses_x_y_hue_lineId()
+    {
+        Assert.True(ServerGumpCommand.TryText(T("text", "4", "5", "996", "0"), out var a));
+        Assert.Equal(new ServerGumpCommand.Text(4, 5, 996, 0), a);
+    }
+
+    [Fact]
+    public void TryCroppedText_parses_rect_hue_lineId()
+    {
+        Assert.True(ServerGumpCommand.TryCroppedText(T("croppedtext", "4", "5", "60", "20", "996", "2"), out var a));
+        Assert.Equal(new ServerGumpCommand.CroppedText(4, 5, 60, 20, 996, 2), a);
+    }
+
+    [Fact]
+    public void TryHtmlBlock_flags_off_without_optional_tokens()
+    {
+        Assert.True(ServerGumpCommand.TryHtmlBlock(T("htmlgump", "0", "0", "200", "100", "3"), out var a));
+        Assert.Equal(new ServerGumpCommand.HtmlBlock(0, 0, 200, 100, HasBg: false, HasScroll: false), a);
+    }
+
+    [Fact]
+    public void TryHtmlBlock_reads_bg_and_scroll_flags()
+    {
+        // gp[6]=="1" → hasBg; gp[7]!="0" → hasScroll
+        Assert.True(ServerGumpCommand.TryHtmlBlock(T("htmlgump", "0", "0", "200", "100", "3", "1", "1"), out var a));
+        Assert.True(a.HasBg);
+        Assert.True(a.HasScroll);
+
+        Assert.True(ServerGumpCommand.TryHtmlBlock(T("htmlgump", "0", "0", "200", "100", "3", "0", "0"), out var b));
+        Assert.False(b.HasBg);
+        Assert.False(b.HasScroll);
+    }
+
+    [Fact]
+    public void TryXmfHtmlTok_requires_nine_tokens_and_reads_flags_at_5_6()
+    {
+        Assert.False(ServerGumpCommand.TryXmfHtmlTok(T("xmfhtmltok", "0", "0", "200", "100", "1", "1", "0"), out _));
+        Assert.True(ServerGumpCommand.TryXmfHtmlTok(T("xmfhtmltok", "0", "0", "200", "100", "1", "1", "0", "1234", "@arg@"), out var a));
+        Assert.Equal(new ServerGumpCommand.HtmlBlock(0, 0, 200, 100, HasBg: true, HasScroll: true), a);
+    }
+
+    [Fact]
+    public void TryCheck_initial_state_picks_checked_asset()
+    {
+        Assert.True(ServerGumpCommand.TryCheck(T("checkbox", "3", "4", "210", "211", "1"), out var on));
+        Assert.True(on.Initial);
+        Assert.True(ServerGumpCommand.TryCheck(T("checkbox", "3", "4", "210", "211"), out var off));
+        Assert.False(off.Initial);
+        Assert.Equal(new ServerGumpCommand.Check(3, 4, 210, 211, false), off);
+    }
+
+    [Fact]
+    public void TryPicInPic_reads_dest_size_from_tokens_6_7()
+    {
+        Assert.True(ServerGumpCommand.TryPicInPic(T("picinpic", "1", "2", "100", "0", "0", "40", "30"), out var a));
+        Assert.Equal(new ServerGumpCommand.PicInPic(1, 2, 100, 40, 30), a);
+    }
+
+    [Fact]
+    public void TryRect_parses_x_y_w_h()
+    {
+        Assert.True(ServerGumpCommand.TryRect(T("checkertrans", "5", "6", "70", "80"), out var a));
+        Assert.Equal(new ServerGumpCommand.Rect(5, 6, 70, 80), a);
+    }
+
+    [Fact]
+    public void TryRect_rejects_short()
+        => Assert.False(ServerGumpCommand.TryRect(T("checkertrans", "5", "6", "70"), out _));
 }

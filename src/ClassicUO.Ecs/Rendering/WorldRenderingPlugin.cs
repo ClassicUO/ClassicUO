@@ -422,7 +422,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         (0x0D8C, 0x0D90)
     };
 
-    private static long FoliageKey(ushort graphic, int x, int y, sbyte z)
+    internal static long FoliageKey(ushort graphic, int x, int y, sbyte z)
         => ((long)graphic << 40) | ((long)(ushort)x << 24) | ((long)(ushort)y << 8) | (byte)z;
 
     // Legacy GameScene._rectanglePlayer — the player sprite's screen-space
@@ -583,7 +583,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         return true;
     }
 
-    private static bool CalculateAlpha(ref byte alphaHue, int maxAlpha, bool useObjectsFading)
+    internal static bool CalculateAlpha(ref byte alphaHue, int maxAlpha, bool useObjectsFading)
     {
         if (!useObjectsFading)
         {
@@ -614,7 +614,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
     }
 
     // Legacy Mobile.IsDead graphics (ghost bodies).
-    private static bool IsDeadBody(ushort graphic)
+    internal static bool IsDeadBody(ushort graphic)
         => graphic == 0x0192 || graphic == 0x0193 ||
            (graphic >= 0x025F && graphic <= 0x0260) ||
            graphic == 0x02B6 || graphic == 0x02B7;
@@ -625,7 +625,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
     // Legacy Static._canBeTransparent + TransparentTest — which statics the
     // circle of transparency may see through, given playerZ + 5.
-    private static bool TransparentTest(int z5, int objZ, ref readonly StaticTiles data)
+    internal static bool TransparentTest(int z5, int objZ, ref readonly StaticTiles data)
     {
         if (objZ <= z5 - data.Height)
             return false;
@@ -636,10 +636,89 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         return true;
     }
 
-    private static bool CanBeTransparent(ref readonly StaticTiles data)
+    internal static bool CanBeTransparent(ref readonly StaticTiles data)
         => data.Height > 5 || data.Height == 0 ||
            data.IsRoof || (data.IsSurface && data.IsBackground) || data.IsWall ||
            (data.Height == 5 && data.IsSurface && !data.IsBackground);
+
+    // Legacy StaticView depth-sort weighting: background sinks, raised / wall /
+    // multi tiles lift, a normal-multi piece sinks. qNormalMultis membership is
+    // resolved by the caller (a query) and passed in. Pure so the weighting is
+    // unit-tested.
+    internal static int StaticPriorityZ(int z, ref readonly StaticTiles data, bool isNormalMulti)
+    {
+        if (data.IsBackground) z -= 1;
+        if (data.Height != 0) z += 1;
+        if (data.IsWall) z += 2;
+        if (data.IsMultiMovable) z += 1;
+        if (isNormalMulti) z -= 1;
+        return z;
+    }
+
+    // Gradient circle-of-transparency (legacy GetGradientCotAlpha): inside the
+    // radius alpha fades by distance-cubed from the player; returns false when
+    // the sprite is fully clear (cull) and true otherwise (outside the radius
+    // leaves alpha at 1). `iso` is the pre-center-subtract screen position.
+    internal static bool TryGradientCotAlpha(Vector2 iso, Vector2 cotCenter, float cotRadiusSq, out float alpha)
+    {
+        alpha = 1f;
+        var dx = iso.X - cotCenter.X;
+        var dy = (iso.Y - 44) - cotCenter.Y;
+        var distSq = dx * dx + dy * dy;
+        if (distSq < cotRadiusSq)
+        {
+            var ratio = MathF.Sqrt(distSq / cotRadiusSq);
+            var alphaByte = (byte)(ratio * ratio * ratio * 255f);
+            if (alphaByte == 0)
+                return false;
+            alpha = alphaByte / 255f;
+        }
+        return true;
+    }
+
+    // Legacy StaticView/ItemView hue precedence: highlight > out-of-range gray >
+    // dead-world gray > selected-interactable hover, else the base hue. The
+    // caller pre-computes each condition (they read Profile / WorldFx /
+    // selection); this locks the order + partial-hue suppression.
+    internal static ushort ResolveStaticHue(
+        bool highlight, bool outOfRange, bool grayWorld, bool selectedInteractable,
+        ushort baseHue, bool basePartialHue, out bool partialHue)
+    {
+        partialHue = basePartialHue;
+        if (highlight)
+        {
+            partialHue = false;
+            return Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
+        }
+        if (outOfRange)
+        {
+            partialHue = false;
+            return Constants.OUT_RANGE_COLOR;
+        }
+        if (grayWorld)
+        {
+            partialHue = false;
+            return Constants.DEAD_RANGE_COLOR;
+        }
+        if (selectedInteractable)
+            return 0x0035;
+        return baseHue;
+    }
+
+    // Legacy FieldsType==2 field replacement: an animated field static draws one
+    // replacement graphic tinted per field kind. Pure (StaticFilters); the
+    // FieldsType / IsAnimated gate stays in the caller.
+    internal static bool TryFieldReplace(ushort graphic, out ushort drawGraphic, out ushort hue)
+    {
+        drawGraphic = Constants.FIELD_REPLACE_GRAPHIC;
+        if (StaticFilters.IsFireField(graphic)) { hue = 0x0020; return true; }
+        if (StaticFilters.IsParalyzeField(graphic)) { hue = 0x0058; return true; }
+        if (StaticFilters.IsEnergyField(graphic)) { hue = 0x0070; return true; }
+        if (StaticFilters.IsPoisonField(graphic)) { hue = 0x0044; return true; }
+        if (StaticFilters.IsWallOfStone(graphic)) { hue = 0x038A; return true; }
+        drawGraphic = 0; hue = 0;
+        return false;
+    }
 
 
     private static void RenderTiles(
@@ -703,13 +782,10 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             var alpha = fade.Ref.Value / 255f;
 
             // Legacy LandView hue chain: highlight > out-of-range > dead gray.
-            ushort hueOverride = 0;
-            if (profile.HighlightGameObjects && entity.Ref == selectedEntity.Value.Entity)
-                hueOverride = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
-            else if (profile.NoColorObjectsOutOfRange && Dist(worldPos.Ref.X, worldPos.Ref.Y, fx.PlayerX, fx.PlayerY) > fx.ViewRange)
-                hueOverride = Constants.OUT_RANGE_COLOR;
-            else if (fx.GrayWorld)
-                hueOverride = Constants.DEAD_RANGE_COLOR;
+            ushort hueOverride = ResolveLandHue(
+                highlight: profile.HighlightGameObjects && entity.Ref == selectedEntity.Value.Entity,
+                outOfRange: profile.NoColorObjectsOutOfRange && Dist(worldPos.Ref.X, worldPos.Ref.Y, fx.PlayerX, fx.PlayerY) > fx.ViewRange,
+                grayWorld: fx.GrayWorld);
 
             if (stretched.IsValid())
             {
@@ -851,14 +927,11 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             if (isTree && profile.TreeToStumps)
                 drawGraphic = Constants.TREE_REPLACE_GRAPHIC;
 
-            if (profile.FieldsType == 2 && tileData.IsAnimated)
+            if (profile.FieldsType == 2 && tileData.IsAnimated &&
+                TryFieldReplace(graphic.Ref.Value, out var fieldGraphic, out var fieldHue))
             {
-                var g = graphic.Ref.Value;
-                if (StaticFilters.IsFireField(g)) { drawGraphic = Constants.FIELD_REPLACE_GRAPHIC; hueValue = 0x0020; }
-                else if (StaticFilters.IsParalyzeField(g)) { drawGraphic = Constants.FIELD_REPLACE_GRAPHIC; hueValue = 0x0058; }
-                else if (StaticFilters.IsEnergyField(g)) { drawGraphic = Constants.FIELD_REPLACE_GRAPHIC; hueValue = 0x0070; }
-                else if (StaticFilters.IsPoisonField(g)) { drawGraphic = Constants.FIELD_REPLACE_GRAPHIC; hueValue = 0x0044; }
-                else if (StaticFilters.IsWallOfStone(g)) { drawGraphic = Constants.FIELD_REPLACE_GRAPHIC; hueValue = 0x038A; }
+                drawGraphic = fieldGraphic;
+                hueValue = fieldHue;
             }
 
             var hide = tileData.IsRoof && (!backupZInfo.DrawRoof || !profile.DrawRoofs);
@@ -955,12 +1028,8 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             position.Y -= (short)(artInfo.UV.Height - 44);
 
             // Priority calculation
-            var priorityZ = worldPos.Ref.Z;
-            if (tileData.IsBackground) priorityZ -= 1;
-            if (tileData.Height != 0) priorityZ += 1;
-            if (tileData.IsWall) priorityZ += 2;
-            if (tileData.IsMultiMovable) priorityZ += 1;
-            if (qNormalMultis.Contains(entity.Ref)) priorityZ -= 1;
+            var isNormalMulti = qNormalMultis.Contains(entity.Ref);
+            var priorityZ = StaticPriorityZ(worldPos.Ref.Z, in tileData, isNormalMulti);
 
             var depthZ = Isometric.GetDepthZ(worldPos.Ref.X, worldPos.Ref.Y, priorityZ);
 
@@ -972,48 +1041,22 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             if ((fx.CotFull || fx.CotGradient) && TransparentTest(fx.PlayerZ5, worldPos.Ref.Z, in tileData))
             {
                 if (fx.CotFull)
-                {
                     circleTrans = !isTree && !tileData.IsFoliage;
-                }
-                else
-                {
-                    var dx = iso.X - fx.CotCenter.X;
-                    var dy = (iso.Y - 44) - fx.CotCenter.Y;
-                    var distSq = dx * dx + dy * dy;
-                    if (distSq < fx.CotRadiusSq)
-                    {
-                        var ratio = MathF.Sqrt(distSq / fx.CotRadiusSq);
-                        var alphaByte = (byte)(ratio * ratio * ratio * 255f);
-                        if (alphaByte == 0)
-                            continue;
-                        alpha = alphaByte / 255f;
-                    }
-                }
+                else if (!TryGradientCotAlpha(iso, fx.CotCenter, fx.CotRadiusSq, out alpha))
+                    continue;
             }
 
             // Legacy StaticView/ItemView hue chain: highlight > out-of-range >
             // dead gray; selected interactable items keep the 0x0035 hover hue.
-            var partialHue = tileData.IsPartialHue;
             var isSelected = entity.Ref == selectedEntity.Value.Entity;
-            if (profile.HighlightGameObjects && isSelected)
-            {
-                hueValue = Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
-                partialHue = false;
-            }
-            else if (profile.NoColorObjectsOutOfRange && Dist(worldPos.Ref.X, worldPos.Ref.Y, fx.PlayerX, fx.PlayerY) > fx.ViewRange)
-            {
-                hueValue = Constants.OUT_RANGE_COLOR;
-                partialHue = false;
-            }
-            else if (fx.GrayWorld)
-            {
-                hueValue = Constants.DEAD_RANGE_COLOR;
-                partialHue = false;
-            }
-            else if (isSelected && serial.IsValid() && !qNormalMultis.Contains(entity.Ref))
-            {
-                hueValue = 0x0035;
-            }
+            hueValue = ResolveStaticHue(
+                highlight: profile.HighlightGameObjects && isSelected,
+                outOfRange: profile.NoColorObjectsOutOfRange && Dist(worldPos.Ref.X, worldPos.Ref.Y, fx.PlayerX, fx.PlayerY) > fx.ViewRange,
+                grayWorld: fx.GrayWorld,
+                selectedInteractable: isSelected && serial.IsValid() && !isNormalMulti,
+                baseHue: hueValue,
+                basePartialHue: tileData.IsPartialHue,
+                out var partialHue);
 
             alpha *= fade.Ref.Value / 255f;
 
@@ -1198,23 +1241,9 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 position.X -= frame.Center.X;
             position.Y -= frame.UV.Height + frame.Center.Y;
 
-            var depthZ = Isometric.GetDepthZ(pos.Ref.X, pos.Ref.Y, priorityZ);
+            var depthZ = BodyDepthZ(pos.Ref.X, pos.Ref.Y, priorityZ, offset.Ref.Value);
             var color = ShaderHueTranslator.GetHueVector(FixHue(uoHue), false, fadeAlpha);
             position += offset.Ref.Value;
-
-            // Adjust depth based on offset
-            if (offset.Ref.Value.X > 0 && offset.Ref.Value.Y > 0)
-            {
-                depthZ = Isometric.GetDepthZ(pos.Ref.X + 1, pos.Ref.Y, priorityZ);
-            }
-            else if (offset.Ref.Value.X == 0 && offset.Ref.Value.Y > 0)
-            {
-                depthZ = Isometric.GetDepthZ(pos.Ref.X + 1, pos.Ref.Y + 1, priorityZ);
-            }
-            else if (offset.Ref.Value.X < 0 && offset.Ref.Value.Y > 0)
-            {
-                depthZ = Isometric.GetDepthZ(pos.Ref.X, pos.Ref.Y + 1, priorityZ);
-            }
 
             if (highlighted)
             {
@@ -1302,6 +1331,35 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         return overrideHue;
     }
 
+    // A mid-step mobile's screen offset pushes it toward the next tile; its
+    // depth must sort against that tile, not its origin. Shared by RenderBodies
+    // + RenderEquipment so a body and its worn items keep one depth. Pure
+    // (Isometric.GetDepthZ) so the per-quadrant nudge is unit-tested.
+    internal static float BodyDepthZ(int x, int y, int priorityZ, Vector2 offset)
+    {
+        if (offset.X > 0 && offset.Y > 0) return Isometric.GetDepthZ(x + 1, y, priorityZ);
+        if (offset.X == 0 && offset.Y > 0) return Isometric.GetDepthZ(x + 1, y + 1, priorityZ);
+        if (offset.X < 0 && offset.Y > 0) return Isometric.GetDepthZ(x, y + 1, priorityZ);
+        return Isometric.GetDepthZ(x, y, priorityZ);
+    }
+
+    // Legacy LandView hue chain: highlight > out-of-range gray > dead-world
+    // gray, else 0 (no override). Caller pre-computes the conditions.
+    internal static ushort ResolveLandHue(bool highlight, bool outOfRange, bool grayWorld)
+    {
+        if (highlight) return Constants.HIGHLIGHT_CURRENT_OBJECT_HUE;
+        if (outOfRange) return Constants.OUT_RANGE_COLOR;
+        if (grayWorld) return Constants.DEAD_RANGE_COLOR;
+        return 0;
+    }
+
+    // Bodies using the female/gargoyle chest-under-torso draw-order variant
+    // (legacy PaperdollOrder altTorsoTable gate). Gargoyle bodies only exist on
+    // CV >= 7000 but the id test itself is version-independent.
+    internal static bool IsAltTorsoBody(ushort bodyGfx)
+        => bodyGfx == 0x0191 || bodyGfx == 0x0193 || bodyGfx == 0x025D
+        || bodyGfx == 0x029A || bodyGfx == 0x029B || bodyGfx == 0x02B7;
+
     private static void RenderEquipment(
         Res<SelectedEntity> selectedEntity,
         Res<UltimaBatcher2D> batch,
@@ -1354,21 +1412,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
             // Calculate priority and depth
             var priorityZ = pos.Ref.Z + 2;
-            var depthZ = Isometric.GetDepthZ(pos.Ref.X, pos.Ref.Y, priorityZ);
-
-            // Adjust depth based on offset
-            if (offset.Ref.Value.X > 0 && offset.Ref.Value.Y > 0)
-            {
-                depthZ = Isometric.GetDepthZ(pos.Ref.X + 1, pos.Ref.Y, priorityZ);
-            }
-            else if (offset.Ref.Value.X == 0 && offset.Ref.Value.Y > 0)
-            {
-                depthZ = Isometric.GetDepthZ(pos.Ref.X + 1, pos.Ref.Y + 1, priorityZ);
-            }
-            else if (offset.Ref.Value.X < 0 && offset.Ref.Value.Y > 0)
-            {
-                depthZ = Isometric.GetDepthZ(pos.Ref.X, pos.Ref.Y + 1, priorityZ);
-            }
+            var depthZ = BodyDepthZ(pos.Ref.X, pos.Ref.Y, priorityZ, offset.Ref.Value);
 
             // Fix direction for animation
             (var dir, var mirror) = FixDirection(animation.Ref.Direction);
@@ -1379,9 +1423,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             // then reposition the cloak by facing direction. altTorsoTable gates
             // the female/gargoyle chest-under variant — derived from the body
             // graphic (gargoyle bodies 0x029A/0x029B only exist on CV >= 7000).
-            ushort bodyGfx = graphic.Ref.Value;
-            bool altTorso = bodyGfx == 0x0191 || bodyGfx == 0x0193 || bodyGfx == 0x025D
-                         || bodyGfx == 0x029A || bodyGfx == 0x029B || bodyGfx == 0x02B7;
+            bool altTorso = IsAltTorsoBody(graphic.Ref.Value);
 
             equipGfx.Clear();
             for (int l = (int)Layer.OneHanded; l <= (int)Layer.Legs; l++)
@@ -1508,7 +1550,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
     }
 
 
-    private static ushort FixHue(ushort hue)
+    internal static ushort FixHue(ushort hue)
     {
         var fixedColor = (ushort)(hue & 0x3FFF);
 
@@ -1529,7 +1571,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         return fixedColor;
     }
 
-    private static byte CalculateObjectHeight(ref int maxObjectZ, ref readonly StaticTiles itemData)
+    internal static byte CalculateObjectHeight(ref int maxObjectZ, ref readonly StaticTiles itemData)
     {
         if (
             itemData.Height != 0xFF /*&& itemData.Flags != 0*/
@@ -1619,7 +1661,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         return false;
     }
 
-    private static (Direction, bool) FixDirection(Direction dir)
+    internal static (Direction, bool) FixDirection(Direction dir)
     {
         dir &= ~Direction.Running;
         dir &= Direction.Mask;
