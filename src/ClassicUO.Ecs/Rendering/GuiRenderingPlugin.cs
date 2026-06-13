@@ -141,6 +141,22 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                     if (gameState.Value.Current == GameState.GameScreen
                         && ReferenceEquals(cmd.Image.ImageData, worldRt.Value))
                     {
+                        // Darkness pass: multiply the light RT over the world
+                        // image (result = world * light), before overhead text
+                        // so labels/HP bars stay at full brightness. SetBlendState
+                        // flushes, so the world image already committed.
+                        var light = overlay.Light.Value;
+                        if (light.Active && light.Rt != null)
+                        {
+                            b.SetBlendState(light.Alt ? LightingPlugin.AltLightsBlend : LightingPlugin.DarknessBlend);
+                            b.Draw(
+                                light.Rt,
+                                new Microsoft.Xna.Framework.Rectangle((int)bb.X, (int)bb.Y, (int)bb.Width, (int)bb.Height),
+                                new Microsoft.Xna.Framework.Rectangle(0, 0, light.Rt.Width, light.Rt.Height),
+                                new Microsoft.Xna.Framework.Vector3(0f, 0f, light.Alt ? 0.5f : 1f));
+                            b.SetBlendState(null);
+                        }
+
                         var camBounds = camera.Value.Bounds;
                         b.ClipBegin(camBounds.X, camBounds.Y, camBounds.Width, camBounds.Height);
                         // HP overheads first: speech (and everything painted

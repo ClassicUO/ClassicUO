@@ -114,11 +114,6 @@ struct GameContext
     // music plugin once those are wired into ECS.
     public byte Season;
     public byte SeasonMusicIndex;
-    // Last server-pushed light levels (0..30; lower = darker). Consumed
-    // by the world light pass once it's ported. Cached here so the
-    // lighting plugin can pick them up at startup.
-    public byte ServerLightLevel;
-    public byte PersonalLightLevel;
 }
 
 public enum GameState : byte

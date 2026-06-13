@@ -264,10 +264,10 @@ readonly struct InGamePacketsPlugin : IPlugin
             ResMut<GameContext>>(OnSeasonChange);
 
         app.AddObserver<On<PacketReceived<OnPlayerLightLevelPacket_0x4E>>,
-            ResMut<GameContext>>(OnPlayerLightLevel);
+            Res<GameContext>, ResMut<WorldLight>>(OnPlayerLightLevel);
 
         app.AddObserver<On<PacketReceived<OnServerLightLevelPacket_0x4F>>,
-            ResMut<GameContext>>(OnServerLightLevel);
+            ResMut<WorldLight>>(OnServerLightLevel);
 
         app.AddObserver<On<PacketReceived<OnWarmodePacket_0x72>>,
             Commands,
@@ -1394,19 +1394,21 @@ readonly struct InGamePacketsPlugin : IPlugin
 
     static void OnPlayerLightLevel(
         On<PacketReceived<OnPlayerLightLevelPacket_0x4E>> trig,
-        ResMut<GameContext> gameCtx)
+        Res<GameContext> gameCtx,
+        ResMut<WorldLight> light)
     {
-        // Per-player light radius. Same storage pattern as 0x4F.
+        // Per-player ambient level. Clamp to the legacy 0..0x1E range; the
+        // light pass derives the effective personal value from Profile.
         var packet = trig.Event.Packet;
         if (packet.Serial == gameCtx.Value.PlayerSerial)
-            gameCtx.Value.PersonalLightLevel = packet.Level;
+            light.Value.RealPersonal = Math.Min(packet.Level, (byte)0x1E);
     }
 
     static void OnServerLightLevel(
         On<PacketReceived<OnServerLightLevelPacket_0x4F>> trig,
-        ResMut<GameContext> gameCtx)
+        ResMut<WorldLight> light)
     {
-        gameCtx.Value.ServerLightLevel = trig.Event.Packet.Level;
+        light.Value.RealOverall = Math.Min(trig.Event.Packet.Level, (byte)0x1E);
     }
 
     // Server echoes the player's warmode state via 0x72 (response to our

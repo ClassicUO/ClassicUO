@@ -14,6 +14,7 @@ internal sealed class AssetsServer
         MultiMaps = new Renderer.MultiMaps.MultiMap(fileManager.MultiMaps, device);
         Skills = fileManager.Skills;
         Sounds = new Renderer.Sounds.Sound(fileManager.Sounds);
+        Lights = new Renderer.Lights.Light(fileManager.Lights, device);
     }
 
     // Test-only: an assets server with no loaders (loaders need UO files + a
@@ -32,4 +33,5 @@ internal sealed class AssetsServer
     public Renderer.MultiMaps.MultiMap MultiMaps { get; }
     public SkillsLoader Skills { get; }
     public Renderer.Sounds.Sound Sounds { get; }
+    public Renderer.Lights.Light Lights { get; }
 }
