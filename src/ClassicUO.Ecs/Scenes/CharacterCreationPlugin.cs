@@ -1009,12 +1009,8 @@ internal readonly struct CharacterCreationPlugin : IPlugin
             AddUnicodeLabel(commands, stepRootId,
                 files.Clilocs.GetString(statClilocs[i]) ?? string.Empty, 158, statY[i], 1);
 
-            // Legacy HSliderBarStyle.MetalWidgetRecessedBar: track 213/214/215, thumb 216.
-            var slider = builder.AddHSlider(commands, 10, 60, ctx.TradeStats[i],
-                new Vector2(164, statSliderY[i]), 93, thumbGump: 216, trackGumps: (213, 214, 215));
-            commands.AddChild(stepRootId, slider.Id);
-            statSliderIds[i] = slider.Id;
-            AddSliderValueLabel(commands, stepRootId, slider.Id, 164 + 96, statSliderY[i]);
+            statSliderIds[i] = AddTradeSlider(commands, builder, stepRootId, 10, 60, ctx.TradeStats[i],
+                new Vector2(164, statSliderY[i]), 164 + 96, statSliderY[i]);
         }
         for (int i = 0; i < 3; i++)
         {
@@ -1063,11 +1059,8 @@ internal readonly struct CharacterCreationPlugin : IPlugin
                 new Vector2(344, y), 182, skillNames, ctx.TradeSkillIdx[i], "Click here", 200,
                 (sel, c) => { c.TradeSkillIdx[comboIdx] = sel; c.TradeDirty = true; });
 
-            var slider = builder.AddHSlider(commands, 0, 50, ctx.TradeSkillValues[i],
-                new Vector2(344, y + 32), 93, thumbGump: 216, trackGumps: (213, 214, 215));
-            commands.AddChild(stepRootId, slider.Id);
-            skillSliderIds[i] = slider.Id;
-            AddSliderValueLabel(commands, stepRootId, slider.Id, 344 + 96, y + 32);
+            skillSliderIds[i] = AddTradeSlider(commands, builder, stepRootId, 0, 50, ctx.TradeSkillValues[i],
+                new Vector2(344, y + 32), 344 + 96, y + 32);
 
             y += 70;
         }
@@ -1176,6 +1169,19 @@ internal readonly struct CharacterCreationPlugin : IPlugin
             s.Ref.Value = vals[i];
             store[i] = vals[i];
         }
+    }
+
+    // Spawn a trade-step HSlider, parent it, attach its live value label.
+    // Legacy HSliderBarStyle.MetalWidgetRecessedBar: 93px wide, track
+    // 213/214/215, thumb 216 — shared by the stat and skill slider rows.
+    private static ulong AddTradeSlider(
+        Commands commands, GumpBuilder builder, ulong parent,
+        int min, int max, int value, Vector2 pos, int labelX, int labelY)
+    {
+        var slider = builder.AddHSlider(commands, min, max, value, pos, 93, thumbGump: 216, trackGumps: (213, 214, 215));
+        commands.AddChild(parent, slider.Id);
+        AddSliderValueLabel(commands, parent, slider.Id, labelX, labelY);
+        return slider.Id;
     }
 
     private static void AddSliderValueLabel(
