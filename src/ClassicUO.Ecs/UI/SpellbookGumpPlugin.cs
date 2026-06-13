@@ -23,6 +23,7 @@ internal struct SpellbookWindow
     public uint Serial;
     public SpellBookType School;
     public int Page;          // current spread (0-based); each spread = 2 pages
+    public int SoundedPage;   // last spread a page-flip sound played for
     public int PageCount;
     public int BuiltRevision;
     public bool Dirty;
@@ -68,6 +69,13 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
 
         var despawnFn = Despawn;
         app.AddSystem(despawnFn).OnExit(GameState.GameScreen).Build();
+
+        // Page-flip sound (legacy SetActivePage on each nav). Detected by the
+        // spread value changing vs the last sounded one — covers corner flips,
+        // circle buttons and index name-jumps without hooking each site.
+        var pageSoundFn = PlayPageFlipSound;
+        app.AddSystem(pageSoundFn).InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> s) => s.Value.Current == GameState.GameScreen).Build();
 
         // Legacy SpellbookGump plays 0x0055 on open (SetActivePage) and close
         // (Dispose). Window marker inserts once per open (focus reuses the
@@ -175,12 +183,28 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
             Serial = serial,
             School = schoolType,
             Page = 0,
+            SoundedPage = 0,
             BuiltRevision = -1,
             Dirty = true,
             ContentEntity = content.Id,
             LeftCorner = left.Id,
             RightCorner = right.Id,
         });
+    }
+
+    private static void PlayPageFlipSound(
+        Query<Data<SpellbookWindow>> windowsQ,
+        ResMut<AudioState> audio,
+        Res<AssetsServer> assets,
+        Res<ClassicUO.Configuration.Profile> profile,
+        Res<Time> time)
+    {
+        foreach (var (_, win) in windowsQ)
+        {
+            if (win.Ref.Page == win.Ref.SoundedPage) continue;
+            win.Ref.SoundedPage = win.Ref.Page;
+            audio.Value.PlaySound(assets.Value, profile.Value, time.Value.Total, 0x0055);
+        }
     }
 
     // Rebuild the visible spread when the page changed, the store updated, or on

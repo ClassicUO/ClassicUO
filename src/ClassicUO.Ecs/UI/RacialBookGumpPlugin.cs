@@ -33,6 +33,7 @@ namespace ClassicUO.Ecs;
 internal struct RacialBookWindow
 {
     public int Page;        // 1-based active page (legacy ActivePage)
+    public int SoundedPage; // last page a flip sound played for
     public int PageCount;
     public int DictPages;   // leading index pages
     public int AbilityCount;
@@ -83,6 +84,11 @@ internal readonly struct RacialBookGumpPlugin : IPlugin
 
         var despawnFn = Despawn;
         app.AddSystem(despawnFn).OnExit(GameState.GameScreen).Build();
+
+        // Page-flip sound (legacy RacialAbilitiesBookGump SetActivePage).
+        var pageSoundFn = PlayPageFlipSound;
+        app.AddSystem(pageSoundFn).InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> s) => s.Value.Current == GameState.GameScreen).Build();
 
         // Book open sound (legacy RacialAbilitiesBookGump SetActivePage).
         app.AddObserver((
@@ -154,6 +160,7 @@ internal readonly struct RacialBookGumpPlugin : IPlugin
         commands.Entity(root.Id).Insert(new RacialBookWindow
         {
             Page = 1,
+            SoundedPage = 1,
             DictPages = DictPages,
             AbilityCount = abilityCount,
             Race = race,
@@ -167,6 +174,21 @@ internal readonly struct RacialBookGumpPlugin : IPlugin
 
     private static int GumpW(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Width; }
     private static int GumpH(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Height; }
+
+    private static void PlayPageFlipSound(
+        Query<Data<RacialBookWindow>> windowsQ,
+        ResMut<AudioState> audio,
+        Res<AssetsServer> assets,
+        Res<ClassicUO.Configuration.Profile> profile,
+        Res<Time> time)
+    {
+        foreach (var (_, win) in windowsQ)
+        {
+            if (win.Ref.Page == win.Ref.SoundedPage) continue;
+            win.Ref.SoundedPage = win.Ref.Page;
+            audio.Value.PlaySound(assets.Value, profile.Value, time.Value.Total, 0x0055);
+        }
+    }
 
     private static void RebuildContent(
         Commands commands,

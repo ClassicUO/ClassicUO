@@ -42,6 +42,7 @@ internal sealed class PlayerAbilities
 internal struct CombatBookWindow
 {
     public int Page;        // 1-based active page (legacy ActivePage)
+    public int SoundedPage; // last page a flip sound played for
     public int PageCount;
     public int DictPages;   // leading index pages
     public int AbilityCount;
@@ -133,6 +134,12 @@ internal readonly struct CombatBookGumpPlugin : IPlugin
         var despawnFn = Despawn;
         app.AddSystem(despawnFn).OnExit(GameState.GameScreen).Build();
 
+        // Page-flip sound (legacy CombatBookGump SetActivePage). Page-compare
+        // because Dirty also fires on equip changes, not just navigation.
+        var pageSoundFn = PlayPageFlipSound;
+        app.AddSystem(pageSoundFn).InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> s) => s.Value.Current == GameState.GameScreen).Build();
+
         // Book open sound (legacy CombatBookGump first SetActivePage). Window
         // marker inserts once per open; equip changes only mark it Dirty.
         app.AddObserver((
@@ -209,6 +216,7 @@ internal readonly struct CombatBookGumpPlugin : IPlugin
         commands.Entity(root.Id).Insert(new CombatBookWindow
         {
             Page = 1,
+            SoundedPage = 1,
             DictPages = dictPages,
             AbilityCount = abilityCount,
             PageCount = dictPages + abilityCount,
@@ -221,6 +229,21 @@ internal readonly struct CombatBookGumpPlugin : IPlugin
 
     private static int GumpW(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Width; }
     private static int GumpH(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Height; }
+
+    private static void PlayPageFlipSound(
+        Query<Data<CombatBookWindow>> windowsQ,
+        ResMut<AudioState> audio,
+        Res<AssetsServer> assets,
+        Res<ClassicUO.Configuration.Profile> profile,
+        Res<Time> time)
+    {
+        foreach (var (_, win) in windowsQ)
+        {
+            if (win.Ref.Page == win.Ref.SoundedPage) continue;
+            win.Ref.SoundedPage = win.Ref.Page;
+            audio.Value.PlaySound(assets.Value, profile.Value, time.Value.Total, 0x0055);
+        }
+    }
 
     private static void RebuildContent(
         Commands commands,

@@ -49,6 +49,7 @@ internal struct BookWindow
     // as 0x93 when it came from the old packet.
     public bool UseNewHeader;
     public int ActivePage; // 1..MaxPage spread index (AP1 = right page only)
+    public int SoundedPage; // last spread a page-flip sound played for
     // Read-only books may only receive the currently displayed pages; track
     // which wire pages (1-based) we already have so a flip requests the rest.
     public HashSet<int> KnownPages;
@@ -101,6 +102,10 @@ internal readonly struct BookGumpPlugin : IPlugin
         var despawnFn = Despawn;
         app.AddSystem(despawnFn).OnExit(GameState.GameScreen).Build();
 
+        // Page-flip sound (legacy ModernBookGump SetActivePage on each flip).
+        var pageSoundFn = PlayPageFlipSound;
+        app.AddSystem(pageSoundFn).InStage(Stage.Update).Build();
+
         // Book open sound (legacy ModernBookGump SetActivePage on construct).
         // BookWindow inserts once per open; content packets only fill text.
         app.AddObserver((
@@ -119,6 +124,21 @@ internal readonly struct BookGumpPlugin : IPlugin
     }
 
     private static int MaxPage(ushort pageCount) => (pageCount >> 1) + 1;
+
+    private static void PlayPageFlipSound(
+        Query<Data<BookWindow>> windowsQ,
+        ResMut<AudioState> audio,
+        Res<AssetsServer> assets,
+        Res<ClassicUO.Configuration.Profile> profile,
+        Res<Time> time)
+    {
+        foreach (var (_, win) in windowsQ)
+        {
+            if (win.Ref.ActivePage == win.Ref.SoundedPage) continue;
+            win.Ref.SoundedPage = win.Ref.ActivePage;
+            audio.Value.PlaySound(assets.Value, profile.Value, time.Value.Total, 0x0055);
+        }
+    }
 
     private static void OnOpenBookOld(On<PacketReceived<OnOpenBookPacket_0x93>> trig, Commands commands, BookParams p)
     {
@@ -271,6 +291,7 @@ internal readonly struct BookGumpPlugin : IPlugin
             Editable = editable,
             UseNewHeader = useNewHeader,
             ActivePage = 1,
+            SoundedPage = 1,
             KnownPages = new HashSet<int>(),
         });
 
