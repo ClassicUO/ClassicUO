@@ -186,6 +186,7 @@ namespace ClassicUO.Configuration
         public bool ScaleItemsInsideContainers { get; set; }
         public bool DoubleClickToLootInsideContainers { get; set; }
         public bool UseLargeContainerGumps { get; set; }
+        public bool UseGridContainers { get; set; }
         public bool RelativeDragAndDropItems { get; set; }
         public bool HighlightContainerWhenSelected { get; set; }
 

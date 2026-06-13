@@ -112,6 +112,12 @@ internal sealed class TooltipQueries : CompositeSystemParam
     public readonly Query<Data<PaperdollSlot>> PaperdollSlots;
     public readonly Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> Rendered;
     public readonly Query<Data<Node>, With<TooltipRoot>> Roots;
+    // UiContainsByBounds elements (grid cells, healthbars, status frame) so the
+    // hover hit-test bounds-hits them instead of pixel-hitting their sprite.
+    public readonly Query<Data<UiContainsByBounds>> Bounds;
+    // Parent chain for overflow-clip: a cell scrolled out of a grid's
+    // Overflow.Scroll content must not tooltip past the viewport edge.
+    public readonly Query<Data<TinyEcs.Parent>> Parents;
 
     public TooltipQueries()
     {
@@ -120,6 +126,8 @@ internal sealed class TooltipQueries : CompositeSystemParam
         PaperdollSlots = Add(new Query<Data<PaperdollSlot>>());
         Rendered       = Add(new Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>>());
         Roots          = Add(new Query<Data<Node>, With<TooltipRoot>>());
+        Bounds         = Add(new Query<Data<UiContainsByBounds>>());
+        Parents        = Add(new Query<Data<TinyEcs.Parent>>());
     }
 }
 
@@ -213,7 +221,7 @@ internal readonly struct TooltipPlugin : IPlugin
         // the UiPick hit.
         uint serial = 0;
         var noto = NotorietyFlag.Unknown;
-        var hit = UiPick.Topmost(pos, assets.Value, rendered);
+        var hit = UiPick.Topmost(pos, assets.Value, rendered, q.Parents, q.Bounds);
         if (hit.Found)
         {
             if (contQ.TryGet(hit.Entity, out var contRow)) { var (_, c) = contRow; serial = c.Ref.Serial; }

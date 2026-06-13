@@ -28,6 +28,7 @@ using ClassicUO.Agent.Contracts;
 using ClassicUO.Agent.Host;
 using ClassicUO.Assets;
 using ClassicUO.Ecs;
+using ClassicUO.Network;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using TinyEcs.Bevy;
@@ -77,6 +78,35 @@ internal static class InputHandlers
         d.Register("debug.profileFlag", DebugProfileFlag);
         d.Register("debug.pathfindTo", DebugPathfindTo);
         d.Register("debug.pathfindState", DebugPathfindState);
+        d.Register("debug.openBackpack", DebugOpenBackpack);
+    }
+
+    // Test-only: double-click the player's backpack server-side (no pixel
+    // targeting). Resolves EquipmentSlots[Backpack] -> NetworkSerial and sends
+    // the use request; the server replies with open + contents like a manual
+    // double-click.
+    public static JsonRpcResponse DebugOpenBackpack(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        var world = ctx.Runtime.GetWorld();
+        uint backpackSerial = 0;
+        var q = world.QueryBuilder().With<Player>().With<EquipmentSlots>().Build();
+        var it = q.Iter();
+        while (it.Next())
+        {
+            var entities = it.Entities();
+            if (entities.Length == 0) continue;
+            ref var slots = ref world.Get<EquipmentSlots>(entities[0].ID);
+            var bp = slots[ClassicUO.Game.Data.Layer.Backpack];
+            if (bp != 0 && world.Has<NetworkSerial>(bp))
+                backpackSerial = world.Get<NetworkSerial>(bp).Value;
+            break;
+        }
+
+        if (backpackSerial == 0)
+            return AgentServer.ErrorResponse(req.Id, JsonRpcErrorCodes.NotInWorld, "no backpack");
+
+        ctx.Runtime.GetResource<ClassicUO.Network.NetClient>().Send_DoubleClick(backpackSerial);
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["backpack"] = backpackSerial } };
     }
 
     // Test-only: trigger the pathfinder like the world map "Walk To Here"

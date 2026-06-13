@@ -32,17 +32,14 @@ internal readonly struct UseObjectPlugin : IPlugin
     {
         var target = selectedEntity.Value.Entity;
 
-        // Container slot UIs aren't game entities — pull the serial straight
-        // off ContainerItemUI and double-click that (mirrors legacy
-        // ItemGump.OnMouseDoubleClick which calls GameActions.DoubleClick
-        // on LocalSerial).
-        if (uiItemQ.TryGet(target, out var itemRow))
-        {
-            var (_, link) = itemRow;
-            if (link.Ref.Serial != 0)
-                network.Value.Send_DoubleClick(link.Ref.Serial);
+        // Container slot UIs are owned by ContainerGumpPlugin's
+        // OnContainerItemDoubleClick observer (On<UiDoubleClick>), which targets
+        // the exact element the gesture landed on. Handling them here too — off
+        // the current topmost pick — double-fires on a different item when the
+        // cursor drifts between the two clicks (visible with tightly-packed grid
+        // cells). So bail: world objects only.
+        if (uiItemQ.Contains(target))
             return;
-        }
 
         if (!query.TryGet(target, out var serialRow))
             return;

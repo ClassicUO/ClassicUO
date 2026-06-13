@@ -41,6 +41,7 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         var animateEyeFn = AnimateCorpseEye;
         var handleMinimizeFn = HandleMinimizeClick;
         var tearDownFn = TearDownClosedUi;
+        var cascadeCloseFn = CascadeCloseChildren;
         var updateSelectionFn = UpdateSelectedFromContainerUI;
         var disposeOnLogoutFn = DisposeOnLogout;
         var syncProfileFn = SyncProfileToUiScale;
@@ -87,6 +88,17 @@ internal readonly struct ContainerGumpPlugin : IPlugin
                 .Build()
 
             .AddSystem(tearDownFn)
+                .InStage(Stage.Update)
+                .RunIf((EventReader<ContainerClosedEvent> r) => r.HasEvents)
+                .Build()
+
+            // Closing a container closes the sub-containers opened from items
+            // inside it (legacy: a bag's gump dies with its parent). Walks every
+            // open container window's game-entity parent chain; any that descends
+            // from the just-closed container is closed too. Works for normal and
+            // grid windows alike (both carry ContainerWindow). The emitted events
+            // are drained next frame, so grandchildren cascade in turn.
+            .AddSystem(cascadeCloseFn)
                 .InStage(Stage.Update)
                 .RunIf((EventReader<ContainerClosedEvent> r) => r.HasEvents)
                 .Build()
@@ -499,6 +511,11 @@ internal readonly struct ContainerGumpPlugin : IPlugin
             // (gump 0x0009) with GridLootGumpPlugin's grid; suppress the default
             // window here. Type 2 ("both") falls through and opens this too.
             if (ev.Graphic == GridLootGumpPlugin.CorpseContainerGump && profile.Value.GridLootType == 1)
+                continue;
+
+            // Grid containers replace the normal gump for every non-corpse
+            // container; GridContainerGumpPlugin owns those windows.
+            if (ev.Graphic != GridLootGumpPlugin.CorpseContainerGump && profile.Value.UseGridContainers)
                 continue;
 
             // Skip if a UI window for this container is already up.
@@ -959,6 +976,51 @@ internal readonly struct ContainerGumpPlugin : IPlugin
     // it still exists in the world / inventory, only the visible window goes
     // away. Item UI children are picked up via the Children component and
     // despawned alongside their parent.
+    // Close any open container window whose game entity descends from a
+    // just-closed container (sub-bags die with their parent). Emits more
+    // ContainerClosedEvents; they drain next frame so the chain cascades.
+    private static void CascadeCloseChildren(
+        Res<NetworkEntitiesMap> entitiesMap,
+        EventReader<ContainerClosedEvent> reader,
+        EventWriter<ContainerClosedEvent> writer,
+        Query<Data<ContainerWindow>> windowsQ,
+        Query<Data<TinyEcs.Parent>> parentsQ)
+    {
+        foreach (var ev in reader.Read())
+        {
+            if (!entitiesMap.Value.TryGet(ev.Serial, out var closedEnt))
+                continue;
+
+            foreach (var (_, win) in windowsQ)
+            {
+                if (win.Ref.Serial == ev.Serial)
+                    continue;
+                if (!entitiesMap.Value.TryGet(win.Ref.Serial, out var winEnt))
+                    continue;
+                if (DescendsFrom(winEnt, closedEnt, parentsQ))
+                    writer.Send(new ContainerClosedEvent(win.Ref.Serial));
+            }
+        }
+    }
+
+    private static bool DescendsFrom(ulong entity, ulong ancestor, Query<Data<TinyEcs.Parent>> parentsQ)
+    {
+        var cur = entity;
+        for (int i = 0; i < 16; i++)
+        {
+            if (!parentsQ.TryGet(cur, out var row))
+                return false;
+            var (_, p) = row;
+            var pid = (ulong)p.Ref.Id;
+            if (pid == 0 || pid == cur)
+                return false;
+            if (pid == ancestor)
+                return true;
+            cur = pid;
+        }
+        return false;
+    }
+
     private static void TearDownClosedUi(
         Commands commands,
         Res<ContainerUiMap> uiMap,

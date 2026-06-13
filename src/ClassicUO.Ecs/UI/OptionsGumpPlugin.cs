@@ -267,6 +267,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
         T("Containers", "Relative drag and drop", p => p.RelativeDragAndDropItems, (p, v) => p.RelativeDragAndDropItems = v),
         T("Containers", "Highlight on hover", p => p.HighlightContainerWhenSelected, (p, v) => p.HighlightContainerWhenSelected = v),
         T("Containers", "Hue container gumps", p => p.HueContainerGumps, (p, v) => p.HueContainerGumps = v, "color"),
+        T("Containers", "Grid containers", p => p.UseGridContainers, (p, v) => p.UseGridContainers = v, "grid view search sort"),
         T("Containers", "Override container location", p => p.OverrideContainerLocation, (p, v) => p.OverrideContainerLocation = v, "position"),
         C("Containers", "Container location mode", new[] { "Near container", "Top right", "Last dragged", "Remember each" },
             p => p.OverrideContainerLocationSetting, (p, v) => p.OverrideContainerLocationSetting = v, "position"),
