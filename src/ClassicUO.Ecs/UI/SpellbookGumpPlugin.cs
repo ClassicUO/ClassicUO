@@ -68,6 +68,25 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
 
         var despawnFn = Despawn;
         app.AddSystem(despawnFn).OnExit(GameState.GameScreen).Build();
+
+        // Legacy SpellbookGump plays 0x0055 on open (SetActivePage) and close
+        // (Dispose). Window marker inserts once per open (focus reuses the
+        // existing window) and is removed on right-click / logout teardown.
+        app.AddObserver((
+            OnInsert<SpellbookWindow> _,
+            ResMut<AudioState> audio,
+            Res<AssetsServer> assets,
+            Res<ClassicUO.Configuration.Profile> profile,
+            Res<Time> time) =>
+            audio.Value.PlaySound(assets.Value, profile.Value, time.Value.Total, 0x0055));
+
+        app.AddObserver((
+            OnRemove<SpellbookWindow> _,
+            ResMut<AudioState> audio,
+            Res<AssetsServer> assets,
+            Res<ClassicUO.Configuration.Profile> profile,
+            Res<Time> time) =>
+            audio.Value.PlaySound(assets.Value, profile.Value, time.Value.Total, 0x0055));
     }
 
     private static int GumpW(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Width; }

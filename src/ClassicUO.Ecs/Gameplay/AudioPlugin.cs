@@ -72,6 +72,33 @@ internal sealed class AudioState
         }
     }
 
+    // Port of AudioManager.PlaySound: a non-positional one-shot (UI sounds like
+    // container open/close). No distance attenuation — full profile volume.
+    public void PlaySound(AssetsServer assets, Profile profile, float totalMs, int index)
+    {
+        if (!CanReproduceAudio)
+            return;
+
+        float volume = profile.SoundVolume / SOUND_DELTA;
+
+        if (volume < -1 || volume > 1f)
+            return;
+
+        if (!profile.EnableSound)
+            volume = 0;
+
+        var sound = (UOSound)assets.Sounds.GetSound(index);
+
+        if (sound != null && sound.Play((uint)totalMs, volume))
+        {
+            sound.X = -1;
+            sound.Y = -1;
+            sound.CalculateByDistance = false;
+
+            CurrentSounds.AddLast(sound);
+        }
+    }
+
     public void PlayMusic(
         AssetsServer assets, Profile profile, Settings settings, float totalMs,
         int music, bool isWarmode = false, bool isLogin = false)

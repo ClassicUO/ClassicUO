@@ -130,6 +130,22 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         // player's backpack window.
         var dclickFn = OnContainerItemDoubleClick;
         app.AddObserver(dclickFn);
+
+        // Legacy ContainerGump ctor plays data.OpenSound on open. The spawn
+        // system is at the system param cap, so play it off the tag insert
+        // instead — OnInsert<ContainerGumpTag> fires once per window open
+        // (minimize mutates the tag in place, never re-inserts it).
+        app.AddObserver((
+            OnInsert<ContainerGumpTag> trigger,
+            ResMut<AudioState> audio,
+            Res<AssetsServer> assets,
+            Res<Profile> profile,
+            Res<Time> time) =>
+        {
+            var openSound = trigger.Component.OpenSound;
+            if (openSound != 0)
+                audio.Value.PlaySound(assets.Value, profile.Value, time.Value.Total, openSound);
+        });
     }
 
     private static void OnContainerItemDoubleClick(
@@ -625,8 +641,6 @@ internal readonly struct ContainerGumpPlugin : IPlugin
                 ui.AddChild(eye);
             }
 
-            // TODO(audio): play data.OpenSound once AudioManager is ported to
-            // an App resource.
         }
     }
 
@@ -944,14 +958,27 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         Res<ContainerUiMap> uiMap,
         Res<Profile> profile,
         Res<ContainerPositionMemory> memory,
+        ResMut<AudioState> audio,
+        Res<AssetsServer> assets,
+        Res<Time> time,
         EventReader<ContainerClosedEvent> reader,
         Query<Data<Node>> nodeQ,
+        Query<Data<ContainerGumpTag>> tagQ,
         Query<Data<TinyEcs.Children>> childrenQ)
     {
         foreach (var ev in reader.Read())
         {
             if (!uiMap.Value.TryGet(ev.Serial, out var entry))
                 continue;
+
+            // Legacy CloseWithRightClick plays ClosedSound; server/logout
+            // teardowns (UserInitiated == false) stay silent.
+            if (ev.UserInitiated && tagQ.TryGet(entry.UiEntity, out var tagRow))
+            {
+                var (_, tag) = tagRow;
+                if (tag.Ref.ClosedSound != 0)
+                    audio.Value.PlaySound(assets.Value, profile.Value, time.Value.Total, tag.Ref.ClosedSound);
+            }
 
             // Setting 3 remembers each container's position across closes
             // (legacy ContainerGump.Dispose -> UIManager.SavePosition).

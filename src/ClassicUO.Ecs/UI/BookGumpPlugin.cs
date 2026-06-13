@@ -101,6 +101,16 @@ internal readonly struct BookGumpPlugin : IPlugin
         var despawnFn = Despawn;
         app.AddSystem(despawnFn).OnExit(GameState.GameScreen).Build();
 
+        // Book open sound (legacy ModernBookGump SetActivePage on construct).
+        // BookWindow inserts once per open; content packets only fill text.
+        app.AddObserver((
+            OnInsert<BookWindow> _,
+            ResMut<AudioState> audio,
+            Res<AssetsServer> assets,
+            Res<ClassicUO.Configuration.Profile> profile,
+            Res<Time> time) =>
+            audio.Value.PlaySound(assets.Value, profile.Value, time.Value.Total, 0x0055));
+
 #if AGENT_BUILD
         app.AddResource(new DebugBookQueue());
         Action<Commands, ResMut<DebugBookQueue>> drainFn = DrainDebugBook;

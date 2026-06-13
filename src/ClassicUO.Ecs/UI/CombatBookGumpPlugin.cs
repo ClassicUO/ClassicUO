@@ -133,6 +133,16 @@ internal readonly struct CombatBookGumpPlugin : IPlugin
         var despawnFn = Despawn;
         app.AddSystem(despawnFn).OnExit(GameState.GameScreen).Build();
 
+        // Book open sound (legacy CombatBookGump first SetActivePage). Window
+        // marker inserts once per open; equip changes only mark it Dirty.
+        app.AddObserver((
+            OnInsert<CombatBookWindow> _,
+            ResMut<AudioState> audio,
+            Res<AssetsServer> assets,
+            Res<ClassicUO.Configuration.Profile> profile,
+            Res<Time> time) =>
+            audio.Value.PlaySound(assets.Value, profile.Value, time.Value.Total, 0x0055));
+
 #if AGENT_BUILD
         app.AddResource(new DebugCombatBookQueue());
         var drainFn = DrainDebug;

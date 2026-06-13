@@ -19,6 +19,7 @@ internal readonly struct PickupPlugin : IPlugin
     {
         var pickupItemFn = PickupItem;
         var dropItemFn = DropItem;
+        var failedDropSoundFn = PlayFailedDropSound;
         var latchFn = LatchPressTarget;
         var shouldFirePickupFn = ShouldFirePickup;
         var pickupEligibleFn = PickupTargetEligible;
@@ -59,6 +60,13 @@ internal readonly struct PickupPlugin : IPlugin
             // phantom drop packets while the network round-trips.
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial != 0 && !grabbedItem.Value.PendingDrop)
             .RunIf((Res<MouseContext> mouseCtx) => mouseCtx.Value.IsReleased(Input.MouseButtonType.Left))
+            .Build()
+
+            // Bonk (0x0051) when DropItem rejected a drop as out of reach.
+            // Registered after DropItem so the flag it set this frame is
+            // consumed the same frame (registration order = run order in stage).
+            .AddSystem(failedDropSoundFn)
+            .InStage(Stage.Update)
             .Build();
 
         // Per-packet observers replace the boxed EventReader<IPacket> scan.
@@ -551,6 +559,22 @@ internal readonly struct PickupPlugin : IPlugin
         _ => false,
     };
 
+    // Legacy GameScene/ContainerGump play 0x0051 when a held item is released
+    // over an out-of-reach target. DropItem flags it on GrabbedItem; play here.
+    static void PlayFailedDropSound(
+        ResMut<GrabbedItem> grabbedItem,
+        ResMut<AudioState> audio,
+        Res<AssetsServer> assets,
+        Res<Profile> profile,
+        Res<Time> time)
+    {
+        if (!grabbedItem.Value.FailedDrop)
+            return;
+
+        grabbedItem.Value.FailedDrop = false;
+        audio.Value.PlaySound(assets.Value, profile.Value, time.Value.Total, 0x0051);
+    }
+
     static void DropItem(
         Res<SelectedEntity> selectedEntity,
         Res<GrabbedItem> grabbedItem,
@@ -640,6 +664,7 @@ internal readonly struct PickupPlugin : IPlugin
             var (_, tag, computed, window) = containerRow;
             if (!IsContainerInRange(window.Ref.Serial, playerPos.Ref, entitiesMap.Value, itemDataQuery, parentQuery, playerQuery))
             {
+                grabbedItem.Value.FailedDrop = true;
                 grabbedItem.Value.Clear();
                 return;
             }
@@ -694,6 +719,7 @@ internal readonly struct PickupPlugin : IPlugin
             }
             if (ownerSerial != 0 && !IsContainerInRange(ownerSerial, playerPos.Ref, entitiesMap.Value, itemDataQuery, parentQuery, playerQuery))
             {
+                grabbedItem.Value.FailedDrop = true;
                 grabbedItem.Value.Clear();
                 return;
             }
@@ -956,6 +982,12 @@ internal sealed class GrabbedItem
     // the held-serial acks fire and the item would stay stuck on the cursor.
     // Matching this serial in the implicit-ack observers finalizes the merge.
     public uint DropTargetSerial { get; set; }
+
+    // Set by DropItem when a drop is rejected client-side for being out of
+    // reach (legacy GameScene's !can_drop -> PlaySound(0x0051) bonk). Consumed
+    // by PlayFailedDropSound the same frame; deliberately NOT reset by Clear()
+    // so the reject branches can set it immediately before clearing the hold.
+    public bool FailedDrop { get; set; }
 
 
     public void Clear()

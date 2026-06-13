@@ -160,7 +160,7 @@ internal readonly struct WindowDragPlugin : IPlugin
             if (containerQuery.TryGet(target, out var containerRow))
             {
                 var (_, window) = containerRow;
-                closedWriter.Send(new ContainerClosedEvent(window.Ref.Serial));
+                closedWriter.Send(new ContainerClosedEvent(window.Ref.Serial, UserInitiated: true));
                 hostMsgs.Send(new HostMessage.ContainerClosed(window.Ref.Serial));
                 return;
             }

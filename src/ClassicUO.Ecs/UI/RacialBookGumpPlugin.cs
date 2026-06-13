@@ -84,6 +84,15 @@ internal readonly struct RacialBookGumpPlugin : IPlugin
         var despawnFn = Despawn;
         app.AddSystem(despawnFn).OnExit(GameState.GameScreen).Build();
 
+        // Book open sound (legacy RacialAbilitiesBookGump SetActivePage).
+        app.AddObserver((
+            OnInsert<RacialBookWindow> _,
+            ResMut<AudioState> audio,
+            Res<AssetsServer> assets,
+            Res<ClassicUO.Configuration.Profile> profile,
+            Res<Time> time) =>
+            audio.Value.PlaySound(assets.Value, profile.Value, time.Value.Total, 0x0055));
+
 #if AGENT_BUILD
         app.AddResource(new DebugRacialBookQueue());
         var drainFn = DrainDebug;
