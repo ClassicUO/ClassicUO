@@ -138,22 +138,7 @@ internal readonly struct CharacterCreationPlugin : IPlugin
             .Build();
     }
 
-    private static void DespawnAll(Commands cmd, Query<Data<Node>, Filter<With<AppearanceUI>>> q)
-    {
-        foreach (var (ent, _) in q) cmd.Entity(ent.Ref).Despawn();
-    }
-
-    private static void DespawnAll(Commands cmd, Query<Data<Node>, Filter<With<ProfessionUI>>> q)
-    {
-        foreach (var (ent, _) in q) cmd.Entity(ent.Ref).Despawn();
-    }
-
-    private static void DespawnAll(Commands cmd, Query<Data<Node>, Filter<With<TradeUI>>> q)
-    {
-        foreach (var (ent, _) in q) cmd.Entity(ent.Ref).Despawn();
-    }
-
-    private static void DespawnAll(Commands cmd, Query<Data<Node>, Filter<With<CityUI>>> q)
+    private static void DespawnAll<T>(Commands cmd, Query<Data<Node>, Filter<With<T>>> q) where T : struct
     {
         foreach (var (ent, _) in q) cmd.Entity(ent.Ref).Despawn();
     }

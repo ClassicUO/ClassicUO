@@ -718,6 +718,17 @@ internal readonly struct NameplatePlugin : IPlugin
         return 0;
     }
 
+    // Plate root under the cursor (0 if none) — the shared pick every plate
+    // gesture (claim / right-click-close / single-click) runs. PlateRoot(0)
+    // returns 0, so a miss (UiHit.None.Entity == 0) folds into the same answer.
+    private static ulong TopmostPlate(
+        Vector2 pos,
+        AssetsServer assets,
+        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
+        Query<Data<TinyEcs.Parent>> parents,
+        Query<Data<NameplateUI>> platesQ)
+        => PlateRoot(UiPick.Topmost(pos, assets, rendered, parents).Entity, platesQ, parents);
+
     // Claim SelectedEntity with the GAME entity under the plate so targeting /
     // double-click / pickup / drop all route to the serial. Mirrors
     // ContainerGumpPlugin.UpdateSelectedFromContainerUI (claims only when the
@@ -731,10 +742,7 @@ internal readonly struct NameplatePlugin : IPlugin
         Query<Data<TinyEcs.Parent>> parents,
         Query<Data<NameplateUI>> platesQ)
     {
-        var hit = UiPick.Topmost(mouse.Value.Position, assets.Value, rendered, parents);
-        if (!hit.Found) return;
-
-        var plateEnt = PlateRoot(hit.Entity, platesQ, parents);
+        var plateEnt = TopmostPlate(mouse.Value.Position, assets.Value, rendered, parents, platesQ);
         if (plateEnt == 0) return;
 
         if (!platesQ.TryGet(plateEnt, out var plateRow)) return;
@@ -766,8 +774,7 @@ internal readonly struct NameplatePlugin : IPlugin
 
         if (once)
         {
-            var hit = UiPick.Topmost(mouse.Value.Position, assets.Value, rendered, parents);
-            pressTarget.Value = hit.Found ? PlateRoot(hit.Entity, platesQ, parents) : 0;
+            pressTarget.Value = TopmostPlate(mouse.Value.Position, assets.Value, rendered, parents, platesQ);
             if (pressTarget.Value != 0)
                 mouse.Value.Consume(MouseButtonType.Right);
             return;
@@ -788,8 +795,7 @@ internal readonly struct NameplatePlugin : IPlugin
 
             mouse.Value.Consume(MouseButtonType.Right);
 
-            var hit = UiPick.Topmost(mouse.Value.Position, assets.Value, rendered, parents);
-            if (!hit.Found || PlateRoot(hit.Entity, platesQ, parents) != target) return;
+            if (TopmostPlate(mouse.Value.Position, assets.Value, rendered, parents, platesQ) != target) return;
             if (!platesQ.TryGet(target, out var plateRow)) return;
 
             var (_, plate) = plateRow;
@@ -828,8 +834,7 @@ internal readonly struct NameplatePlugin : IPlugin
 
         if (mouse.Value.IsPressedOnce(MouseButtonType.Left))
         {
-            var hit = UiPick.Topmost(mouse.Value.Position, assets.Value, rendered, parents);
-            st.PressedPlate = hit.Found ? PlateRoot(hit.Entity, platesQ, parents) : 0;
+            st.PressedPlate = TopmostPlate(mouse.Value.Position, assets.Value, rendered, parents, platesQ);
             return;
         }
 
@@ -844,8 +849,7 @@ internal readonly struct NameplatePlugin : IPlugin
             if (Math.Abs(dragOffset.X) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS
                 || Math.Abs(dragOffset.Y) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS) return;
 
-            var hit = UiPick.Topmost(mouse.Value.Position, assets.Value, rendered, parents);
-            if (!hit.Found || PlateRoot(hit.Entity, platesQ, parents) != target) return;
+            if (TopmostPlate(mouse.Value.Position, assets.Value, rendered, parents, platesQ) != target) return;
             if (!platesQ.TryGet(target, out var plateRow)) return;
 
             var (_, plate) = plateRow;

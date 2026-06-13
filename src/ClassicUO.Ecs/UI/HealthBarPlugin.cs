@@ -179,8 +179,7 @@ internal readonly struct HealthBarPlugin : IPlugin
         if (mouse.Value.IsPressedDouble(Input.MouseButtonType.Left))
         {
             latch.Value = default;
-            var hit = UiPick.Topmost(pos, assets.Value, p.Rendered);
-            var win = UiPick.MovableRoot(hit.Entity, p.Movables, p.Parents);
+            var win = p.TopmostMovable(pos, assets.Value);
             if (win == 0 || !p.Hb.TryGet(win, out var winRow)) return;
 
             var (_, w) = winRow;
@@ -227,8 +226,7 @@ internal readonly struct HealthBarPlugin : IPlugin
                 System.Math.Abs(off.Y) >= Constants.MIN_PICKUP_DRAG_DISTANCE_PIXELS)
                 return; // dragged — that's a move, not a click
 
-            var hit = UiPick.Topmost(pos, assets.Value, p.Rendered);
-            if (UiPick.MovableRoot(hit.Entity, p.Movables, p.Parents) != target)
+            if (p.TopmostMovable(pos, assets.Value) != target)
                 return; // released off the window
 
             Vector2 spawn = new(20, 150);
@@ -791,4 +789,11 @@ internal sealed class HbInteractParams : CompositeSystemParam
         Buttons     = Add(new Query<Data<UOButton>>());
         LockButtons = Add(new Query<Data<StatLockButton>>());
     }
+
+    // Window root under the cursor (0 if none). Pixel-perfect topmost element
+    // resolved up to its UiMovable root — the answer the press/release/dclick
+    // gestures share. Deliberately the no-parents Topmost overload (no overflow
+    // clip / ContainsByBounds), matching what these handlers have always used.
+    public ulong TopmostMovable(Vector2 pos, AssetsServer assets)
+        => UiPick.MovableRoot(UiPick.Topmost(pos, assets, Rendered).Entity, Movables, Parents);
 }

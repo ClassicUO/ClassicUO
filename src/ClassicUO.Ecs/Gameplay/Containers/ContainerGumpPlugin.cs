@@ -278,9 +278,16 @@ internal readonly struct ContainerGumpPlugin : IPlugin
             3 => 0x7762,
             _ => 0x003C,
         };
-        if (candidate == 0x003C) return 0x003C;
+        return ResolveIfTextured(assets, candidate, 0x003C);
+    }
+
+    // Swap to `candidate` only when the dataset actually ships its art; else
+    // keep `fallback`. Shared tail of the backpack / large-container art swaps.
+    private static ushort ResolveIfTextured(AssetsServer assets, ushort candidate, ushort fallback)
+    {
+        if (candidate == fallback) return fallback;
         ref readonly var info = ref assets.Gumps.GetGump(candidate);
-        return info.Texture != null ? candidate : (ushort)0x003C;
+        return info.Texture != null ? candidate : fallback;
     }
 
     private static void SyncProfileToUiScale(Res<Profile> profile, ResMut<UIScale> uiScale)
@@ -314,9 +321,7 @@ internal readonly struct ContainerGumpPlugin : IPlugin
             0x0044 => 0x9CE3,
             _ => graphic,
         };
-        if (candidate == graphic) return graphic;
-        ref readonly var info = ref assets.Gumps.GetGump(candidate);
-        return info.Texture != null ? candidate : graphic;
+        return ResolveIfTextured(assets, candidate, graphic);
     }
 
     // World-anchored screen position of the container's root holder (chest on
