@@ -495,6 +495,12 @@ internal readonly struct ContainerGumpPlugin : IPlugin
             if (ev.Graphic == 0xFFFF || ev.Graphic == 0x0030)
                 continue;
 
+            // Grid-loot type 1 ("grid only") replaces the normal corpse window
+            // (gump 0x0009) with GridLootGumpPlugin's grid; suppress the default
+            // window here. Type 2 ("both") falls through and opens this too.
+            if (ev.Graphic == GridLootGumpPlugin.CorpseContainerGump && profile.Value.GridLootType == 1)
+                continue;
+
             // Skip if a UI window for this container is already up.
             if (uiMap.Value.TryGet(ev.Serial, out _))
                 continue;

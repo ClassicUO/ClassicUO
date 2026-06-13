@@ -63,6 +63,7 @@ internal readonly struct CuoPlugin : IPlugin
         app.AddPlugin<MapGumpPlugin>();
         app.AddPlugin<SplitMenuPlugin>();
         app.AddPlugin<PopupMenuPlugin>();
+        app.AddPlugin<GridLootGumpPlugin>();
         app.AddPlugin<TooltipPlugin>();
 
         app.AddPlugin<NetworkPlugin>();
