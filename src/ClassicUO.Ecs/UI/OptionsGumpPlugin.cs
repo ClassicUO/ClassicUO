@@ -55,33 +55,42 @@ internal readonly struct OptionsGumpPlugin : IPlugin
     private const int RowW = WinW - Pad * 2 - SidebarW - 10 - ScrollW - 6;
     private const int LabelW = 250;
 
-    // Modern dark palette. Layered slate (panel < card/row < control) for depth,
-    // a blue accent, and a green/grey switch track.
-    private static readonly ClayColor s_panelBg     = new(22, 24, 30, 252);
-    private static readonly ClayColor s_panelBorder = new(58, 63, 78, 200);
-    private static readonly ClayColor s_shadow      = new(0, 0, 0, 90);
-    private static readonly ClayColor s_headerBg    = new(30, 33, 41, 255);
-    private static readonly ClayColor s_rowBg       = new(38, 41, 51, 255);
-    private static readonly ClayColor s_rowHover    = new(48, 52, 64, 255);
-    private static readonly ClayColor s_controlBg   = new(54, 58, 71, 255);
-    private static readonly ClayColor s_controlHover = new(68, 73, 89, 255);
+    // Slider widget geometry (flow children — fill + knob + filler — so it rides
+    // the scroll clip with the rest of the list, like the toggle pill; the lib
+    // SliderPlugin positions its thumb absolutely, which would escape the clip).
+    private const int SliderTrackW = 120;
+    private const int SliderTrackH = 16;
+    private const int SliderKnob = 16;
+    private const int SliderValW = 34;
+
+    private static readonly ClayColor s_panelBg     = new(16, 17, 22, 255);
+    private static readonly ClayColor s_panelBorder = new(44, 47, 58, 255);
+    private static readonly ClayColor s_shadow      = new(0, 0, 0, 120);
+    private static readonly ClayColor s_headerBg    = new(22, 24, 30, 255);
+    private static readonly ClayColor s_rowBg       = new(30, 32, 40, 255);
+    private static readonly ClayColor s_rowHover    = new(38, 41, 51, 255);
+    private static readonly ClayColor s_controlBg   = new(52, 55, 66, 255);
+    private static readonly ClayColor s_controlHover = new(60, 64, 78, 255);
     private static readonly ClayColor s_accent      = new(92, 132, 224, 255);
     private static readonly ClayColor s_accentHover = new(110, 148, 236, 255);
-    private static readonly ClayColor s_sideBg      = new(33, 36, 45, 255);
-    private static readonly ClayColor s_sideHover   = new(46, 50, 62, 255);
+    private static readonly ClayColor s_sideBg      = new(22, 24, 30, 255);
+    private static readonly ClayColor s_sideHover   = new(38, 41, 51, 255);
     private static readonly ClayColor s_toggleOn    = new(74, 178, 112, 255);
-    private static readonly ClayColor s_toggleOff   = new(66, 70, 84, 255);
+    private static readonly ClayColor s_toggleOff   = new(52, 55, 66, 255);
     private static readonly ClayColor s_knob        = new(238, 240, 246, 255);
     private static readonly ClayColor s_field       = new(216, 218, 224, 255);
     private static readonly ClayColor s_textMain    = new(236, 238, 244, 255);
-    private static readonly ClayColor s_textDim     = new(150, 154, 168, 255);
-    private static readonly ClayColor s_textFaint   = new(108, 112, 126, 255);
+    private static readonly ClayColor s_textDim     = new(120, 124, 140, 255);
+    private static readonly ClayColor s_textFaint   = new(120, 124, 140, 255);
+    private static readonly ClayColor s_card        = new(24, 26, 33, 255);
+    private static readonly ClayColor s_sliderTrack = new(40, 43, 54, 255);
 
-    private enum OptionKind { Toggle, Stepper, Cycle, Hue, Action }
+    private enum OptionKind { Toggle, Stepper, Slider, Cycle, Hue, Action }
 
     private sealed class OptionDef
     {
         public string Category;
+        public string Group = string.Empty;
         public string Label;
         public string Keywords = string.Empty;
         public OptionKind Kind;
@@ -99,284 +108,329 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             || Keywords.Contains(needle, StringComparison.OrdinalIgnoreCase);
     }
 
-    // Catalog helpers — keep the (large) registry readable.
-    private static OptionDef T(string cat, string label, Func<Profile, bool> g, Action<Profile, bool> s, string kw = "")
-        => new() { Category = cat, Label = label, Keywords = kw, Kind = OptionKind.Toggle, GetB = g, SetB = s };
-
-    private static OptionDef I(string cat, string label, int min, int max, int step,
-        Func<Profile, int> g, Action<Profile, int> s, string kw = "")
-        => new() { Category = cat, Label = label, Keywords = kw, Kind = OptionKind.Stepper, Min = min, Max = max, Step = step, GetI = g, SetI = s };
-
-    private static OptionDef C(string cat, string label, string[] choices,
-        Func<Profile, int> g, Action<Profile, int> s, string kw = "")
-        => new() { Category = cat, Label = label, Keywords = kw, Kind = OptionKind.Cycle, Choices = choices, GetI = g, SetI = s };
-
-    // Hue setting: numbers-only editable value + a swatch that opens the
-    // palette overlay.
-    private static OptionDef H(string cat, string label, Func<Profile, int> g, Action<Profile, int> s, string kw = "")
-        => new() { Category = cat, Label = label, Keywords = kw + " hue color", Kind = OptionKind.Hue,
-                   Min = 0, Max = 3000, Step = 1, GetI = g, SetI = s };
-
-    // The settings catalog. Mirrors legacy OptionsGump's profile linkage for
-    // every setting the legacy Profile carries (positions / string formats /
-    // macro & infobar editors excluded). Read on build, written on change.
-    private static readonly OptionDef[] s_options =
+    // Catalog builder. Cat() opens a category page; Grp() opens a labelled card
+    // within it; the per-kind helpers add a row. Group order = display order,
+    // so related settings render together inside one card. Read on build,
+    // written on change — mirrors the legacy OptionsGump's profile linkage.
+    private static OptionDef[] BuildCatalog()
     {
-        // ===== General =====
-        T("General", "Enable pathfinding", p => p.EnablePathfind, (p, v) => p.EnablePathfind = v, "walk auto move"),
-        T("General", "Shift to pathfind", p => p.UseShiftToPathfind, (p, v) => p.UseShiftToPathfind = v),
-        T("General", "Always run", p => p.AlwaysRun, (p, v) => p.AlwaysRun = v, "movement speed"),
-        T("General", "Always run unless hidden", p => p.AlwaysRunUnlessHidden, (p, v) => p.AlwaysRunUnlessHidden = v),
-        T("General", "Fast rotation", p => p.FastRotation, (p, v) => p.FastRotation = v, "turn movement"),
-        T("General", "Smooth movements", p => p.SmoothMovements, (p, v) => p.SmoothMovements = v, "interpolation step"),
-        T("General", "Auto open doors", p => p.AutoOpenDoors, (p, v) => p.AutoOpenDoors = v),
-        T("General", "Smooth doors", p => p.SmoothDoors, (p, v) => p.SmoothDoors = v),
-        T("General", "Auto open corpses", p => p.AutoOpenCorpses, (p, v) => p.AutoOpenCorpses = v, "loot"),
-        I("General", "Corpse open range", 0, 5, 1, p => p.AutoOpenCorpseRange, (p, v) => p.AutoOpenCorpseRange = v, "loot distance"),
-        C("General", "Corpse open options", new[] { "Always", "Not targeting", "Not hiding", "Both" },
-            p => p.CorpseOpenOptions, (p, v) => p.CorpseOpenOptions = v, "loot"),
-        T("General", "Skip empty corpses", p => p.SkipEmptyCorpse, (p, v) => p.SkipEmptyCorpse = v, "loot"),
-        T("General", "Sallos easy grab", p => p.SallosEasyGrab, (p, v) => p.SallosEasyGrab = v, "loot pickup"),
-        T("General", "Show house content", p => p.ShowHouseContent, (p, v) => p.ShowHouseContent = v, "public"),
-        T("General", "Smooth boat movement", p => p.UseSmoothBoatMovement, (p, v) => p.UseSmoothBoatMovement = v, "ship"),
-        T("General", "Hold shift for context menu", p => p.HoldShiftForContext, (p, v) => p.HoldShiftForContext = v, "popup"),
-        T("General", "Hold shift to split stacks", p => p.HoldShiftToSplitStack, (p, v) => p.HoldShiftToSplitStack = v, "amount"),
-        T("General", "Hold tab for combat", p => p.HoldDownKeyTab, (p, v) => p.HoldDownKeyTab = v, "warmode toggle"),
-        T("General", "Alt closes anchored gumps", p => p.HoldDownKeyAltToCloseAnchored, (p, v) => p.HoldDownKeyAltToCloseAnchored = v),
-        T("General", "Alt to move gumps", p => p.HoldAltToMoveGumps, (p, v) => p.HoldAltToMoveGumps = v, "drag window"),
-        T("General", "Right click closes anchored group", p => p.CloseAllAnchoredGumpsInGroupWithRightClick,
-            (p, v) => p.CloseAllAnchoredGumpsInGroupWithRightClick = v),
-        T("General", "Disable top bar", p => p.TopbarGumpIsDisabled, (p, v) => p.TopbarGumpIsDisabled = v, "menu"),
-        T("General", "Hide screenshot stored message", p => p.HideScreenshotStoredInMessage, (p, v) => p.HideScreenshotStoredInMessage = v),
-        T("General", "Show stats changed message", p => p.ShowStatsChangedMessage, (p, v) => p.ShowStatsChangedMessage = v, "str dex int"),
-        T("General", "Show skills changed message", p => p.ShowSkillsChangedMessage, (p, v) => p.ShowSkillsChangedMessage = v),
-        I("General", "Skills changed delta (x0.1)", 0, 100, 1, p => p.ShowSkillsChangedDeltaValue, (p, v) => p.ShowSkillsChangedDeltaValue = v, "message threshold"),
-        T("General", "Ignore stamina check", p => p.IgnoreStaminaCheck, (p, v) => p.IgnoreStaminaCheck = v, "push"),
+        var list = new List<OptionDef>();
+        string cat = string.Empty, grp = string.Empty;
+        void Cat(string c) => cat = c;
+        void Grp(string g) => grp = g;
+        void AddDef(OptionDef d) { d.Category = cat; d.Group = grp; list.Add(d); }
 
-        // ===== Mobiles =====
-        T("Mobiles", "Show mobiles HP", p => p.ShowMobilesHP, (p, v) => p.ShowMobilesHP = v, "health overhead"),
-        C("Mobiles", "HP display", new[] { "Percentage", "Line", "Both" }, p => p.MobileHPType, (p, v) => p.MobileHPType = v, "health"),
-        C("Mobiles", "HP show when", new[] { "Always", "Less than 100%", "Smart" }, p => p.MobileHPShowWhen, (p, v) => p.MobileHPShowWhen = v, "health"),
-        T("Mobiles", "Poll mobiles HP status (OSI)", p => p.PollMobileStatus, (p, v) => p.PollMobileStatus = v, "health refresh 500ms normalized"),
-        T("Mobiles", "Highlight game objects", p => p.HighlightGameObjects, (p, v) => p.HighlightGameObjects = v, "selection"),
-        T("Mobiles", "Highlight poisoned", p => p.HighlightMobilesByPoisoned, (p, v) => p.HighlightMobilesByPoisoned = v),
-        H("Mobiles", "Poison hue", p => p.PoisonHue, (p, v) => p.PoisonHue = (ushort)v),
-        T("Mobiles", "Highlight paralyzed", p => p.HighlightMobilesByParalize, (p, v) => p.HighlightMobilesByParalize = v),
-        H("Mobiles", "Paralyzed hue", p => p.ParalyzedHue, (p, v) => p.ParalyzedHue = (ushort)v),
-        T("Mobiles", "Highlight invulnerable", p => p.HighlightMobilesByInvul, (p, v) => p.HighlightMobilesByInvul = v),
-        H("Mobiles", "Invulnerable hue", p => p.InvulnerableHue, (p, v) => p.InvulnerableHue = (ushort)v),
-        T("Mobiles", "Incoming mobile names", p => p.ShowNewMobileNameIncoming, (p, v) => p.ShowNewMobileNameIncoming = v),
-        T("Mobiles", "Incoming corpse names", p => p.ShowNewCorpseNameIncoming, (p, v) => p.ShowNewCorpseNameIncoming = v),
-        C("Mobiles", "Aura under feet", new[] { "Off", "Warmode", "Ctrl+Shift", "Always" },
-            p => p.AuraUnderFeetType, (p, v) => p.AuraUnderFeetType = v, "circle"),
-        T("Mobiles", "Custom party aura", p => p.PartyAura, (p, v) => p.PartyAura = v),
-        H("Mobiles", "Party aura hue", p => p.PartyAuraHue, (p, v) => p.PartyAuraHue = (ushort)v),
-        T("Mobiles", "Name overheads toggled", p => p.NameOverheadToggled, (p, v) => p.NameOverheadToggled = v, "nameplate"),
-        T("Mobiles", "Name overhead gump", p => p.NameOverheadShowGump, (p, v) => p.NameOverheadShowGump = v, "nameplate handler"),
-        T("Mobiles", "Name overhead HP bar", p => p.NameOverheadShowHpBar, (p, v) => p.NameOverheadShowHpBar = v, "nameplate health"),
-        T("Mobiles", "Target range indicator", p => p.ShowTargetRangeIndicator, (p, v) => p.ShowTargetRangeIndicator = v),
-        T("Mobiles", "Drag select health bars", p => p.EnableDragSelect, (p, v) => p.EnableDragSelect = v, "lasso"),
-        C("Mobiles", "Drag select modifier", new[] { "None", "Ctrl", "Shift" },
-            p => p.DragSelectModifierKey, (p, v) => p.DragSelectModifierKey = v),
-        T("Mobiles", "Drag select humanoids only", p => p.DragSelectHumanoidsOnly, (p, v) => p.DragSelectHumanoidsOnly = v),
-        T("Mobiles", "Drag select hostile only", p => p.DragSelectHostileOnly, (p, v) => p.DragSelectHostileOnly = v),
-        I("Mobiles", "Drag select start X", 0, 2000, 10, p => p.DragSelectStartX, (p, v) => p.DragSelectStartX = v),
-        I("Mobiles", "Drag select start Y", 0, 2000, 10, p => p.DragSelectStartY, (p, v) => p.DragSelectStartY = v),
-        T("Mobiles", "Drag select as anchor", p => p.DragSelectAsAnchor, (p, v) => p.DragSelectAsAnchor = v),
+        // Toggle.
+        void T(string label, Func<Profile, bool> g, Action<Profile, bool> s, string kw = "")
+            => AddDef(new OptionDef { Label = label, Keywords = kw, Kind = OptionKind.Toggle, GetB = g, SetB = s });
+        // Stepper (−/+ for precise values: coords, indices, fonts).
+        void I(string label, int min, int max, int step, Func<Profile, int> g, Action<Profile, int> s, string kw = "")
+            => AddDef(new OptionDef { Label = label, Keywords = kw, Kind = OptionKind.Stepper, Min = min, Max = max, Step = step, GetI = g, SetI = s });
+        // Slider (drag/click for bounded magnitudes: volumes, %, delays).
+        void S(string label, int min, int max, int step, Func<Profile, int> g, Action<Profile, int> s, string kw = "")
+            => AddDef(new OptionDef { Label = label, Keywords = kw, Kind = OptionKind.Slider, Min = min, Max = max, Step = step, GetI = g, SetI = s });
+        // Cycle (selectbox + dropdown overlay).
+        void C(string label, string[] choices, Func<Profile, int> g, Action<Profile, int> s, string kw = "")
+            => AddDef(new OptionDef { Label = label, Keywords = kw, Kind = OptionKind.Cycle, Choices = choices, GetI = g, SetI = s });
+        // Hue (numbers-only editable value + swatch that opens the palette).
+        void H(string label, Func<Profile, int> g, Action<Profile, int> s, string kw = "")
+            => AddDef(new OptionDef { Label = label, Keywords = kw + " hue color", Kind = OptionKind.Hue, Min = 0, Max = 3000, Step = 1, GetI = g, SetI = s });
+        // Action (client-local feature launcher button).
+        void A(string label, Action<Commands, OptionsButtonParams> run, string kw = "")
+            => AddDef(new OptionDef { Label = label, Keywords = kw, Kind = OptionKind.Action, Run = run });
 
-        // ===== Video =====
-        T("Video", "Game window full size", p => p.GameWindowFullSize, (p, v) => p.GameWindowFullSize = v, "viewport fullscreen resize"),
-        T("Video", "Lock game window", p => p.GameWindowLock, (p, v) => p.GameWindowLock = v, "viewport move"),
-        I("Video", "Game window X", 0, 2000, 10, p => p.GameWindowPosition.X, (p, v) => p.GameWindowPosition = new Point(v, p.GameWindowPosition.Y), "viewport position"),
-        I("Video", "Game window Y", 0, 2000, 10, p => p.GameWindowPosition.Y, (p, v) => p.GameWindowPosition = new Point(p.GameWindowPosition.X, v), "viewport position"),
-        I("Video", "Game window width", 200, 2048, 20, p => p.GameWindowSize.X, (p, v) => p.GameWindowSize = new Point(v, p.GameWindowSize.Y), "viewport size"),
-        I("Video", "Game window height", 200, 2048, 20, p => p.GameWindowSize.Y, (p, v) => p.GameWindowSize = new Point(p.GameWindowSize.X, v), "viewport size"),
-        T("Video", "Borderless window", p => p.WindowBorderless, (p, v) => p.WindowBorderless = v, "fullscreen"),
-        I("Video", "Default zoom (%)", 50, 300, 10, p => (int)(p.DefaultScale * 100f), (p, v) => p.DefaultScale = v / 100f, "scale camera"),
-        T("Video", "Mousewheel zoom", p => p.EnableMousewheelScaleZoom, (p, v) => p.EnableMousewheelScaleZoom = v, "ctrl scale"),
-        T("Video", "Save zoom on close", p => p.SaveScaleAfterClose, (p, v) => p.SaveScaleAfterClose = v, "scale"),
-        T("Video", "Restore zoom after ctrl release", p => p.RestoreScaleAfterUnpressCtrl, (p, v) => p.RestoreScaleAfterUnpressCtrl = v, "scale"),
-        T("Video", "Alternative lights", p => p.UseAlternativeLights, (p, v) => p.UseAlternativeLights = v),
-        T("Video", "Custom light level", p => p.UseCustomLightLevel, (p, v) => p.UseCustomLightLevel = v),
-        I("Video", "Light level", 0, 30, 1, p => p.LightLevel, (p, v) => p.LightLevel = (byte)v, "brightness"),
-        C("Video", "Light level type", new[] { "Absolute", "Minimum" }, p => p.LightLevelType, (p, v) => p.LightLevelType = v),
-        T("Video", "Colored lights", p => p.UseColoredLights, (p, v) => p.UseColoredLights = v),
-        T("Video", "Dark nights", p => p.UseDarkNights, (p, v) => p.UseDarkNights = v),
-        T("Video", "Shadows", p => p.ShadowsEnabled, (p, v) => p.ShadowsEnabled = v),
-        T("Video", "Shadows on statics", p => p.ShadowsStatics, (p, v) => p.ShadowsStatics = v),
-        I("Video", "Terrain shadow level", 5, 25, 1, p => p.TerrainShadowsLevel, (p, v) => p.TerrainShadowsLevel = v),
-        T("Video", "Object fading", p => p.UseObjectsFading, (p, v) => p.UseObjectsFading = v, "transparency"),
-        T("Video", "Text fading", p => p.TextFading, (p, v) => p.TextFading = v, "overhead"),
-        T("Video", "Death screen", p => p.EnableDeathScreen, (p, v) => p.EnableDeathScreen = v),
-        T("Video", "Black & white death effect", p => p.EnableBlackWhiteEffect, (p, v) => p.EnableBlackWhiteEffect = v, "grayscale"),
-        T("Video", "Animated water", p => p.AnimatedWaterEffect, (p, v) => p.AnimatedWaterEffect = v),
-        T("Video", "Aura on mouse target", p => p.AuraOnMouse, (p, v) => p.AuraOnMouse = v),
-        T("Video", "xBR upscaling", p => p.UseXBR, (p, v) => p.UseXBR = v, "filter shader"),
-        T("Video", "Reduce FPS when inactive", p => p.ReduceFPSWhenInactive, (p, v) => p.ReduceFPSWhenInactive = v, "background framerate"),
-        T("Video", "Draw roofs", p => p.DrawRoofs, (p, v) => p.DrawRoofs = v, "hide house"),
-        T("Video", "Trees to stumps", p => p.TreeToStumps, (p, v) => p.TreeToStumps = v, "filter"),
-        T("Video", "Hide vegetation", p => p.HideVegetation, (p, v) => p.HideVegetation = v, "filter grass"),
-        T("Video", "Mark cave tiles", p => p.EnableCaveBorder, (p, v) => p.EnableCaveBorder = v, "border"),
-        C("Video", "Field types", new[] { "Normal", "Static", "Tile" }, p => p.FieldsType, (p, v) => p.FieldsType = v, "fire poison wall"),
-        T("Video", "Circle of transparency", p => p.UseCircleOfTransparency, (p, v) => p.UseCircleOfTransparency = v),
-        I("Video", "Circle radius", 50, 200, 10, p => p.CircleOfTransparencyRadius, (p, v) => p.CircleOfTransparencyRadius = v, "transparency"),
-        C("Video", "Circle type", new[] { "Full", "Gradient" }, p => p.CircleOfTransparencyType, (p, v) => p.CircleOfTransparencyType = v, "transparency"),
-        T("Video", "No color out of range", p => p.NoColorObjectsOutOfRange, (p, v) => p.NoColorObjectsOutOfRange = v, "gray"),
+        Cat("General");
+            Grp("Movement");
+                T("Enable pathfinding", p => p.EnablePathfind, (p, v) => p.EnablePathfind = v, "walk auto move");
+                T("Shift to pathfind", p => p.UseShiftToPathfind, (p, v) => p.UseShiftToPathfind = v);
+                T("Always run", p => p.AlwaysRun, (p, v) => p.AlwaysRun = v, "movement speed");
+                T("Always run unless hidden", p => p.AlwaysRunUnlessHidden, (p, v) => p.AlwaysRunUnlessHidden = v);
+                T("Fast rotation", p => p.FastRotation, (p, v) => p.FastRotation = v, "turn movement");
+                T("Smooth movements", p => p.SmoothMovements, (p, v) => p.SmoothMovements = v, "interpolation step");
+            Grp("Doors & Corpses");
+                T("Auto open doors", p => p.AutoOpenDoors, (p, v) => p.AutoOpenDoors = v);
+                T("Smooth doors", p => p.SmoothDoors, (p, v) => p.SmoothDoors = v);
+                T("Auto open corpses", p => p.AutoOpenCorpses, (p, v) => p.AutoOpenCorpses = v, "loot");
+                S("Corpse open range", 0, 5, 1, p => p.AutoOpenCorpseRange, (p, v) => p.AutoOpenCorpseRange = v, "loot distance");
+                C("Corpse open options", new[] { "Always", "Not targeting", "Not hiding", "Both" }, p => p.CorpseOpenOptions, (p, v) => p.CorpseOpenOptions = v, "loot");
+                T("Skip empty corpses", p => p.SkipEmptyCorpse, (p, v) => p.SkipEmptyCorpse = v, "loot");
+            Grp("Interaction");
+                T("Sallos easy grab", p => p.SallosEasyGrab, (p, v) => p.SallosEasyGrab = v, "loot pickup");
+                T("Show house content", p => p.ShowHouseContent, (p, v) => p.ShowHouseContent = v, "public");
+                T("Smooth boat movement", p => p.UseSmoothBoatMovement, (p, v) => p.UseSmoothBoatMovement = v, "ship");
+                T("Hold shift for context menu", p => p.HoldShiftForContext, (p, v) => p.HoldShiftForContext = v, "popup");
+                T("Hold shift to split stacks", p => p.HoldShiftToSplitStack, (p, v) => p.HoldShiftToSplitStack = v, "amount");
+                T("Hold tab for combat", p => p.HoldDownKeyTab, (p, v) => p.HoldDownKeyTab = v, "warmode toggle");
+                T("Alt closes anchored gumps", p => p.HoldDownKeyAltToCloseAnchored, (p, v) => p.HoldDownKeyAltToCloseAnchored = v);
+                T("Alt to move gumps", p => p.HoldAltToMoveGumps, (p, v) => p.HoldAltToMoveGumps = v, "drag window");
+                T("Right click closes anchored group", p => p.CloseAllAnchoredGumpsInGroupWithRightClick, (p, v) => p.CloseAllAnchoredGumpsInGroupWithRightClick = v);
+                T("Disable top bar", p => p.TopbarGumpIsDisabled, (p, v) => p.TopbarGumpIsDisabled = v, "menu");
+                T("Ignore stamina check", p => p.IgnoreStaminaCheck, (p, v) => p.IgnoreStaminaCheck = v, "push");
+            Grp("Messages");
+                T("Hide screenshot stored message", p => p.HideScreenshotStoredInMessage, (p, v) => p.HideScreenshotStoredInMessage = v);
+                T("Show stats changed message", p => p.ShowStatsChangedMessage, (p, v) => p.ShowStatsChangedMessage = v, "str dex int");
+                T("Show skills changed message", p => p.ShowSkillsChangedMessage, (p, v) => p.ShowSkillsChangedMessage = v);
+                I("Skills changed delta (x0.1)", 0, 100, 1, p => p.ShowSkillsChangedDeltaValue, (p, v) => p.ShowSkillsChangedDeltaValue = v, "message threshold");
 
-        // ===== Sound =====
-        T("Sound", "Enable sounds", p => p.EnableSound, (p, v) => p.EnableSound = v, "audio effects"),
-        I("Sound", "Sound volume", 0, 100, 5, p => p.SoundVolume, (p, v) => p.SoundVolume = v, "audio"),
-        T("Sound", "Enable music", p => p.EnableMusic, (p, v) => p.EnableMusic = v, "audio"),
-        I("Sound", "Music volume", 0, 100, 5, p => p.MusicVolume, (p, v) => p.MusicVolume = v, "audio"),
-        T("Sound", "Footstep sounds", p => p.EnableFootstepsSound, (p, v) => p.EnableFootstepsSound = v, "walk"),
-        T("Sound", "Combat music", p => p.EnableCombatMusic, (p, v) => p.EnableCombatMusic = v, "warmode"),
-        T("Sound", "Sounds in background", p => p.ReproduceSoundsInBackground, (p, v) => p.ReproduceSoundsInBackground = v, "focus audio"),
+        Cat("Mobiles");
+            Grp("Health Display");
+                T("Show mobiles HP", p => p.ShowMobilesHP, (p, v) => p.ShowMobilesHP = v, "health overhead");
+                C("HP display", new[] { "Percentage", "Line", "Both" }, p => p.MobileHPType, (p, v) => p.MobileHPType = v, "health");
+                C("HP show when", new[] { "Always", "Less than 100%", "Smart" }, p => p.MobileHPShowWhen, (p, v) => p.MobileHPShowWhen = v, "health");
+                T("Poll mobiles HP status (OSI)", p => p.PollMobileStatus, (p, v) => p.PollMobileStatus = v, "health refresh 500ms normalized");
+            Grp("Highlighting");
+                T("Highlight game objects", p => p.HighlightGameObjects, (p, v) => p.HighlightGameObjects = v, "selection");
+                T("Highlight poisoned", p => p.HighlightMobilesByPoisoned, (p, v) => p.HighlightMobilesByPoisoned = v);
+                H("Poison hue", p => p.PoisonHue, (p, v) => p.PoisonHue = (ushort)v);
+                T("Highlight paralyzed", p => p.HighlightMobilesByParalize, (p, v) => p.HighlightMobilesByParalize = v);
+                H("Paralyzed hue", p => p.ParalyzedHue, (p, v) => p.ParalyzedHue = (ushort)v);
+                T("Highlight invulnerable", p => p.HighlightMobilesByInvul, (p, v) => p.HighlightMobilesByInvul = v);
+                H("Invulnerable hue", p => p.InvulnerableHue, (p, v) => p.InvulnerableHue = (ushort)v);
+            Grp("Aura");
+                C("Aura under feet", new[] { "Off", "Warmode", "Ctrl+Shift", "Always" }, p => p.AuraUnderFeetType, (p, v) => p.AuraUnderFeetType = v, "circle");
+                T("Custom party aura", p => p.PartyAura, (p, v) => p.PartyAura = v);
+                H("Party aura hue", p => p.PartyAuraHue, (p, v) => p.PartyAuraHue = (ushort)v);
+            Grp("Names");
+                T("Incoming mobile names", p => p.ShowNewMobileNameIncoming, (p, v) => p.ShowNewMobileNameIncoming = v);
+                T("Incoming corpse names", p => p.ShowNewCorpseNameIncoming, (p, v) => p.ShowNewCorpseNameIncoming = v);
+                T("Name overheads toggled", p => p.NameOverheadToggled, (p, v) => p.NameOverheadToggled = v, "nameplate");
+                T("Name overhead gump", p => p.NameOverheadShowGump, (p, v) => p.NameOverheadShowGump = v, "nameplate handler");
+                T("Name overhead HP bar", p => p.NameOverheadShowHpBar, (p, v) => p.NameOverheadShowHpBar = v, "nameplate health");
+                T("Target range indicator", p => p.ShowTargetRangeIndicator, (p, v) => p.ShowTargetRangeIndicator = v);
+            Grp("Drag Select");
+                T("Drag select health bars", p => p.EnableDragSelect, (p, v) => p.EnableDragSelect = v, "lasso");
+                C("Drag select modifier", new[] { "None", "Ctrl", "Shift" }, p => p.DragSelectModifierKey, (p, v) => p.DragSelectModifierKey = v);
+                T("Drag select humanoids only", p => p.DragSelectHumanoidsOnly, (p, v) => p.DragSelectHumanoidsOnly = v);
+                T("Drag select hostile only", p => p.DragSelectHostileOnly, (p, v) => p.DragSelectHostileOnly = v);
+                I("Drag select start X", 0, 2000, 10, p => p.DragSelectStartX, (p, v) => p.DragSelectStartX = v);
+                I("Drag select start Y", 0, 2000, 10, p => p.DragSelectStartY, (p, v) => p.DragSelectStartY = v);
+                T("Drag select as anchor", p => p.DragSelectAsAnchor, (p, v) => p.DragSelectAsAnchor = v);
 
-        // ===== Chat =====
-        I("Chat", "Chat font", 0, 9, 1, p => p.ChatFont, (p, v) => p.ChatFont = (byte)v, "speech"),
-        I("Chat", "Speech delay", 0, 1000, 50, p => p.SpeechDelay, (p, v) => p.SpeechDelay = v, "overhead duration"),
-        T("Chat", "Scale speech delay", p => p.ScaleSpeechDelay, (p, v) => p.ScaleSpeechDelay = v, "overhead duration"),
-        T("Chat", "Save journal to file", p => p.SaveJournalToFile, (p, v) => p.SaveJournalToFile = v, "log"),
-        T("Chat", "Force unicode journal", p => p.ForceUnicodeJournal, (p, v) => p.ForceUnicodeJournal = v, "font"),
-        T("Chat", "Override game font", p => p.OverrideAllFonts, (p, v) => p.OverrideAllFonts = v, "text"),
-        T("Chat", "Overridden font is unicode", p => p.OverrideAllFontsIsUnicode, (p, v) => p.OverrideAllFontsIsUnicode = v, "ascii"),
-        T("Chat", "Ignore guild messages", p => p.IgnoreGuildMessages, (p, v) => p.IgnoreGuildMessages = v, "mute"),
-        T("Chat", "Ignore alliance messages", p => p.IgnoreAllianceMessages, (p, v) => p.IgnoreAllianceMessages = v, "mute"),
-        T("Chat", "Activate chat after enter", p => p.ActivateChatAfterEnter, (p, v) => p.ActivateChatAfterEnter = v, "input focus"),
-        T("Chat", "Chat additional buttons", p => p.ActivateChatAdditionalButtons, (p, v) => p.ActivateChatAdditionalButtons = v, "modifier"),
-        T("Chat", "Shift+Enter sends message", p => p.ActivateChatShiftEnterSupport, (p, v) => p.ActivateChatShiftEnterSupport = v),
-        T("Chat", "Hide chat gradient", p => p.HideChatGradient, (p, v) => p.HideChatGradient = v, "background"),
-        T("Chat", "Overhead party messages", p => p.OverheadPartyMessages, (p, v) => p.OverheadPartyMessages = v),
-        T("Chat", "Journal dark mode", p => p.JournalDarkMode, (p, v) => p.JournalDarkMode = v),
-        T("Chat", "Use alternate journal", p => p.UseAlternateJournal, (p, v) => p.UseAlternateJournal = v, "resizable tabs"),
-        T("Chat", "Journal: client messages", p => p.ShowJournalClient, (p, v) => p.ShowJournalClient = v, "filter"),
-        T("Chat", "Journal: object messages", p => p.ShowJournalObjects, (p, v) => p.ShowJournalObjects = v, "filter"),
-        T("Chat", "Journal: system messages", p => p.ShowJournalSystem, (p, v) => p.ShowJournalSystem = v, "filter"),
-        T("Chat", "Journal: guild & alliance", p => p.ShowJournalGuildAlly, (p, v) => p.ShowJournalGuildAlly = v, "filter"),
-        H("Chat", "Speech hue", p => p.SpeechHue, (p, v) => p.SpeechHue = (ushort)v, "say"),
-        H("Chat", "Whisper hue", p => p.WhisperHue, (p, v) => p.WhisperHue = (ushort)v),
-        H("Chat", "Emote hue", p => p.EmoteHue, (p, v) => p.EmoteHue = (ushort)v),
-        H("Chat", "Yell hue", p => p.YellHue, (p, v) => p.YellHue = (ushort)v),
-        H("Chat", "Party message hue", p => p.PartyMessageHue, (p, v) => p.PartyMessageHue = (ushort)v),
-        H("Chat", "Guild message hue", p => p.GuildMessageHue, (p, v) => p.GuildMessageHue = (ushort)v),
-        H("Chat", "Alliance message hue", p => p.AllyMessageHue, (p, v) => p.AllyMessageHue = (ushort)v),
-        H("Chat", "Chat message hue", p => p.ChatMessageHue, (p, v) => p.ChatMessageHue = (ushort)v),
+        Cat("Video");
+            Grp("Window");
+                T("Game window full size", p => p.GameWindowFullSize, (p, v) => p.GameWindowFullSize = v, "viewport fullscreen resize");
+                T("Lock game window", p => p.GameWindowLock, (p, v) => p.GameWindowLock = v, "viewport move");
+                I("Game window X", 0, 2000, 10, p => p.GameWindowPosition.X, (p, v) => p.GameWindowPosition = new Point(v, p.GameWindowPosition.Y), "viewport position");
+                I("Game window Y", 0, 2000, 10, p => p.GameWindowPosition.Y, (p, v) => p.GameWindowPosition = new Point(p.GameWindowPosition.X, v), "viewport position");
+                I("Game window width", 200, 2048, 20, p => p.GameWindowSize.X, (p, v) => p.GameWindowSize = new Point(v, p.GameWindowSize.Y), "viewport size");
+                I("Game window height", 200, 2048, 20, p => p.GameWindowSize.Y, (p, v) => p.GameWindowSize = new Point(p.GameWindowSize.X, v), "viewport size");
+                T("Borderless window", p => p.WindowBorderless, (p, v) => p.WindowBorderless = v, "fullscreen");
+            Grp("Zoom");
+                S("Default zoom (%)", 50, 300, 10, p => (int)(p.DefaultScale * 100f), (p, v) => p.DefaultScale = v / 100f, "scale camera");
+                T("Mousewheel zoom", p => p.EnableMousewheelScaleZoom, (p, v) => p.EnableMousewheelScaleZoom = v, "ctrl scale");
+                T("Save zoom on close", p => p.SaveScaleAfterClose, (p, v) => p.SaveScaleAfterClose = v, "scale");
+                T("Restore zoom after ctrl release", p => p.RestoreScaleAfterUnpressCtrl, (p, v) => p.RestoreScaleAfterUnpressCtrl = v, "scale");
+            Grp("Lighting");
+                T("Alternative lights", p => p.UseAlternativeLights, (p, v) => p.UseAlternativeLights = v);
+                T("Custom light level", p => p.UseCustomLightLevel, (p, v) => p.UseCustomLightLevel = v);
+                S("Light level", 0, 30, 1, p => p.LightLevel, (p, v) => p.LightLevel = (byte)v, "brightness");
+                C("Light level type", new[] { "Absolute", "Minimum" }, p => p.LightLevelType, (p, v) => p.LightLevelType = v);
+                T("Colored lights", p => p.UseColoredLights, (p, v) => p.UseColoredLights = v);
+                T("Dark nights", p => p.UseDarkNights, (p, v) => p.UseDarkNights = v);
+            Grp("Shadows");
+                T("Shadows", p => p.ShadowsEnabled, (p, v) => p.ShadowsEnabled = v);
+                T("Shadows on statics", p => p.ShadowsStatics, (p, v) => p.ShadowsStatics = v);
+                S("Terrain shadow level", 5, 25, 1, p => p.TerrainShadowsLevel, (p, v) => p.TerrainShadowsLevel = v);
+            Grp("Effects");
+                T("Object fading", p => p.UseObjectsFading, (p, v) => p.UseObjectsFading = v, "transparency");
+                T("Text fading", p => p.TextFading, (p, v) => p.TextFading = v, "overhead");
+                T("Death screen", p => p.EnableDeathScreen, (p, v) => p.EnableDeathScreen = v);
+                T("Black & white death effect", p => p.EnableBlackWhiteEffect, (p, v) => p.EnableBlackWhiteEffect = v, "grayscale");
+                T("Animated water", p => p.AnimatedWaterEffect, (p, v) => p.AnimatedWaterEffect = v);
+                T("Aura on mouse target", p => p.AuraOnMouse, (p, v) => p.AuraOnMouse = v);
+                T("xBR upscaling", p => p.UseXBR, (p, v) => p.UseXBR = v, "filter shader");
+                T("Reduce FPS when inactive", p => p.ReduceFPSWhenInactive, (p, v) => p.ReduceFPSWhenInactive = v, "background framerate");
+            Grp("World Filter");
+                T("Draw roofs", p => p.DrawRoofs, (p, v) => p.DrawRoofs = v, "hide house");
+                T("Trees to stumps", p => p.TreeToStumps, (p, v) => p.TreeToStumps = v, "filter");
+                T("Hide vegetation", p => p.HideVegetation, (p, v) => p.HideVegetation = v, "filter grass");
+                T("Mark cave tiles", p => p.EnableCaveBorder, (p, v) => p.EnableCaveBorder = v, "border");
+                C("Field types", new[] { "Normal", "Static", "Tile" }, p => p.FieldsType, (p, v) => p.FieldsType = v, "fire poison wall");
+                T("Circle of transparency", p => p.UseCircleOfTransparency, (p, v) => p.UseCircleOfTransparency = v);
+                S("Circle radius", 50, 200, 10, p => p.CircleOfTransparencyRadius, (p, v) => p.CircleOfTransparencyRadius = v, "transparency");
+                C("Circle type", new[] { "Full", "Gradient" }, p => p.CircleOfTransparencyType, (p, v) => p.CircleOfTransparencyType = v, "transparency");
+                T("No color out of range", p => p.NoColorObjectsOutOfRange, (p, v) => p.NoColorObjectsOutOfRange = v, "gray");
 
-        // ===== Combat =====
-        T("Combat", "New target system", p => p.UseNewTargetSystem, (p, v) => p.UseNewTargetSystem = v),
-        T("Combat", "Query before criminal actions", p => p.EnabledCriminalActionQuery, (p, v) => p.EnabledCriminalActionQuery = v, "confirm attack"),
-        T("Combat", "Query before beneficial acts", p => p.EnabledBeneficialCriminalActionQuery, (p, v) => p.EnabledBeneficialCriminalActionQuery = v, "confirm heal criminal"),
-        T("Combat", "Cast spells with one click", p => p.CastSpellsByOneClick, (p, v) => p.CastSpellsByOneClick = v, "spellbook"),
-        T("Combat", "Show buff duration", p => p.BuffBarTime, (p, v) => p.BuffBarTime = v, "timer countdown"),
-        T("Combat", "Fast spell assign", p => p.FastSpellsAssign, (p, v) => p.FastSpellsAssign = v, "hotkey"),
-        T("Combat", "Overhead spell format", p => p.EnabledSpellFormat, (p, v) => p.EnabledSpellFormat = v, "power words"),
-        T("Combat", "Overhead spell hue", p => p.EnabledSpellHue, (p, v) => p.EnabledSpellHue = v, "color"),
-        T("Combat", "DPS with damage numbers", p => p.ShowDPSWithDamageNumbers, (p, v) => p.ShowDPSWithDamageNumbers = v),
-        T("Combat", "Old bandage-self behavior", p => p.BandageSelfOld, (p, v) => p.BandageSelfOld = v, "heal"),
-        T("Combat", "Stat change report", p => p.EnableStatReport, (p, v) => p.EnableStatReport = v, "message"),
-        T("Combat", "Skill change report", p => p.EnableSkillReport, (p, v) => p.EnableSkillReport = v, "message"),
-        H("Combat", "Innocent hue", p => p.InnocentHue, (p, v) => p.InnocentHue = (ushort)v, "notoriety blue"),
-        H("Combat", "Friend hue", p => p.FriendHue, (p, v) => p.FriendHue = (ushort)v, "notoriety"),
-        H("Combat", "Criminal hue", p => p.CriminalHue, (p, v) => p.CriminalHue = (ushort)v, "notoriety gray"),
-        H("Combat", "Can-attack hue", p => p.CanAttackHue, (p, v) => p.CanAttackHue = (ushort)v, "notoriety gray"),
-        H("Combat", "Murderer hue", p => p.MurdererHue, (p, v) => p.MurdererHue = (ushort)v, "notoriety red"),
-        H("Combat", "Enemy hue", p => p.EnemyHue, (p, v) => p.EnemyHue = (ushort)v, "notoriety orange"),
-        H("Combat", "Beneficial spell hue", p => p.BeneficHue, (p, v) => p.BeneficHue = (ushort)v),
-        H("Combat", "Harmful spell hue", p => p.HarmfulHue, (p, v) => p.HarmfulHue = (ushort)v),
-        H("Combat", "Neutral spell hue", p => p.NeutralHue, (p, v) => p.NeutralHue = (ushort)v),
+        Cat("Sound");
+            Grp("Audio");
+                T("Enable sounds", p => p.EnableSound, (p, v) => p.EnableSound = v, "audio effects");
+                S("Sound volume", 0, 100, 5, p => p.SoundVolume, (p, v) => p.SoundVolume = v, "audio");
+                T("Enable music", p => p.EnableMusic, (p, v) => p.EnableMusic = v, "audio");
+                S("Music volume", 0, 100, 5, p => p.MusicVolume, (p, v) => p.MusicVolume = v, "audio");
+                T("Footstep sounds", p => p.EnableFootstepsSound, (p, v) => p.EnableFootstepsSound = v, "walk");
+                T("Combat music", p => p.EnableCombatMusic, (p, v) => p.EnableCombatMusic = v, "warmode");
+                T("Sounds in background", p => p.ReproduceSoundsInBackground, (p, v) => p.ReproduceSoundsInBackground = v, "focus audio");
 
-        // ===== Containers =====
-        C("Containers", "Backpack style", new[] { "Default", "Suede", "Polar bear", "Ghoul skin" },
-            p => p.BackpackStyle, (p, v) => p.BackpackStyle = v),
-        I("Containers", "Container scale (%)", 70, 200, 10, p => p.ContainersScale, (p, v) => p.ContainersScale = (byte)v, "size zoom"),
-        T("Containers", "Scale items inside", p => p.ScaleItemsInsideContainers, (p, v) => p.ScaleItemsInsideContainers = v, "zoom"),
-        T("Containers", "Large container gumps", p => p.UseLargeContainerGumps, (p, v) => p.UseLargeContainerGumps = v),
-        T("Containers", "Double click to loot", p => p.DoubleClickToLootInsideContainers, (p, v) => p.DoubleClickToLootInsideContainers = v),
-        T("Containers", "Relative drag and drop", p => p.RelativeDragAndDropItems, (p, v) => p.RelativeDragAndDropItems = v),
-        T("Containers", "Highlight on hover", p => p.HighlightContainerWhenSelected, (p, v) => p.HighlightContainerWhenSelected = v),
-        T("Containers", "Hue container gumps", p => p.HueContainerGumps, (p, v) => p.HueContainerGumps = v, "color"),
-        T("Containers", "Grid containers", p => p.UseGridContainers, (p, v) => p.UseGridContainers = v, "grid view search sort"),
-        T("Containers", "Override container location", p => p.OverrideContainerLocation, (p, v) => p.OverrideContainerLocation = v, "position"),
-        C("Containers", "Container location mode", new[] { "Near container", "Top right", "Last dragged", "Remember each" },
-            p => p.OverrideContainerLocationSetting, (p, v) => p.OverrideContainerLocationSetting = v, "position"),
-        C("Containers", "Grid loot", new[] { "Disabled", "Grid only", "Grid + classic" },
-            p => p.GridLootType, (p, v) => p.GridLootType = v, "corpse"),
+        Cat("Chat");
+            Grp("Speech");
+                I("Chat font", 0, 9, 1, p => p.ChatFont, (p, v) => p.ChatFont = (byte)v, "speech");
+                S("Speech delay", 0, 1000, 50, p => p.SpeechDelay, (p, v) => p.SpeechDelay = v, "overhead duration");
+                T("Scale speech delay", p => p.ScaleSpeechDelay, (p, v) => p.ScaleSpeechDelay = v, "overhead duration");
+                T("Activate chat after enter", p => p.ActivateChatAfterEnter, (p, v) => p.ActivateChatAfterEnter = v, "input focus");
+                T("Chat additional buttons", p => p.ActivateChatAdditionalButtons, (p, v) => p.ActivateChatAdditionalButtons = v, "modifier");
+                T("Shift+Enter sends message", p => p.ActivateChatShiftEnterSupport, (p, v) => p.ActivateChatShiftEnterSupport = v);
+                T("Hide chat gradient", p => p.HideChatGradient, (p, v) => p.HideChatGradient = v, "background");
+                T("Overhead party messages", p => p.OverheadPartyMessages, (p, v) => p.OverheadPartyMessages = v);
+            Grp("Journal");
+                T("Save journal to file", p => p.SaveJournalToFile, (p, v) => p.SaveJournalToFile = v, "log");
+                T("Force unicode journal", p => p.ForceUnicodeJournal, (p, v) => p.ForceUnicodeJournal = v, "font");
+                T("Journal dark mode", p => p.JournalDarkMode, (p, v) => p.JournalDarkMode = v);
+                T("Use alternate journal", p => p.UseAlternateJournal, (p, v) => p.UseAlternateJournal = v, "resizable tabs");
+                T("Journal: client messages", p => p.ShowJournalClient, (p, v) => p.ShowJournalClient = v, "filter");
+                T("Journal: object messages", p => p.ShowJournalObjects, (p, v) => p.ShowJournalObjects = v, "filter");
+                T("Journal: system messages", p => p.ShowJournalSystem, (p, v) => p.ShowJournalSystem = v, "filter");
+                T("Journal: guild & alliance", p => p.ShowJournalGuildAlly, (p, v) => p.ShowJournalGuildAlly = v, "filter");
+            Grp("Fonts & Filters");
+                T("Override game font", p => p.OverrideAllFonts, (p, v) => p.OverrideAllFonts = v, "text");
+                T("Overridden font is unicode", p => p.OverrideAllFontsIsUnicode, (p, v) => p.OverrideAllFontsIsUnicode = v, "ascii");
+                T("Ignore guild messages", p => p.IgnoreGuildMessages, (p, v) => p.IgnoreGuildMessages = v, "mute");
+                T("Ignore alliance messages", p => p.IgnoreAllianceMessages, (p, v) => p.IgnoreAllianceMessages = v, "mute");
+            Grp("Message Hues");
+                H("Speech hue", p => p.SpeechHue, (p, v) => p.SpeechHue = (ushort)v, "say");
+                H("Whisper hue", p => p.WhisperHue, (p, v) => p.WhisperHue = (ushort)v);
+                H("Emote hue", p => p.EmoteHue, (p, v) => p.EmoteHue = (ushort)v);
+                H("Yell hue", p => p.YellHue, (p, v) => p.YellHue = (ushort)v);
+                H("Party message hue", p => p.PartyMessageHue, (p, v) => p.PartyMessageHue = (ushort)v);
+                H("Guild message hue", p => p.GuildMessageHue, (p, v) => p.GuildMessageHue = (ushort)v);
+                H("Alliance message hue", p => p.AllyMessageHue, (p, v) => p.AllyMessageHue = (ushort)v);
+                H("Chat message hue", p => p.ChatMessageHue, (p, v) => p.ChatMessageHue = (ushort)v);
 
-        // ===== Interface =====
-        T("Interface", "Use old status gump", p => p.UseOldStatusGump, (p, v) => p.UseOldStatusGump = v, "classic layout"),
-        T("Interface", "Status bars mutually exclusive", p => p.StatusGumpBarMutuallyExclusive, (p, v) => p.StatusGumpBarMutuallyExclusive = v),
-        T("Interface", "Custom health bars", p => p.CustomBarsToggled, (p, v) => p.CustomBarsToggled = v, "hp"),
-        T("Interface", "Custom bars black background", p => p.CBBlackBGToggled, (p, v) => p.CBBlackBGToggled = v, "hp"),
-        T("Interface", "Save health bars on logout", p => p.SaveHealthbars, (p, v) => p.SaveHealthbars = v),
-        C("Interface", "Close health bars", new[] { "Never", "Out of range", "On death" },
-            p => p.CloseHealthBarType, (p, v) => p.CloseHealthBarType = v, "hp dispose"),
-        T("Interface", "Show party invite gump", p => p.PartyInviteGump, (p, v) => p.PartyInviteGump = v, "popup"),
-        I("Interface", "Vendor gump height", 30, 120, 10, p => p.VendorGumpHeight, (p, v) => p.VendorGumpHeight = v, "shop size"),
-        T("Interface", "Standard skills gump", p => p.StandardSkillsGump, (p, v) => p.StandardSkillsGump = v, "advanced"),
-        T("Interface", "Use tooltips", p => p.UseTooltip, (p, v) => p.UseTooltip = v, "item properties"),
-        I("Interface", "Tooltip delay (ms)", 0, 1000, 50, p => p.TooltipDelayBeforeDisplay, (p, v) => p.TooltipDelayBeforeDisplay = v),
-        I("Interface", "Tooltip zoom (%)", 100, 200, 10, p => p.TooltipDisplayZoom, (p, v) => p.TooltipDisplayZoom = v),
-        I("Interface", "Tooltip background opacity", 0, 100, 5, p => p.TooltipBackgroundOpacity, (p, v) => p.TooltipBackgroundOpacity = v, "transparent"),
-        H("Interface", "Tooltip text hue", p => p.TooltipTextHue, (p, v) => p.TooltipTextHue = (ushort)v),
-        I("Interface", "Tooltip font", 0, 9, 1, p => p.TooltipFont, (p, v) => p.TooltipFont = (byte)v),
-        T("Interface", "Show info bar", p => p.ShowInfoBar, (p, v) => p.ShowInfoBar = v, "hud"),
-        C("Interface", "Info bar highlight", new[] { "Text color", "Bars" },
-            p => p.InfoBarHighlightType, (p, v) => p.InfoBarHighlightType = v),
-        T("Interface", "Enable counter bar", p => p.CounterBarEnabled, (p, v) => p.CounterBarEnabled = v, "consumables"),
-        T("Interface", "Counter: highlight on change", p => p.CounterBarHighlightOnChange, (p, v) => p.CounterBarHighlightOnChange = v),
-        T("Interface", "Counter: highlight when low", p => p.CounterBarHighlightOnAmount, (p, v) => p.CounterBarHighlightOnAmount = v, "red threshold"),
-        I("Interface", "Counter: low threshold", 1, 100, 1, p => p.CounterBarHighlightAmount, (p, v) => p.CounterBarHighlightAmount = v),
-        T("Interface", "Counter: abbreviate amounts", p => p.CounterBarDisplayAbbreviatedAmount, (p, v) => p.CounterBarDisplayAbbreviatedAmount = v, "1k"),
-        I("Interface", "Counter: abbreviate from", 100, 10000, 100, p => p.CounterBarAbbreviatedAmount, (p, v) => p.CounterBarAbbreviatedAmount = v),
-        I("Interface", "Counter: cell size", 30, 80, 5, p => p.CounterBarCellSize, (p, v) => p.CounterBarCellSize = v),
+        Cat("Combat");
+            Grp("Targeting");
+                T("New target system", p => p.UseNewTargetSystem, (p, v) => p.UseNewTargetSystem = v);
+                T("Query before criminal actions", p => p.EnabledCriminalActionQuery, (p, v) => p.EnabledCriminalActionQuery = v, "confirm attack");
+                T("Query before beneficial acts", p => p.EnabledBeneficialCriminalActionQuery, (p, v) => p.EnabledBeneficialCriminalActionQuery = v, "confirm heal criminal");
+            Grp("Spells");
+                T("Cast spells with one click", p => p.CastSpellsByOneClick, (p, v) => p.CastSpellsByOneClick = v, "spellbook");
+                T("Show buff duration", p => p.BuffBarTime, (p, v) => p.BuffBarTime = v, "timer countdown");
+                T("Fast spell assign", p => p.FastSpellsAssign, (p, v) => p.FastSpellsAssign = v, "hotkey");
+                T("Overhead spell format", p => p.EnabledSpellFormat, (p, v) => p.EnabledSpellFormat = v, "power words");
+                T("Overhead spell hue", p => p.EnabledSpellHue, (p, v) => p.EnabledSpellHue = v, "color");
+            Grp("Feedback");
+                T("DPS with damage numbers", p => p.ShowDPSWithDamageNumbers, (p, v) => p.ShowDPSWithDamageNumbers = v);
+                T("Old bandage-self behavior", p => p.BandageSelfOld, (p, v) => p.BandageSelfOld = v, "heal");
+                T("Stat change report", p => p.EnableStatReport, (p, v) => p.EnableStatReport = v, "message");
+                T("Skill change report", p => p.EnableSkillReport, (p, v) => p.EnableSkillReport = v, "message");
+            Grp("Notoriety Hues");
+                H("Innocent hue", p => p.InnocentHue, (p, v) => p.InnocentHue = (ushort)v, "notoriety blue");
+                H("Friend hue", p => p.FriendHue, (p, v) => p.FriendHue = (ushort)v, "notoriety");
+                H("Criminal hue", p => p.CriminalHue, (p, v) => p.CriminalHue = (ushort)v, "notoriety gray");
+                H("Can-attack hue", p => p.CanAttackHue, (p, v) => p.CanAttackHue = (ushort)v, "notoriety gray");
+                H("Murderer hue", p => p.MurdererHue, (p, v) => p.MurdererHue = (ushort)v, "notoriety red");
+                H("Enemy hue", p => p.EnemyHue, (p, v) => p.EnemyHue = (ushort)v, "notoriety orange");
+            Grp("Spell Hues");
+                H("Beneficial spell hue", p => p.BeneficHue, (p, v) => p.BeneficHue = (ushort)v);
+                H("Harmful spell hue", p => p.HarmfulHue, (p, v) => p.HarmfulHue = (ushort)v);
+                H("Neutral spell hue", p => p.NeutralHue, (p, v) => p.NeutralHue = (ushort)v);
 
-        // ===== World Map =====
-        I("World Map", "Map width", 200, 2000, 50, p => p.WorldMapWidth, (p, v) => p.WorldMapWidth = v, "size"),
-        I("World Map", "Map height", 200, 2000, 50, p => p.WorldMapHeight, (p, v) => p.WorldMapHeight = v, "size"),
-        I("World Map", "Map font", 1, 6, 1, p => p.WorldMapFont, (p, v) => p.WorldMapFont = v),
-        I("World Map", "Zoom index", 0, 10, 1, p => p.WorldMapZoomIndex, (p, v) => p.WorldMapZoomIndex = v),
-        T("World Map", "Flip map", p => p.WorldMapFlipMap, (p, v) => p.WorldMapFlipMap = v, "rotate 45"),
-        T("World Map", "Top most", p => p.WorldMapTopMost, (p, v) => p.WorldMapTopMost = v, "always on top"),
-        T("World Map", "Free view", p => p.WorldMapFreeView, (p, v) => p.WorldMapFreeView = v, "pan"),
-        T("World Map", "Show party members", p => p.WorldMapShowParty, (p, v) => p.WorldMapShowParty = v),
-        T("World Map", "Show coordinates", p => p.WorldMapShowCoordinates, (p, v) => p.WorldMapShowCoordinates = v),
-        T("World Map", "Show mouse coordinates", p => p.WorldMapShowMouseCoordinates, (p, v) => p.WorldMapShowMouseCoordinates = v),
-        T("World Map", "Show sextant coordinates", p => p.WorldMapShowSextantCoordinates, (p, v) => p.WorldMapShowSextantCoordinates = v),
-        T("World Map", "Show mobiles", p => p.WorldMapShowMobiles, (p, v) => p.WorldMapShowMobiles = v),
-        T("World Map", "Show player name", p => p.WorldMapShowPlayerName, (p, v) => p.WorldMapShowPlayerName = v),
-        T("World Map", "Show player health bar", p => p.WorldMapShowPlayerBar, (p, v) => p.WorldMapShowPlayerBar = v),
-        T("World Map", "Show group names", p => p.WorldMapShowGroupName, (p, v) => p.WorldMapShowGroupName = v, "party"),
-        T("World Map", "Show group health bars", p => p.WorldMapShowGroupBar, (p, v) => p.WorldMapShowGroupBar = v, "party"),
-        T("World Map", "Show markers", p => p.WorldMapShowMarkers, (p, v) => p.WorldMapShowMarkers = v, "pins"),
-        T("World Map", "Show marker names", p => p.WorldMapShowMarkersNames, (p, v) => p.WorldMapShowMarkersNames = v, "pins labels"),
-        T("World Map", "Show multis", p => p.WorldMapShowMultis, (p, v) => p.WorldMapShowMultis = v, "houses boats"),
-        T("World Map", "Show grid when zoomed", p => p.WorldMapShowGridIfZoomed, (p, v) => p.WorldMapShowGridIfZoomed = v),
-        T("World Map", "Allow positional targeting", p => p.WorldMapAllowPositionalTarget, (p, v) => p.WorldMapAllowPositionalTarget = v, "click target"),
+        Cat("Containers");
+            Grp("Appearance");
+                C("Backpack style", new[] { "Default", "Suede", "Polar bear", "Ghoul skin" }, p => p.BackpackStyle, (p, v) => p.BackpackStyle = v);
+                S("Container scale (%)", 70, 200, 10, p => p.ContainersScale, (p, v) => p.ContainersScale = (byte)v, "size zoom");
+                T("Scale items inside", p => p.ScaleItemsInsideContainers, (p, v) => p.ScaleItemsInsideContainers = v, "zoom");
+                T("Large container gumps", p => p.UseLargeContainerGumps, (p, v) => p.UseLargeContainerGumps = v);
+                T("Hue container gumps", p => p.HueContainerGumps, (p, v) => p.HueContainerGumps = v, "color");
+            Grp("Behaviour");
+                T("Double click to loot", p => p.DoubleClickToLootInsideContainers, (p, v) => p.DoubleClickToLootInsideContainers = v);
+                T("Relative drag and drop", p => p.RelativeDragAndDropItems, (p, v) => p.RelativeDragAndDropItems = v);
+                T("Highlight on hover", p => p.HighlightContainerWhenSelected, (p, v) => p.HighlightContainerWhenSelected = v);
+                T("Grid containers", p => p.UseGridContainers, (p, v) => p.UseGridContainers = v, "grid view search sort");
+                T("Override container location", p => p.OverrideContainerLocation, (p, v) => p.OverrideContainerLocation = v, "position");
+                C("Container location mode", new[] { "Near container", "Top right", "Last dragged", "Remember each" }, p => p.OverrideContainerLocationSetting, (p, v) => p.OverrideContainerLocationSetting = v, "position");
+                C("Grid loot", new[] { "Disabled", "Grid only", "Grid + classic" }, p => p.GridLootType, (p, v) => p.GridLootType = v, "corpse");
 
-        // ===== Experimental =====
-        T("Experimental", "Disable default UO hotkeys", p => p.DisableDefaultHotkeys, (p, v) => p.DisableDefaultHotkeys = v, "keyboard"),
-        T("Experimental", "Disable arrow keys movement", p => p.DisableArrowBtn, (p, v) => p.DisableArrowBtn = v, "keyboard"),
-        T("Experimental", "Disable tab key", p => p.DisableTabBtn, (p, v) => p.DisableTabBtn = v, "keyboard warmode"),
-        T("Experimental", "Disable Ctrl+Q/W history", p => p.DisableCtrlQWBtn, (p, v) => p.DisableCtrlQWBtn = v, "keyboard message"),
-        T("Experimental", "Disable click auto-move", p => p.DisableAutoMove, (p, v) => p.DisableAutoMove = v, "mouse"),
-        T("Experimental", "KR equip/unequip packets", p => p.UseKrEquipUnequipPacket, (p, v) => p.UseKrEquipUnequipPacket = v, "network"),
+        Cat("Interface");
+            Grp("Status & Health");
+                T("Use old status gump", p => p.UseOldStatusGump, (p, v) => p.UseOldStatusGump = v, "classic layout");
+                T("Status bars mutually exclusive", p => p.StatusGumpBarMutuallyExclusive, (p, v) => p.StatusGumpBarMutuallyExclusive = v);
+                T("Custom health bars", p => p.CustomBarsToggled, (p, v) => p.CustomBarsToggled = v, "hp");
+                T("Custom bars black background", p => p.CBBlackBGToggled, (p, v) => p.CBBlackBGToggled = v, "hp");
+                T("Save health bars on logout", p => p.SaveHealthbars, (p, v) => p.SaveHealthbars = v);
+                C("Close health bars", new[] { "Never", "Out of range", "On death" }, p => p.CloseHealthBarType, (p, v) => p.CloseHealthBarType = v, "hp dispose");
+                T("Show party invite gump", p => p.PartyInviteGump, (p, v) => p.PartyInviteGump = v, "popup");
+            Grp("Skills & Vendors");
+                S("Vendor gump height", 30, 120, 10, p => p.VendorGumpHeight, (p, v) => p.VendorGumpHeight = v, "shop size");
+                T("Standard skills gump", p => p.StandardSkillsGump, (p, v) => p.StandardSkillsGump = v, "advanced");
+            Grp("Tooltips");
+                T("Use tooltips", p => p.UseTooltip, (p, v) => p.UseTooltip = v, "item properties");
+                S("Tooltip delay (ms)", 0, 1000, 50, p => p.TooltipDelayBeforeDisplay, (p, v) => p.TooltipDelayBeforeDisplay = v);
+                S("Tooltip zoom (%)", 100, 200, 10, p => p.TooltipDisplayZoom, (p, v) => p.TooltipDisplayZoom = v);
+                S("Tooltip background opacity", 0, 100, 5, p => p.TooltipBackgroundOpacity, (p, v) => p.TooltipBackgroundOpacity = v, "transparent");
+                H("Tooltip text hue", p => p.TooltipTextHue, (p, v) => p.TooltipTextHue = (ushort)v);
+                I("Tooltip font", 0, 9, 1, p => p.TooltipFont, (p, v) => p.TooltipFont = (byte)v);
+            Grp("Info Bar & Counters");
+                T("Show info bar", p => p.ShowInfoBar, (p, v) => p.ShowInfoBar = v, "hud");
+                C("Info bar highlight", new[] { "Text color", "Bars" }, p => p.InfoBarHighlightType, (p, v) => p.InfoBarHighlightType = v);
+                T("Enable counter bar", p => p.CounterBarEnabled, (p, v) => p.CounterBarEnabled = v, "consumables");
+                T("Counter: highlight on change", p => p.CounterBarHighlightOnChange, (p, v) => p.CounterBarHighlightOnChange = v);
+                T("Counter: highlight when low", p => p.CounterBarHighlightOnAmount, (p, v) => p.CounterBarHighlightOnAmount = v, "red threshold");
+                S("Counter: low threshold", 1, 100, 1, p => p.CounterBarHighlightAmount, (p, v) => p.CounterBarHighlightAmount = v);
+                T("Counter: abbreviate amounts", p => p.CounterBarDisplayAbbreviatedAmount, (p, v) => p.CounterBarDisplayAbbreviatedAmount = v, "1k");
+                I("Counter: abbreviate from", 100, 10000, 100, p => p.CounterBarAbbreviatedAmount, (p, v) => p.CounterBarAbbreviatedAmount = v);
+                S("Counter: cell size", 30, 80, 5, p => p.CounterBarCellSize, (p, v) => p.CounterBarCellSize = v);
 
-        // ===== Debug (client-local feature launchers; the old test window's rows) =====
-        new() { Category = "Debug", Label = "Open color picker", Keywords = "dye hue test",
-                Kind = OptionKind.Action, Run = static (cmd, p) =>
+        Cat("World Map");
+            Grp("Window");
+                I("Map width", 200, 2000, 50, p => p.WorldMapWidth, (p, v) => p.WorldMapWidth = v, "size");
+                I("Map height", 200, 2000, 50, p => p.WorldMapHeight, (p, v) => p.WorldMapHeight = v, "size");
+                I("Map font", 1, 6, 1, p => p.WorldMapFont, (p, v) => p.WorldMapFont = v);
+                I("Zoom index", 0, 10, 1, p => p.WorldMapZoomIndex, (p, v) => p.WorldMapZoomIndex = v);
+                T("Flip map", p => p.WorldMapFlipMap, (p, v) => p.WorldMapFlipMap = v, "rotate 45");
+                T("Top most", p => p.WorldMapTopMost, (p, v) => p.WorldMapTopMost = v, "always on top");
+                T("Free view", p => p.WorldMapFreeView, (p, v) => p.WorldMapFreeView = v, "pan");
+            Grp("Coordinates");
+                T("Show coordinates", p => p.WorldMapShowCoordinates, (p, v) => p.WorldMapShowCoordinates = v);
+                T("Show mouse coordinates", p => p.WorldMapShowMouseCoordinates, (p, v) => p.WorldMapShowMouseCoordinates = v);
+                T("Show sextant coordinates", p => p.WorldMapShowSextantCoordinates, (p, v) => p.WorldMapShowSextantCoordinates = v);
+                T("Show grid when zoomed", p => p.WorldMapShowGridIfZoomed, (p, v) => p.WorldMapShowGridIfZoomed = v);
+                T("Allow positional targeting", p => p.WorldMapAllowPositionalTarget, (p, v) => p.WorldMapAllowPositionalTarget = v, "click target");
+            Grp("Entities");
+                T("Show party members", p => p.WorldMapShowParty, (p, v) => p.WorldMapShowParty = v);
+                T("Show mobiles", p => p.WorldMapShowMobiles, (p, v) => p.WorldMapShowMobiles = v);
+                T("Show player name", p => p.WorldMapShowPlayerName, (p, v) => p.WorldMapShowPlayerName = v);
+                T("Show player health bar", p => p.WorldMapShowPlayerBar, (p, v) => p.WorldMapShowPlayerBar = v);
+                T("Show group names", p => p.WorldMapShowGroupName, (p, v) => p.WorldMapShowGroupName = v, "party");
+                T("Show group health bars", p => p.WorldMapShowGroupBar, (p, v) => p.WorldMapShowGroupBar = v, "party");
+                T("Show markers", p => p.WorldMapShowMarkers, (p, v) => p.WorldMapShowMarkers = v, "pins");
+                T("Show marker names", p => p.WorldMapShowMarkersNames, (p, v) => p.WorldMapShowMarkersNames = v, "pins labels");
+                T("Show multis", p => p.WorldMapShowMultis, (p, v) => p.WorldMapShowMultis = v, "houses boats");
+
+        Cat("Experimental");
+            Grp("Keyboard");
+                T("Disable default UO hotkeys", p => p.DisableDefaultHotkeys, (p, v) => p.DisableDefaultHotkeys = v, "keyboard");
+                T("Disable arrow keys movement", p => p.DisableArrowBtn, (p, v) => p.DisableArrowBtn = v, "keyboard");
+                T("Disable tab key", p => p.DisableTabBtn, (p, v) => p.DisableTabBtn = v, "keyboard warmode");
+                T("Disable Ctrl+Q/W history", p => p.DisableCtrlQWBtn, (p, v) => p.DisableCtrlQWBtn = v, "keyboard message");
+            Grp("Mouse");
+                T("Disable click auto-move", p => p.DisableAutoMove, (p, v) => p.DisableAutoMove = v, "mouse");
+            Grp("Network");
+                T("KR equip/unequip packets", p => p.UseKrEquipUnequipPacket, (p, v) => p.UseKrEquipUnequipPacket = v, "network");
+
+        Cat("Debug");
+            Grp("Tools");
+                A("Open color picker", static (cmd, p) =>
                     ColorPickerPlugin.Open(cmd, p.Assets.Value, p.Builder.Value, p.Files.Value.Hues,
-                        p.ZCounter.Value, p.Surface.Value, serial: 0, graphic: 0x0FAB) },
-    };
+                        p.ZCounter.Value, p.Surface.Value, serial: 0, graphic: 0x0FAB), "dye hue test");
 
-    private static readonly string[] s_categories =
+        return list.ToArray();
+    }
+
+    private static readonly OptionDef[] s_options = BuildCatalog();
+    private static readonly string[] s_categories = DistinctCategories(s_options);
+
+    // Category list in first-seen catalog order (drives the sidebar tabs).
+    private static string[] DistinctCategories(OptionDef[] opts)
     {
-        "General", "Mobiles", "Video", "Sound", "Chat",
-        "Combat", "Containers", "Interface", "World Map", "Experimental", "Debug",
-    };
+        var list = new List<string>();
+        foreach (var o in opts)
+            if (!list.Contains(o.Category)) list.Add(o.Category);
+        return list.ToArray();
+    }
 
     public void Build(App app)
     {
         app.AddResource(new OptionsUiState());
+        app.AddResource(new OptionsSliderDrag());
 
         Action<Commands, Res<OptionsUiState>, Query<Data<OptionsWindow>>> teardownFn =
             (cmd, state, q) =>
@@ -418,13 +472,18 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             .RunIf((Res<OptionsUiState> s) => s.Value.Window != 0)
             .Build();
 
+        var sliderFn = UpdateSliderDrag;
+        app.AddSystem(sliderFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<OptionsUiState> s) => s.Value.Window != 0)
+            .Build();
+
         // Hover tint: any element carrying OptionsHover swaps its background
         // between Normal/Hover based on Clay's Interaction state. One system
         // covers every control (rows, sidebar, buttons, dropdown items).
         var hoverFn = ApplyHover;
         app.AddSystem(hoverFn)
             .InStage(Stage.Last)
-            .RunIf((Res<OptionsUiState> s) => s.Value.Window != 0)
             .Build();
 
 #if AGENT_BUILD
@@ -497,7 +556,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             .Insert(new BackgroundColor(s_panelBg))
             .Insert(new BorderColor(s_panelBorder))
             .Insert(BorderRadius.All(14))
-            .Insert(new BoxShadow { Color = s_shadow, OffsetX = 0, OffsetY = 6, BlurRadius = 16, SpreadRadius = 0 })
+            .Insert(new BoxShadow { Color = s_shadow, OffsetX = 0, OffsetY = 8, BlurRadius = 32, SpreadRadius = 0 })
             .Insert<UiMovable>()
             .Insert(new GlobalZIndex(zc.Bump()))
             .Insert(new OptionsWindow());
@@ -637,15 +696,15 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                 Left = Val.Px(SidebarW + 10 + RowW + 6), Top = Val.Px(0),
                 Width = Val.Px(8), Height = Val.Px(viewH),
             })
-            .Insert(new BackgroundColor(new ClayColor(30, 32, 40, 255)))
-            .Insert(BorderRadius.All(4))
+            .Insert(new BackgroundColor(new ClayColor(22, 24, 30, 255)))
+            .Insert(BorderRadius.All(3))
             .Insert(new Scrollbar { Target = viewport.Id, Orientation = ScrollbarOrientation.Vertical, MinThumbLength = 28f })
             .Insert(Interaction.None)
             .Insert<UiNoWindowDrag>();
         var sbThumb = commands.Spawn()
             .Insert(new Node { Width = Val.Px(8), Height = Val.Px(28) })
-            .Insert(new BackgroundColor(new ClayColor(86, 92, 112, 255)))
-            .Insert(new OptionsHover { Normal = new ClayColor(86, 92, 112, 255), Hover = new ClayColor(110, 118, 142, 255) })
+            .Insert(new BackgroundColor(new ClayColor(52, 55, 66, 255)))
+            .Insert(new OptionsHover { Normal = new ClayColor(52, 55, 66, 255), Hover = new ClayColor(72, 76, 92, 255) })
             .Insert(BorderRadius.All(4))
             .Insert(new ScrollbarThumb())
             .Insert(new ScrollbarDragState())
@@ -771,61 +830,117 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             .Insert(new TextColor(s_textMain))
             .Id);
 
+        if (searching)
+        {
+            // Flat results — each row carries its category and its own pill bg.
+            var needle = state.Search.Trim();
+            for (var i = 0; i < s_options.Length; i++)
+            {
+                var def = s_options[i];
+                if (!def.Matches(needle)) continue;
+                SpawnRow(commands, profile.Value, files.Value.Hues, state, def, i,
+                    searching: true, parentId: state.Viewport, rowWidth: RowW, transparent: false);
+            }
+            return;
+        }
+
+        // Category mode: bucket the page's options into labelled cards so
+        // related settings read together. The card is tagged OptionsListItem;
+        // its rows are untagged and die with it on the next rebuild's cascade.
+        string curGroup = null;
+        ulong cardId = 0;
+        int cardInnerW = RowW - 24;
         for (var i = 0; i < s_options.Length; i++)
         {
             var def = s_options[i];
-            if (searching)
+            if (def.Category != state.Category) continue;
+            if (!string.Equals(def.Group, curGroup, StringComparison.Ordinal))
             {
-                if (!def.Matches(state.Search.Trim())) continue;
+                curGroup = def.Group;
+                cardId = SpawnCard(commands, state.Viewport, curGroup);
             }
-            else if (def.Category != state.Category)
-            {
-                continue;
-            }
-
-            SpawnRow(commands, profile.Value, files.Value.Hues, state, def, i, searching);
+            SpawnRow(commands, profile.Value, files.Value.Hues, state, def, i,
+                searching: false, parentId: cardId, rowWidth: cardInnerW, transparent: true);
         }
+    }
+
+    // A labelled card grouping related rows. Child of the viewport (flows with
+    // the scroll). Auto height = title + rows; rows are added as children.
+    private static ulong SpawnCard(Commands commands, ulong viewport, string title)
+    {
+        var card = commands.Spawn()
+            .Insert<OptionsListItem>()
+            .Insert(new Node
+            {
+                Display = Display.Flex,
+                FlexDirection = FlexDirection.Column,
+                Width = Val.Px(RowW), Height = Val.Auto,
+                Padding = new UiRect { Left = Val.Px(12), Right = Val.Px(12), Top = Val.Px(10), Bottom = Val.Px(10) },
+                Gap = Val.Px(3),
+            })
+            .Insert(new BackgroundColor(s_card))
+            .Insert(BorderRadius.All(10));
+        var cardId = card.Id;
+        commands.AddChild(cardId, commands.Spawn()
+            .Insert(new Node
+            {
+                Display = Display.Flex,
+                AlignItems = AlignItems.Center,
+                Width = Val.Px(RowW - 24), Height = Val.Px(18),
+            })
+            .Insert(new Text(title.ToUpperInvariant()))
+            .Insert(new TextFont { FontId = 1, Size = 11 })
+            .Insert(new TextColor(s_accent))
+            .Id);
+        commands.AddChild(viewport, cardId);
+        return cardId;
     }
 
     private static void SpawnRow(
         Commands commands, Profile profile, HuesLoader hues, OptionsUiState state,
-        OptionDef def, int defIndex, bool searching)
+        OptionDef def, int defIndex, bool searching, ulong parentId, int rowWidth, bool transparent)
     {
+        // Card rows are transparent (the card paints the surface) and despawn
+        // via the card's cascade; search rows are flat pills tagged for the
+        // rebuild sweep.
+        var rowBg = transparent ? new ClayColor(0, 0, 0, 0) : s_rowBg;
         var row = commands.Spawn()
-            .Insert<OptionsListItem>()
             .Insert(new Node
             {
                 Display = Display.Flex,
                 FlexDirection = FlexDirection.Row,
                 AlignItems = AlignItems.Center,
-                Width = Val.Px(RowW), Height = Val.Px(RowH),
+                Width = Val.Px(rowWidth), Height = Val.Px(RowH),
                 Padding = new UiRect { Left = Val.Px(14), Right = Val.Px(12) },
             })
-            .Insert(new BackgroundColor(s_rowBg))
-            .Insert(new OptionsHover { Normal = s_rowBg, Hover = s_rowHover })
+            .Insert(new BackgroundColor(rowBg))
+            .Insert(new OptionsHover { Normal = rowBg, Hover = s_rowHover })
             .Insert(BorderRadius.All(8))
             .Insert(Interaction.None)
             .Insert<UiNoWindowDrag>();
-        commands.AddChild(state.Viewport, row.Id);
+        if (searching)
+            row.Insert<OptionsListItem>();
+        commands.AddChild(parentId, row.Id);
         var rowId = row.Id;
 
         // While searching the row carries its category so results from other
         // pages stay readable.
         var labelText = searching ? $"{def.Category}  ·  {def.Label}" : def.Label;
+        int contentW = rowWidth - 20;
+        int labelW = rowWidth - 186;
         commands.AddChild(rowId, commands.Spawn()
-            .Insert(new Node { Width = Val.Px(LabelW), Height = Val.Auto })
+            .Insert(new Node { Width = Val.Px(labelW), Height = Val.Auto })
             .Insert(new Text(labelText))
             .Insert(new TextFont { FontId = 1, Size = 13 })
             .Insert(new TextColor(s_textMain))
             .Id);
 
-        int contentW = RowW - 20;
         switch (def.Kind)
         {
             case OptionKind.Toggle:
             {
                 const int TrackW = 46, TrackH = 24, Knob = 18;
-                AddSpacer(commands, rowId, contentW - LabelW - TrackW);
+                AddSpacer(commands, rowId, contentW - labelW - TrackW);
                 var on = def.GetB(profile);
                 // Real switch: a rounded track whose flow child (the knob) is
                 // pushed to Start/End. Flow — not absolute — so it rides the
@@ -862,7 +977,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             case OptionKind.Stepper:
             {
                 const int StepW = 26, ValW = 58;
-                AddSpacer(commands, rowId, contentW - LabelW - (StepW + ValW + StepW + 8));
+                AddSpacer(commands, rowId, contentW - labelW - (StepW + ValW + StepW + 8));
                 SpawnStepButton(commands, rowId, "−", () => def, -1);
                 AddSpacer(commands, rowId, 4);
                 commands.AddChild(rowId, commands.Spawn()
@@ -873,7 +988,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                         JustifyContent = JustifyContent.Center,
                         AlignItems = AlignItems.Center,
                     })
-                    .Insert(new BackgroundColor(new ClayColor(30, 32, 40, 255)))
+                    .Insert(new BackgroundColor(new ClayColor(20, 21, 27, 255)))
                     .Insert(BorderRadius.All(6))
                     .Insert(new Text(def.GetI(profile).ToString()))
                     .Insert(new TextFont { FontId = 1, Size = 13 })
@@ -884,9 +999,66 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                 break;
             }
 
+            case OptionKind.Slider:
+            {
+                // Flow widget: [fill][knob][filler] inside a rounded track, plus
+                // a value readout. No absolute children, so it stays inside the
+                // scroll clip. The drag/click handling lives in UpdateSliderDrag
+                // (keyed by defIndex, which the OptionsSlider marker carries).
+                int sval = Math.Clamp(def.GetI(profile), def.Min, def.Max);
+                float ratio = def.Max > def.Min ? (sval - def.Min) / (float)(def.Max - def.Min) : 0f;
+                int fillPx = (int)MathF.Round(ratio * (SliderTrackW - SliderKnob));
+                int restPx = Math.Max(0, SliderTrackW - SliderKnob - fillPx);
+
+                AddSpacer(commands, rowId, contentW - labelW - (SliderTrackW + 8 + SliderValW));
+
+                var track = commands.Spawn()
+                    .Insert(new Node
+                    {
+                        Display = Display.Flex,
+                        FlexDirection = FlexDirection.Row,
+                        AlignItems = AlignItems.Center,
+                        Width = Val.Px(SliderTrackW), Height = Val.Px(SliderTrackH),
+                    })
+                    .Insert(new BackgroundColor(s_sliderTrack))
+                    .Insert(BorderRadius.All(SliderTrackH / 2))
+                    .Insert(new OptionsSlider { Index = defIndex })
+                    .Insert<UiNoWindowDrag>();
+                var trackId = track.Id;
+                if (fillPx > 0)
+                    commands.AddChild(trackId, commands.Spawn()
+                        .Insert(new Node { Width = Val.Px(fillPx), Height = Val.Px(SliderTrackH) })
+                        .Insert(new BackgroundColor(s_accent))
+                        .Insert(BorderRadius.All(SliderTrackH / 2))
+                        .Id);
+                commands.AddChild(trackId, commands.Spawn()
+                    .Insert(new Node { Width = Val.Px(SliderKnob), Height = Val.Px(SliderKnob) })
+                    .Insert(new BackgroundColor(s_knob))
+                    .Insert(BorderRadius.All(SliderKnob / 2))
+                    .Id);
+                AddSpacer(commands, trackId, restPx);
+                commands.AddChild(rowId, trackId);
+
+                AddSpacer(commands, rowId, 8);
+
+                commands.AddChild(rowId, commands.Spawn()
+                    .Insert(new Node
+                    {
+                        Display = Display.Flex,
+                        Width = Val.Px(SliderValW), Height = Val.Px(20),
+                        JustifyContent = JustifyContent.End,
+                        AlignItems = AlignItems.Center,
+                    })
+                    .Insert(new Text(sval.ToString()))
+                    .Insert(new TextFont { FontId = 1, Size = 13 })
+                    .Insert(new TextColor(s_textDim))
+                    .Id);
+                break;
+            }
+
             case OptionKind.Cycle:
             {
-                AddSpacer(commands, rowId, contentW - LabelW - 140);
+                AddSpacer(commands, rowId, contentW - labelW - 140);
                 var current = Math.Clamp(def.GetI(profile), 0, def.Choices.Length - 1);
                 // Selectbox: shows the current choice; click opens a dropdown
                 // overlay anchored under the control (spawned on the window
@@ -922,7 +1094,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
 
             case OptionKind.Hue:
             {
-                AddSpacer(commands, rowId, contentW - LabelW - (60 + 8 + 28));
+                AddSpacer(commands, rowId, contentW - labelW - (60 + 8 + 28));
 
                 // Numbers-only editable value (SyncHueEdits enforces + applies).
                 var field = commands.Spawn()
@@ -993,7 +1165,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
 
             case OptionKind.Action:
             {
-                AddSpacer(commands, rowId, contentW - LabelW - 80);
+                AddSpacer(commands, rowId, contentW - labelW - 80);
                 var act = commands.Spawn()
                     .Insert(new Node
                     {
@@ -1152,10 +1324,10 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                 Gap = Val.Px(3),
                 Border = UiRect.All(1),
             })
-            .Insert(new BackgroundColor(new ClayColor(28, 30, 38, 254)))
+            .Insert(new BackgroundColor(new ClayColor(20, 21, 27, 254)))
             .Insert(new BorderColor(s_panelBorder))
             .Insert(BorderRadius.All(10))
-            .Insert(new BoxShadow { Color = s_shadow, OffsetX = 0, OffsetY = 5, BlurRadius = 12, SpreadRadius = 0 });
+            .Insert(new BoxShadow { Color = s_shadow, OffsetX = 0, OffsetY = 8, BlurRadius = 32, SpreadRadius = 0 });
         commands.AddChild(state.Window, panel.Id);
         var panelId = panel.Id;
 
@@ -1209,6 +1381,68 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             if (!inside) commands.Entity(ent.Ref).Despawn();
         }
     }
+
+    // Continuous-held slider drag + click-to-set. Latch is keyed by catalog
+    // Index (NOT entity id) so it survives the per-tweak rebuild that despawns
+    // and respawns the track. Reads the raw mouse against the track's
+    // ComputedNode bounds — the same gesture style as window drag, which works
+    // because the gump children are deliberately non-interactive.
+    private static void UpdateSliderDrag(
+        Res<MouseContext> mouse,
+        Res<Profile> profile,
+        Res<OptionsUiState> stateRes,
+        ResMut<OptionsSliderDrag> dragRes,
+        Query<Data<ComputedNode, OptionsSlider>> sliders)
+    {
+        bool down = mouse.Value.IsPressed(MouseButtonType.Left)
+                 || mouse.Value.IsPressedOnce(MouseButtonType.Left);
+        if (!down)
+        {
+            dragRes.Value.ActiveIndex = -1;
+            return;
+        }
+
+        var pos = mouse.Value.Position;
+
+        // Latch the slider under the cursor on the press edge.
+        if (mouse.Value.IsPressedOnce(MouseButtonType.Left))
+        {
+            dragRes.Value.ActiveIndex = -1;
+            foreach (var (_, cn, sl) in sliders)
+            {
+                var bb = cn.Ref;
+                // Thin track, tall row: pad the grab band vertically.
+                if (pos.X >= bb.Position.X && pos.X <= bb.Position.X + bb.Size.X
+                    && pos.Y >= bb.Position.Y - 10 && pos.Y <= bb.Position.Y + bb.Size.Y + 10)
+                {
+                    dragRes.Value.ActiveIndex = sl.Ref.Index;
+                    break;
+                }
+            }
+        }
+
+        int active = dragRes.Value.ActiveIndex;
+        if (active < 0) return;
+
+        foreach (var (_, cn, sl) in sliders)
+        {
+            if (sl.Ref.Index != active) continue;
+            var def = s_options[active];
+            var bb = cn.Ref;
+            float usable = MathF.Max(1f, bb.Size.X - SliderKnob);
+            float ratio = Math.Clamp((pos.X - bb.Position.X - SliderKnob * 0.5f) / usable, 0f, 1f);
+            int span = def.Max - def.Min;
+            int step = Math.Max(1, def.Step);
+            int snapped = def.Min + (int)MathF.Round(ratio * span / step) * step;
+            int v = Math.Clamp(snapped, def.Min, def.Max);
+            if (def.GetI(profile.Value) != v)
+            {
+                def.SetI(profile.Value, v);
+                stateRes.Value.Dirty = true;
+            }
+            break;
+        }
+    }
 }
 
 internal struct OptionsWindow;
@@ -1221,6 +1455,14 @@ internal struct OptionsListItem;
 
 // Marker on any open dropdown / hue-palette overlay (one at a time).
 internal struct OptionsOverlay;
+
+// Slider track marker — Index into the s_options catalog. UpdateSliderDrag maps
+// cursor X over the track's ComputedNode bounds to the option's value.
+internal struct OptionsSlider { public int Index; }
+
+// Active slider-drag latch, keyed by catalog Index (NOT entity id) so it
+// survives the per-tweak rebuild that despawns + respawns the slider track.
+internal sealed class OptionsSliderDrag { public int ActiveIndex = -1; }
 
 #if AGENT_BUILD
 internal sealed class DebugOptionsQueue { public bool OpenRequested; }
