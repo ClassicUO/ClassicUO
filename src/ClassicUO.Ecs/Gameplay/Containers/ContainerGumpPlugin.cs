@@ -254,7 +254,13 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         Res<AssetsServer> assets,
         UiGesturePick pick,
         Query<Data<ContainerItemUI, ComputedNode, UiCustom, Node, GlobalZIndex>> itemQuery,
-        Query<Data<ContainerWindow, ComputedNode, UiCustom, GlobalZIndex>> windowQuery)
+        // NOT Data<...UiCustom...>: grid container windows render as a plain
+        // BackgroundColor rect (no UOCustomRender), so requiring UiCustom here
+        // excluded them — drops onto an empty grid area resolved to no
+        // SelectedEntity, DropItem took the target==0 early-out and cleared the
+        // hold without sending a drop, leaving the item stuck on the server's
+        // cursor. Match on the window marker + layout/z only.
+        Query<Data<ContainerWindow, ComputedNode, GlobalZIndex>> windowQuery)
     {
         var pos = mouse.Value.Position;
 

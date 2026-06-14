@@ -236,12 +236,20 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
         Res<GridContainerState> state,
         Res<NetworkEntitiesMap> entitiesMap,
         Res<GrabbedItem> grabbed,
+        EventReader<ContainerSlotEvent> slotEvents,
         Query<Data<Text>> textQ,
         Query<Data<GridContainerWindow, Node>> windowsQ,
         Query<Data<GridContainerRow>> rowsQ,
         Query<Data<TinyEcs.Parent, Graphic, Hue, Amount, NetworkSerial, EntityName>,
             Filter<With<ContainedInto>, Optional<Amount>, Optional<EntityName>>> itemsQ)
     {
+        foreach (var ev in slotEvents.Read())
+        {
+            var touched = ev.ContainerSerial != 0 ? state.Value.Get(ev.ContainerSerial) : null;
+            if (touched != null)
+                touched.LastSig = int.MinValue;
+        }
+
         if (grabbed.Value.Serial != 0)
             return;
 
