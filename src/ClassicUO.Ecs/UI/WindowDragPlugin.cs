@@ -319,8 +319,12 @@ internal readonly struct WindowDragPlugin : IPlugin
         var delta = mouse.Value.Position - anchor.Value.Mouse;
         var (_, ownerNode, _) = anchorRow;
         ownerNode.Ref.PositionType = PositionType.Absolute;
-        ownerNode.Ref.Left = Val.Px(anchor.Value.OriginX + delta.X);
-        ownerNode.Ref.Top = Val.Px(anchor.Value.OriginY + delta.Y);
+        // Snap to integer: descendants floor their own absolute box independently
+        // at render (`(int)bb.X`). A fractional window origin makes each child
+        // cross the integer boundary at a different sub-pixel offset, so the
+        // relative gap between bg and text wobbles ±1px = flicker on drag.
+        ownerNode.Ref.Left = Val.Px(MathF.Round(anchor.Value.OriginX + delta.X));
+        ownerNode.Ref.Top = Val.Px(MathF.Round(anchor.Value.OriginY + delta.Y));
     }
 }
 
