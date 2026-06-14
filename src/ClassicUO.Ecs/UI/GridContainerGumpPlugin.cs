@@ -27,6 +27,7 @@ internal struct GridContainerResizeHandle { public ulong Window; }
 internal struct GridContainerSearchFrame { public uint Serial; }
 internal struct GridContainerSortButton { public uint Serial; }
 internal struct GridContainerCell { public uint Serial; public ushort Graphic; }
+internal struct GridContainerTitle { public uint Serial; }
 
 internal enum GridSort : byte { None, Name, Graphic }
 
@@ -40,6 +41,7 @@ internal sealed class GridContainerState
         public ulong Window;
         public ulong Content;
         public ulong SearchField;
+        public ulong TitleLabel;
         public GridSort Sort;
         public int LastSig = int.MinValue;
     }
@@ -54,7 +56,9 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
 {
     internal const ushort CorpseGump = 0x0009;
     private const int Inset = 8;
-    private const int HeaderH = 28;
+    private const int TitleH = 14;        // centered container-name label row
+    private const int SearchTop = 22;     // search/sort row sits below the title
+    private const int HeaderH = 44;        // title + search rows + gap
     private const int Cell = 50;
     private const int Grip = 14;
     private const int SortW = 48;
@@ -160,12 +164,30 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
                 .Insert(new GridContainerContent { Serial = ev.Serial });
             commands.AddChild(root.Id, content.Id);
 
+            // Centered title label (container name). Filled live in RebuildGrids
+            // from the container entity's EntityName (not available at open).
+            var titleLabel = commands.Spawn()
+                .Insert(new Node
+                {
+                    PositionType = PositionType.Absolute,
+                    Left = Val.Px(Inset), Top = Val.Px(4),
+                    Width = Val.Px(w - Inset * 2), Height = Val.Px(TitleH),
+                    JustifyContent = JustifyContent.Center,
+                    AlignItems = AlignItems.Center,
+                })
+                .Insert(new Text(string.Empty))
+                .Insert(new TextFont { FontId = 1, Size = 12 })
+                .Insert(new TextColor(s_text))
+                .Insert(Interaction.None)
+                .Insert(new GridContainerTitle { Serial = ev.Serial });
+            commands.AddChild(root.Id, titleLabel.Id);
+
             // Search field (filters by item name).
             var searchFrame = commands.Spawn()
                 .Insert(new Node
                 {
                     PositionType = PositionType.Absolute,
-                    Left = Val.Px(Inset), Top = Val.Px(5),
+                    Left = Val.Px(Inset), Top = Val.Px(SearchTop),
                     Width = Val.Px(w - Inset * 2 - SortW - HeaderGap), Height = Val.Px(18),
                 })
                 .Insert(new BackgroundColor(s_fieldBg))
@@ -184,7 +206,7 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
                 .Insert(new Node
                 {
                     PositionType = PositionType.Absolute,
-                    Left = Val.Px(w - Inset - SortW), Top = Val.Px(5),
+                    Left = Val.Px(w - Inset - SortW), Top = Val.Px(SearchTop),
                     Width = Val.Px(SortW), Height = Val.Px(18),
                     JustifyContent = JustifyContent.Center,
                     AlignItems = AlignItems.Center,
@@ -226,6 +248,7 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
             view.Window = root.Id;
             view.Content = content.Id;
             view.SearchField = searchField;
+            view.TitleLabel = titleLabel.Id;
         }
     }
 
@@ -242,9 +265,12 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
         Res<GridContainerState> state,
         Res<NetworkEntitiesMap> entitiesMap,
         Res<GrabbedItem> grabbed,
+        Res<UOFileManager> fileManager,
+        Res<ObjectPropertyLists> opl,
         EventReader<ContainerSlotEvent> slotEvents,
         Query<Data<Text>> textQ,
-        Query<Data<GridContainerWindow, Node>> windowsQ,
+        Query<Data<Graphic>> graphicQ,
+        Query<Data<GridContainerWindow, Node, GlobalZIndex>> windowsQ,
         Query<Data<GridContainerRow>> rowsQ,
         Query<Data<TinyEcs.Parent, Graphic, Hue, Amount, NetworkSerial, EntityName>,
             Filter<With<ContainedInto>, Optional<Amount>, Optional<EntityName>>> itemsQ)
@@ -259,12 +285,40 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
         if (grabbed.Value.Serial != 0)
             return;
 
-        foreach (var (_, win, winNode) in windowsQ)
+        foreach (var (_, win, winNode, winZ) in windowsQ)
         {
             var view = state.Value.Get(win.Ref.Serial);
             if (view == null) continue;
             if (!entitiesMap.Value.TryGet(win.Ref.Serial, out var containerEnt))
                 continue;
+
+            // Title = container name from its OPL (the only item-name source;
+            // EntityName is mobile-only). Request the OPL when absent and show
+            // the item graphic's tiledata name meanwhile. Runs every frame
+            // before the sig early-return, so the real name replaces the
+            // tiledata fallback the frame the OPL arrives.
+            if (view.TitleLabel != 0 && textQ.TryGet(view.TitleLabel, out var titleRow))
+            {
+                string title = null;
+                if (opl.Value.TryGet(win.Ref.Serial, out var oplEntry) && !string.IsNullOrEmpty(oplEntry.Name))
+                {
+                    title = oplEntry.Name;
+                }
+                else
+                {
+                    opl.Value.Request(win.Ref.Serial);
+                    if (graphicQ.TryGet(containerEnt, out var cgRow))
+                    {
+                        var (_, cg) = cgRow;
+                        var sd = fileManager.Value.TileData.StaticData;
+                        if (cg.Ref.Value < sd.Length)
+                            title = sd[cg.Ref.Value].Name;
+                    }
+                }
+                var (_, titleTxt) = titleRow;
+                if (!string.IsNullOrEmpty(title) && titleTxt.Ref.Value != title)
+                    titleTxt.Ref.Value = title;
+            }
 
             int w = winNode.Ref.Width.Type == ValType.Px ? (int)winNode.Ref.Width.Value : LastW;
             int cols = Math.Max(1, (w - Inset * 2) / Cell);
@@ -347,7 +401,13 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
                         OriginalHue = hueVec,
                         HoverHue = hoverHue,
                     })
-                    .Insert(new GridContainerCell { Serial = it.serial, Graphic = it.graphic });
+                    .Insert(new GridContainerCell { Serial = it.serial, Graphic = it.graphic })
+                    // Cells need their own GlobalZIndex so UpdateSelectedFromContainerUI's
+                    // itemQuery (Data<ContainerItemUI,...,GlobalZIndex>) matches them — without
+                    // it the drop target resolved to the window (DropItem Case 1, plain drop)
+                    // instead of the cell (Case 2, merge/nest/stack). SyncItemZToWindow keeps
+                    // it tracking the window root on z-bump.
+                    .Insert(new GlobalZIndex(winZ.Ref.Value));
                 commands.Entity(rowId).AddChild(cell.Id);
                 colInRow++;
             }
@@ -382,7 +442,8 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
         Query<Data<Node, GridContainerWindow>> windowsQ,
         Query<Data<Node, GridContainerContent>> contentQ,
         Query<Data<Node, GridContainerSearchFrame>> searchQ,
-        Query<Data<Node, GridContainerSortButton>> sortQ)
+        Query<Data<Node, GridContainerSortButton>> sortQ,
+        Query<Data<Node, GridContainerTitle>> titleQ)
     {
         bool held = mouse.Value.IsPressed(MouseButtonType.Left) || mouse.Value.IsPressedOnce(MouseButtonType.Left);
         if (!held)
@@ -450,6 +511,9 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
         foreach (var (_, node, s) in sortQ)
             if (s.Ref.Serial == anchor.Value.Serial)
                 node.Ref.Left = Val.Px(w - Inset - SortW);
+        foreach (var (_, node, t) in titleQ)
+            if (t.Ref.Serial == anchor.Value.Serial)
+                node.Ref.Width = Val.Px(w - Inset * 2);
     }
 
     private static void CloseWindows(
