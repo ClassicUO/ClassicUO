@@ -40,6 +40,10 @@ internal sealed class GumpBuilder
         return AddGump(commands, ids.normal, hue, position)
             .Insert(new UOButton { Normal = ids.normal, Pressed = ids.pressed, Over = ids.over })
             .Insert(Interaction.None)
+            // Buttons are interactive controls: a press fires their On<UiClick>,
+            // it must not latch a window-drag (which a press on a plain opaque
+            // gump child — paperdoll body, container bg — still does). Opt out.
+            .Insert<UiNoWindowDrag>()
             .Insert(new Button());
     }
 

@@ -199,7 +199,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         Query<Data<ContainerItemUI>> itemsQ,
         Query<Data<PaperdollEquipUI>> equipQ,
         Query<Data<UiMovableNoDrag>> noDragQ,
-        Query<Data<UiNoWindowDrag>> noWindowDragChildQ)
+        Query<Data<ComputedNode, Node>, Filter<With<UiNoWindowDrag>>> noWindowDragBoundsQ)
     {
         // IsPressed is false on the press-once frame (oldState=Released), so
         // include IsPressedOnce in the "held" check or the latch attempt
@@ -273,14 +273,28 @@ internal readonly struct WindowDragPlugin : IPlugin
             // doesn't drag the window they sit in.
             if (itemsQ.Contains(hit.Entity) || equipQ.Contains(hit.Entity)) return;
 
-            // Interactive in-window controls (skills group arrows, lock/use
-            // buttons, reset, resize handle, checkboxes) opt out of window-drag:
-            // a press on them must reach their own UiClick / drag handler, not
-            // latch a window move that cancels the click.
-            if (noWindowDragChildQ.Contains(hit.Entity)) return;
-
             var owner = pick.MovableRoot(hit.Entity);
             if (owner == 0) return;
+
+            // Interactive in-window controls (slider, toggle, stepper, cycle box,
+            // buttons, skills arrows, resize handle) opt out of window-drag: a
+            // press on them must reach their own UiClick / drag handler, not latch
+            // a window move that cancels the gesture. Topmost can't be relied on
+            // to surface the control: when a window root paints an opaque
+            // background its PaintOrder (inflated by the root's GlobalZIndex)
+            // outranks its own flow children, so Topmost returns the ROOT for a
+            // press anywhere inside. So scan the window's opt-out controls by
+            // BOUNDS instead — if the press lands inside one (of this same
+            // window), the gesture belongs to that control, not a window drag.
+            foreach (var (e, cn, nd) in noWindowDragBoundsQ)
+            {
+                if (nd.Ref.Display == Display.None) continue;
+                var b = cn.Ref;
+                if (pos.X >= b.Position.X && pos.X < b.Position.X + b.Size.X
+                    && pos.Y >= b.Position.Y && pos.Y < b.Position.Y + b.Size.Y
+                    && pick.MovableRoot(e.Ref) == owner)
+                    return;
+            }
 
             // nomove windows: still a window (close / click-capture work), but
             // the drag gesture is suppressed.
