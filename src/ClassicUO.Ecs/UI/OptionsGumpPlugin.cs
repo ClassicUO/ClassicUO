@@ -28,26 +28,54 @@ namespace ClassicUO.Ecs;
 
 internal readonly struct OptionsGumpPlugin : IPlugin
 {
-    private const int WinW = 600;
-    private const int WinH = 400;
-    private const int Pad = 10;
-    private const int HeaderH = 40;
-    private const int SidebarW = 110;
+    // The UI lays out at the logical surface size (640x480), upscaled to the
+    // window. Keep the window inside that or it overflows off-screen.
+    private const int WinW = 624;
+    private const int Pad = 14;
+    private const int HeaderH = 50;
+    private const int SidebarW = 120;
     private const int ScrollW = 14;
-    private const int RowH = 34;
-    private const int RowGap = 6;
+    private const int RowH = 38;
+    private const int RowGap = 7;
+    private const int BottomPad = 6;
+    private const int SideBtnH = 30;
+
+    // The window height is derived so the scroll viewport holds a WHOLE number
+    // of rows — a viewport that ends mid-row leaves a clipped sliver + the
+    // trailing inter-row gap, which reads as dead space at the bottom. The
+    // section title is fixed-height so the row math is exact. Row count adapts
+    // to the screen between Min/Max.
+    private const int RowPitch = RowH + RowGap;   // per-row vertical advance
+    private const int SectionH = 26;              // fixed section-title height
+    private const int MinRows = 6;
+    private const int MaxRows = 12;
+    // Vertical chrome around the scroll area: top pad + header + header/body gap + bottom pad.
+    private const int ChromeV = Pad + (HeaderH - Pad) + 12 + BottomPad;
     // Inner width available to a row: window - panel padding - sidebar - gaps - scrollbar.
-    private const int RowW = WinW - Pad * 2 - SidebarW - 8 - ScrollW - 6;
+    private const int RowW = WinW - Pad * 2 - SidebarW - 10 - ScrollW - 6;
     private const int LabelW = 250;
 
-    private static readonly ClayColor s_panelBg = new(26, 28, 34, 245);
-    private static readonly ClayColor s_rowBg = new(44, 46, 56, 255);
-    private static readonly ClayColor s_controlBg = new(64, 66, 78, 255);
-    private static readonly ClayColor s_accent = new(86, 120, 200, 255);
-    private static readonly ClayColor s_toggleOn = new(70, 160, 90, 255);
-    private static readonly ClayColor s_toggleOff = new(90, 92, 104, 255);
-    private static readonly ClayColor s_textMain = new(235, 236, 240, 255);
-    private static readonly ClayColor s_textDim = new(160, 163, 175, 255);
+    // Modern dark palette. Layered slate (panel < card/row < control) for depth,
+    // a blue accent, and a green/grey switch track.
+    private static readonly ClayColor s_panelBg     = new(22, 24, 30, 252);
+    private static readonly ClayColor s_panelBorder = new(58, 63, 78, 200);
+    private static readonly ClayColor s_shadow      = new(0, 0, 0, 90);
+    private static readonly ClayColor s_headerBg    = new(30, 33, 41, 255);
+    private static readonly ClayColor s_rowBg       = new(38, 41, 51, 255);
+    private static readonly ClayColor s_rowHover    = new(48, 52, 64, 255);
+    private static readonly ClayColor s_controlBg   = new(54, 58, 71, 255);
+    private static readonly ClayColor s_controlHover = new(68, 73, 89, 255);
+    private static readonly ClayColor s_accent      = new(92, 132, 224, 255);
+    private static readonly ClayColor s_accentHover = new(110, 148, 236, 255);
+    private static readonly ClayColor s_sideBg      = new(33, 36, 45, 255);
+    private static readonly ClayColor s_sideHover   = new(46, 50, 62, 255);
+    private static readonly ClayColor s_toggleOn    = new(74, 178, 112, 255);
+    private static readonly ClayColor s_toggleOff   = new(66, 70, 84, 255);
+    private static readonly ClayColor s_knob        = new(238, 240, 246, 255);
+    private static readonly ClayColor s_field       = new(216, 218, 224, 255);
+    private static readonly ClayColor s_textMain    = new(236, 238, 244, 255);
+    private static readonly ClayColor s_textDim     = new(150, 154, 168, 255);
+    private static readonly ClayColor s_textFaint   = new(108, 112, 126, 255);
 
     private enum OptionKind { Toggle, Stepper, Cycle, Hue, Action }
 
@@ -389,6 +417,47 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             .InStage(Stage.Update)
             .RunIf((Res<OptionsUiState> s) => s.Value.Window != 0)
             .Build();
+
+        // Hover tint: any element carrying OptionsHover swaps its background
+        // between Normal/Hover based on Clay's Interaction state. One system
+        // covers every control (rows, sidebar, buttons, dropdown items).
+        var hoverFn = ApplyHover;
+        app.AddSystem(hoverFn)
+            .InStage(Stage.Last)
+            .RunIf((Res<OptionsUiState> s) => s.Value.Window != 0)
+            .Build();
+
+#if AGENT_BUILD
+        app.AddResource(new DebugOptionsQueue());
+        var drainFn = DrainDebugOpen;
+        app.AddSystem(drainFn).InStage(Stage.First).Build();
+#endif
+    }
+
+#if AGENT_BUILD
+    private static void DrainDebugOpen(
+        Commands commands,
+        ResMut<DebugOptionsQueue> q,
+        Res<UiZCounter> zc,
+        Res<UiSurface> surface,
+        Res<OptionsUiState> state,
+        Query<Data<OptionsWindow>> existing)
+    {
+        if (!q.Value.OpenRequested) return;
+        q.Value.OpenRequested = false;
+        OpenOrFocus(commands, zc.Value, surface.Value, state.Value, existing);
+    }
+#endif
+
+    private static void ApplyHover(Query<Data<Interaction, BackgroundColor, OptionsHover>> q)
+    {
+        foreach (var (_, it, bg, hv) in q)
+        {
+            var want = it.Ref == Interaction.None ? hv.Ref.Normal : hv.Ref.Hover;
+            if (bg.Ref.Value.R != want.R || bg.Ref.Value.G != want.G
+                || bg.Ref.Value.B != want.B || bg.Ref.Value.A != want.A)
+                bg.Ref = new BackgroundColor(want);
+        }
     }
 
     internal static void OpenOrFocus(
@@ -401,8 +470,15 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             return;
         }
 
+        // Derive height from a whole number of rows so the viewport never clips
+        // mid-row (no bottom sliver/gap). Row count fills the screen, clamped.
+        int surfH = (int)surface.LogicalSize.Y;
+        int rows = Math.Clamp((surfH - 24 - ChromeV - SectionH) / RowPitch, MinRows, MaxRows);
+        int viewH = SectionH + rows * RowPitch;
+        int winH = viewH + ChromeV;
+
         var cx = MathF.Max(0, (surface.LogicalSize.X - WinW) * 0.5f);
-        var cy = MathF.Max(0, (surface.LogicalSize.Y - WinH) * 0.5f);
+        var cy = MathF.Max(0, (surface.LogicalSize.Y - winH) * 0.5f);
 
         var root = commands.Spawn()
             .Insert(new Node
@@ -411,12 +487,17 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                 PositionType = PositionType.Absolute,
                 FlexDirection = FlexDirection.Column,
                 Left = Val.Px(cx), Top = Val.Px(cy),
-                Width = Val.Px(WinW), Height = Val.Px(WinH),
-                Padding = UiRect.All(Pad),
-                Gap = Val.Px(8),
+                Width = Val.Px(WinW), Height = Val.Px(winH),
+                // Tighter bottom: the scroll list ends on a whole row + the
+                // inter-row gap, so a full Pad below it reads as dead space.
+                Padding = new UiRect { Left = Val.Px(Pad), Right = Val.Px(Pad), Top = Val.Px(Pad), Bottom = Val.Px(BottomPad) },
+                Gap = Val.Px(12),
+                Border = UiRect.All(1),
             })
             .Insert(new BackgroundColor(s_panelBg))
-            .Insert(BorderRadius.All(10))
+            .Insert(new BorderColor(s_panelBorder))
+            .Insert(BorderRadius.All(14))
+            .Insert(new BoxShadow { Color = s_shadow, OffsetX = 0, OffsetY = 6, BlurRadius = 16, SpreadRadius = 0 })
             .Insert<UiMovable>()
             .Insert(new GlobalZIndex(zc.Bump()))
             .Insert(new OptionsWindow());
@@ -431,15 +512,21 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                 FlexDirection = FlexDirection.Row,
                 AlignItems = AlignItems.Center,
                 Width = Val.Px(WinW - Pad * 2), Height = Val.Px(HeaderH - Pad),
-                Gap = Val.Px(10),
+                Gap = Val.Px(12),
             });
         commands.AddChild(rootId, header.Id);
         var headerId = header.Id;
 
+        // Accent tab on the title so the header reads as a header.
         commands.AddChild(headerId, commands.Spawn()
-            .Insert(new Node { Width = Val.Px(80), Height = Val.Auto })
+            .Insert(new Node { Width = Val.Px(4), Height = Val.Px(22) })
+            .Insert(new BackgroundColor(s_accent))
+            .Insert(BorderRadius.All(2))
+            .Id);
+        commands.AddChild(headerId, commands.Spawn()
+            .Insert(new Node { Width = Val.Px(92), Height = Val.Auto })
             .Insert(new Text("Options"))
-            .Insert(new TextFont { FontId = 1, Size = 16 })
+            .Insert(new TextFont { FontId = 1, Size = 18 })
             .Insert(new TextColor(s_textMain))
             .Id);
 
@@ -448,22 +535,24 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             .Insert(new Node
             {
                 Display = Display.Flex,
-                Width = Val.Px(240), Height = Val.Px(24),
+                AlignItems = AlignItems.Center,
+                Width = Val.Px(300), Height = Val.Px(28),
+                Padding = new UiRect { Left = Val.Px(8), Right = Val.Px(8) },
             })
-            .Insert(new BackgroundColor(new ClayColor(216, 218, 224, 255)))
-            .Insert(BorderRadius.All(5));
+            .Insert(new BackgroundColor(s_field))
+            .Insert(BorderRadius.All(8));
         var searchTextId = GuiPlugin.SpawnTextField(
-            commands, searchFrame, new Vector2(6, 4),
+            commands, searchFrame, new Vector2(8, 6),
             new TextFont { FontId = (ushort)(5 | UoFontRuntime.AsciiFlag), Size = 16 },
             UoFontRuntime.AsciiHue(1), string.Empty, masked: false);
         commands.Entity(searchTextId).Insert<OptionsSearchText>();
         commands.AddChild(headerId, searchFrame.Id);
 
         commands.AddChild(headerId, commands.Spawn()
-            .Insert(new Node { Width = Val.Px(120), Height = Val.Auto })
-            .Insert(new Text("type to filter"))
+            .Insert(new Node { Width = Val.Px(96), Height = Val.Auto })
+            .Insert(new Text("Search settings"))
             .Insert(new TextFont { FontId = 1, Size = 11 })
-            .Insert(new TextColor(s_textDim))
+            .Insert(new TextColor(s_textFaint))
             .Id);
 
         // Close button — absolute so it pins to the header's right edge
@@ -474,13 +563,14 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             {
                 Display = Display.Flex,
                 PositionType = PositionType.Absolute,
-                Left = Val.Px(WinW - Pad * 2 - 24), Top = Val.Px(2),
-                Width = Val.Px(24), Height = Val.Px(24),
+                Left = Val.Px(WinW - Pad * 2 - 28), Top = Val.Px(0),
+                Width = Val.Px(28), Height = Val.Px(28),
                 JustifyContent = JustifyContent.Center,
                 AlignItems = AlignItems.Center,
             })
-            .Insert(new BackgroundColor(new ClayColor(140, 60, 60, 255)))
-            .Insert(BorderRadius.All(5))
+            .Insert(new BackgroundColor(s_controlBg))
+            .Insert(new OptionsHover { Normal = s_controlBg, Hover = new ClayColor(196, 72, 72, 255) })
+            .Insert(BorderRadius.All(8))
             .Insert(new Text("X"))
             .Insert(new TextFont { FontId = 1, Size = 12 })
             .Insert(new TextColor(s_textMain))
@@ -501,23 +591,29 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                 PositionType = PositionType.Relative,
                 FlexDirection = FlexDirection.Row,
                 Width = Val.Px(WinW - Pad * 2),
-                Height = Val.Px(WinH - HeaderH - Pad * 2),
-                Gap = Val.Px(8),
+                // Fills the area below the header down to the bottom padding;
+                // equals the viewport height (a whole number of rows).
+                Height = Val.Px(viewH),
+                Gap = Val.Px(10),
             });
         commands.AddChild(rootId, body.Id);
         var bodyId = body.Id;
 
+        // Nav tabs stack tight at the top of the card (no gaps between them);
+        // the empty space falls below the last tab.
+        const int sideGap = 0;
         var sidebar = commands.Spawn()
             .Insert(new Node
             {
                 Display = Display.Flex,
                 FlexDirection = FlexDirection.Column,
                 Width = Val.Px(SidebarW), Height = Val.Percent(100),
-                Gap = Val.Px(4),
-            });
+                Padding = UiRect.All(6),
+                Gap = Val.Px(sideGap),
+            })
+            .Insert(new BackgroundColor(s_sideBg))
+            .Insert(BorderRadius.All(10));
         commands.AddChild(bodyId, sidebar.Id);
-
-        int viewH = WinH - HeaderH - Pad * 2;
         var viewport = commands.Spawn()
             .Insert(new Node
             {
@@ -538,18 +634,19 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             {
                 Display = Display.Flex,
                 PositionType = PositionType.Absolute,
-                Left = Val.Px(SidebarW + 8 + RowW + 4), Top = Val.Px(0),
-                Width = Val.Px(10), Height = Val.Px(viewH),
+                Left = Val.Px(SidebarW + 10 + RowW + 6), Top = Val.Px(0),
+                Width = Val.Px(8), Height = Val.Px(viewH),
             })
-            .Insert(new BackgroundColor(new ClayColor(36, 38, 46, 255)))
-            .Insert(BorderRadius.All(5))
-            .Insert(new Scrollbar { Target = viewport.Id, Orientation = ScrollbarOrientation.Vertical, MinThumbLength = 24f })
+            .Insert(new BackgroundColor(new ClayColor(30, 32, 40, 255)))
+            .Insert(BorderRadius.All(4))
+            .Insert(new Scrollbar { Target = viewport.Id, Orientation = ScrollbarOrientation.Vertical, MinThumbLength = 28f })
             .Insert(Interaction.None)
             .Insert<UiNoWindowDrag>();
         var sbThumb = commands.Spawn()
-            .Insert(new Node { Width = Val.Px(10), Height = Val.Px(24) })
-            .Insert(new BackgroundColor(new ClayColor(96, 102, 122, 255)))
-            .Insert(BorderRadius.All(5))
+            .Insert(new Node { Width = Val.Px(8), Height = Val.Px(28) })
+            .Insert(new BackgroundColor(new ClayColor(86, 92, 112, 255)))
+            .Insert(new OptionsHover { Normal = new ClayColor(86, 92, 112, 255), Hover = new ClayColor(110, 118, 142, 255) })
+            .Insert(BorderRadius.All(4))
             .Insert(new ScrollbarThumb())
             .Insert(new ScrollbarDragState())
             .Insert(Interaction.None)
@@ -610,6 +707,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
         bool searching = !string.IsNullOrWhiteSpace(state.Search);
 
         // Sidebar category buttons (highlight ignored while a search is live).
+        int innerW = SidebarW - 12;
         foreach (var cat in s_categories)
         {
             var selected = !searching && cat == state.Category;
@@ -619,15 +717,14 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                 .Insert(new Node
                 {
                     Display = Display.Flex,
-                    Width = Val.Px(SidebarW), Height = Val.Px(24),
-                    JustifyContent = JustifyContent.Center,
+                    FlexDirection = FlexDirection.Row,
+                    Width = Val.Px(innerW), Height = Val.Px(SideBtnH),
                     AlignItems = AlignItems.Center,
+                    Gap = Val.Px(8),
+                    Padding = new UiRect { Left = Val.Px(8), Right = Val.Px(8) },
                 })
                 .Insert(new BackgroundColor(selected ? s_accent : s_rowBg))
-                .Insert(BorderRadius.All(6))
-                .Insert(new Text(cat))
-                .Insert(new TextFont { FontId = 1, Size = 12 })
-                .Insert(new TextColor(selected ? s_textMain : s_textDim))
+                .Insert(BorderRadius.All(7))
                 .Insert(Interaction.None)
                 .Insert<UiNoWindowDrag>()
                 .Observe((On<UiClick> _, Res<OptionsUiState> st) =>
@@ -636,8 +733,43 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                     st.Value.Dirty = true;
                     st.Value.FilterChanged = true;
                 });
-            commands.AddChild(state.Sidebar, btn.Id);
+            if (!selected)
+                btn.Insert(new OptionsHover { Normal = s_rowBg, Hover = s_sideHover });
+            var btnId = btn.Id;
+            commands.AddChild(state.Sidebar, btnId);
+            // Accent dot marks the active page; a placeholder keeps inactive
+            // labels aligned to the same left edge.
+            commands.AddChild(btnId, commands.Spawn()
+                .Insert(new Node { Width = Val.Px(6), Height = Val.Px(6) })
+                .Insert(new BackgroundColor(selected ? s_textMain : s_textFaint))
+                .Insert(BorderRadius.All(3))
+                .Id);
+            commands.AddChild(btnId, commands.Spawn()
+                .Insert(new Node { Width = Val.Px(innerW - 30), Height = Val.Auto })
+                .Insert(new Text(cat))
+                .Insert(new TextFont { FontId = 1, Size = 12 })
+                .Insert(new TextColor(selected ? s_textMain : s_textDim))
+                .Id);
         }
+
+        // Section header at the top of the list. Fixed height (SectionH) so the
+        // viewport holds a whole number of rows below it — keeps the scroll
+        // bottom flush instead of clipping a row sliver.
+        var headerLabel = searching ? $"Search: \"{state.Search.Trim()}\"" : state.Category;
+        commands.AddChild(state.Viewport, commands.Spawn()
+            .Insert<OptionsListItem>()
+            .Insert(new Node
+            {
+                Display = Display.Flex,
+                FlexDirection = FlexDirection.Column,
+                JustifyContent = JustifyContent.Center,
+                Width = Val.Px(RowW), Height = Val.Px(SectionH),
+                Padding = new UiRect { Left = Val.Px(4) },
+            })
+            .Insert(new Text(headerLabel))
+            .Insert(new TextFont { FontId = 1, Size = 15 })
+            .Insert(new TextColor(s_textMain))
+            .Id);
 
         for (var i = 0; i < s_options.Length; i++)
         {
@@ -667,10 +799,13 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                 FlexDirection = FlexDirection.Row,
                 AlignItems = AlignItems.Center,
                 Width = Val.Px(RowW), Height = Val.Px(RowH),
-                Padding = new UiRect { Left = Val.Px(10), Right = Val.Px(10) },
+                Padding = new UiRect { Left = Val.Px(14), Right = Val.Px(12) },
             })
             .Insert(new BackgroundColor(s_rowBg))
-            .Insert(BorderRadius.All(6));
+            .Insert(new OptionsHover { Normal = s_rowBg, Hover = s_rowHover })
+            .Insert(BorderRadius.All(8))
+            .Insert(Interaction.None)
+            .Insert<UiNoWindowDrag>();
         commands.AddChild(state.Viewport, row.Id);
         var rowId = row.Id;
 
@@ -680,7 +815,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
         commands.AddChild(rowId, commands.Spawn()
             .Insert(new Node { Width = Val.Px(LabelW), Height = Val.Auto })
             .Insert(new Text(labelText))
-            .Insert(new TextFont { FontId = 1, Size = 12 })
+            .Insert(new TextFont { FontId = 1, Size = 13 })
             .Insert(new TextColor(s_textMain))
             .Id);
 
@@ -689,21 +824,24 @@ internal readonly struct OptionsGumpPlugin : IPlugin
         {
             case OptionKind.Toggle:
             {
-                AddSpacer(commands, rowId, contentW - LabelW - 56);
+                const int TrackW = 46, TrackH = 24, Knob = 18;
+                AddSpacer(commands, rowId, contentW - LabelW - TrackW);
                 var on = def.GetB(profile);
-                var pill = commands.Spawn()
+                // Real switch: a rounded track whose flow child (the knob) is
+                // pushed to Start/End. Flow — not absolute — so it rides the
+                // scroll clip with the rest of the list.
+                var track = commands.Spawn()
                     .Insert(new Node
                     {
                         Display = Display.Flex,
-                        Width = Val.Px(56), Height = Val.Px(22),
-                        JustifyContent = JustifyContent.Center,
+                        FlexDirection = FlexDirection.Row,
+                        Width = Val.Px(TrackW), Height = Val.Px(TrackH),
+                        JustifyContent = on ? JustifyContent.End : JustifyContent.Start,
                         AlignItems = AlignItems.Center,
+                        Padding = new UiRect { Left = Val.Px(3), Right = Val.Px(3) },
                     })
                     .Insert(new BackgroundColor(on ? s_toggleOn : s_toggleOff))
-                    .Insert(BorderRadius.All(11))
-                    .Insert(new Text(on ? "ON" : "OFF"))
-                    .Insert(new TextFont { FontId = 1, Size = 11 })
-                    .Insert(new TextColor(s_textMain))
+                    .Insert(BorderRadius.All(TrackH / 2))
                     .Insert(Interaction.None)
                     .Insert<UiNoWindowDrag>()
                     .Observe((On<UiClick> _, Res<Profile> p, Res<OptionsUiState> st) =>
@@ -711,26 +849,37 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                         def.SetB(p.Value, !def.GetB(p.Value));
                         st.Value.Dirty = true;
                     });
-                commands.AddChild(rowId, pill.Id);
+                var trackId = track.Id;
+                commands.AddChild(trackId, commands.Spawn()
+                    .Insert(new Node { Width = Val.Px(Knob), Height = Val.Px(Knob) })
+                    .Insert(new BackgroundColor(s_knob))
+                    .Insert(BorderRadius.All(Knob / 2))
+                    .Id);
+                commands.AddChild(rowId, trackId);
                 break;
             }
 
             case OptionKind.Stepper:
             {
-                AddSpacer(commands, rowId, contentW - LabelW - (22 + 56 + 22));
-                SpawnStepButton(commands, rowId, "-", () => def, -1);
+                const int StepW = 26, ValW = 58;
+                AddSpacer(commands, rowId, contentW - LabelW - (StepW + ValW + StepW + 8));
+                SpawnStepButton(commands, rowId, "−", () => def, -1);
+                AddSpacer(commands, rowId, 4);
                 commands.AddChild(rowId, commands.Spawn()
                     .Insert(new Node
                     {
                         Display = Display.Flex,
-                        Width = Val.Px(56), Height = Val.Auto,
+                        Width = Val.Px(ValW), Height = Val.Px(26),
                         JustifyContent = JustifyContent.Center,
                         AlignItems = AlignItems.Center,
                     })
+                    .Insert(new BackgroundColor(new ClayColor(30, 32, 40, 255)))
+                    .Insert(BorderRadius.All(6))
                     .Insert(new Text(def.GetI(profile).ToString()))
-                    .Insert(new TextFont { FontId = 1, Size = 12 })
+                    .Insert(new TextFont { FontId = 1, Size = 13 })
                     .Insert(new TextColor(s_textMain))
                     .Id);
+                AddSpacer(commands, rowId, 4);
                 SpawnStepButton(commands, rowId, "+", () => def, +1);
                 break;
             }
@@ -746,14 +895,15 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                     .Insert(new Node
                     {
                         Display = Display.Flex,
-                        Width = Val.Px(140), Height = Val.Px(24),
+                        Width = Val.Px(150), Height = Val.Px(28),
                         JustifyContent = JustifyContent.Center,
                         AlignItems = AlignItems.Center,
                     })
                     .Insert(new BackgroundColor(s_controlBg))
-                    .Insert(BorderRadius.All(5))
-                    .Insert(new Text($"{def.Choices[current]}  v"))
-                    .Insert(new TextFont { FontId = 1, Size = 11 })
+                    .Insert(new OptionsHover { Normal = s_controlBg, Hover = s_controlHover })
+                    .Insert(BorderRadius.All(8))
+                    .Insert(new Text($"{def.Choices[current]}   v"))
+                    .Insert(new TextFont { FontId = 1, Size = 12 })
                     .Insert(new TextColor(s_textMain))
                     .Insert(Interaction.None)
                     .Insert<UiNoWindowDrag>();
@@ -772,17 +922,17 @@ internal readonly struct OptionsGumpPlugin : IPlugin
 
             case OptionKind.Hue:
             {
-                AddSpacer(commands, rowId, contentW - LabelW - (60 + 6 + 26));
+                AddSpacer(commands, rowId, contentW - LabelW - (60 + 8 + 28));
 
                 // Numbers-only editable value (SyncHueEdits enforces + applies).
                 var field = commands.Spawn()
                     .Insert(new Node
                     {
                         Display = Display.Flex,
-                        Width = Val.Px(60), Height = Val.Px(22),
+                        Width = Val.Px(60), Height = Val.Px(24),
                     })
-                    .Insert(new BackgroundColor(new ClayColor(216, 218, 224, 255)))
-                    .Insert(BorderRadius.All(4));
+                    .Insert(new BackgroundColor(s_field))
+                    .Insert(BorderRadius.All(6));
                 // flowRow: an absolute glyph row would escape the list's
                 // scroll clip and paint the value outside the window.
                 var glyphId = GuiPlugin.SpawnTextField(
@@ -793,21 +943,21 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                 commands.Entity(glyphId).Insert(new HueValueText { Index = defIndex });
                 commands.AddChild(rowId, field.Id);
 
-                AddSpacer(commands, rowId, 6);
+                AddSpacer(commands, rowId, 8);
 
                 // Swatch picker icon — shows the current hue, opens the palette.
                 var swatch = commands.Spawn()
                     .Insert(new Node
                     {
                         Display = Display.Flex,
-                        Width = Val.Px(26), Height = Val.Px(22),
+                        Width = Val.Px(28), Height = Val.Px(24),
                     })
                     .Insert(new UiCustom
                     {
                         Data = new UOCustomRender
                         {
                             Kind = UOCustomKind.HueGrid,
-                            GridRows = 1, GridCols = 1, CellW = 26, CellH = 22,
+                            GridRows = 1, GridCols = 1, CellW = 28, CellH = 24,
                             SelectedIndex = -1,
                             GridColors = new[] { BakeHue(hues, (ushort)def.GetI(profile)) },
                         }
@@ -843,19 +993,20 @@ internal readonly struct OptionsGumpPlugin : IPlugin
 
             case OptionKind.Action:
             {
-                AddSpacer(commands, rowId, contentW - LabelW - 70);
+                AddSpacer(commands, rowId, contentW - LabelW - 80);
                 var act = commands.Spawn()
                     .Insert(new Node
                     {
                         Display = Display.Flex,
-                        Width = Val.Px(70), Height = Val.Px(24),
+                        Width = Val.Px(80), Height = Val.Px(28),
                         JustifyContent = JustifyContent.Center,
                         AlignItems = AlignItems.Center,
                     })
                     .Insert(new BackgroundColor(s_accent))
-                    .Insert(BorderRadius.All(5))
+                    .Insert(new OptionsHover { Normal = s_accent, Hover = s_accentHover })
+                    .Insert(BorderRadius.All(8))
                     .Insert(new Text("Open"))
-                    .Insert(new TextFont { FontId = 1, Size = 11 })
+                    .Insert(new TextFont { FontId = 1, Size = 12 })
                     .Insert(new TextColor(s_textMain))
                     .Insert(Interaction.None)
                     .Insert<UiNoWindowDrag>()
@@ -874,14 +1025,15 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             .Insert(new Node
             {
                 Display = Display.Flex,
-                Width = Val.Px(22), Height = Val.Px(22),
+                Width = Val.Px(26), Height = Val.Px(26),
                 JustifyContent = JustifyContent.Center,
                 AlignItems = AlignItems.Center,
             })
             .Insert(new BackgroundColor(s_controlBg))
-            .Insert(BorderRadius.All(5))
+            .Insert(new OptionsHover { Normal = s_controlBg, Hover = s_controlHover })
+            .Insert(BorderRadius.All(7))
             .Insert(new Text(glyph))
-            .Insert(new TextFont { FontId = 1, Size = 13 })
+            .Insert(new TextFont { FontId = 1, Size = 15 })
             .Insert(new TextColor(s_textMain))
             .Insert(Interaction.None)
             .Insert<UiNoWindowDrag>()
@@ -981,11 +1133,11 @@ internal readonly struct OptionsGumpPlugin : IPlugin
         var (_, an) = anchorRow;
         var (_, wn) = winRow;
 
-        const int ItemH = 24;
-        int listH = def.Choices.Length * ItemH + 8;
+        const int ItemH = 28, PanelW = 150;
+        int listH = def.Choices.Length * ItemH + 10;
         float x = an.Ref.Position.X - wn.Ref.Position.X;
-        float y = an.Ref.Position.Y - wn.Ref.Position.Y + an.Ref.Size.Y + 2;
-        if (y + listH > WinH - 6) y = an.Ref.Position.Y - wn.Ref.Position.Y - listH - 2;
+        float y = an.Ref.Position.Y - wn.Ref.Position.Y + an.Ref.Size.Y + 4;
+        if (y + listH > wn.Ref.Size.Y - 6) y = an.Ref.Position.Y - wn.Ref.Position.Y - listH - 4;
 
         var panel = commands.Spawn()
             .Insert<OptionsOverlay>()
@@ -995,12 +1147,15 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                 PositionType = PositionType.Absolute,
                 FlexDirection = FlexDirection.Column,
                 Left = Val.Px(x), Top = Val.Px(y),
-                Width = Val.Px(140), Height = Val.Px(listH),
-                Padding = UiRect.All(4),
-                Gap = Val.Px(2),
+                Width = Val.Px(PanelW), Height = Val.Px(listH),
+                Padding = UiRect.All(5),
+                Gap = Val.Px(3),
+                Border = UiRect.All(1),
             })
-            .Insert(new BackgroundColor(new ClayColor(20, 21, 26, 252)))
-            .Insert(BorderRadius.All(6));
+            .Insert(new BackgroundColor(new ClayColor(28, 30, 38, 254)))
+            .Insert(new BorderColor(s_panelBorder))
+            .Insert(BorderRadius.All(10))
+            .Insert(new BoxShadow { Color = s_shadow, OffsetX = 0, OffsetY = 5, BlurRadius = 12, SpreadRadius = 0 });
         commands.AddChild(state.Window, panel.Id);
         var panelId = panel.Id;
 
@@ -1008,18 +1163,19 @@ internal readonly struct OptionsGumpPlugin : IPlugin
         for (var i = 0; i < def.Choices.Length; i++)
         {
             var idx = i;
+            var sel = i == current;
             var item = commands.Spawn()
                 .Insert(new Node
                 {
                     Display = Display.Flex,
-                    Width = Val.Px(132), Height = Val.Px(ItemH - 2),
+                    Width = Val.Px(PanelW - 10), Height = Val.Px(ItemH - 2),
                     JustifyContent = JustifyContent.Center,
                     AlignItems = AlignItems.Center,
                 })
-                .Insert(new BackgroundColor(i == current ? s_accent : s_controlBg))
-                .Insert(BorderRadius.All(4))
+                .Insert(new BackgroundColor(sel ? s_accent : s_controlBg))
+                .Insert(BorderRadius.All(6))
                 .Insert(new Text(def.Choices[i]))
-                .Insert(new TextFont { FontId = 1, Size = 11 })
+                .Insert(new TextFont { FontId = 1, Size = 12 })
                 .Insert(new TextColor(s_textMain))
                 .Insert(Interaction.None)
                 .Insert<UiNoWindowDrag>()
@@ -1029,6 +1185,8 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                     st.Value.Dirty = true;
                     cmd.Entity(panelId).Despawn();
                 });
+            if (!sel)
+                item.Insert(new OptionsHover { Normal = s_controlBg, Hover = s_controlHover });
             commands.AddChild(panelId, item.Id);
         }
     }
@@ -1063,6 +1221,18 @@ internal struct OptionsListItem;
 
 // Marker on any open dropdown / hue-palette overlay (one at a time).
 internal struct OptionsOverlay;
+
+#if AGENT_BUILD
+internal sealed class DebugOptionsQueue { public bool OpenRequested; }
+#endif
+
+// Per-element hover tint. ApplyHover swaps BackgroundColor between Normal and
+// Hover based on the element's Clay Interaction state each frame.
+internal struct OptionsHover
+{
+    public ClayColor Normal;
+    public ClayColor Hover;
+}
 
 // Editable hue value text — Index into the s_options catalog.
 internal struct HueValueText { public int Index; }

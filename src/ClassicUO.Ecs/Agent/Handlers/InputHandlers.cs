@@ -59,6 +59,7 @@ internal static class InputHandlers
         d.Register("debug.openColorPicker", DebugOpenColorPicker);
         d.Register("debug.addBuff", DebugAddBuff);
         d.Register("debug.openBuffBar", DebugOpenBuffBar);
+        d.Register("debug.openOptions", DebugOpenOptions);
         d.Register("debug.openProfile", DebugOpenProfile);
         d.Register("debug.openTrade", DebugOpenTrade);
         d.Register("debug.tradeUpdate", DebugTradeUpdate);
@@ -464,6 +465,15 @@ internal static class InputHandlers
     public static JsonRpcResponse DebugOpenBuffBar(JsonRpcRequest req, in AgentRpcContext<App> ctx)
     {
         ctx.Runtime.GetResource<DebugBuffQueue>().OpenRequested = true;
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true } };
+    }
+
+    // Test-only: open the Options window (the same OpenOrFocus the top bar's
+    // gear button calls) without driving the top-bar UI. Works at any screen
+    // since the panel positions from UiSurface, so no server/login needed.
+    public static JsonRpcResponse DebugOpenOptions(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        ctx.Runtime.GetResource<DebugOptionsQueue>().OpenRequested = true;
         return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true } };
     }
 

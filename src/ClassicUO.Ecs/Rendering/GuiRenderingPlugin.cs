@@ -198,7 +198,9 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                     DrawBorder(b, dumbTexture.Value.Texture!, in cmd);
                     break;
 
-                // Shadow not yet implemented for UO renderer.
+                case RenderCommandType.Shadow:
+                    DrawShadow(b, dumbTexture.Value.Texture!, in cmd);
+                    break;
             }
         }
 
@@ -240,6 +242,17 @@ internal readonly struct GuiRenderingPlugin : IPlugin
         int x = (int)bb.X, y = (int)bb.Y, w = (int)bb.Width, h = (int)bb.Height;
         int l = border.Width.Left, r = border.Width.Right, t = border.Width.Top, bo = border.Width.Bottom;
 
+        // Rounded frame: a single AA outline so the border follows the panel's
+        // corner radius instead of poking square edges past it.
+        if (border.CornerRadius.TopLeft > 0)
+        {
+            float thickness = MathF.Max(MathF.Max(l, r), MathF.Max(t, bo));
+            if (thickness <= 0) thickness = 1;
+            b.DrawRoundedRectangleOutline(white,
+                new Rectangle(x, y, w, h), border.CornerRadius.TopLeft, thickness, color, cmd.ZIndex);
+            return;
+        }
+
         if (t > 0) DrawQuad(b, white, x, y, w, t, color, cmd.ZIndex);
         if (bo > 0) DrawQuad(b, white, x, y + h - bo, w, bo, color, cmd.ZIndex);
         if (l > 0) DrawQuad(b, white, x, y, l, h, color, cmd.ZIndex);
@@ -249,6 +262,26 @@ internal readonly struct GuiRenderingPlugin : IPlugin
     private static void DrawQuad(UltimaBatcher2D b, Texture2D white, int x, int y, int w, int h, XnaColor color, int z)
     {
         b.Draw(white, new Vector2(x, y), new Rectangle(0, 0, w, h), color, 0f, Vector2.One, z);
+    }
+
+    // Soft drop shadow. Clay hands us a bounding box already expanded by
+    // (spread + blur + 1) on every side; shrink back to the element rect and
+    // let the batcher paint a fading ring stack around it.
+    private static void DrawShadow(UltimaBatcher2D b, Texture2D white, in RenderCommand cmd)
+    {
+        ref readonly var bb = ref cmd.BoundingBox;
+        ref readonly var sh = ref cmd.Shadow;
+
+        float expand = sh.SpreadRadius + sh.BlurRadius + 1f;
+        var rect = new Rectangle(
+            (int)(bb.X + expand),
+            (int)(bb.Y + expand),
+            (int)(bb.Width - expand * 2),
+            (int)(bb.Height - expand * 2));
+        if (rect.Width <= 0 || rect.Height <= 0)
+            return;
+
+        b.DrawRoundedRectangleShadow(white, rect, sh.CornerRadius.TopLeft, sh.BlurRadius, sh.OffsetX, sh.OffsetY, ToXnaColor(sh.Color), cmd.ZIndex);
     }
 
     private static void DrawText(UltimaBatcher2D b, in RenderCommand cmd)

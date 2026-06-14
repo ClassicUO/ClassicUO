@@ -1646,37 +1646,186 @@ namespace ClassicUO.Renderer
             DrawRoundedCorner(texture, rectangle.X + cornerRadius, rectangle.Y + rectangle.Height - cornerRadius, cornerRadius, color, depth, 3);
         }
 
+        // Anti-aliased quarter-disc. Instead of a hard distance<=radius cutoff
+        // (which left jagged corners), each edge pixel's alpha is its coverage
+        // of the circle: full inside, fading to 0 across the ~1px boundary band.
+        // Blends correctly under the UI's non-premultiplied alpha blend.
         private void DrawRoundedCorner(Texture2D texture, float centerX, float centerY, float radius, Color color, float depth, int quadrant)
         {
-            int steps = (int)(radius * 2);
+            int r = (int)MathF.Ceiling(radius);
+            int baseX = (int)MathF.Floor(centerX - radius);
+            int baseY = (int)MathF.Floor(centerY - radius);
 
-            for (int x = 0; x < steps; x++)
+            // +2 so the outer anti-aliased ring (distance up to radius+0.5) is covered.
+            for (int x = 0; x <= r * 2 + 1; x++)
             {
-                for (int y = 0; y < steps; y++)
+                for (int y = 0; y <= r * 2 + 1; y++)
                 {
-                    float px = centerX + (x - radius) + 0.5f;
-                    float py = centerY + (y - radius) + 0.5f;
+                    int ix = baseX + x;
+                    int iy = baseY + y;
+                    float dx = ix + 0.5f - centerX;
+                    float dy = iy + 0.5f - centerY;
 
-                    float dx = px - centerX;
-                    float dy = py - centerY;
-                    float distance = (float)Math.Sqrt(dx * dx + dy * dy);
-
-                    if (distance <= radius)
+                    bool inQuadrant = quadrant switch
                     {
-                        bool inQuadrant = false;
-                        switch (quadrant)
-                        {
-                            case 0: inQuadrant = dx <= 0 && dy <= 0; break;
-                            case 1: inQuadrant = dx >= 0 && dy <= 0; break;
-                            case 2: inQuadrant = dx >= 0 && dy >= 0; break;
-                            case 3: inQuadrant = dx <= 0 && dy >= 0; break;
-                        }
+                        0 => dx <= 0.5f && dy <= 0.5f,
+                        1 => dx >= -0.5f && dy <= 0.5f,
+                        2 => dx >= -0.5f && dy >= -0.5f,
+                        _ => dx <= 0.5f && dy >= -0.5f,
+                    };
+                    if (!inQuadrant)
+                        continue;
 
-                        if (inQuadrant)
-                        {
-                            Draw(texture, new Vector2(px, py), new Rectangle(0, 0, 1, 1), color, 0f, Vector2.One, depth);
-                        }
-                    }
+                    float distance = MathF.Sqrt(dx * dx + dy * dy);
+                    float coverage = Math.Clamp(radius - distance + 0.5f, 0f, 1f);
+                    if (coverage <= 0f)
+                        continue;
+
+                    var c = color;
+                    c.A = (byte)(color.A * coverage);
+                    Draw(texture, new Vector2(ix, iy), new Rectangle(0, 0, 1, 1), c, 0f, Vector2.One, depth);
+                }
+            }
+        }
+
+        // Anti-aliased rounded-rect outline (border). Straight edges are quads;
+        // the four corners are AA arcs covering only the [radius-thickness, radius]
+        // band. Used for window/widget framing where Clay emits a Border command
+        // with a corner radius.
+        public void DrawRoundedRectangleOutline(Texture2D texture, Rectangle rectangle, float cornerRadius, float thickness, Color color, float depth = 0.0f)
+        {
+            if (thickness <= 0)
+                return;
+            if (cornerRadius <= 0)
+            {
+                int t = (int)MathF.Ceiling(thickness);
+                Draw(texture, new Vector2(rectangle.X, rectangle.Y), new Rectangle(0, 0, rectangle.Width, t), color, 0f, Vector2.One, depth);
+                Draw(texture, new Vector2(rectangle.X, rectangle.Y + rectangle.Height - t), new Rectangle(0, 0, rectangle.Width, t), color, 0f, Vector2.One, depth);
+                Draw(texture, new Vector2(rectangle.X, rectangle.Y), new Rectangle(0, 0, t, rectangle.Height), color, 0f, Vector2.One, depth);
+                Draw(texture, new Vector2(rectangle.X + rectangle.Width - t, rectangle.Y), new Rectangle(0, 0, t, rectangle.Height), color, 0f, Vector2.One, depth);
+                return;
+            }
+
+            float maxRadius = Math.Min(rectangle.Width, rectangle.Height) * 0.5f;
+            cornerRadius = Math.Min(cornerRadius, maxRadius);
+            int th = (int)MathF.Ceiling(thickness);
+            int cr = (int)cornerRadius;
+
+            // Top / bottom / left / right straight runs (between the corner arcs).
+            int spanX = rectangle.Width - cr * 2;
+            int spanY = rectangle.Height - cr * 2;
+            if (spanX > 0)
+            {
+                Draw(texture, new Vector2(rectangle.X + cr, rectangle.Y), new Rectangle(0, 0, spanX, th), color, 0f, Vector2.One, depth);
+                Draw(texture, new Vector2(rectangle.X + cr, rectangle.Y + rectangle.Height - th), new Rectangle(0, 0, spanX, th), color, 0f, Vector2.One, depth);
+            }
+            if (spanY > 0)
+            {
+                Draw(texture, new Vector2(rectangle.X, rectangle.Y + cr), new Rectangle(0, 0, th, spanY), color, 0f, Vector2.One, depth);
+                Draw(texture, new Vector2(rectangle.X + rectangle.Width - th, rectangle.Y + cr), new Rectangle(0, 0, th, spanY), color, 0f, Vector2.One, depth);
+            }
+
+            DrawRoundedCornerRing(texture, rectangle.X + cornerRadius, rectangle.Y + cornerRadius, cornerRadius, thickness, color, depth, 0);
+            DrawRoundedCornerRing(texture, rectangle.X + rectangle.Width - cornerRadius, rectangle.Y + cornerRadius, cornerRadius, thickness, color, depth, 1);
+            DrawRoundedCornerRing(texture, rectangle.X + rectangle.Width - cornerRadius, rectangle.Y + rectangle.Height - cornerRadius, cornerRadius, thickness, color, depth, 2);
+            DrawRoundedCornerRing(texture, rectangle.X + cornerRadius, rectangle.Y + rectangle.Height - cornerRadius, cornerRadius, thickness, color, depth, 3);
+        }
+
+        private void DrawRoundedCornerRing(Texture2D texture, float centerX, float centerY, float radius, float thickness, Color color, float depth, int quadrant)
+        {
+            int r = (int)MathF.Ceiling(radius);
+            int baseX = (int)MathF.Floor(centerX - radius);
+            int baseY = (int)MathF.Floor(centerY - radius);
+            float inner = radius - thickness;
+
+            for (int x = 0; x <= r * 2 + 1; x++)
+            {
+                for (int y = 0; y <= r * 2 + 1; y++)
+                {
+                    int ix = baseX + x;
+                    int iy = baseY + y;
+                    float dx = ix + 0.5f - centerX;
+                    float dy = iy + 0.5f - centerY;
+
+                    bool inQuadrant = quadrant switch
+                    {
+                        0 => dx <= 0.5f && dy <= 0.5f,
+                        1 => dx >= -0.5f && dy <= 0.5f,
+                        2 => dx >= -0.5f && dy >= -0.5f,
+                        _ => dx <= 0.5f && dy >= -0.5f,
+                    };
+                    if (!inQuadrant)
+                        continue;
+
+                    float distance = MathF.Sqrt(dx * dx + dy * dy);
+                    // Coverage of the annulus: fade on the outer edge AND inner edge.
+                    float outer = Math.Clamp(radius - distance + 0.5f, 0f, 1f);
+                    float innerCov = Math.Clamp(distance - inner + 0.5f, 0f, 1f);
+                    float coverage = MathF.Min(outer, innerCov);
+                    if (coverage <= 0f)
+                        continue;
+
+                    var c = color;
+                    c.A = (byte)(color.A * coverage);
+                    Draw(texture, new Vector2(ix, iy), new Rectangle(0, 0, 1, 1), c, 0f, Vector2.One, depth);
+                }
+            }
+        }
+
+        // Soft drop shadow for a rounded rect. `rect` is the shadow silhouette
+        // (the casting element's box already shifted by the drop offset). Per-pixel
+        // signed-distance falloff over the blur band: each pixel gets ONE alpha
+        // from its distance to the silhouette (no layer stacking → no seams).
+        //
+        // The element itself is opaque, so the silhouette's interior is normally
+        // hidden — but when the shadow is OFFSET, the offset sliver of that interior
+        // sticks out past the element and MUST still be drawn, or it reads as a
+        // transparent gap between the element and its shadow. So the interior skip
+        // is tested against the OCCLUDER (the element's true box = rect − offset),
+        // not the silhouette: only pixels actually under the element are skipped.
+        public void DrawRoundedRectangleShadow(Texture2D texture, Rectangle rect, float cornerRadius, float blur, float offsetX, float offsetY, Color color, float depth = 0.0f)
+        {
+            if (blur < 1f) blur = 1f;
+            int b = (int)MathF.Ceiling(blur);
+            float cx = rect.X + rect.Width * 0.5f;
+            float cy = rect.Y + rect.Height * 0.5f;
+            float hx = rect.Width * 0.5f;
+            float hy = rect.Height * 0.5f;
+            float r = Math.Min(cornerRadius, Math.Min(hx, hy));
+            // Occluder centre (element's true box, before the drop offset).
+            float ocx = cx - offsetX, ocy = cy - offsetY;
+
+            int x0 = rect.X - b, x1 = rect.X + rect.Width + b;
+            int y0 = rect.Y - b, y1 = rect.Y + rect.Height + b;
+
+            for (int py = y0; py < y1; py++)
+            {
+                float dy = MathF.Abs(py + 0.5f - cy) - (hy - r);
+                float ody = MathF.Abs(py + 0.5f - ocy) - (hy - r);
+                for (int px = x0; px < x1; px++)
+                {
+                    float dx = MathF.Abs(px + 0.5f - cx) - (hx - r);
+                    float qx = MathF.Max(dx, 0f), qy = MathF.Max(dy, 0f);
+                    float d = MathF.Sqrt(qx * qx + qy * qy) + MathF.Min(MathF.Max(dx, dy), 0f) - r;
+                    if (d > blur)
+                        continue;
+
+                    // Covered by the element (its true box) → skip; the offset sliver
+                    // is NOT covered, so it still draws and the shadow meets the element.
+                    float odx = MathF.Abs(px + 0.5f - ocx) - (hx - r);
+                    float oqx = MathF.Max(odx, 0f), oqy = MathF.Max(ody, 0f);
+                    float dOcc = MathF.Sqrt(oqx * oqx + oqy * oqy) + MathF.Min(MathF.Max(odx, ody), 0f) - r;
+                    if (dOcc < -1.5f)
+                        continue;
+
+                    float t = d <= 0f ? 1f : 1f - d / blur;
+                    float a = color.A * t * t;        // squared = softer outer tail
+                    if (a < 1f)
+                        continue;
+
+                    var c = color;
+                    c.A = (byte)a;
+                    Draw(texture, new Vector2(px, py), new Rectangle(0, 0, 1, 1), c, 0f, Vector2.One, depth);
                 }
             }
         }
