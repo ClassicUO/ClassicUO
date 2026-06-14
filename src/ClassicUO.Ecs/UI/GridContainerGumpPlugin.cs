@@ -24,6 +24,8 @@ internal struct GridContainerWindow { public uint Serial; }
 internal struct GridContainerContent { public uint Serial; }
 internal struct GridContainerRow { public ulong Window; }
 internal struct GridContainerResizeHandle { public ulong Window; }
+internal struct GridContainerSearchFrame { public uint Serial; }
+internal struct GridContainerSortButton { public uint Serial; }
 internal struct GridContainerCell { public uint Serial; public ushort Graphic; }
 
 internal enum GridSort : byte { None, Name, Graphic }
@@ -55,6 +57,8 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
     private const int HeaderH = 28;
     private const int Cell = 50;
     private const int Grip = 14;
+    private const int SortW = 48;
+    private const int HeaderGap = 4;
     private const int MinWin = 160, MaxWin = 900;
 
     private static int LastW = 320, LastH = 300;
@@ -162,10 +166,11 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
                 {
                     PositionType = PositionType.Absolute,
                     Left = Val.Px(Inset), Top = Val.Px(5),
-                    Width = Val.Px(150), Height = Val.Px(18),
+                    Width = Val.Px(w - Inset * 2 - SortW - HeaderGap), Height = Val.Px(18),
                 })
                 .Insert(new BackgroundColor(s_fieldBg))
-                .Insert(BorderRadius.All(4));
+                .Insert(BorderRadius.All(4))
+                .Insert(new GridContainerSearchFrame { Serial = ev.Serial });
             var searchField = GuiPlugin.SpawnTextField(
                 commands, searchFrame, new Vector2(5, 3),
                 new TextFont { FontId = (ushort)(5 | UoFontRuntime.AsciiFlag), Size = 14 },
@@ -179,8 +184,8 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
                 .Insert(new Node
                 {
                     PositionType = PositionType.Absolute,
-                    Left = Val.Px(166), Top = Val.Px(5),
-                    Width = Val.Px(48), Height = Val.Px(18),
+                    Left = Val.Px(w - Inset - SortW), Top = Val.Px(5),
+                    Width = Val.Px(SortW), Height = Val.Px(18),
                     JustifyContent = JustifyContent.Center,
                     AlignItems = AlignItems.Center,
                 })
@@ -191,6 +196,7 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
                 .Insert(new TextColor(s_text))
                 .Insert(Interaction.None)
                 .Insert(new Button())
+                .Insert(new GridContainerSortButton { Serial = ev.Serial })
                 .Insert<UiNoWindowDrag>();
             sortBtn.Observe((On<UiClick> _, ResMut<GridContainerState> st) =>
             {
@@ -374,7 +380,9 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
         Local<ResizeAnchor> anchor,
         Query<Data<Node, ComputedNode, GridContainerResizeHandle>> gripQ,
         Query<Data<Node, GridContainerWindow>> windowsQ,
-        Query<Data<Node, GridContainerContent>> contentQ)
+        Query<Data<Node, GridContainerContent>> contentQ,
+        Query<Data<Node, GridContainerSearchFrame>> searchQ,
+        Query<Data<Node, GridContainerSortButton>> sortQ)
     {
         bool held = mouse.Value.IsPressed(MouseButtonType.Left) || mouse.Value.IsPressedOnce(MouseButtonType.Left);
         if (!held)
@@ -436,6 +444,12 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
                 node.Ref.Left = Val.Px(w - Grip - 2);
                 node.Ref.Top = Val.Px(h - Grip - 2);
             }
+        foreach (var (_, node, s) in searchQ)
+            if (s.Ref.Serial == anchor.Value.Serial)
+                node.Ref.Width = Val.Px(w - Inset * 2 - SortW - HeaderGap);
+        foreach (var (_, node, s) in sortQ)
+            if (s.Ref.Serial == anchor.Value.Serial)
+                node.Ref.Left = Val.Px(w - Inset - SortW);
     }
 
     private static void CloseWindows(
