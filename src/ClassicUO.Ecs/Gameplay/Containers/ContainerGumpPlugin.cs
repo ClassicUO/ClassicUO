@@ -35,7 +35,9 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         app.AddResource(new ContainerDataRegistry());
         app.AddResource(new ContainerUiMap());
         app.AddResource(new ContainerPositionMemory());
+        app.AddResource(new ContainerBackendSwitch());
 
+        var switchBackendFn = SwitchContainerBackend;
         var spawnUiFn = SpawnContainerWindow;
         var updateSlotsFn = UpdateContainerSlots;
         var animateEyeFn = AnimateCorpseEye;
@@ -54,6 +56,14 @@ internal readonly struct ContainerGumpPlugin : IPlugin
             // consumer this frame sees the current settings.
             .AddSystem(syncProfileFn)
                 .InStage(Stage.First)
+                .Build()
+
+            // std<->grid backend toggle: rebuild every open container when the
+            // user flips Profile.UseGridContainers mid-session (see
+            // SwitchContainerBackend).
+            .AddSystem(switchBackendFn)
+                .InStage(Stage.First)
+                .RunIf((Res<State<GameState>> s) => s.Value.Current == GameState.GameScreen)
                 .Build()
 
             // Legacy ContainerGump.OnDragEnd: dropping a dragged container
@@ -241,6 +251,88 @@ internal readonly struct ContainerGumpPlugin : IPlugin
         // don't want a stale SourceUiEntity id pointing at a despawned slot.
         grabbed.Value.Clear();
         grabbed.Value.SourceUiEntity = 0;
+    }
+
+    // std<->grid container backend toggle. The two backends only diverge at OPEN
+    // time (ContainerOpenedEvent is consumed once), so flipping
+    // Profile.UseGridContainers mid-session leaves already-open windows in the
+    // stale backend. Rebuild them: close every open container, then once the
+    // close + its child cascade have fully drained, re-send ContainerOpenedEvent
+    // so the now-active backend respawns each window.
+    //
+    // Two-phase, gated on the close stream being empty: a stray ContainerClosedEvent
+    // still in flight would wipe a freshly-rebuilt window's bookkeeping (grid
+    // CloseWindows removes its view unconditionally on any matching close). Corpse
+    // windows (0x0009) are left alone — the grid toggle doesn't govern them
+    // (corpses are owned by GridLootGumpPlugin / std corpse view).
+    private static void SwitchContainerBackend(
+        ResMut<ContainerBackendSwitch> state,
+        Res<Profile> profile,
+        Res<NetworkEntitiesMap> entitiesMap,
+        ResMut<ContainerPositionMemory> memory,
+        EventReader<ContainerClosedEvent> closeReader,
+        EventWriter<ContainerClosedEvent> closeWriter,
+        EventWriter<ContainerOpenedEvent> openWriter,
+        EventWriter<ContainerSlotEvent> slotWriter,
+        Query<Data<ContainerWindow, ContainerGumpTag, Node>> windowsQ,
+        Query<Data<TinyEcs.Parent, Graphic, Hue, Amount, ContainerSlotPosition, NetworkSerial>,
+            Filter<With<ContainedInto>, Optional<Amount>>> itemsQ)
+    {
+        var sw = state.Value;
+        bool useGrid = profile.Value.UseGridContainers;
+
+        if (!sw.Initialized)
+        {
+            sw.Initialized = true;
+            sw.LastUseGrid = useGrid;
+            return;
+        }
+
+        // Phase 1: toggle just flipped — capture + close every open container.
+        if (useGrid != sw.LastUseGrid)
+        {
+            sw.LastUseGrid = useGrid;
+            sw.PendingReopen.Clear();
+            foreach (var (_, win, tag, node) in windowsQ)
+            {
+                if (tag.Ref.OriginalGraphic == 0x0009) continue;
+                sw.PendingReopen.Add((win.Ref.Serial, tag.Ref.OriginalGraphic));
+                // Stash the live position so the reopen lands in place. Both
+                // backends consume ContainerPositionMemory.Saved (consume-once) on
+                // open, so the window keeps its spot across the switch.
+                memory.Value.Saved[win.Ref.Serial] =
+                    new Point((int)node.Ref.Left.Value, (int)node.Ref.Top.Value);
+                closeWriter.Send(new ContainerClosedEvent(win.Ref.Serial));
+            }
+            return;
+        }
+
+        if (sw.PendingReopen.Count == 0)
+            return;
+
+        // Phase 2: wait until the close + cascade fully settle before reopening.
+        if (closeReader.HasEvents)
+            return;
+
+        foreach (var (serial, graphic) in sw.PendingReopen)
+        {
+            openWriter.Send(new ContainerOpenedEvent(serial, graphic));
+
+            // Replay the container's items as slot events. Grid repopulates from
+            // child entities itself, but the std backend only fills from this
+            // stream — without it a grid->std switch reopens empty windows.
+            if (!entitiesMap.Value.TryGet(serial, out var containerEnt))
+                continue;
+            foreach (var (parent, g, hue, amount, slotPos, itemSerial) in itemsQ)
+            {
+                if ((ulong)parent.Ref.Id != containerEnt) continue;
+                var amt = amount.IsValid() ? amount.Ref.Value : 1;
+                slotWriter.Send(ContainerSlotEvent.Add(
+                    serial, itemSerial.Ref.Value, g.Ref.Value, hue.Ref.Value,
+                    slotPos.Ref.X, slotPos.Ref.Y, (ushort)Math.Clamp(amt, 1, ushort.MaxValue)));
+            }
+        }
+        sw.PendingReopen.Clear();
     }
 
     // Mirrors the legacy ItemGump.OnMouseOver path: when the cursor is over a
@@ -1114,6 +1206,17 @@ internal struct ContainerEyeTag
 internal struct MinimizeHitbox
 {
     public ulong Container;   // UI entity id
+}
+
+// Tracks Profile.UseGridContainers across frames so SwitchContainerBackend can
+// rebuild every open container when the std<->grid toggle flips mid-session.
+internal sealed class ContainerBackendSwitch
+{
+    public bool Initialized;
+    public bool LastUseGrid;
+    // (serial, server-sent graphic) captured at close time, reopened once the
+    // close + child cascade have drained.
+    public readonly List<(uint Serial, ushort Graphic)> PendingReopen = new();
 }
 
 // Per-serial remembered window positions for OverrideContainerLocationSetting

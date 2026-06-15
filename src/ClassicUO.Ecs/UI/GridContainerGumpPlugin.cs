@@ -109,6 +109,7 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
         Commands commands,
         ResMut<GridContainerState> state,
         ResMut<UiZCounter> zCounter,
+        ResMut<ContainerPositionMemory> memory,
         EventReader<ContainerOpenedEvent> reader)
     {
         foreach (var ev in reader.Read())
@@ -120,12 +121,21 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
 
             int w = LastW, h = LastH;
 
+            // A backend switch (or setting-3 "remember position") stashes the
+            // window's last spot here; consume it once, else default.
+            float px = 120, py = 120;
+            if (memory.Value.Saved.TryGetValue(ev.Serial, out var saved))
+            {
+                memory.Value.Saved.Remove(ev.Serial);
+                px = saved.X; py = saved.Y;
+            }
+
             var root = commands.Spawn()
                 .Insert(new Node
                 {
                     Display = Display.Flex,
                     PositionType = PositionType.Absolute,
-                    Left = Val.Px(120), Top = Val.Px(120),
+                    Left = Val.Px(px), Top = Val.Px(py),
                     Width = Val.Px(w), Height = Val.Px(h),
                 })
                 .Insert(new BackgroundColor(s_panelBg))
@@ -193,8 +203,12 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
                 .Insert(new BackgroundColor(s_fieldBg))
                 .Insert(BorderRadius.All(4))
                 .Insert(new GridContainerSearchFrame { Serial = ev.Serial });
+            // contentOffset.Y centres the fixed-size ASCII font-5 cell (~16px,
+            // same as the options search box) in the 18px frame: (18-16)/2 = 1.
+            // The old 3 predated the DrawText ink-centring fix and now floats the
+            // text ~2px low.
             var searchField = GuiPlugin.SpawnTextField(
-                commands, searchFrame, new Vector2(5, 3),
+                commands, searchFrame, new Vector2(5, 1),
                 new TextFont { FontId = (ushort)(5 | UoFontRuntime.AsciiFlag), Size = 14 },
                 UoFontRuntime.AsciiHue(1), string.Empty, masked: false);
             commands.AddChild(root.Id, searchFrame.Id);
