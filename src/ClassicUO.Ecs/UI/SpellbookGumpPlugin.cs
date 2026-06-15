@@ -372,11 +372,22 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
         }
     }
 
+    // These labels are placed at absolute y to match the spellbook gump art.
+    // DrawText shifts ASCII ink up to centre it in the font cell — right for
+    // boxed fields, but it lifts these labels off their tuned y ("a bit up").
+    // Cancel that per-font shift so the ink lands at the legacy y again.
+    private static float LegacyLabelTop(int font, int y)
+    {
+        var (inkTop, inkH, cell) = UoFontRenderer.CaretMetrics((ushort)(font | UoFontRuntime.AsciiFlag));
+        float yShift = (cell - inkH) / 2f - inkTop; // mirror GuiRenderingPlugin.DrawText
+        return y - yShift;
+    }
+
     // A clickable, hover-recoloured spell label (None-kind custom for a hit box;
     // SpellLabel drives the over-colour via SpellLabelHover).
     private static EntityCommands SpawnSpellLabel(Commands commands, string text, int font, int x, int y, int w)
         => commands.Spawn()
-            .Insert(new Node { PositionType = PositionType.Absolute, Left = Val.Px(x), Top = Val.Px(y), Width = Val.Px(w), Height = Val.Auto })
+            .Insert(new Node { PositionType = PositionType.Absolute, Left = Val.Px(x), Top = Val.Px(LegacyLabelTop(font, y)), Width = Val.Px(w), Height = Val.Auto })
             .Insert(new Text(text))
             .Insert(new TextFont { FontId = (ushort)(font | UoFontRuntime.AsciiFlag), Size = 12 })
             .Insert(new TextColor(UoFontRuntime.AsciiHue(SpellHue)))
@@ -387,7 +398,7 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
     private static void AddText(Commands commands, ulong parent, string s, int font, int x, int y)
     {
         var t = commands.Spawn()
-            .Insert(new Node { PositionType = PositionType.Absolute, Left = Val.Px(x), Top = Val.Px(y), Width = Val.Auto, Height = Val.Auto })
+            .Insert(new Node { PositionType = PositionType.Absolute, Left = Val.Px(x), Top = Val.Px(LegacyLabelTop(font, y)), Width = Val.Auto, Height = Val.Auto })
             .Insert(new Text(s))
             .Insert(new TextFont { FontId = (ushort)(font | UoFontRuntime.AsciiFlag), Size = 12 })
             .Insert(new TextColor(UoFontRuntime.AsciiHue(SpellHue)));
