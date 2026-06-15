@@ -501,10 +501,11 @@ internal readonly struct TextEditPlugin : IPlugin
                 continue;
             }
             // Size the bar to the glyph ink (cap-top to descender), not the full
-            // font cell / font.Size — the cell's top leading made the caret overshoot
-            // above the text. Same metric the multiline (renderer) caret uses.
-            var (caretTop, caretH) = UoFontRenderer.CaretMetrics(a.FontId);
-            float caretY = cy + caretTop + caret.Ref.OffsetY;
+            // font cell — the cell's top leading made the caret overshoot above the
+            // text. Centre it on the same ink band DrawText centres the glyphs on
+            // ((cell-ink)/2 from the line top; cy = 0 for single-line).
+            var (_, caretH, _) = UoFontRenderer.CaretMetrics(a.FontId);
+            float caretY = cy + (a.LineHeight - caretH) / 2f + caret.Ref.OffsetY;
             if (caret.Ref.MaxY > 0)
             {
                 if (caretY >= caret.Ref.MaxY)
@@ -543,7 +544,11 @@ internal readonly struct TextEditPlugin : IPlugin
                     continue;
                 }
             }
-            float selTop = y0 + sel.Ref.OffsetY;
+            // Centre the highlight on the same ink band as the glyphs/caret
+            // (single-line: y0 = 0, box top = row top).
+            var (_, selInkH, _) = UoFontRenderer.CaretMetrics(a.FontId);
+            float selTop = y0 + (a.LineHeight - selInkH) / 2f + sel.Ref.OffsetY;
+            float selH = selInkH;
             if (sel.Ref.MaxY > 0)
             {
                 if (selTop >= sel.Ref.MaxY)
@@ -551,9 +556,10 @@ internal readonly struct TextEditPlugin : IPlugin
                     node.Ref.Display = Display.None;
                     continue;
                 }
-                node.Ref.Height = Val.Px(MathF.Min(a.LineHeight, sel.Ref.MaxY - selTop));
+                selH = MathF.Min(selInkH, sel.Ref.MaxY - selTop);
             }
             node.Ref.Display = Display.Flex;
+            node.Ref.Height = Val.Px(selH);
             node.Ref.Left = Val.Px(selLeft);
             node.Ref.Top = Val.Px(selTop);
             node.Ref.Width = Val.Px(MathF.Max(1, selRight - selLeft));
@@ -576,7 +582,7 @@ internal readonly struct TextEditPlugin : IPlugin
                 // Size the caret to the font's glyph ink (cap-top to descender),
                 // not the full line cell — the line cell has top leading that made
                 // the bar overshoot above the text.
-                var (caretTop, caretH) = UoFontRenderer.CaretMetrics(a.FontId);
+                var (caretTop, caretH, _) = UoFontRenderer.CaretMetrics(a.FontId);
                 render.CaretOn = on;
                 render.CaretX = cx;
                 render.CaretY = cy + caretTop;

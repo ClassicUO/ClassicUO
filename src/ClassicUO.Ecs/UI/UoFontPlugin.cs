@@ -679,16 +679,19 @@ internal static class UoFontRenderer
         return rects;
     }
 
-    private static readonly Dictionary<ushort, (float Top, float Height)> _caretMetrics = new();
+    private static readonly Dictionary<ushort, (float Top, float Height, float Cell)> _caretMetrics = new();
 
-    // Caret bar geometry for a font: the visible glyph INK extent within a line,
-    // NOT the line cell. The cell (what MeasureFont returns) carries top leading
-    // and — for the ASCII fonts — a tall transparent-padded bitmap, so a caret
-    // sized to it floats well above/below the text. Scan the actual glyph pixels of
-    // a cap + a descender for the inked rows (BearingY + first/last lit row); Top =
-    // where the cap ink begins, Height = cap-ink-top to descender-ink-bottom. Cached
-    // per font (RenderSingleGlyph* allocates, so this runs once).
-    public static (float Top, float Height) CaretMetrics(ushort fontId)
+    // Glyph-ink geometry for a font: the visible INK extent within a line, plus
+    // the full line cell. The cell (what MeasureFont returns) carries top leading
+    // and — for the ASCII fonts — a tall transparent-padded bitmap, so the ink
+    // sits asymmetrically low in the cell; a caret sized to the cell floats above
+    // the text, and text drawn at the cell top floats low. Scan the actual glyph
+    // pixels of a cap + a descender for the inked rows (BearingY + first/last lit
+    // row): Top = where the cap ink begins, Height = cap-ink-top to descender-ink-
+    // bottom, Cell = the full line cell (MeasureFont). Callers centre the ink
+    // within the cell ((Cell-Height)/2) to cancel the asymmetry. Cached per font
+    // (RenderSingleGlyph* allocates, so this runs once).
+    public static (float Top, float Height, float Cell) CaretMetrics(ushort fontId)
     {
         if (_caretMetrics.TryGetValue(fontId, out var m))
             return m;
@@ -721,12 +724,14 @@ internal static class UoFontRenderer
                 if (gb > bottom) bottom = gb;
             }
         }
+        float cell = MeasureFont("Wg", fontId, int.MaxValue, allowHtml: false).Height;
         if (top == int.MaxValue)
         {
             top = 0;
-            bottom = (int)MeasureFont("Wg", fontId, int.MaxValue, allowHtml: false).Height;
+            bottom = (int)cell;
         }
-        m = (top, Math.Max(1, bottom - top));
+        if (cell <= 0) cell = bottom;
+        m = (top, Math.Max(1, bottom - top), cell);
         _caretMetrics[fontId] = m;
         return m;
     }
