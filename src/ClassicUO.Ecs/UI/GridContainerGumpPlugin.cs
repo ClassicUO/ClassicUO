@@ -286,8 +286,8 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
         Query<Data<Graphic>> graphicQ,
         Query<Data<GridContainerWindow, Node, GlobalZIndex>> windowsQ,
         Query<Data<GridContainerRow>> rowsQ,
-        Query<Data<TinyEcs.Parent, Graphic, Hue, Amount, NetworkSerial, EntityName>,
-            Filter<With<ContainedInto>, Optional<Amount>, Optional<EntityName>>> itemsQ)
+        Query<Data<TinyEcs.Parent, Graphic, Hue, Amount, NetworkSerial>,
+            Filter<With<ContainedInto>, Optional<Amount>>> itemsQ)
     {
         foreach (var ev in slotEvents.Read())
         {
@@ -346,13 +346,22 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
 
             // Build the filtered + sorted display list from the container's
             // direct child items.
+            var tiles = fileManager.Value.TileData.StaticData;
             var list = new List<(uint serial, ushort graphic, ushort hue, ushort amount, string name)>();
-            foreach (var (parent, graphic, hue, amount, serial, name) in itemsQ)
+            foreach (var (parent, graphic, hue, amount, serial) in itemsQ)
             {
                 if ((ulong)parent.Ref.Id != containerEnt)
                     continue;
-                string nm = name.IsValid() ? name.Ref.Value : null;
-                if (query.Length > 0 && (nm == null || !nm.Contains(query, StringComparison.OrdinalIgnoreCase)))
+
+                // Item name for search/sort: OPL (tooltip) name if loaded, else
+                // the tiledata name (see ResolveItemSearchName). Request the OPL
+                // while searching so the full name upgrades the tiledata fallback.
+                string oplName = opl.Value.TryGet(serial.Ref.Value, out var itemOpl) ? itemOpl.Name : null;
+                if (string.IsNullOrEmpty(oplName) && query.Length > 0)
+                    opl.Value.Request(serial.Ref.Value);
+                string nm = ResolveItemSearchName(oplName, tiles, graphic.Ref.Value);
+
+                if (!MatchesSearch(nm, query))
                     continue;
                 var amt = amount.IsValid() ? amount.Ref.Value : 1;
                 list.Add((serial.Ref.Value, graphic.Ref.Value, hue.Ref.Value, (ushort)Math.Clamp(amt, 1, ushort.MaxValue), nm));
@@ -426,6 +435,28 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
                 colInRow++;
             }
         }
+    }
+
+    // Search/sort name for a container item: the OPL (tooltip) name if loaded,
+    // else the tiledata name. Never null for a real item — the tiledata table
+    // always has an entry. This is the regression guard: the old filter keyed on
+    // EntityName, which is mobile-only (null on container items), so search
+    // matched nothing.
+    internal static string ResolveItemSearchName(string oplName, StaticTiles[] tiles, ushort graphic)
+    {
+        if (!string.IsNullOrEmpty(oplName))
+            return oplName;
+        return graphic < tiles.Length ? tiles[graphic].Name : null;
+    }
+
+    // Search filter: an empty query shows everything; otherwise a case-insensitive
+    // substring match on the item name.
+    internal static bool MatchesSearch(string name, string query)
+    {
+        if (string.IsNullOrEmpty(query))
+            return true;
+        return !string.IsNullOrEmpty(name)
+            && name.Contains(query, StringComparison.OrdinalIgnoreCase);
     }
 
     private static int Sig(List<(uint serial, ushort graphic, ushort hue, ushort amount, string name)> list, int cols, string query, GridSort sort)
