@@ -532,10 +532,11 @@ internal readonly struct TextEditPlugin : IPlugin
             }
             // Size the bar to the glyph ink (cap-top to descender), not the full
             // font cell — the cell's top leading made the caret overshoot above the
-            // text. Centre it on the same ink band DrawText centres the glyphs on
-            // ((cell-ink)/2 from the line top; cy = 0 for single-line).
-            var (_, caretH, _) = UoFontRenderer.CaretMetrics(a.FontId);
-            float caretY = cy + (a.LineHeight - caretH) / 2f + caret.Ref.OffsetY;
+            // text. Sit it on the ink at the line's natural top (cy + ink top),
+            // matching the glyphs (drawn at their natural origin) and the multiline
+            // path below. cy = 0 for single-line.
+            var (caretInkTop, caretH, _) = UoFontRenderer.CaretMetrics(a.FontId);
+            float caretY = cy + caretInkTop + caret.Ref.OffsetY;
             if (caret.Ref.MaxY > 0)
             {
                 if (caretY >= caret.Ref.MaxY)
@@ -574,10 +575,10 @@ internal readonly struct TextEditPlugin : IPlugin
                     continue;
                 }
             }
-            // Centre the highlight on the same ink band as the glyphs/caret
-            // (single-line: y0 = 0, box top = row top).
-            var (_, selInkH, _) = UoFontRenderer.CaretMetrics(a.FontId);
-            float selTop = y0 + (a.LineHeight - selInkH) / 2f + sel.Ref.OffsetY;
+            // Sit the highlight on the same ink band as the glyphs/caret, at the
+            // line's natural top (single-line: y0 = 0, box top = row top).
+            var (selInkTop, selInkH, _) = UoFontRenderer.CaretMetrics(a.FontId);
+            float selTop = y0 + selInkTop + sel.Ref.OffsetY;
             float selH = selInkH;
             if (sel.Ref.MaxY > 0)
             {

@@ -298,24 +298,18 @@ internal readonly struct GuiRenderingPlugin : IPlugin
         // ClayColor on TextColor becomes the per-draw tint applied to the
         // white-baked bitmap.
         //
-        // Cancel the font's intrinsic vertical asymmetry: the measured line cell
-        // carries top leading — large for the ASCII bitmap fonts, which bake
-        // transparent rows above the glyph — so drawing at the cell top floats the
-        // ink low. Shift so the ink sits centred within the font's OWN cell, i.e.
-        // symmetric leading. This is a per-font constant (independent of the
-        // element box), so text keeps its box's anchoring — a tall fixed box still
-        // top-anchors its text — instead of being re-centred in the box. Matches
-        // the caret, placed by the same metrics.
-        var (inkTop, inkH, cell) = UoFontRenderer.CaretMetrics(t.FontId);
-        float yShift = (cell - inkH) / 2f - inkTop;
-
+        // Draw at the node's natural top, exactly like the legacy client — no
+        // vertical centring here. Labels are positioned to match the gump art at
+        // that natural origin; only boxed text FIELDS want their text centred in
+        // the box, and SpawnTextField does that locally (shifts its own text row),
+        // so the centring never leaks onto plain labels.
         UoFontRenderer.Draw(
             b,
             t.Text,
             t.FontId,
             ToXnaColor(t.TextColor),
             (int)cmd.BoundingBox.X,
-            (int)(cmd.BoundingBox.Y + yShift),
+            (int)cmd.BoundingBox.Y,
             (int)cmd.BoundingBox.Width,
             cmd.ZIndex);
     }

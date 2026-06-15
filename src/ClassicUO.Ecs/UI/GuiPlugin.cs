@@ -581,6 +581,17 @@ internal readonly struct GuiPlugin : IPlugin
         // flowRow: same flow treatment for a single-line field inside a scroll
         // container; the content offset becomes row padding so the glyph (and
         // TextFieldGeom caret math) keeps the same origin.
+        //
+        // DrawText draws ASCII at its natural top (ink low in the cell). A boxed
+        // FIELD wants its text centred, so shift the single-line row up by the
+        // font's ink-centring constant — the caret/selection ride the row, so they
+        // follow. Multiline flows naturally and keeps its own caret math.
+        float vCentre = 0f;
+        if (!multiline)
+        {
+            var (inkTop, inkH, cell) = UoFontRenderer.CaretMetrics(font.FontId);
+            vCentre = (cell - inkH) / 2f - inkTop;
+        }
         var rowNode = multiline
             ? new Node { FlexDirection = FlexDirection.Row, AlignItems = AlignItems.Start, Width = Val.Auto, Height = Val.Auto }
             : flowRow
@@ -590,13 +601,13 @@ internal readonly struct GuiPlugin : IPlugin
                     AlignItems = AlignItems.Center,
                     Width = Val.Auto,
                     Height = Val.Auto,
-                    Padding = new UiRect { Left = Val.Px(contentOffset.X), Top = Val.Px(contentOffset.Y) },
+                    Padding = new UiRect { Left = Val.Px(contentOffset.X), Top = Val.Px(contentOffset.Y + vCentre) },
                 }
                 : new Node
                 {
                     PositionType = PositionType.Absolute,
                     Left = Val.Px(contentOffset.X),
-                    Top = Val.Px(contentOffset.Y),
+                    Top = Val.Px(contentOffset.Y + vCentre),
                     FlexDirection = FlexDirection.Row,
                     AlignItems = AlignItems.Center,
                     Width = Val.Auto,
