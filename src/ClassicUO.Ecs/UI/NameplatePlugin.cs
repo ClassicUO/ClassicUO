@@ -121,7 +121,6 @@ internal readonly struct NameplatePlugin : IPlugin
     private const int HpBarHeight = Constants.OBJECT_HANDLES_HP_BAR_HEIGHT;       // 3
     private const ushort ItemHue = 0x0481;
     private const ushort CorpseGraphic = 0x2006;
-    private const float DoubleClickWindow = 300f;  // TinyEcs.Bevy.Input MouseInput.DoubleClickDelta
 
     public void Build(App app)
     {
@@ -854,7 +853,7 @@ internal readonly struct NameplatePlugin : IPlugin
 
             var (_, plate) = plateRow;
             st.PendingClickSerial = plate.Ref.Serial;
-            st.PendingClickDeadline = time.Value.Total + DoubleClickWindow;
+            st.PendingClickDeadline = time.Value.Total + MouseContext.DoubleClickDelta;
         }
     }
 

@@ -58,8 +58,6 @@ internal readonly struct PopupMenuPlugin : IPlugin
     private const ushort Background = 0x0A3C;   // resizepic
     private const ushort ArrowGump = 0x15E6;    // submenu/continuation arrow
     private const int Pad = 10;
-    // Matches MouseContext.DCLICK_DELTA — the double-click window in ms.
-    private const float DClickDelay = 300f;
     // Legacy HitBox hover bar: white at alpha 0.25 (≈64/255).
     private static readonly ClayColor Transparent = new(0, 0, 0, 0);
     private static readonly ClayColor Highlight = new(255, 255, 255, 64);
@@ -139,7 +137,7 @@ internal readonly struct PopupMenuPlugin : IPlugin
 
         state.Value.ClickPending = true;
         state.Value.ClickSerial = ser.Ref.Value;
-        state.Value.ClickTimer = time.Value.Total + DClickDelay;
+        state.Value.ClickTimer = time.Value.Total + MouseContext.DoubleClickDelta;
         state.Value.ClickPos = pos;
     }
 

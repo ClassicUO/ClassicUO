@@ -56,6 +56,15 @@ internal sealed class ActiveTextEdit : ITextEditHandler
     // the drag-select branch so holding the button down after a press that started
     // outside the field (anywhere else on screen) doesn't extend the selection.
     public bool MouseSelecting;
+
+    // Engine-clock time (Time.Total, ms) of the last press recorded on the
+    // focused field. RouteMouse calls a press a double-click when two land within
+    // DoubleClickWindow. We can't lean on MouseContext.IsPressedDouble here: it's
+    // a one-frame pulse on the press-once edge, but the field's PendingClick fires
+    // off the UiPointerDown press edge (IsPressed = two consecutive down frames),
+    // which is always a frame later — by then IsPressedDouble has been reset, so
+    // the two never coincide at this callsite. Reset on field change.
+    public float LastClickTime = float.NegativeInfinity;
     public readonly TextEditState State = new(singleLine: true);
     public readonly StringBuilder Buffer = new();
 
@@ -212,7 +221,7 @@ internal readonly struct TextEditPlugin : IPlugin
             Query<Data<MaskedText>, Filter<With<EditableText>>>,
             Query<Data<TextFont>, With<EditableText>>,
             Query<Data<UiCustom, MultilineText>, With<EditableText>>> syncFn = SyncActiveEditor;
-        Action<Res<MouseContext>, ResMut<ActiveTextEdit>,
+        Action<Res<MouseContext>, Res<Time>, ResMut<ActiveTextEdit>,
             Query<Data<ComputedNode>>, Query<Data<TextFieldGeom>>> mouseFn = RouteMouse;
         Action<Res<KeyboardContext>, ResMut<ActiveTextEdit>> keysFn = RouteKeys;
         Action<EventReader<CharInput>, ResMut<ActiveTextEdit>> charsFn = RouteChars;
@@ -247,6 +256,7 @@ internal readonly struct TextEditPlugin : IPlugin
     // row's left offset.
     private static void RouteMouse(
         Res<MouseContext> mouse,
+        Res<Time> time,
         ResMut<ActiveTextEdit> edit,
         Query<Data<ComputedNode>> computedQ,
         Query<Data<TextFieldGeom>> geomQ)
@@ -293,8 +303,25 @@ internal readonly struct TextEditPlugin : IPlugin
         if (a.PendingClickEntity == a.Entity)
         {
             a.PendingClickEntity = 0;
-            a.MouseSelecting = true;
             TextEdit.Click(a, a.State, a.PendingClickX - glyphLogicalX, LocalY(a.PendingClickY));
+            bool isDouble = time.Value.Total - a.LastClickTime <= MouseContext.DoubleClickDelta;
+            if (isDouble)
+            {
+                // Double-click selects the word under the caret. Leave
+                // MouseSelecting false so the held second click doesn't fall into
+                // the drag branch below and collapse the word back to a caret.
+                SelectWordAt(a);
+                a.MouseSelecting = false;
+                // Consume the pair — reset the clock so the next press is a fresh
+                // single click (which clears the selection via Click above),
+                // instead of chaining into another "double" within the window.
+                a.LastClickTime = float.NegativeInfinity;
+            }
+            else
+            {
+                a.MouseSelecting = true;
+                a.LastClickTime = time.Value.Total;
+            }
         }
         else if (a.MouseSelecting && mouse.Value.IsPressed(MouseButtonType.Left))
         {
@@ -357,6 +384,9 @@ internal readonly struct TextEditPlugin : IPlugin
             a.Buffer.Append(current);
             a.State.Initialize(singleLine: !isMulti);
             a.State.Cursor = a.Buffer.Length;
+            // A click that moves focus here must not pair with a click on the
+            // previous field as a double — restart the double-click clock.
+            if (newField) a.LastClickTime = float.NegativeInfinity;
         }
     }
 
@@ -610,6 +640,37 @@ internal readonly struct TextEditPlugin : IPlugin
             node.Ref.Height = Val.Px(Math.Max(total, font.Ref.Size));
             node.Ref.Width = Val.Px(multi.Ref.WrapWidth);
         }
+    }
+
+    // Expand the selection to the whitespace-delimited word containing the
+    // caret (double-click select-word). Mirrors legacy StbTextBox intent: a
+    // click that lands on whitespace (or an empty buffer) selects nothing. Reads
+    // the real Buffer chars, so it works for masked/multiline fields too
+    // (newline counts as whitespace, so a word never spans lines).
+    internal static void SelectWordAt(ActiveTextEdit a)
+    {
+        var buf = a.Buffer;
+        int len = buf.Length;
+        int c = Math.Clamp(a.State.Cursor, 0, len);
+
+        // Anchor on the char under the caret; if the caret landed just past a
+        // word (on the following whitespace / buffer end) but a word char
+        // precedes it, anchor on that preceding char instead.
+        int anchor = c;
+        if (anchor >= len || char.IsWhiteSpace(buf[anchor]))
+        {
+            if (c > 0 && !char.IsWhiteSpace(buf[c - 1])) anchor = c - 1;
+            else return;
+        }
+
+        int start = anchor;
+        while (start > 0 && !char.IsWhiteSpace(buf[start - 1])) --start;
+        int end = anchor + 1;
+        while (end < len && !char.IsWhiteSpace(buf[end])) ++end;
+
+        a.State.SelectStart = start;
+        a.State.SelectEnd = end;
+        a.State.Cursor = end;
     }
 
     private static string Selected(ActiveTextEdit a)

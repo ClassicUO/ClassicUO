@@ -512,10 +512,31 @@ internal readonly struct GuiPlugin : IPlugin
         decorate?.Invoke(glyph);
         ulong glyphId = glyph.Id;
 
+        // Record a press for caret placement / selection-clear (TextEditPlugin
+        // applies it after focus syncs). Attached to every hittable part of the
+        // field. glyphId is an immutable capture (the field's lifetime exceeds the
+        // observer's), so it is safe per the no-captured-mutable-state rule.
+        void AttachPress(EntityCommands ec) =>
+            ec.Observe((On<UiPointerDown> t, ResMut<FocusedInput> focused, ResMut<ActiveTextEdit> edit) =>
+            {
+                focused.Value.Entity = glyphId;
+                edit.Value.PendingClickEntity = glyphId;
+                edit.Value.PendingClickX = t.Event.Position.X;
+                edit.Value.PendingClickY = t.Event.Position.Y;
+            });
+
         // Selection highlight behind the glyphs and a caret bar over them, both
         // absolute and positioned each frame by TextEditPlugin.PositionOverlays
         // (measured from the cursor / selection indices). Added selection-first
         // so it paints under the text; caret last so it paints on top.
+        // Both are PositionType.Absolute → Clay floating elements, which capture
+        // the pointer by default and so drop the row out of Clay's hit list when
+        // the cursor is over them. Without their own Interaction + press handler a
+        // click that lands on the highlighted word never reaches the field, so the
+        // selection couldn't be cleared / the caret couldn't be re-placed by
+        // clicking on selected text. Interaction.None makes them hit targets;
+        // UiContainsByBounds captures the whole box (no per-pixel alpha test);
+        // AttachPress forwards the click to the glyph just like the row does.
         var selection = commands.Spawn()
             .Insert(new Node
             {
@@ -525,9 +546,16 @@ internal readonly struct GuiPlugin : IPlugin
                 Display = Display.None,
             })
             .Insert(new BackgroundColor(new Clay.Color(70, 110, 180, 120)))
+            .Insert(Interaction.None)
+            .Insert<UiContainsByBounds>()
             .Insert<UiNoWindowDrag>()
+            // TextInput so GameCursorPlugin shows the I-beam over the highlight
+            // too — without it the overlay (now the hovered entity) carries no
+            // TextInput in its subtree and the cursor reverts to the gauntlet.
+            .Insert<TextInput>()
             .Insert(new TextEditSelection { Target = glyphId });
         decorate?.Invoke(selection);
+        AttachPress(selection);
 
         var caret = commands.Spawn()
             .Insert(new Node
@@ -538,9 +566,13 @@ internal readonly struct GuiPlugin : IPlugin
                 Display = Display.None,
             })
             .Insert(new BackgroundColor(color))
+            .Insert(Interaction.None)
+            .Insert<UiContainsByBounds>()
             .Insert<UiNoWindowDrag>()
+            .Insert<TextInput>()
             .Insert(new TextEditCaret { Target = glyphId });
         decorate?.Invoke(caret);
+        AttachPress(caret);
 
         // Single-line: absolute row at the content offset (overlays sit on top).
         // Multiline: a FLOWING row so it (and its growing glyph) is clipped and
@@ -576,27 +608,12 @@ internal readonly struct GuiPlugin : IPlugin
             .Insert<UiContainsByBounds>()
             .Insert<UiNoWindowDrag>();
         decorate?.Invoke(row);
-        // Press records the click for caret placement (TextEditPlugin applies it
-        // after focus syncs); the raw button is consumed by the focus interaction
-        // before a plain mouse system would see it.
-        row.Observe((On<UiPointerDown> t, ResMut<FocusedInput> focused, ResMut<ActiveTextEdit> edit) =>
-        {
-            focused.Value.Entity = glyphId;
-            edit.Value.PendingClickEntity = glyphId;
-            edit.Value.PendingClickX = t.Event.Position.X;
-            edit.Value.PendingClickY = t.Event.Position.Y;
-        });
+        AttachPress(row);
         row.AddChild(selection);
         row.AddChild(glyph);
         row.AddChild(caret);
 
-        frame.Observe((On<UiPointerDown> t, ResMut<FocusedInput> focused, ResMut<ActiveTextEdit> edit) =>
-        {
-            focused.Value.Entity = glyphId;
-            edit.Value.PendingClickEntity = glyphId;
-            edit.Value.PendingClickX = t.Event.Position.X;
-            edit.Value.PendingClickY = t.Event.Position.Y;
-        });
+        AttachPress(frame);
         frame.AddChild(row);
 
         return glyphId;

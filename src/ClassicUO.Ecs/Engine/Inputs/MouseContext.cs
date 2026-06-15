@@ -15,6 +15,13 @@ namespace ClassicUO.Ecs;
 // direct.
 internal class MouseContext
 {
+    // The one double-click window (ms) for the whole ECS: two presses of the
+    // same button closer than this count as a double-click. Bound into the
+    // library in the ctor so MouseInput.IsPressedDouble (world use, nameplates,
+    // popups) and the host gestures that roll their own timer (text-field
+    // select-word, popup deadlines) all measure against this single value.
+    public const float DoubleClickDelta = 300f;
+
     // protected so a headless test double (see ClassicUO.Ecs.Tests) can feed
     // frames straight into the library without an OS mouse or FNA Game.
     protected readonly MouseInput Input = new();
@@ -47,7 +54,11 @@ internal class MouseContext
     internal bool AgentSyntheticActive => _agentSynthEnabled;
 #endif
 
-    internal MouseContext(Microsoft.Xna.Framework.Game game) => _game = game;
+    internal MouseContext(Microsoft.Xna.Framework.Game game)
+    {
+        _game = game;
+        Input.DoubleClickDelta = DoubleClickDelta;
+    }
 
     // Window-focus gate for the press-edge checks. Real input only counts while
     // the FNA window is focused; a headless subclass overrides this to stay
