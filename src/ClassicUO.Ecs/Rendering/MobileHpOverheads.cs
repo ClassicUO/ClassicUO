@@ -331,6 +331,7 @@ internal sealed class WorldOverlayParams : CompositeSystemParam
     public readonly Query<Data<NetworkSerial, WorldPosition, ScreenPositionOffset, Graphic, Hits, Notoriety, ServerFlags, EquipmentSlots>,
         Filter<Optional<ScreenPositionOffset>, Optional<Hits>, Optional<Notoriety>, Optional<ServerFlags>, Optional<EquipmentSlots>,
             Without<ContainedInto>>> Mobiles;
+    public readonly Query<Data<WorldPosition, Graphic, StaticNameLabel>> StaticLabels;
 
     public WorldOverlayParams()
     {
@@ -343,5 +344,6 @@ internal sealed class WorldOverlayParams : CompositeSystemParam
         Mobiles = Add(new Query<Data<NetworkSerial, WorldPosition, ScreenPositionOffset, Graphic, Hits, Notoriety, ServerFlags, EquipmentSlots>,
             Filter<Optional<ScreenPositionOffset>, Optional<Hits>, Optional<Notoriety>, Optional<ServerFlags>, Optional<EquipmentSlots>,
                 Without<ContainedInto>>>());
+        StaticLabels = Add(new Query<Data<WorldPosition, Graphic, StaticNameLabel>>());
     }
 }

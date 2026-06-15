@@ -167,6 +167,7 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                         overlay.Overhead.Value.Update(time.Value, networkEntities.Value);
                         overlay.Overhead.Value.Render(networkEntities.Value, b, gameCtx.Value, camera.Value, overlay.OverheadAnchors,
                             overlay.Mouse.Value, overlay.Selected.Value, nameplates.Value.PlateTops);
+                        StaticNameOverheads.Render(b, assets.Value, gameCtx.Value, camera.Value, overlay.StaticLabels);
                         b.ClipEnd();
                     }
                     break;
