@@ -571,7 +571,10 @@ internal readonly struct PaperdollPlugin : IPlugin
         // body between scrolls and chrome.
         int childIdx = BehindBodyScrollCount(gameCtx, serial);
 
-        var bodyHue = ToShaderHue(mobileHue);
+        // Body uses partial hue so the skin tone tints only the grayscale skin
+        // pixels — the baked-in white underwear stays white (legacy sets
+        // IsPartialHue=true on the body GumpPic).
+        var bodyHue = ToShaderHue(mobileHue, partial: true);
         var body = builder.AddGump(commands, bodyId, bodyHue, new Vector2(8, 19))
             .Insert(new PaperdollBodyChild { WindowEntity = rootId });
         commands.AddChild(rootId, body.Id, childIdx++);
@@ -600,7 +603,7 @@ internal readonly struct PaperdollPlugin : IPlugin
                     if (sig.Ref.Value != 0)
                     {
                         slotArtId = sig.Ref.Value;
-                        slotArtHue = sih.IsValid() ? ToShaderHue((ushort)(sih.Ref.Value & 0x3FFF)) : Vector3.UnitZ;
+                        slotArtHue = sih.IsValid() ? ToShaderHue((ushort)(sih.Ref.Value & 0x3FFF), IsPartialHue(slotArtId, tileData)) : Vector3.UnitZ;
                         var (_, slNs) = slotSerialRow;
                         slotItemSerial = slNs.Ref.Value;
                     }
@@ -691,7 +694,7 @@ internal readonly struct PaperdollPlugin : IPlugin
                 equipGump = (ushort)(animId + altOffset);
             }
 
-            var equipHue = ih.IsValid() ? ToShaderHue((ushort)(ih.Ref.Value & 0x3FFF)) : Vector3.UnitZ;
+            var equipHue = ih.IsValid() ? ToShaderHue((ushort)(ih.Ref.Value & 0x3FFF), IsPartialHue(itemGraphic, tileData)) : Vector3.UnitZ;
             var equipPic = builder.AddGump(commands, equipGump, equipHue, new Vector2(8, 19))
                 .Insert(new PaperdollBodyChild { WindowEntity = rootId });
 
@@ -790,8 +793,20 @@ internal readonly struct PaperdollPlugin : IPlugin
     // Hue=0 means "no hue applied" — must select the pass-through shader
     // (Vector3.UnitZ), NOT (0, 1, 1) which selects SHADER_HUED with hue 0
     // and renders the sprite black/transparent depending on backend.
-    private static Vector3 ToShaderHue(ushort hue)
-        => hue == 0 ? Vector3.UnitZ : new Vector3(hue, 1f, 1f);
+    //
+    // partial=true selects SHADER_PARTIAL_HUED (mode 2 in IsometricWorld.fx):
+    // the hue tints only grayscale (r==g==b) pixels, leaving baked-in color
+    // alone — white underwear on the body, dyed-cloth accents on equipment.
+    // Mirrors legacy GumpPic.IsPartialHue. (The hue index here is the raw
+    // 1-based server hue, not GetHueVector's -1 form — that off-by-one is the
+    // shared ToShaderHue convention across the ECS UI plugins, left untouched.)
+    private static Vector3 ToShaderHue(ushort hue, bool partial = false)
+        => hue == 0 ? Vector3.UnitZ : new Vector3(hue, partial ? 2f : 1f, 1f);
+
+    // Per-item partial-hue flag from tiledata (mirrors legacy
+    // GumpPicEquipment's IsPartialHue = ItemData.IsPartialHue).
+    private static bool IsPartialHue(ushort graphic, ClassicUO.Assets.StaticTiles[] tileData)
+        => graphic < tileData.Length && tileData[graphic].IsPartialHue;
 
     internal static bool ResolveIsFemale(ushort mobileGraphic)
     {
