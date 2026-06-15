@@ -79,27 +79,27 @@ internal readonly struct LightingPlugin : IPlugin
         app.AddResource(new LightRenderData());
         app.AddResource(new LightRenderTarget());
 
-        var accumulateFn = AccumulateLights;
+        // Hand the world render pass the shared light buffer. Lights are pushed
+        // from inside the static draw (WorldRenderingPlugin.RenderStatics), so
+        // only sources that survive the same camera + maxZ culling the world
+        // uses contribute — pools never bleed from off-screen / roof-cut
+        // sources (a separate full-world scan was the regression).
+        app.AddSystem(Stage.Startup, (ResMut<GameContext> gameCtx, Res<LightRenderData> lights) =>
+            gameCtx.Value.Lights = lights.Value);
+
         var renderFn = RenderLightTarget;
 
         app
-            .AddSystem(accumulateFn)
-            .InStage(Stage.PostUpdate)
-            .SingleThreaded()
-            .Label("cuo:lighting:accumulate")
-            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
-            .RunIf((Query<Data<WorldPosition>, With<Player>> q) => q.Count() > 0)
-            .Build()
-
-            // Render the light buffer into its own target BEFORE the world RT is
-            // bound (cuo:rendering:begin). The world draw then stays a single
-            // uninterrupted pass; Gui multiplies this target over it later.
+            // Render the light buffer into its own target AFTER the world draw
+            // has filled it (cuo:rendering:end) and before Gui (UiRenderStage,
+            // which runs after PostUpdate) multiplies this target over the
+            // world image. The world draw still stays a single uninterrupted
+            // pass; this binds a separate target once it has finished.
             .AddSystem(renderFn)
             .InStage(Stage.PostUpdate)
             .SingleThreaded()
             .Label("cuo:lighting:render")
-            .After("cuo:lighting:accumulate")
-            .Before("cuo:rendering:begin")
+            .After("cuo:rendering:end")
             .RunIf((Commands cmds) => cmds.HasResource<GraphicsDevice>())
             .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
             .RunIf((Res<UoGame> game) => game.Value.IsDrawable)
@@ -141,69 +141,11 @@ internal readonly struct LightingPlugin : IPlugin
         return (level, useLights);
     }
 
-    // Legacy GameScene camera-centering (FillGameObjectList/DrawWorld). Must
-    // match WorldRenderingPlugin.Rendering exactly so accumulated light coords
-    // land on the same pixels as the drawn sprites.
-    private static Vector2 CameraCenter(GameContext gameCtx, Camera camera)
-    {
-        var center = Isometric.IsoToScreen(gameCtx.CenterX, gameCtx.CenterY, gameCtx.CenterZ);
-        center.X -= camera.Bounds.Width / 2f;
-        center.Y -= camera.Bounds.Height / 2f;
-        center.X += 22f;
-        center.Y += 22f;
-        center -= gameCtx.CenterOffset;
-        return center;
-    }
-
-    private static void AccumulateLights(
-        Res<Camera> camera,
-        Res<GameContext> gameCtx,
-        Res<Profile> profile,
-        Res<WorldLight> worldLight,
-        Res<UOFileManager> fileManager,
-        ResMut<LightRenderData> lights,
-        Query<Data<ScreenPosition, Graphic, NetworkSerial, Facing>,
-            Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>, Optional<NetworkSerial>, Optional<Facing>>> queryStatics)
-    {
-        lights.Value.Count = 0;
-
-        var (_, useLights) = Compute(worldLight.Value, profile.Value);
-        if (!useLights && !profile.Value.UseAlternativeLights)
-            return;
-
-        var center = CameraCenter(gameCtx.Value, camera.Value);
-        var tileData = fileManager.Value.TileData;
-        var useColored = profile.Value.UseColoredLights;
-
-        foreach (var (screenPos, graphic, serial, facing) in queryStatics)
-        {
-            var g = graphic.Ref.Value;
-            ref readonly var data = ref tileData.StaticData[g];
-
-            var isLight = data.IsLight
-                || (g >= 0x3E02 && g <= 0x3E0B)
-                || (g >= 0x3914 && g <= 0x3929);
-            if (!isLight)
-                continue;
-
-            // Item light id rides the packet "direction" byte (stored as Facing
-            // on world items); statics use their tile-data layer.
-            byte id;
-            if (serial.IsValid() && facing.IsValid())
-                id = (byte)facing.Ref.Value;
-            else
-                id = data.Layer;
-
-            var x = screenPos.Ref.Value.X - center.X + 22f;
-            var y = screenPos.Ref.Value.Y - center.Y + 22f;
-            Push(lights.Value, g, id, x, y, useColored);
-        }
-    }
-
-    // Legacy GameScene.AddLight id/colour resolution (occlusion test omitted —
-    // ECS has no per-tile static list to walk; halos are additive so the cost
-    // is over-lighting under a few overhangs).
-    private static void Push(LightRenderData buf, ushort graphic, byte id, float drawX, float drawY, bool useColored)
+    // Legacy GameScene.AddLight id/colour resolution. Called from the world
+    // static draw for each light source that survives culling (occlusion test
+    // omitted — ECS has no per-tile static list to walk; halos are additive so
+    // the cost is over-lighting under a few overhangs).
+    internal static void Push(LightRenderData buf, ushort graphic, byte id, float drawX, float drawY, bool useColored)
     {
         if (buf.Count >= LightsLoader.MAX_LIGHTS_DATA_INDEX_COUNT)
             return;

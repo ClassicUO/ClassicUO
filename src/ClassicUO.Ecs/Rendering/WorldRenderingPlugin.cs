@@ -177,7 +177,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         Query<Empty, With<NormalMulti>> qNormalMultis,
         Single<Data<WorldPosition>, With<Player>> queryPlayer,
         Query<Data<WorldPosition, ScreenPosition, Graphic, TileStretched, AlphaFade>, Filter<With<IsTile>, Optional<TileStretched>>> queryTiles,
-        Query<Data<WorldPosition, ScreenPosition, Graphic, Hue, Amount, NetworkSerial, AlphaFade>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>, Optional<Amount>, Optional<NetworkSerial>>> queryStatics,
+        Query<Data<WorldPosition, ScreenPosition, Graphic, Hue, Amount, NetworkSerial, Facing, AlphaFade>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>, Optional<Amount>, Optional<NetworkSerial>, Optional<Facing>>> queryStatics,
         Query<Data<WorldPosition, Graphic, Hue, NetworkSerial, ScreenPositionOffset, Facing, MobAnimation, MobileSteps, ServerFlags, Notoriety, AlphaFade>,
             Filter<Without<ContainedInto>, Optional<Facing>, Optional<MobAnimation>, Optional<MobileSteps>, Optional<ServerFlags>, Optional<Notoriety>>> queryBodyOnly,
         Query<Data<EquipmentSlots, ScreenPositionOffset, WorldPosition, Graphic, Facing, MobileSteps, MobAnimation, ServerFlags, Notoriety, AlphaFade>,
@@ -324,6 +324,15 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         cameraBounds.Width = s.X;
         cameraBounds.Height = s.Y;
 
+        // Reset the dynamic-light buffer; RenderStatics refills it from the
+        // sources it actually draws (consumed by LightingPlugin after the world
+        // pass ends). The occlusion scratch is reused across frames.
+        gameCtx.Value.Lights.Count = 0;
+        var lightOccluders = scratch.Value.LightOccluders ??= new Dictionary<long, int>();
+        var pendingLights = scratch.Value.PendingLights ??= new List<PendingLight>();
+        lightOccluders.Clear();
+        pendingLights.Clear();
+
         // Render each layer
         RenderTiles(
             selectedEntity, gameCtx, batch, assetsServer, fileManager,
@@ -333,7 +342,8 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         RenderStatics(
             selectedEntity, gameCtx, batch, assetsServer, fileManager,
             camera, profile.Value, in fx, calculateZ, ref workingZInfo, playerX, playerY, playerZ14,
-            backupZInfo, maxZ, center, mousePos, cameraBounds, qNormalMultis, queryStatics);
+            backupZInfo, maxZ, center, mousePos, cameraBounds, qNormalMultis, queryStatics,
+            lightOccluders, pendingLights);
 
         RenderBodies(
             selectedEntity, batch, assetsServer, fileManager,
@@ -395,6 +405,23 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         public float AlphaTime;
         public HashSet<long> FoliageMarks;
         public List<FoliageDraw> FoliageDraws;
+        // Dynamic-light occlusion (legacy GameScene.AddLight overhang test).
+        // LightOccluders maps a light tile (occluderX-1, occluderY-1) → the
+        // tallest non-transparent static/multi z (below the roof ceiling) on
+        // its SE neighbour; a light is dropped if that z reaches lightZ+5.
+        // Lights are collected during the static pass and resolved after it so
+        // the occluder map is complete (an occluder may be iterated after the
+        // light it blocks).
+        public Dictionary<long, int> LightOccluders;
+        public List<PendingLight> PendingLights;
+    }
+
+    private struct PendingLight
+    {
+        public ushort Graphic;
+        public byte Id;
+        public float DrawX, DrawY;
+        public int TileX, TileY, Z;
     }
 
     // Semi-transparent foliage can't draw in the statics pass: it would write
@@ -486,7 +513,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         int playerY,
         int? maxZ,
         Rectangle? playerRect,
-        Query<Data<WorldPosition, ScreenPosition, Graphic, Hue, Amount, NetworkSerial, AlphaFade>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>, Optional<Amount>, Optional<NetworkSerial>>> queryStatics)
+        Query<Data<WorldPosition, ScreenPosition, Graphic, Hue, Amount, NetworkSerial, Facing, AlphaFade>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>, Optional<Amount>, Optional<NetworkSerial>, Optional<Facing>>> queryStatics)
     {
         marks.Clear();
 
@@ -497,7 +524,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         var arts = assetsServer.Value.Arts;
         var pRect = playerRect.Value;
 
-        foreach (var (_, worldPos, screenPos, graphic, _, _, _, _) in queryStatics)
+        foreach (var (_, worldPos, screenPos, graphic, _, _, _, _, _) in queryStatics)
         {
             var g = graphic.Ref.Value;
             ref readonly var tileData = ref tileDataCache.StaticData[g];
@@ -899,14 +926,18 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         Vector2 mousePos,
         Rectangle cameraBounds,
         Query<Empty, With<NormalMulti>> qNormalMultis,
-        Query<Data<WorldPosition, ScreenPosition, Graphic, Hue, Amount, NetworkSerial, AlphaFade>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>, Optional<Amount>, Optional<NetworkSerial>>> queryStatics)
+        Query<Data<WorldPosition, ScreenPosition, Graphic, Hue, Amount, NetworkSerial, Facing, AlphaFade>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>, Optional<Amount>, Optional<NetworkSerial>, Optional<Facing>>> queryStatics,
+        Dictionary<long, int> lightOccluders,
+        List<PendingLight> pendingLights)
     {
         // Cache frequently accessed resources
         var tileDataCache = fileManager.Value.TileData;
         var arts = assetsServer.Value.Arts;
+        var useColoredLights = profile.UseColoredLights;
+        var lightCeiling = maxZ ?? 127;
 
         // Process all statics in one pass with optimized property access
-        foreach (var (entity, worldPos, screenPos, graphic, hue, amount, serial, fade) in queryStatics)
+        foreach (var (entity, worldPos, screenPos, graphic, hue, amount, serial, facing, fade) in queryStatics)
         {
             ref readonly var tileData = ref tileDataCache.StaticData[graphic.Ref.Value];
             int amountVal = amount.IsValid() ? amount.Ref.Value : 1;
@@ -958,6 +989,45 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             ref readonly var artInfo = ref arts.GetArt(drawGraphic);
             if (artInfo.Texture == null)
                 continue;
+
+            var isNormalMulti = qNormalMultis.Contains(entity.Ref);
+
+            // Dynamic-light occlusion (legacy GameScene.AddLight overhang test):
+            // a non-transparent static/multi below the roof ceiling blocks the
+            // light of a source on its NW neighbour. Record it under that
+            // neighbour's tile, keeping the tallest blocker. Dynamic items
+            // (NetworkSerial, not a multi) never occlude — matches legacy, and
+            // is what stops interior floor-lights lighting through house walls
+            // (walls are multis).
+            if (!tileData.IsTransparent && worldPos.Ref.Z < lightCeiling
+                && (isNormalMulti || !serial.IsValid()))
+            {
+                var key = TileKey(worldPos.Ref.X - 1, worldPos.Ref.Y - 1);
+                if (!lightOccluders.TryGetValue(key, out var oz) || worldPos.Ref.Z > oz)
+                    lightOccluders[key] = worldPos.Ref.Z;
+            }
+
+            // Collect light sources that survived camera-bounds (above) and the
+            // roof/maxZ ceiling (!hide); resolved against the occluder map after
+            // the pass (mirrors legacy AddLight-from-Draw). position is still
+            // screenPos-center here (the sprite top-left offset happens below),
+            // matching the old +22 centring. World items carry the light id on
+            // Facing; map statics use the tile-data layer.
+            if (!hide &&
+                (tileData.IsLight || (graphic.Ref.Value >= 0x3E02 && graphic.Ref.Value <= 0x3E0B)
+                    || (graphic.Ref.Value >= 0x3914 && graphic.Ref.Value <= 0x3929)))
+            {
+                pendingLights.Add(new PendingLight
+                {
+                    Graphic = graphic.Ref.Value,
+                    Id = serial.IsValid() && facing.IsValid() ? (byte)facing.Ref.Value : tileData.Layer,
+                    DrawX = position.X + 22f,
+                    DrawY = position.Y + 22f,
+                    TileX = worldPos.Ref.X,
+                    TileY = worldPos.Ref.Y,
+                    Z = worldPos.Ref.Z,
+                });
+            }
 
             // Z-calculations (only if needed)
             if (calculateZ)
@@ -1031,7 +1101,6 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             position.Y -= (short)(artInfo.UV.Height - 44);
 
             // Priority calculation
-            var isNormalMulti = qNormalMultis.Contains(entity.Ref);
             var priorityZ = StaticPriorityZ(worldPos.Ref.Z, in tileData, isNormalMulti);
 
             var depthZ = Isometric.GetDepthZ(worldPos.Ref.X, worldPos.Ref.Y, priorityZ);
@@ -1145,7 +1214,19 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                 depthZ
             );
         }
+
+        // Resolve collected lights against the occluder map (legacy AddLight
+        // overhang test): drop a light if its SE neighbour holds a blocker at
+        // lightZ+5 or above. Done after the pass so the map is complete.
+        foreach (ref readonly var pl in System.Runtime.InteropServices.CollectionsMarshal.AsSpan(pendingLights))
+        {
+            if (lightOccluders.TryGetValue(TileKey(pl.TileX, pl.TileY), out var oz) && oz >= pl.Z + 5)
+                continue;
+            LightingPlugin.Push(gameCtx.Value.Lights, pl.Graphic, pl.Id, pl.DrawX, pl.DrawY, useColoredLights);
+        }
     }
+
+    private static long TileKey(int x, int y) => ((long)(uint)x << 32) | (uint)y;
 
     private static void RenderEffects()
     {

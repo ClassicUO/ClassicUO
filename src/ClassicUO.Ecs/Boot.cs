@@ -116,6 +116,12 @@ struct GameContext
     // music plugin once those are wired into ECS.
     public byte Season;
     public byte SeasonMusicIndex;
+
+    // Shared dynamic-light buffer the world static draw pushes into (wired once
+    // at startup by LightingPlugin). Lives here only so RenderStatics can reach
+    // it without a 17th system param — the world render is already at the 16
+    // ISystemParam ceiling.
+    public LightRenderData Lights;
 }
 
 public enum GameState : byte
