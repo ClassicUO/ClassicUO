@@ -117,6 +117,7 @@ internal readonly struct ChatPlugin : IPlugin
     private static void SpawnChatField(
         Commands commands,
         Res<Profile> profile,
+        Res<UOFileManager> fileManager,
         ResMut<ChatField> field,
         ResMut<FocusedInput> focused)
     {
@@ -140,12 +141,16 @@ internal readonly struct ChatPlugin : IPlugin
             .Insert(new BackgroundColor(new ClayColor(0, 0, 0, 180)))
             .Insert<ChatUi>();
 
-        // Unicode font -> white RGB tint (a packed UO hue would read as RGB and
-        // black the text out). The font id comes from the profile's ChatFont
-        // (legacy SystemChatControl textbox font).
+        // Unicode font wants a literal RGB tint, NOT a packed UO hue (that would
+        // read as RGB and black the text out). Convert the profile's SpeechHue
+        // (the hue chat is said in — see SubmitChat) to RGB so what you type
+        // previews in the colour it'll be sent as. SizeChatBar re-applies it each
+        // frame so an Options change lands instantly. The font id comes from the
+        // profile's ChatFont (legacy SystemChatControl textbox font).
         var font = new TextFont { FontId = profile.Value.ChatFont, Size = 18 };
+        var chatColor = HueToClayColor(fileManager.Value.Hues, profile.Value.SpeechHue);
         var glyphId = GuiPlugin.SpawnTextField(
-            commands, bar, new Vector2(LeftMargin, 2), font, new ClayColor(255, 255, 255, 255), string.Empty, masked: false,
+            commands, bar, new Vector2(LeftMargin, 2), font, chatColor, string.Empty, masked: false,
             decorate: e => e.Insert<ChatUi>());
 
         field.Value.Bar = bar.Id;
@@ -220,8 +225,10 @@ internal readonly struct ChatPlugin : IPlugin
         Res<ChatField> field,
         Res<Camera> camera,
         Res<Profile> profile,
+        Res<UOFileManager> fileManager,
         Query<Data<Node>> nodes,
-        Query<Data<BackgroundColor>> backgrounds)
+        Query<Data<BackgroundColor>> backgrounds,
+        Query<Data<TextColor>> textColors)
     {
         var bar = field.Value.Bar;
         if (bar == 0 || !nodes.TryGet(bar, out var nodeRow)) return;
@@ -233,6 +240,29 @@ internal readonly struct ChatPlugin : IPlugin
             var (_, bg) = bgRow;
             bg.Ref.Value = new ClayColor(0, 0, 0, profile.Value.HideChatGradient ? (byte)0 : (byte)180);
         }
+
+        // Re-apply the typed-text colour from the profile's SpeechHue each frame
+        // so an Options change applies live (LayoutSystem reads TextColor.Value
+        // per layout). In-place mutation — no Commands.
+        var glyph = field.Value.Glyph;
+        if (glyph != 0 && textColors.TryGet(glyph, out var tcRow))
+        {
+            var (_, tc) = tcRow;
+            tc.Ref.Value = HueToClayColor(fileManager.Value.Hues, profile.Value.SpeechHue);
+        }
+    }
+
+    // UO hue → ClayColor for tinting the white unicode chat glyph. Mirrors
+    // TextEntryDialogPlugin.HueToClayColor (cell 30, +1 wire convention).
+    private static ClayColor HueToClayColor(HuesLoader hues, ushort hue)
+    {
+        if (hue == 0) return new ClayColor(255, 255, 255, 255);
+        var packed = hues.GetPolygoneColor(30, (ushort)(hue + 1));
+        if (packed == 0 || packed == 0xFF010101) return new ClayColor(255, 255, 255, 255);
+        byte r = (byte)(packed & 0xFF);
+        byte g = (byte)((packed >> 8) & 0xFF);
+        byte b = (byte)((packed >> 16) & 0xFF);
+        return new ClayColor(r, g, b, 255);
     }
 
     // A left-press that lands on the game world (the viewport node, or empty
