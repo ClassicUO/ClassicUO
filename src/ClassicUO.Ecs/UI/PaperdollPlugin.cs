@@ -78,6 +78,14 @@ internal readonly struct PaperdollPlugin : IPlugin
         app.AddSystem(scrollFn).InStage(Stage.Update)
             .RunIf((Res<State<GameState>> s) => s.Value.Current == GameState.GameScreen).Build();
 
+        // Held-item preview ("fake item"): while dragging a wearable over a
+        // paperdoll whose matching equip layer is empty, draw a translucent
+        // ghost of the item on the doll. Mirrors legacy
+        // PaperDollInteractable.HasFakeItem + PaperdollGump.SetFakeItem.
+        var fakeItemFn = FakeItemPreview;
+        app.AddSystem(fakeItemFn).InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> s) => s.Value.Current == GameState.GameScreen).Build();
+
         // Backpack double-click. Bevy.UI synthesizes UiDoubleClick from
         // two UiClick events within UiClayContext.DoubleClickWindow on the
         // same entity; this observer just routes that to Send_DoubleClick
@@ -501,6 +509,112 @@ internal readonly struct PaperdollPlugin : IPlugin
         }
     }
 
+    // Translucent held-item preview ("fake item") on a paperdoll. Mirrors legacy
+    // PaperDollInteractable.HasFakeItem + PaperdollGump.SetFakeItem: while the
+    // user drags a wearable and hovers a paperdoll whose matching equip layer is
+    // empty, draw a 50%-alpha ghost of the item — in its proper PaperdollOrder
+    // position among the equipment overlays (legacy injects the held AnimID into
+    // layerGraphics before the order is built). ECS GrabbedItem has no
+    // IsFixedPosition flag (legacy's fixed-drag mode does not exist here), so
+    // "actively held" = Serial set and not mid-drop.
+    //
+    // The ghost is spawned inside BuildBodyAndOverlays so it lands at the right
+    // child index (= paint order). Edge-triggered: a rebuild fires only when the
+    // desired (window, held serial) differs from the ghost currently shown — the
+    // window gaining the ghost is rebuilt WITH the fake, the one losing it
+    // WITHOUT (so the AnimID injection's reorder effects are undone).
+    private static void FakeItemPreview(
+        Commands commands,
+        UiGesturePick pick,
+        PaperdollFakeParams p)
+    {
+        // Desired fake: hovering a paperdoll while holding a wearable whose
+        // matching layer is empty on that doll's mobile.
+        ulong desiredWindow = 0;
+        uint desiredMobile = 0;
+        FakeItemInfo fake = default;
+
+        var held = p.Grabbed.Value;
+        if (held.Serial != 0 && !held.PendingDrop && held.Graphic != 0)
+        {
+            var tileData = p.Files.Value.TileData.StaticData;
+            if (held.Graphic < tileData.Length)
+            {
+                ref readonly var td = ref tileData[held.Graphic];
+                if (td.IsWearable && td.AnimID != 0)
+                {
+                    var layer = (GameLayer)td.Layer;
+                    var root = pick.TopmostMovable(p.Mouse.Value.Position, p.Assets.Value);
+                    if (root != 0 && p.WindowsQ.TryGet(root, out var winRow))
+                    {
+                        var (_, win) = winRow;
+
+                        // Layer must be empty on the doll's mobile (legacy guards
+                        // via FindItemByLayer == null) — no preview over a worn slot.
+                        bool slotEmpty = true;
+                        if (p.Entities.Value.TryGet(win.Ref.Serial, out var mobileEnt)
+                            && p.EquipQ.TryGet(mobileEnt, out var slotsRow))
+                        {
+                            var (_, slots) = slotsRow;
+                            slotEmpty = slots.Ref[layer] == 0;
+                        }
+                        if (slotEmpty)
+                        {
+                            desiredWindow = root;
+                            desiredMobile = win.Ref.Serial;
+                            fake = new FakeItemInfo(held.Serial, held.Graphic, held.Hue);
+                        }
+                    }
+                }
+            }
+        }
+
+        // The ghost currently shown (invariant: at most one across all paperdolls).
+        ulong curWindow = 0;
+        uint curSerial = 0;
+        foreach (var (_, ghost) in p.FakeQ)
+        {
+            curWindow = ghost.Ref.WindowEntity;
+            curSerial = ghost.Ref.ItemSerial;
+            break;
+        }
+
+        if (curWindow == desiredWindow && curSerial == fake.Serial)
+            return; // no change — edge-triggered, no per-frame rebuild
+
+        var tiles = p.Files.Value.TileData.StaticData;
+
+        void Rebuild(ulong window, uint mobile, FakeItemInfo f)
+        {
+            foreach (var (childEnt, child) in p.BodyChildQ)
+            {
+                if (child.Ref.WindowEntity != window) continue;
+                commands.Entity(childEnt.Ref).Despawn();
+            }
+            BuildBodyAndOverlays(commands, p.Assets.Value, p.Builder.Value, p.GameCtx.Value,
+                tiles, p.Entities.Value, p.GraphicHueQ, p.EquipQ, p.GraphicHueQ, p.SerialQ,
+                window, mobile, f);
+        }
+
+        // Window losing the ghost -> rebuild clean (undo the injection's reorder).
+        // Covers cursor leaving entirely (desiredWindow == 0) too.
+        if (curWindow != 0 && curWindow != desiredWindow)
+        {
+            uint curMobile = 0;
+            if (p.WindowsQ.TryGet(curWindow, out var curWinRow))
+            {
+                var (_, cw) = curWinRow;
+                curMobile = cw.Ref.Serial;
+            }
+            Rebuild(curWindow, curMobile, default);
+        }
+
+        // Window gaining (or changing) the ghost -> rebuild with the fake. Also
+        // covers curWindow == desiredWindow with a different held serial.
+        if (desiredWindow != 0)
+            Rebuild(desiredWindow, desiredMobile, fake);
+    }
+
     // Number of scroll gump-pics BuildWindow adds at the front of root.Children
     // before the body (combat book, racial book, profile, party). Must match the
     // adds in BuildWindow exactly — it's the start index for the body subtree so
@@ -534,7 +648,8 @@ internal readonly struct PaperdollPlugin : IPlugin
         Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> itemQ,
         Query<Data<NetworkSerial>> itemSerialQ,
         ulong rootId,
-        uint serial)
+        uint serial,
+        FakeItemInfo fake = default)
     {
         // Mobile lookup for body graphic + equipment iteration. Tolerant of
         // a missing mobile entity (paperdoll for an unloaded NPC just gets a
@@ -560,6 +675,22 @@ internal readonly struct PaperdollPlugin : IPlugin
         bool isFemale = ResolveIsFemale(mobileGraphic);
         var bodyId = ResolveBodyGraphic(mobileGraphic, isFemale);
         if (bodyId == 0) return;
+
+        // Held-item preview ("fake item"): resolve the layer + paperdoll AnimID of
+        // the dragged item so it can be injected into the draw order below and
+        // rendered as a translucent ghost in its proper layer slot. Only active
+        // when FakeItemPreview passed a held wearable for this window.
+        GameLayer fakeLayer = GameLayer.Invalid;
+        ushort fakeAnim = 0;
+        if (fake.Active && fake.Graphic < tileData.Length)
+        {
+            ref readonly var ftd = ref tileData[fake.Graphic];
+            if (ftd.IsWearable && ftd.AnimID != 0)
+            {
+                fakeLayer = (GameLayer)ftd.Layer;
+                fakeAnim = ftd.AnimID;
+            }
+        }
 
         // Body children insert just AFTER the scroll gump-pics (combat / racial
         // book, profile, party), which BuildWindow adds first so they occupy the
@@ -665,6 +796,12 @@ internal readonly struct PaperdollPlugin : IPlugin
             if (lgfx != 0 && lgfx < tileData.Length) equipGfx[l] = tileData[lgfx].AnimID;
         }
 
+        // Inject the held item's AnimID so the per-graphic order rules account for
+        // it (legacy injects into layerGraphics before Build) — keeps the ghost in
+        // the same z-slot the item would occupy once equipped. Only when empty.
+        if (fakeAnim != 0 && (int)fakeLayer < PaperdollOrder.N && slots.Value[fakeLayer] == 0)
+            equipGfx[(int)fakeLayer] = fakeAnim;
+
         Span<GameLayer> rawOrder = stackalloc GameLayer[PaperdollOrder.N];
         PaperdollOrder.Build(equipGfx, isFemale || isGargoyle, rawOrder);
         Span<GameLayer> drawOrder = stackalloc GameLayer[PaperdollOrder.N];
@@ -674,7 +811,33 @@ internal readonly struct PaperdollPlugin : IPlugin
         {
             var layer = drawOrder[oi];
             var itemEnt = slots.Value[layer];
-            if (itemEnt == 0) continue;
+            if (itemEnt == 0)
+            {
+                // Empty slot: draw the held-item preview ghost here if this is its
+                // layer, so it sits in the correct z-position among the overlays.
+                if (fakeAnim != 0 && layer == fakeLayer)
+                {
+                    var fOffset = isFemale ? Constants.FEMALE_GUMP_OFFSET : Constants.MALE_GUMP_OFFSET;
+                    var fGump = (ushort)(fakeAnim + fOffset);
+                    ref readonly var fInfo = ref assets.Gumps.GetGump(fGump);
+                    if (fInfo.Texture == null)
+                    {
+                        var altF = isFemale ? Constants.MALE_GUMP_OFFSET : Constants.FEMALE_GUMP_OFFSET;
+                        fGump = (ushort)(fakeAnim + altF);
+                    }
+                    // 50%-alpha ghost (shader IN.Hue.z); partial hue from tiledata
+                    // like a worn overlay. PaperdollBodyChild so a rebuild despawns
+                    // it; PaperdollFakeItem lets FakeItemPreview track it. No
+                    // PaperdollEquipUI / Interaction — not liftable, no click steal.
+                    var fHue = ToShaderHue((ushort)(fake.Hue & 0x3FFF), IsPartialHue(fake.Graphic, tileData));
+                    fHue.Z = 0.5f;
+                    var ghost = builder.AddGump(commands, fGump, fHue, new Vector2(8, 19))
+                        .Insert(new PaperdollBodyChild { WindowEntity = rootId })
+                        .Insert(new PaperdollFakeItem { WindowEntity = rootId, ItemSerial = fake.Serial });
+                    commands.AddChild(rootId, ghost.Id, childIdx++);
+                }
+                continue;
+            }
             if (!itemQ.TryGet(itemEnt, out var overlayRow)) continue;
 
             var (_, ig, ih) = overlayRow;
@@ -866,6 +1029,45 @@ internal sealed class PaperdollScrollParams : CompositeSystemParam
     }
 }
 
+// Composite param for FakeItemPreview. Bundles the held-item state + the
+// resources/queries BuildBodyAndOverlays needs (same set as PaperdollRebuildParams)
+// plus the fake-ghost marker query, so the system stays under the delegate arity
+// cap. Commands + UiGesturePick are passed top-level. GraphicHueQ doubles for
+// mobile + item lookups; SerialQ for item serials.
+internal sealed class PaperdollFakeParams : CompositeSystemParam
+{
+    public readonly Res<GrabbedItem> Grabbed;
+    public readonly Res<MouseContext> Mouse;
+    public readonly Res<AssetsServer> Assets;
+    public readonly Res<GumpBuilder> Builder;
+    public readonly Res<GameContext> GameCtx;
+    public readonly Res<UOFileManager> Files;
+    public readonly Res<NetworkEntitiesMap> Entities;
+    public readonly Query<Data<PaperdollWindow>> WindowsQ;
+    public readonly Query<Data<EquipmentSlots>> EquipQ;
+    public readonly Query<Data<Graphic, Hue>, Filter<Optional<Hue>>> GraphicHueQ;
+    public readonly Query<Data<NetworkSerial>> SerialQ;
+    public readonly Query<Data<PaperdollBodyChild>> BodyChildQ;
+    public readonly Query<Data<PaperdollFakeItem>> FakeQ;
+
+    public PaperdollFakeParams()
+    {
+        Grabbed     = Add(new Res<GrabbedItem>());
+        Mouse       = Add(new Res<MouseContext>());
+        Assets      = Add(new Res<AssetsServer>());
+        Builder     = Add(new Res<GumpBuilder>());
+        GameCtx     = Add(new Res<GameContext>());
+        Files       = Add(new Res<UOFileManager>());
+        Entities    = Add(new Res<NetworkEntitiesMap>());
+        WindowsQ    = Add(new Query<Data<PaperdollWindow>>());
+        EquipQ      = Add(new Query<Data<EquipmentSlots>>());
+        GraphicHueQ = Add(new Query<Data<Graphic, Hue>, Filter<Optional<Hue>>>());
+        SerialQ     = Add(new Query<Data<NetworkSerial>>());
+        BodyChildQ  = Add(new Query<Data<PaperdollBodyChild>>());
+        FakeQ       = Add(new Query<Data<PaperdollFakeItem>>());
+    }
+}
+
 // Carried by each of the 15 equipment slot frames. Future UpdateSlots
 // system (not in v1) will query this to refresh the slot's child item icon
 // when the mobile's EquipmentSlots changes.
@@ -893,6 +1095,35 @@ internal struct PaperdollBodyChild
 internal struct PaperdollWarModeButton
 {
     public uint MobileSerial;
+}
+
+// Carried by the translucent held-item preview ("fake item") sprite, alongside
+// PaperdollBodyChild (so a body rebuild despawns it like any overlay). Keyed on
+// the hovered window + the held item's serial so FakeItemPreview can tell which
+// ghost is currently shown and edge-trigger a rebuild only when it must change.
+internal struct PaperdollFakeItem
+{
+    public ulong WindowEntity;
+    public uint ItemSerial;
+}
+
+// Held item snapshot handed to BuildBodyAndOverlays so the preview ghost is
+// drawn in its proper PaperdollOrder slot. default / Active==false means no
+// preview (the spawn + equip-rebuild paths pass default).
+internal readonly struct FakeItemInfo
+{
+    public readonly uint Serial;
+    public readonly ushort Graphic;
+    public readonly ushort Hue;
+
+    public FakeItemInfo(uint serial, ushort graphic, ushort hue)
+    {
+        Serial = serial;
+        Graphic = graphic;
+        Hue = hue;
+    }
+
+    public bool Active => Serial != 0 && Graphic != 0;
 }
 
 // Carried by the backpack overlay sprite on a paperdoll. The global
