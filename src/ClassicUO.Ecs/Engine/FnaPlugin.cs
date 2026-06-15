@@ -56,12 +56,14 @@ internal readonly struct FnaPlugin : IPlugin
             .InStage(Stage.First)
             .SingleThreaded()
             .RunIf((Commands cmds) => cmds.HasResource<GraphicsDevice>())
+            .RunIf((Res<UoGame> game) => game.Value.IsDrawable)
             .Build()
 
             .AddSystem((Res<GraphicsDevice> device) => device.Value.Present())
             .InStage(Stage.Last)
             .SingleThreaded()
             .RunIf((Commands cmds) => cmds.HasResource<GraphicsDevice>())
+            .RunIf((Res<UoGame> game) => game.Value.IsDrawable)
             .Build()
 
             .AddSystem(_ => Environment.Exit(0))

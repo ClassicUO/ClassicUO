@@ -102,6 +102,7 @@ internal readonly struct LightingPlugin : IPlugin
             .Before("cuo:rendering:begin")
             .RunIf((Commands cmds) => cmds.HasResource<GraphicsDevice>())
             .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+            .RunIf((Res<UoGame> game) => game.Value.IsDrawable)
             .Build();
 
         // Reset to defaults on leaving the world so a night level doesn't bleed

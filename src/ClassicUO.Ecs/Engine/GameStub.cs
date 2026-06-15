@@ -77,6 +77,29 @@ internal sealed class UoGame : Microsoft.Xna.Framework.Game
         return (flags & SDL.SDL_WindowFlags.SDL_WINDOW_MAXIMIZED) != 0;
     }
 
+    // Whether the window can be drawn/presented this frame. FNA's own Game
+    // loop skips Draw (via BeginDraw) while the device isn't presentable; this
+    // app drives its own render loop (FnaPlugin), so it must check explicitly.
+    // Minimized or zero-area backbuffer = no valid swapchain images: clearing,
+    // drawing or presenting against it on the Vulkan/SDL_GPU backend faults the
+    // GPU (VK_ERROR_DEVICE_LOST). Skip the whole render+present when not drawable.
+    public bool IsDrawable
+    {
+        get
+        {
+            var flags = SDL.SDL_GetWindowFlags(Window.Handle);
+            if ((flags & SDL.SDL_WindowFlags.SDL_WINDOW_MINIMIZED) != 0)
+                return false;
+
+            var device = GraphicManager.GraphicsDevice;
+            if (device == null)
+                return false;
+
+            var pp = device.PresentationParameters;
+            return pp.BackBufferWidth > 0 && pp.BackBufferHeight > 0;
+        }
+    }
+
     // User-configurable extra multiplier on top of the OS scale (parity with
     // main's GameController.ScreenScale). Settable; the DpiScale getter
     // recomputes off SDL_GetWindowDisplayScale * ScreenScale.

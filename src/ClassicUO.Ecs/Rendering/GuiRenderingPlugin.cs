@@ -62,6 +62,7 @@ internal readonly struct GuiRenderingPlugin : IPlugin
             .InStage(UiPlugin.UiRenderStage)
             .SingleThreaded()
             .Label("cuo:gui_rendering")
+            .RunIf((Res<UoGame> game) => game.Value.IsDrawable)
             .Build();
     }
 

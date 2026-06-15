@@ -105,6 +105,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             .InStage(Stage.PostUpdate)
             .SingleThreaded()
             .Label("cuo:rendering:begin")
+            .RunIf((Res<UoGame> game) => game.Value.IsDrawable)
             .Build()
 
             .AddSystem(renderingFn)
@@ -115,6 +116,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             .RunIf((Commands cmds) => cmds.HasResource<GraphicsDevice>())
             .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
             .RunIf((Query<Data<WorldPosition>, With<Player>> playerQuery) => playerQuery.Count() > 0)
+            .RunIf((Res<UoGame> game) => game.Value.IsDrawable)
             .Build()
 
             .AddSystem(endRenderingFn)
@@ -122,6 +124,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             .SingleThreaded()
             .Label("cuo:rendering:end")
             .After("cuo:rendering:rendering")
+            .RunIf((Res<UoGame> game) => game.Value.IsDrawable)
             .Build();
     }
 
