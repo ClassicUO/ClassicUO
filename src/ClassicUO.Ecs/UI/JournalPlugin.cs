@@ -801,5 +801,9 @@ internal struct JournalFilterLabel;
 // Func<string> override field back — nothing swapped it yet, so no seam.
 internal sealed class JournalTimeProvider
 {
-    public string NowLabel() => DateTime.Now.ToString("HH:mm");
+    // Optional fixed-clock override for tests / a deterministic harness; null =
+    // wall clock. (43aa33ae5 dropped this as "unused" but JournalCaptureTests
+    // reassigns it for a stable timestamp — re-added per that commit's own note.)
+    public Func<string> Source;
+    public string NowLabel() => Source?.Invoke() ?? DateTime.Now.ToString("HH:mm");
 }
