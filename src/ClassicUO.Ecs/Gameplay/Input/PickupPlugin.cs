@@ -45,6 +45,12 @@ internal readonly struct PickupPlugin : IPlugin
             .RunIf((Res<SplitPrompt> split) => !split.Value.Open)
             .RunIf((Commands cmds) => cmds.HasResource<SelectedEntity>() && cmds.HasResource<GrabbedItem>())
             .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial == 0)
+            // One pickup per left-hold. A 0x27 deny clears GrabbedItem.Serial
+            // mid-drag, which would otherwise re-open the Serial==0 gate and
+            // re-fire PickupItem every frame the button stays held -> infinite
+            // PickUpRequest/deny loop, item stuck flickering on the cursor.
+            // Consumed latches the gesture; cleared on release in LatchPressTarget.
+            .RunIf((Res<LeftPressLatch> latch) => !latch.Value.Consumed)
             .RunIf(shouldFirePickupFn)
             .RunIf(pickupEligibleFn)
             .Build()
@@ -196,6 +202,7 @@ internal readonly struct PickupPlugin : IPlugin
         if (m.Value.IsReleased(Input.MouseButtonType.Left))
         {
             latch.Value.Entity = 0;
+            latch.Value.Consumed = false;
             return;
         }
 
@@ -379,7 +386,7 @@ internal readonly struct PickupPlugin : IPlugin
 
     static void PickupItem(
         Commands commands,
-        Res<LeftPressLatch> latch,
+        ResMut<LeftPressLatch> latch,
         Res<GrabbedItem> grabbedItem,
         Res<NetClient> network,
         Res<NetworkEntitiesMap> entitiesMap,
@@ -398,6 +405,12 @@ internal readonly struct PickupPlugin : IPlugin
         Query<Data<Node>> nodeQ
     )
     {
+        // Consume the gesture immediately: the system only runs once all gates
+        // passed, so reaching here means "fire pickup now". A server 0x27 deny
+        // clears GrabbedItem.Serial mid-hold; without this the Serial==0 gate
+        // re-opens and pickup re-fires every frame the button stays held.
+        latch.Value.Consumed = true;
+
         // Source-of-truth is the press-origin entity captured at click time,
         // not whatever the cursor currently hovers (which may have changed
         // mid-drag).
@@ -937,6 +950,11 @@ internal sealed class LeftPressLatch
     // Cleared on release. Used by the pickup gate to ensure the drag
     // gesture began on the same entity it's now pointed at.
     public ulong Entity { get; set; }
+
+    // Set once PickupItem fires for the current left-hold; cleared on release.
+    // Stops a 0x27 deny (which clears GrabbedItem.Serial mid-drag) from
+    // re-opening the pickup gate and looping PickUpRequest/deny while held.
+    public bool Consumed { get; set; }
 }
 
 internal sealed class GrabbedItem
