@@ -796,10 +796,10 @@ internal struct JournalFilterLabel;
 
 // Wall-clock timestamp provider for the journal. Legacy JournalManager stamps
 // each entry with DateTime.Now for display; this is the one sanctioned wall-clock
-// touch (display text only, never gameplay/engine timing — see CLAUDE.md). Kept
-// behind a resource so a deterministic harness can swap it for a fixed clock.
+// touch (display text only, never gameplay/engine timing — see CLAUDE.md).
+// ponytail: plain DateTime.Now. If a harness ever needs a fixed clock, add a
+// Func<string> override field back — nothing swapped it yet, so no seam.
 internal sealed class JournalTimeProvider
 {
-    public Func<string> Source = static () => DateTime.Now.ToString("HH:mm");
-    public string NowLabel() => Source();
+    public string NowLabel() => DateTime.Now.ToString("HH:mm");
 }
