@@ -238,7 +238,11 @@ internal sealed class GumpBuilder
         return AddGump(commands, isChecked ? on : off, hue, position)
             .Insert(new UOCheckbox { Off = off, On = on })
             .Insert(new Checkbox { Checked = isChecked })
-            .Insert(Interaction.None);
+            .Insert(Interaction.None)
+            // Interactive control: a press toggles it (CheckboxPlugin), it must
+            // not latch a window-drag. Opt out here in the factory so callers
+            // never have to remember it.
+            .Insert<UiNoWindowDrag>();
     }
 
     /// Spawn a vertical scrollbar bound to a scrollable container (an entity with

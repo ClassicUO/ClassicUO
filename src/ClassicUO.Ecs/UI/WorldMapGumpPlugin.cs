@@ -158,12 +158,14 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
     private const int MaxWinSize = 1200;
 
     // Options-gump palette (OptionsGumpPlugin) so the menu reads as one family.
-    private static readonly ClayColor s_panelBg = new(26, 28, 34, 245);
-    private static readonly ClayColor s_rowBg = new(44, 46, 56, 255);
-    private static readonly ClayColor s_toggleOn = new(70, 160, 90, 255);
-    private static readonly ClayColor s_toggleOff = new(90, 92, 104, 255);
-    private static readonly ClayColor s_textMain = new(235, 236, 240, 255);
-    private static readonly ClayColor s_textDim = new(160, 163, 175, 255);
+    private static readonly ClayColor s_panelBg     = new(22, 24, 30, 252);
+    private static readonly ClayColor s_rowBg       = new(38, 41, 51, 255);
+    private static readonly ClayColor s_rowHover    = new(48, 52, 64, 255);
+    private static readonly ClayColor s_toggleOn    = new(74, 178, 112, 255);
+    private static readonly ClayColor s_toggleOff   = new(66, 70, 84, 255);
+    private static readonly ClayColor s_knob        = new(238, 240, 246, 255);
+    private static readonly ClayColor s_textMain    = new(236, 238, 244, 255);
+    private static readonly ClayColor s_textDim     = new(150, 154, 168, 255);
 
     private static readonly XnaColor s_gridColor = new(255, 255, 255, 56);
 
@@ -1096,9 +1098,13 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
         Vector2 windowPos,
         Vector2 surfaceSize)
     {
-        const int MenuW = 210;
-        const int RowH = 22;
-        const int Pad = 6;
+        const int MenuW = 260;
+        const int RowH = 34;
+        const int RowGap = 5;
+        const int Pad = 10;
+        const int TrackW = 42;
+        const int TrackH = 22;
+        const int KnobSz = 16;
 
         var toggles = new (string Label, Func<Profile, bool> Get, Action<Profile, bool> Set)[]
         {
@@ -1120,7 +1126,8 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
 
         int viewedMap = state.ViewMap >= 0 ? state.ViewMap : gameCtx.Map;
         int actionRows = 5;
-        int menuH = Pad * 2 + (toggles.Length + actionRows) * RowH + (toggles.Length + actionRows - 1) * 2;
+        int totalRows = toggles.Length + actionRows;
+        int menuH = Pad * 2 + totalRows * RowH + (totalRows - 1) * RowGap;
 
         // Clamp to the logical surface (the menu is taller than the window and
         // an absolute child may escape it — but never the screen).
@@ -1138,10 +1145,10 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
                 Width = Val.Px(MenuW),
                 Height = Val.Px(menuH),
                 Padding = UiRect.All(Pad),
-                Gap = Val.Px(2),
+                Gap = Val.Px(RowGap),
             })
             .Insert(new BackgroundColor(s_panelBg))
-            .Insert(BorderRadius.All(8))
+            .Insert(BorderRadius.All(12))
             .Insert(Interaction.None)
             .Insert<UiNoWindowDrag>()
             .Insert<WorldMapMenu>();
@@ -1155,26 +1162,30 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
             var row = SpawnMenuRow(commands, rootId, MenuW - Pad * 2, RowH, label);
             bool on = getCopy(profile);
 
-            var pill = commands.Spawn()
+            var track = commands.Spawn()
                 .Insert(new Node
                 {
                     Display = Display.Flex,
+                    FlexDirection = FlexDirection.Row,
                     PositionType = PositionType.Absolute,
-                    Left = Val.Px(MenuW - Pad * 2 - 40),
-                    Top = Val.Px(3),
-                    Width = Val.Px(36),
-                    Height = Val.Px(RowH - 6),
-                    JustifyContent = JustifyContent.Center,
+                    Right = Val.Px(10),
+                    Top = Val.Px((RowH - TrackH) / 2),
+                    Width = Val.Px(TrackW), Height = Val.Px(TrackH),
+                    JustifyContent = on ? JustifyContent.End : JustifyContent.Start,
                     AlignItems = AlignItems.Center,
+                    Padding = new UiRect { Left = Val.Px(3), Right = Val.Px(3) },
                 })
                 .Insert(new BackgroundColor(on ? s_toggleOn : s_toggleOff))
-                .Insert(BorderRadius.All(8))
-                .Insert(new Text(on ? "ON" : "OFF"))
-                .Insert(new TextFont { FontId = 1, Size = 10 })
-                .Insert(new TextColor(s_textMain))
+                .Insert(BorderRadius.All(TrackH / 2))
                 .Insert(Interaction.None)
                 .Insert<UiNoWindowDrag>();
-            commands.AddChild(row, pill.Id);
+            var trackId = track.Id;
+            commands.AddChild(trackId, commands.Spawn()
+                .Insert(new Node { Width = Val.Px(KnobSz), Height = Val.Px(KnobSz) })
+                .Insert(new BackgroundColor(s_knob))
+                .Insert(BorderRadius.All(KnobSz / 2))
+                .Id);
+            commands.AddChild(row, trackId);
 
             commands.Entity(row).Observe((On<UiClick> _, Res<Profile> pr, ResMut<WorldMapState> st) =>
             {
@@ -1316,15 +1327,17 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
                 Display = Display.Flex,
                 FlexDirection = FlexDirection.Row,
                 AlignItems = AlignItems.Center,
+                JustifyContent = JustifyContent.Start,
                 Width = Val.Px(w),
                 Height = Val.Px(h),
-                Padding = new UiRect { Left = Val.Px(8), Right = Val.Px(4) },
+                Padding = new UiRect { Left = Val.Px(12), Right = Val.Px(10) },
             })
             .Insert(new BackgroundColor(s_rowBg))
-            .Insert(BorderRadius.All(4))
+            .Insert(new OptionsHover { Normal = s_rowBg, Hover = s_rowHover })
+            .Insert(BorderRadius.All(7))
             .Insert(new Text(label))
-            .Insert(new TextFont { FontId = 1, Size = 11 })
-            .Insert(new TextColor(s_textDim))
+            .Insert(new TextFont { FontId = 1, Size = 13 })
+            .Insert(new TextColor(s_textMain))
             .Insert(Interaction.None)
             .Insert<UiNoWindowDrag>();
         commands.AddChild(parent, row.Id);
