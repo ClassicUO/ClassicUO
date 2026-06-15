@@ -138,6 +138,25 @@ internal readonly struct PaperdollPlugin : IPlugin
                 btn.Ref.Over = ids.o;
             }
         });
+
+        // Close a watched mobile's paperdoll when that mobile leaves the world.
+        // The server sends 0x1D (delete) once a mobile passes out of view range;
+        // OnDeleteObject despawns its entity, firing OnRemove<NetworkSerial>.
+        // Mirrors legacy PaperdollGump.Update -> Dispose on mobile.IsDestroyed.
+        // The player's own paperdoll is exempt (IsPlayer): the player entity
+        // only despawns on logout, where DisposeOnLogout already handles it.
+        app.AddObserver((
+            OnRemove<NetworkSerial> trigger,
+            Commands commands,
+            Query<Data<PaperdollWindow>> windowsQ) =>
+        {
+            var serial = trigger.Component.Value;
+            foreach (var (ent, w) in windowsQ)
+            {
+                if (w.Ref.IsPlayer || w.Ref.Serial != serial) continue;
+                commands.Entity(ent.Ref).Despawn();
+            }
+        });
     }
 
     private static void DisposeOnLogout(

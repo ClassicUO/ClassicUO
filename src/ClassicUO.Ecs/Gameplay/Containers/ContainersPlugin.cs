@@ -81,6 +81,30 @@ internal readonly struct ContainersPlugin : IPlugin
             Query<Data<EquipmentSlots>> equipQ,
             Query<Data<NetworkSerial>> serialQ)
             => HandleUpdateContainerItems(trig.Event.Packet, commands, entitiesMap, writer, hostMsgs, equipQ, serialQ));
+
+        // Close a container window when its backing item leaves the world. The
+        // server sends 0x1D once the container passes out of view range (or it
+        // decays / is picked up); OnDeleteObject despawns the entity, firing
+        // OnRemove<NetworkSerial>. The distance poll above only fires while the
+        // entity is still mapped, so without this a server-side removal would
+        // leak the window. Routes through ContainerClosedEvent so TearDownClosedUi
+        // owns the despawn + position memory + child cascade (silent close:
+        // UserInitiated stays false, matching legacy Dispose).
+        app.AddObserver((
+            OnRemove<NetworkSerial> trigger,
+            Query<Data<ContainerWindow>> windowsQuery,
+            EventWriter<ContainerClosedEvent> closedWriter,
+            EventWriter<HostMessage> hostMsgs) =>
+        {
+            var serial = trigger.Component.Value;
+            foreach (var (_, window) in windowsQuery)
+            {
+                if (window.Ref.Serial != serial) continue;
+                closedWriter.Send(new ContainerClosedEvent(serial));
+                hostMsgs.Send(new HostMessage.ContainerClosed(serial));
+                break;
+            }
+        });
     }
 
     // An item just entered a container, so it can no longer be worn. Clear any
