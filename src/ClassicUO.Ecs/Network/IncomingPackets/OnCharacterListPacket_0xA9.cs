@@ -11,8 +11,13 @@ internal struct OnCharacterListPacket_0xA9 : IPacket
 
     public List<CharacterInfo> Characters { get; private set; }
     public byte CityCount { get; private set; }
+    // Raw tail after the city count: the city block, then the 4-byte
+    // CharacterListFlags, then (on 70130+ clients) a trailing (short)-1. The
+    // city block is version-sized, so flags can't be located here — the plugin
+    // parses the cities (it has the client version) and reads the flags right
+    // after them. The old "flags = last 4 bytes" shortcut mis-read the trailing
+    // -1 into the flags (0xFFFF), which forced the AOS/tooltip bit on.
     public byte[] CityData { get; private set; }
-    public CharacterListFlags Flags { get; private set; }
 
     public void Fill(StackDataReader reader)
     {
@@ -34,17 +39,6 @@ internal struct OnCharacterListPacket_0xA9 : IPacket
 
         CityCount = reader.ReadUInt8();
 
-        var remaining = reader.Remaining;
-        if (remaining >= sizeof(uint))
-        {
-            var cityDataLength = remaining - sizeof(uint);
-            CityData = cityDataLength > 0 ? reader.ReadArray(cityDataLength) : Array.Empty<byte>();
-            Flags = (CharacterListFlags)reader.ReadUInt32BE();
-        }
-        else
-        {
-            CityData = Array.Empty<byte>();
-            Flags = 0;
-        }
+        CityData = reader.Remaining > 0 ? reader.ReadArray(reader.Remaining) : Array.Empty<byte>();
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using ClassicUO.Renderer;
 using Clay;
 using FontStashSharp;
@@ -39,6 +40,9 @@ internal readonly struct GuiRenderingPlugin : IPlugin
 
     public void Build(App app)
     {
+        // Per-frame scratch reused by the gump-anchored overhead pass below.
+        app.AddResource(new GumpItemNameAnchors());
+
         // Run in Bevy.UI's render stage so UiRenderCommands is guaranteed populated
         // (RenderSystem.Publish runs first in this stage by declaration order).
         Action<
@@ -108,6 +112,42 @@ internal readonly struct GuiRenderingPlugin : IPlugin
             uiRt.Value.Height = logicalH;
         }
 
+        // Map item serial -> on-screen gump-slot rect for items shown inside a
+        // gump (container slots, paperdoll equipment/backpack). Built BEFORE the
+        // overhead Update below so it can keep a single-clicked item's name even
+        // when the item isn't in NetworkEntitiesMap (equipped items are tracked
+        // via EquipmentSlots, not the world map) — else the label is purged the
+        // same frame it arrives.
+        var gumpAnchors = overlay.GumpAnchors.Value.Map;
+        gumpAnchors.Clear();
+        if (gameState.Value.Current == GameState.GameScreen)
+        {
+            foreach (var (_, item, node) in overlay.ContainerItemAnchors)
+                gumpAnchors[item.Ref.Serial] = ToAnchorRect(node.Ref);
+            foreach (var (_, equip, node) in overlay.PaperdollEquipAnchors)
+                if (equip.Ref.ItemSerial != 0)
+                    gumpAnchors[equip.Ref.ItemSerial] = ToAnchorRect(node.Ref);
+            foreach (var (_, bp, node) in overlay.PaperdollBackpackAnchors)
+                if (bp.Ref.ItemSerial != 0)
+                    gumpAnchors[bp.Ref.ItemSerial] = ToAnchorRect(node.Ref);
+
+            // For a single-clicked item still shown in its gump, float the name
+            // at the click point (element box + stored offset), recomputed each
+            // frame so it tracks the window as it moves. Paperdoll overlays span
+            // the whole window, so their raw box would dump the label in the
+            // corner — the offset puts it back on the item. The element pass
+            // above is the keep-set + fallback position for server-pushed names.
+            foreach (var kv in overlay.ClickPos.Value.Map)
+            {
+                if (!gumpAnchors.ContainsKey(kv.Key)) continue;
+                if (!overlay.NodeById.TryGet(kv.Value.Element, out var nRow)) continue;
+                var (_, cn) = nRow;
+                gumpAnchors[kv.Key] = new Rectangle(
+                    (int)(cn.Ref.Position.X + kv.Value.Offset.X),
+                    (int)(cn.Ref.Position.Y + kv.Value.Offset.Y), 0, 0);
+            }
+        }
+
         // Phase 1: render UI into the RT at logical pixels with PointClamp.
         device.SetRenderTarget(uiRt.Value.Rt);
         device.Clear(XnaColor.Transparent);
@@ -164,7 +204,7 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                         // after) sits on top of the bars/labels like legacy.
                         MobileHpOverheads.Render(b, assets.Value, overlay.Profile.Value,
                             gameCtx.Value, camera.Value, overlay.Mobiles, nameplates.Value.PlateTops);
-                        overlay.Overhead.Value.Update(time.Value, networkEntities.Value);
+                        overlay.Overhead.Value.Update(time.Value, networkEntities.Value, gumpAnchors);
                         overlay.Overhead.Value.Render(networkEntities.Value, b, gameCtx.Value, camera.Value, overlay.OverheadAnchors,
                             overlay.Mouse.Value, overlay.Selected.Value, nameplates.Value.PlateTops);
                         StaticNameOverheads.Render(b, assets.Value, gameCtx.Value, camera.Value, overlay.StaticLabels);
@@ -206,6 +246,15 @@ internal readonly struct GuiRenderingPlugin : IPlugin
             }
         }
 
+        // Floating names for single-clicked items that live inside a gump
+        // (container slots / paperdoll equipment). They have no WorldPosition,
+        // so the world overhead pass skipped them. Anchor to each item's
+        // on-screen UI rect and draw here, after every gump painted = on top,
+        // unclipped (a gump label is not world-clipped). Legacy routes these
+        // into the owning gump's AddText (MessageManager.cs:222).
+        if (gumpAnchors.Count > 0)
+            overlay.Overhead.Value.RenderGumpAnchored(b, gumpAnchors);
+
         b.End();
 
         // Phase 2: blit RT to the backbuffer scaled to physical size.
@@ -223,6 +272,17 @@ internal readonly struct GuiRenderingPlugin : IPlugin
             Vector3.UnitZ);
         b.SetSampler(null);
         b.End();
+    }
+
+    private static Rectangle ToAnchorRect(in TinyEcs.Bevy.UI.ComputedNode n)
+        => new((int)n.Position.X, (int)n.Position.Y, (int)n.Size.X, (int)n.Size.Y);
+
+    // Per-frame scratch: item serial -> its on-screen gump-slot rect, rebuilt
+    // each render. A Res (not a static) so it lives in the world like the rest
+    // of the engine's shared state and stays off the static-field path.
+    internal sealed class GumpItemNameAnchors
+    {
+        public readonly Dictionary<uint, Rectangle> Map = new();
     }
 
     private static Texture2D MakeWhitePixel(GraphicsDevice device)

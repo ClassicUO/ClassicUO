@@ -102,8 +102,8 @@ internal readonly struct LoginPacketsPlugin : IPlugin
         EventWriter<HostMessage> hostMsgsWriter
     )
     {
-        var towns = ParseTowns(packet, gameCtx.Value.ClientVersion);
-        gameCtx.Value.ClientFeatures = packet.Flags;
+        var (towns, flags) = ParseTownsAndFlags(packet, gameCtx.Value.ClientVersion);
+        gameCtx.Value.ClientFeatures = flags;
 
         // Kept for flows that need the data after the event is consumed —
         // character creation reads towns (city step) and the first free slot.
@@ -117,7 +117,7 @@ internal readonly struct LoginPacketsPlugin : IPlugin
             Towns = towns
         });
 
-        hostMsgsWriter.Send(new HostMessage.LoginResponse(packet.Flags, packet.Characters, towns));
+        hostMsgsWriter.Send(new HostMessage.LoginResponse(flags, packet.Characters, towns));
     }
 
     static void HandleServerRelayPacket(
@@ -163,11 +163,16 @@ internal readonly struct LoginPacketsPlugin : IPlugin
         });
     }
 
-    static List<TownInfo> ParseTowns(OnCharacterListPacket_0xA9 packet, ClientVersion clientVersion)
+    // Parse the city block then the CharacterListFlags that follow it. The flags
+    // sit right after the (version-sized) city entries; a trailing (short)-1 on
+    // 70130+ clients is left unread. Reading flags here — not in the packet's
+    // Fill — is the only place the client version is known to size the cities.
+    static (List<TownInfo> towns, CharacterListFlags flags) ParseTownsAndFlags(
+        OnCharacterListPacket_0xA9 packet, ClientVersion clientVersion)
     {
         var towns = new List<TownInfo>();
-        if (packet.CityData.Length == 0 || packet.CityCount == 0)
-            return towns;
+        if (packet.CityData.Length == 0)
+            return (towns, 0);
 
         var reader = new StackDataReader(packet.CityData);
         var useNewFormat = clientVersion >= ClientVersion.CV_70130;
@@ -203,6 +208,9 @@ internal readonly struct LoginPacketsPlugin : IPlugin
             }
         }
 
-        return towns;
+        var flags = reader.Remaining >= sizeof(uint)
+            ? (CharacterListFlags)reader.ReadUInt32BE()
+            : (CharacterListFlags)0;
+        return (towns, flags);
     }
 }

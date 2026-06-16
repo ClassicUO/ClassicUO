@@ -48,37 +48,40 @@ internal readonly struct TextOverheadPlugin : IPlugin
     {
         foreach (var text in texts.Read())
         {
-            switch (text.MessageType)
+            // Mirror legacy MessageManager.HandleMessage: render overhead for
+            // EVERY message type (its `default:` arm) except guild/alliance
+            // (journal-only) and the party-class types, which go overhead only
+            // when the profile opts in. The old allow-list silently dropped any
+            // type it didn't enumerate — a single-click name sent with an
+            // unusual/less-common MessageType then never rendered. System-serial
+            // (broadcast) lines never reach here; the packet handlers route
+            // those to the system log.
+            var render = text.MessageType switch
             {
-                // Party lines go overhead only when the profile opts in (legacy
-                // MessageManager's Party case); the journal capture keeps its
-                // copy regardless.
-                case MessageType.Party when profile.Value.OverheadPartyMessages:
-                case MessageType.Regular:
-                case MessageType.Emote:
-                case MessageType.Focus:
-                case MessageType.Spell:
-                case MessageType.Whisper:
-                case MessageType.Yell:
-                case MessageType.Label:
-                case MessageType.Limit3Spell:
-                    var copyText = text;
-                    if (text.MessageType == MessageType.Party)
-                        copyText.Hue = profile.Value.PartyMessageHue;
-                    copyText.Time = time.Value.Total + TimeToLive(profile.Value, in text);
+                MessageType.Guild or MessageType.Alliance => false,
+                MessageType.Command or MessageType.Encoded
+                    or MessageType.System or MessageType.Party
+                    => profile.Value.OverheadPartyMessages,
+                _ => true,
+            };
+            if (!render)
+                continue;
 
-                    textOverHeadManager.Value.Append(copyText);
+            var copyText = text;
+            if (text.MessageType == MessageType.Party)
+                copyText.Hue = profile.Value.PartyMessageHue;
+            copyText.Time = time.Value.Total + TimeToLive(profile.Value, in text);
 
-                    hostMsgs.Send(new Modding.Host.HostMessage.MessageReceived(
-                        copyText.MessageType,
-                        copyText.Text,
-                        copyText.Name,
-                        copyText.Serial,
-                        copyText.Hue,
-                        copyText.Font
-                    ));
-                    break;
-            }
+            textOverHeadManager.Value.Append(copyText);
+
+            hostMsgs.Send(new Modding.Host.HostMessage.MessageReceived(
+                copyText.MessageType,
+                copyText.Text,
+                copyText.Name,
+                copyText.Serial,
+                copyText.Hue,
+                copyText.Font
+            ));
         }
     }
 
@@ -129,13 +132,21 @@ internal sealed class TextOverHeadManager
         _mainLinkedList.AddLast(list);
     }
 
-    public void Update(Time time, NetworkEntitiesMap networkEntities)
+    public void Update(Time time, NetworkEntitiesMap networkEntities,
+        IReadOnlyDictionary<uint, Rectangle> gumpAnchors = null)
     {
         foreach ((var serial, var list) in _textOverHeadMap)
         {
             // Read-only lookup: Get(commands, ...) returns a default
             // EntityCommands for unmapped serials whose .Id throws.
-            if (!networkEntities.TryGet(serial, out _) || list.Count == 0)
+            // An item shown inside a gump (container slot, paperdoll equipment)
+            // is anchored by serial but may not live in NetworkEntitiesMap —
+            // equipped items in particular are tracked via EquipmentSlots, not
+            // the world map. Keep its name as long as it has a live gump anchor,
+            // else its single-click label would be purged the same frame it
+            // arrives and never render.
+            bool anchored = gumpAnchors != null && gumpAnchors.ContainsKey(serial);
+            if ((!anchored && !networkEntities.TryGet(serial, out _)) || list.Count == 0)
             {
                 _toRemove.Add(serial);
                 continue;
@@ -375,6 +386,47 @@ internal sealed class TextOverHeadManager
             // 0x7F/255 — same half-fade legacy applies to covered text.
             UoFontRenderer.Draw(batch, e.Text, e.FontId, hue, e.Rect.X, e.Rect.Y, MaxWidth, 0f,
                 allowHtml: false, alpha: e.Transparent ? 0x7F / 255f : 1f);
+        }
+    }
+
+    // Floating name text for an item that lives inside a gump (a container
+    // slot, a paperdoll equipment overlay). Such an item has no WorldPosition,
+    // so the world Render above skips it (its query.TryGet fails). Legacy routes
+    // these into the owning gump's AddText (MessageManager.cs:222 -> Container/
+    // PaperDollGump.AddText); we anchor at the item's on-screen UI rect instead
+    // and stack the lines upward from the slot's top edge. Called from
+    // GuiRenderingPlugin after every gump has painted, so it sits on top and is
+    // unclipped (a gump label is not world-clipped). `uiAnchors` maps the item
+    // serial to its ComputedNode rect (logical UI-RT pixels — the same space
+    // this batch draws in). No hover-pick / overlap-fade: a transient single
+    // name needs none.
+    public void RenderGumpAnchored(
+        UltimaBatcher2D batch,
+        IReadOnlyDictionary<uint, Rectangle> uiAnchors)
+    {
+        foreach (var list in _mainLinkedList)
+        {
+            if (list.Count == 0 || list.First == null)
+                continue;
+            if (!uiAnchors.TryGetValue(list.First.Value.Serial, out var rect))
+                continue;
+
+            float centerX = rect.X + rect.Width / 2f;
+            float y = rect.Y;
+            for (var node = list.Last; node != null; node = node.Previous)
+            {
+                var t = node.Value;
+                if (string.IsNullOrEmpty(t.Text)) continue;
+
+                var fontId = FontId(t);
+                var (w, h) = UoFontRenderer.MeasureFont(t.Text, fontId, MaxWidth, allowHtml: false);
+                if (h <= 0) continue;
+
+                y -= h;
+                int x = (int)(centerX - w / 2f);
+                UoFontRenderer.Draw(batch, t.Text, fontId, NormalizeHue(t.Hue),
+                    x, (int)y, MaxWidth, 0f, allowHtml: false, alpha: 1f);
+            }
         }
     }
 

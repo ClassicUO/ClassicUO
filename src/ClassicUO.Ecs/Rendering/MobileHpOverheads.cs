@@ -29,6 +29,7 @@ using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
+using TinyEcs.Bevy.UI;
 using GameLayer = ClassicUO.Game.Data.Layer;
 
 namespace ClassicUO.Ecs;
@@ -332,6 +333,16 @@ internal sealed class WorldOverlayParams : CompositeSystemParam
         Filter<Optional<ScreenPositionOffset>, Optional<Hits>, Optional<Notoriety>, Optional<ServerFlags>, Optional<EquipmentSlots>,
             Without<ContainedInto>>> Mobiles;
     public readonly Query<Data<WorldPosition, Graphic, StaticNameLabel>> StaticLabels;
+    // Serial -> on-screen rect for items shown inside a gump. Feeds
+    // TextOverHeadManager.RenderGumpAnchored so a single-clicked container slot
+    // / paperdoll item's name floats over the slot (it has no WorldPosition, so
+    // the world overhead pass skips it).
+    public readonly Query<Data<ContainerItemUI, ComputedNode>> ContainerItemAnchors;
+    public readonly Query<Data<PaperdollEquipUI, ComputedNode>> PaperdollEquipAnchors;
+    public readonly Query<Data<PaperdollBackpackUI, ComputedNode>> PaperdollBackpackAnchors;
+    public readonly Res<GuiRenderingPlugin.GumpItemNameAnchors> GumpAnchors;
+    public readonly Res<GumpNameClickPos> ClickPos;
+    public readonly Query<Data<ComputedNode>> NodeById;
 
     public WorldOverlayParams()
     {
@@ -345,5 +356,11 @@ internal sealed class WorldOverlayParams : CompositeSystemParam
             Filter<Optional<ScreenPositionOffset>, Optional<Hits>, Optional<Notoriety>, Optional<ServerFlags>, Optional<EquipmentSlots>,
                 Without<ContainedInto>>>());
         StaticLabels = Add(new Query<Data<WorldPosition, Graphic, StaticNameLabel>>());
+        ContainerItemAnchors = Add(new Query<Data<ContainerItemUI, ComputedNode>>());
+        PaperdollEquipAnchors = Add(new Query<Data<PaperdollEquipUI, ComputedNode>>());
+        PaperdollBackpackAnchors = Add(new Query<Data<PaperdollBackpackUI, ComputedNode>>());
+        GumpAnchors = Add(new Res<GuiRenderingPlugin.GumpItemNameAnchors>());
+        ClickPos = Add(new Res<GumpNameClickPos>());
+        NodeById = Add(new Query<Data<ComputedNode>>());
     }
 }

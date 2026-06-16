@@ -12,6 +12,7 @@ internal readonly struct GameplayPlugin : IPlugin
         app.AddPlugin<PickupPlugin>();
         app.AddPlugin<UseObjectPlugin>();
         app.AddPlugin<StaticNameLabelPlugin>();
+        app.AddPlugin<SingleClickNamePlugin>();
         app.AddPlugin<AutoLootPlugin>();
         app.AddPlugin<MobAnimationsPlugin>();
         app.AddPlugin<PlayerMovementPlugin>();

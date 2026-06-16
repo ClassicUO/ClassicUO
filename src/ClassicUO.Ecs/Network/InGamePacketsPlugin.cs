@@ -177,6 +177,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             Res<DelayedAction>,
             ResMut<SpellbookStore>,
             ResMut<PopupMenuState>,
+            EventWriter<TextOverheadEvent>,
             InGameQueries>(OnExtendedCommand);
 
         app.AddObserver<On<PacketReceived<OnUpdateItemPacket_0x1A>>,
@@ -635,6 +636,60 @@ readonly struct InGamePacketsPlugin : IPlugin
         gameCtx.Value.MaxObjectsDistance = trig.Event.Packet.Range;
     }
 
+    // Armor/weapons/shields send their single-click name via 0xBF/0x10
+    // (DisplayEquipmentInfo), NOT 0x1C/0xC1. Mirror legacy PacketHandlers 0x10:
+    // the base cliloc is the item name (one overhead line), then crafter /
+    // unidentified / attribute clilocs assemble into a second line. Without this
+    // a single-clicked shield/armor name was parsed and silently dropped.
+    static void EmitEquipInfoOverhead(
+        OnExtendedCommandPacket_0xBF.DisplayEquipInfoData info,
+        UOFileManager files,
+        EventWriter<TextOverheadEvent> textOverHeadQueue)
+    {
+        var baseName = info.Cliloc > 0 ? files.Clilocs.GetString((int)info.Cliloc, true) : string.Empty;
+        if (!string.IsNullOrEmpty(baseName))
+            textOverHeadQueue.Send(new TextOverheadEvent
+            {
+                Serial = info.ItemSerial, Text = baseName, Name = baseName,
+                Hue = 0x3B2, Font = 3, IsUnicode = true, MessageType = MessageType.Regular,
+            });
+
+        var sb = new System.Text.StringBuilder();
+        if (!string.IsNullOrEmpty(info.CrafterName))
+            sb.Append("Crafted by ").Append(info.CrafterName);
+        if (info.Unidentified)
+            sb.Append("[Unidentified");
+
+        int count = 0;
+        foreach (var entry in info.Entries)
+        {
+            var attr = files.Clilocs.GetString((int)entry.AttributeId);
+            if (!string.IsNullOrEmpty(attr))
+            {
+                if (entry.Charges == -1)
+                {
+                    if (count > 0) sb.Append('/').Append(attr);
+                    else sb.Append(" [").Append(attr);
+                }
+                else
+                {
+                    sb.Append("\n[").Append(attr).Append(" : ").Append(entry.Charges).Append(']');
+                    count += 20;
+                }
+            }
+            count++;
+        }
+        if ((count < 20 && count > 0) || (info.Unidentified && count == 0))
+            sb.Append(']');
+
+        if (sb.Length > 0)
+            textOverHeadQueue.Send(new TextOverheadEvent
+            {
+                Serial = info.ItemSerial, Text = sb.ToString(), Name = baseName,
+                Hue = 0x3B2, Font = 3, IsUnicode = true, MessageType = MessageType.Regular,
+            });
+    }
+
     static void OnExtendedCommand(
         On<PacketReceived<OnExtendedCommandPacket_0xBF>> trig,
         Commands commands,
@@ -645,6 +700,7 @@ readonly struct InGamePacketsPlugin : IPlugin
         Res<DelayedAction> delayedActions,
         ResMut<SpellbookStore> spellbooks,
         ResMut<PopupMenuState> popupMenu,
+        EventWriter<TextOverheadEvent> textOverHeadQueue,
         InGameQueries queries)
     {
         var packet = trig.Event.Packet;
@@ -662,6 +718,9 @@ readonly struct InGamePacketsPlugin : IPlugin
             var pm = packet.PopupMenu.Value;
             popupMenu.Value.SetPending(pm.Serial, pm.Items);
         }
+
+        if (packet.DisplayEquipInfo.HasValue)
+            EmitEquipInfoOverhead(packet.DisplayEquipInfo.Value, fileManager.Value, textOverHeadQueue);
 
         switch (packet.Command)
         {

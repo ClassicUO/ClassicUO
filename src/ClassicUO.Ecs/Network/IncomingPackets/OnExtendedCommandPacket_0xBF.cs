@@ -16,10 +16,9 @@ internal struct OnExtendedCommandPacket_0xBF : IPacket
     internal struct DisplayEquipInfoData
     {
         public uint ItemSerial;
-        public uint Cliloc;
-        public uint Sentinel1;
-        public string OwnerName;
-        public uint Sentinel2;
+        public uint Cliloc;          // base name cliloc
+        public string CrafterName;   // empty if not crafted (-3 block absent)
+        public bool Unidentified;    // -4 block present
         public List<DisplayEquipInfoEntry> Entries;
     }
 
@@ -212,30 +211,40 @@ internal struct OnExtendedCommandPacket_0xBF : IPacket
 
             case 0x10:
                 {
+                    // DisplayEquipmentInfo (armor/weapon/shield single-click name).
+                    // Variable layout: cliloc, then OPTIONAL -3 crafter block,
+                    // OPTIONAL -4 unidentified, then [attrId,charges] pairs, -1
+                    // terminated. The old fixed parse assumed a crafter block was
+                    // always present and mis-read non-crafted items.
                     var info = new DisplayEquipInfoData
                     {
                         ItemSerial = reader.ReadUInt32BE(),
                         Cliloc = reader.ReadUInt32BE(),
-                        Sentinel1 = reader.ReadUInt32BE(),
+                        CrafterName = string.Empty,
                         Entries = new List<DisplayEquipInfoEntry>()
                     };
 
-                    var ownerNameLen = reader.ReadUInt16BE();
-                    info.OwnerName = reader.ReadASCII(ownerNameLen);
-                    info.Sentinel2 = reader.ReadUInt32BE();
-
-                    while (reader.Remaining > 0)
+                    var next = reader.ReadUInt32BE();
+                    if (next == 0xFFFF_FFFD) // -3: crafted by
                     {
-                        var attributeId = reader.ReadUInt32BE();
-                        if (attributeId == 0xFFFF_FFFF)
-                            break;
-
+                        var len = reader.ReadUInt16BE();
+                        if (len > 0)
+                            info.CrafterName = reader.ReadASCII(len);
+                        next = reader.ReadUInt32BE();
+                    }
+                    if (next == 0xFFFF_FFFC) // -4: unidentified
+                    {
+                        info.Unidentified = true;
+                        next = reader.ReadUInt32BE();
+                    }
+                    // `next` now holds the first attribute id (or -1 terminator).
+                    while (next != 0xFFFF_FFFF && reader.Remaining >= 2)
+                    {
                         var charges = reader.ReadInt16BE();
-                        info.Entries.Add(new DisplayEquipInfoEntry
-                        {
-                            AttributeId = attributeId,
-                            Charges = charges
-                        });
+                        info.Entries.Add(new DisplayEquipInfoEntry { AttributeId = next, Charges = charges });
+                        if (reader.Remaining < 4)
+                            break;
+                        next = reader.ReadUInt32BE();
                     }
 
                     DisplayEquipInfo = info;
