@@ -1,13 +1,30 @@
+// ECS port of the legacy login error popup (Game/UI/Gumps/Login/LoadingGump.cs
+// in the LoginButtons.OK / PopUpMessage state). A ResizePic 0x0A28 panel at the
+// fixed login coords with the rejection message centered inside (ASCII font 2,
+// hue 0x0386, wrapped at 326px) and an OK button. OK returns to the login screen
+// and disconnects, mirroring LoginScene.StepBack.
+using System;
 using ClassicUO.Network;
+using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
 using TinyEcs.Bevy.UI;
-using ClayColor = Clay.Color;
 
 namespace ClassicUO.Ecs;
 
 internal readonly struct LoginErrorScreenPlugin : IPlugin
 {
+    // LoadingGump geometry (login logical 640x480 coord space).
+    private const ushort Background = 0x0A28;
+    private static readonly Vector2 BoxPos = new(142, 134);
+    private static readonly Vector2 BoxSize = new(366, 212);
+    private static readonly Vector2 LabelPos = new(20, 44);   // box-relative (162,178)
+    private const int LabelWidth = 326;
+    private static readonly Vector2 OkPos = new(164, 170);     // box-relative (306,304)
+    private const ushort OkN = 0x0481, OkP = 0x0483, OkO = 0x0482;
+    private const ushort TextHue = 0x0386;
+    private const byte Font = 2;
+
     public void Build(App app)
     {
         var cleanupFn = Cleanup;
@@ -38,136 +55,97 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
     private static void LoginErrorInfoSetup(
         Commands commands,
         Res<NetClient> network,
+        Res<GumpBuilder> builder,
+        Res<UiSurface> surface,
         ResMut<NextState<GameState>> nextState,
         EventReader<LoginErrorsInfoEvent> reader)
     {
-        // Root: full-screen vertical column, centered.
-        var root = commands.Spawn()
-            .Insert<LoginErrorScene>()
-            .Insert(new Node
-            {
-                Width = Val.Percent(100f),
-                Height = Val.Percent(100f),
-                FlexDirection = FlexDirection.Column,
-                JustifyContent = JustifyContent.Center,
-                AlignItems = AlignItems.Center,
-                Padding = UiRect.All(8),
-                Gap = Val.Px(4),
-            })
-            .Insert(new BackgroundColor(new ClayColor(51, 51, 51, 255)));
-        var rootId = root.Id;
-
-        // Title label.
-        var header = commands.Spawn()
-            .Insert<LoginErrorScene>()
-            .Insert(new Node
-            {
-                Width = Val.Percent(50f),
-                Height = Val.Auto,
-                FlexDirection = FlexDirection.Column,
-                JustifyContent = JustifyContent.Start,
-                AlignItems = AlignItems.Start,
-                Padding = UiRect.All(8),
-                Gap = Val.Px(4),
-            })
-            .Insert(new BackgroundColor(new ClayColor(76, 76, 76, 255)))
-            .Insert(BorderRadius.All(8))
-            .Insert(new Text("Error on login"))
-            .Insert(new TextFont { FontId = 0, Size = 28 })
-            .Insert(new TextColor(ClayColor.White));
-        commands.AddChild(rootId, header.Id);
-
-        // Menu container.
-        var menu = commands.Spawn()
-            .Insert<LoginErrorScene>()
-            .Insert(new Node
-            {
-                Width = Val.Percent(50f),
-                Height = Val.Percent(50f),
-                FlexDirection = FlexDirection.Column,
-                JustifyContent = JustifyContent.Start,
-                AlignItems = AlignItems.Center,
-                Padding = UiRect.All(8),
-                Gap = Val.Px(4),
-            })
-            .Insert(new BackgroundColor(new ClayColor(76, 76, 76, 255)))
-            .Insert(BorderRadius.All(8));
-        commands.AddChild(rootId, menu.Id);
-        var menuId = menu.Id;
-
+        string message = "No Text";
         foreach (var ev in reader.Read())
-        {
-            var errorEntry = commands.Spawn()
-                .Insert<LoginErrorScene>()
-                .Insert(ev.Error)
-                .Insert(new Node
-                {
-                    Width = Val.Auto,
-                    Height = Val.Auto,
-                    FlexDirection = FlexDirection.Column,
-                    JustifyContent = JustifyContent.Center,
-                    AlignItems = AlignItems.Center,
-                    Padding = UiRect.All(8),
-                    Gap = Val.Px(4),
-                })
-                .Insert(new BackgroundColor(new ClayColor(153, 153, 153, 255)))
-                .Insert(BorderRadius.All(8))
-                .Insert(new Text(ev.Error.ErrorMessage))
-                .Insert(new TextFont { FontId = 0, Size = 24 })
-                .Insert(new TextColor(ClayColor.White));
-            commands.AddChild(menuId, errorEntry.Id);
-        }
+            message = ev.Error.ErrorMessage;
 
-        // Footer row, anchored at the bottom-end.
-        var footer = commands.Spawn()
+        // Login wallpaper — legacy LoginBackground persists for the whole
+        // LoginScene (added in Load, only disposed on Unload), so the popup
+        // renders over it, not black. CV>=706400 branch: tiled 0x0150 + UO flag
+        // 0x0151. Sized absolutely from the surface (a parentless Percent-sized
+        // root collapses to 0).
+        var size = surface.Value.LogicalSize;
+        var backdrop = commands.Spawn()
             .Insert<LoginErrorScene>()
             .Insert(new Node
             {
-                Width = Val.Percent(100f),
-                Height = Val.Percent(100f),
-                FlexDirection = FlexDirection.Column,
-                JustifyContent = JustifyContent.End,
-                AlignItems = AlignItems.Center,
-                Padding = UiRect.All(8),
-                Gap = Val.Px(4),
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(0), Top = Val.Px(0),
+                Width = Val.Px(size.X), Height = Val.Px(size.Y),
             });
-        commands.AddChild(menuId, footer.Id);
-        var footerId = footer.Id;
+        var backdropId = backdrop.Id;
 
-        // OK button.
-        var okButton = commands.Spawn()
+        var wallpaper = builder.Value.AddGumpTiled(commands, 0x0150, Vector3.UnitZ,
+            new Vector2(0, 0), new Vector2(size.X, size.Y))
+            .Insert<LoginErrorScene>();
+        commands.AddChild(backdropId, wallpaper.Id);
+
+        var flag = builder.Value.AddGump(commands, 0x0151, Vector3.UnitZ, new Vector2(0, 4))
+            .Insert<LoginErrorScene>();
+        commands.AddChild(backdropId, flag.Id);
+
+        // ResizePic panel.
+        var box = commands.Spawn()
             .Insert<LoginErrorScene>()
-            .Insert(LoginButtons.Ok)
             .Insert(new Node
             {
-                Width = Val.Percent(40f),
-                Height = Val.Auto,
-                FlexDirection = FlexDirection.Column,
-                JustifyContent = JustifyContent.Center,
-                AlignItems = AlignItems.Center,
-                Padding = UiRect.All(8),
-                Gap = Val.Px(4),
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(BoxPos.X), Top = Val.Px(BoxPos.Y),
+                Width = Val.Px(BoxSize.X), Height = Val.Px(BoxSize.Y),
             })
-            .Insert(new BackgroundColor(new ClayColor(153, 153, 153, 255)))
-            .Insert(BorderRadius.All(8))
-            .Insert(new Text("OK"))
-            .Insert(new TextFont { FontId = 0, Size = 24 })
-            .Insert(new TextColor(ClayColor.White))
-            .Insert(Interaction.None)
-            .Insert(new FocusPolicy { Block = true })
-            .Observe<On<UiClick>>(_ =>
+            .Insert(Interaction.None);
+        var boxId = box.Id;
+        commands.AddChild(backdropId, boxId);
+
+        var bg = builder.Value.AddGumpNinePatch(commands, Background, Vector3.UnitZ, new Vector2(0, 0), BoxSize)
+            .Insert<LoginErrorScene>();
+        commands.AddChild(boxId, bg.Id);
+
+        // Centered, wrapped ASCII message (Clay can't wrap the UO atlas, so wrap
+        // at spawn via a WrappedText custom sized to the measured height).
+        var (_, msgH) = UoFontRenderer.Measure(message, Font, LabelWidth, isHtml: false, 0, htmlBg: false, ascii: true);
+        var label = commands.Spawn()
+            .Insert<LoginErrorScene>()
+            .Insert(new Node
             {
-                nextState.Value.Set(GameState.LoginScreen);
-                network.Value.Disconnect();
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(LabelPos.X), Top = Val.Px(LabelPos.Y),
+                Width = Val.Px(LabelWidth), Height = Val.Px(Math.Max(msgH, 18)),
+            })
+            .Insert(new UiCustom
+            {
+                Data = new UOCustomRender
+                {
+                    Kind = UOCustomKind.WrappedText,
+                    Hue = Vector3.UnitZ,
+                    Text = message,
+                    TextFont = Font,
+                    TextHue = TextHue,
+                    WrapWidth = LabelWidth,
+                    IsHtml = false,
+                    TextAscii = true,
+                    TextCenter = true,
+                },
             });
-        commands.AddChild(footerId, okButton.Id);
+        commands.AddChild(boxId, label.Id);
+
+        // OK — back to the login screen + disconnect (LoginScene.StepBack).
+        var okButton = builder.Value.AddButton(commands, (OkN, OkP, OkO), Vector3.UnitZ, OkPos)
+            .Insert<LoginErrorScene>()
+            .Observe((On<UiClick> _, ResMut<NextState<GameState>> state, Res<NetClient> net) =>
+            {
+                state.Value.Set(GameState.LoginScreen);
+                net.Value.Disconnect();
+            });
+        commands.AddChild(boxId, okButton.Id);
     }
 
     private struct LoginErrorScene;
-    private enum LoginButtons : byte
-    {
-        Ok
-    }
 }
 
 internal struct LoginErrorsInfoEvent
