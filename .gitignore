@@ -24,6 +24,9 @@ bld/
 [Dd]ata/
 settings.json
 
+# agent-desktop harness local config (creds, UO dir, client version)
+.env
+
 # Visual Studio Code
 .vscode/
 

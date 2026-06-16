@@ -34,6 +34,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ClassicUO.Agent.Contracts;
 using ClassicUO.Agent.Contracts.Dto;
+using ClassicUO.Agent.Desktop.Services;
 
 namespace ClassicUO.Agent.Desktop.Commands;
 
@@ -75,7 +76,7 @@ internal static class ScriptCommand
         JsonArray steps;
         try
         {
-            var json = await File.ReadAllTextAsync(filePath);
+            var json = DotEnv.Expand(await File.ReadAllTextAsync(filePath));
             var node = JsonNode.Parse(json);
             if (node is not JsonArray arr)
             {

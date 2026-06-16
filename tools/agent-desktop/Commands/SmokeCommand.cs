@@ -21,6 +21,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using ClassicUO.Agent.Contracts;
 using ClassicUO.Agent.Contracts.Dto;
+using ClassicUO.Agent.Desktop.Services;
 
 namespace ClassicUO.Agent.Desktop.Commands;
 
@@ -37,13 +38,13 @@ internal static class SmokeCommand
 
         var username = new Option<string>(
             "--username",
-            () => "admin",
-            "Login username.");
+            () => DotEnv.Get("UO_USERNAME") ?? "admin",
+            "Login username. Defaults to UO_USERNAME from .env, else 'admin'.");
 
         var password = new Option<string>(
             "--password",
-            () => "admin",
-            "Login password (plaintext; encrypted on the way through).");
+            () => DotEnv.Get("UO_PASSWORD") ?? "admin",
+            "Login password (plaintext; encrypted on the way through). Defaults to UO_PASSWORD from .env, else 'admin'.");
 
         var shardAddress = new Option<string>(
             "--shard-address",

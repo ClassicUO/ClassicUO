@@ -87,6 +87,41 @@ Pin these in repo-level `settings.json`:
 
 Fixed windowed size keeps inputs deterministic across machines.
 
+## .env (local config)
+
+Instead of hand-editing `settings.json` and retyping credentials on every
+command, drop a `.env` at the **repo root**. It is gitignored — never
+committed. Copy `.env.example` and fill it in:
+
+```dotenv
+UO_CLIENT_VERSION=7.0.115.0
+UO_DIRECTORY=D:\path\to\UltimaOnline
+UO_USERNAME=admin
+UO_PASSWORD=admin
+```
+
+How each key is consumed:
+
+| Key | Consumed by | Effect |
+|---|---|---|
+| `UO_CLIENT_VERSION` | `up` | written to `settings.json` → `clientversion` before the client spawns |
+| `UO_DIRECTORY` | `up` | written to `settings.json` → `ultimaonlinedirectory` (UO data/assets folder) |
+| `UO_USERNAME` | `smoke` default; `${UO_USERNAME}` in `script` | login account |
+| `UO_PASSWORD` | `smoke` default; `${UO_PASSWORD}` in `script` | login password (plaintext) |
+
+Notes:
+
+- `up` **patches** `settings.json` in place — it only overwrites
+  `clientversion` / `ultimaonlinedirectory` and leaves every other pin
+  (window size, ip/port) untouched. If `.env` is absent, nothing is touched.
+- Login credentials are **not** written to `settings.json`. `smoke` reads
+  them as its `--username` / `--password` defaults (explicit flags still
+  win). For `script --file`, reference them as `${UO_USERNAME}` /
+  `${UO_PASSWORD}` tokens anywhere in the JSON — they are substituted from
+  `.env` before the script runs. Unknown `${...}` tokens are left as-is.
+- Parsing is plain `KEY=VALUE`, one per line; `#` comments and blank lines
+  are skipped; one layer of surrounding quotes is stripped.
+
 ## Commands
 
 One file per verb in `Commands/<Verb>.cs`, wired in `Program.cs`. Run

@@ -9,6 +9,7 @@
 using System.CommandLine;
 using System.Diagnostics;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using ClassicUO.Agent.Desktop.Services;
 
 namespace ClassicUO.Agent.Desktop.Commands;
@@ -41,16 +42,25 @@ internal static class UpCommand
 
     private static async Task RunAsync(bool persistMode, int timeoutMs)
     {
-        string repoRoot;
+        var repoRoot = RepoRoot.Find();
+        if (repoRoot is null)
+        {
+            EmitError(
+                "could not locate src/ClassicUO.Client/ClassicUO.Client.csproj by walking up from "
+                + AppContext.BaseDirectory);
+            Environment.ExitCode = 1;
+            return;
+        }
+
         try
         {
-            repoRoot = FindRepoRoot();
+            ApplyDotEnvToSettings(repoRoot);
         }
         catch (Exception ex)
         {
-            EmitError(ex.Message);
-            Environment.ExitCode = 1;
-            return;
+            // Non-fatal: stale/missing settings just means the client uses
+            // whatever is already on disk. Warn and keep going.
+            EmitWarning($"failed to apply .env to settings.json: {ex.Message}");
         }
 
         var agentDll = ClientProcess.GetAgentDllPath(repoRoot);
@@ -118,22 +128,30 @@ internal static class UpCommand
         EmitStatus(new { status = "down" });
     }
 
-    private static string FindRepoRoot()
+    // Overlay .env onto the repo-level settings.json the client reads from
+    // CWD. Only the client-config keys live here (creds are consumed by the
+    // login verbs from .env directly). Other settings.json fields — window
+    // size, ip/port pins — are preserved untouched.
+    private static void ApplyDotEnvToSettings(string repoRoot)
     {
-        // Walk up until we find a marker that uniquely identifies the
-        // cuo-agents repo root. No top-level .sln on impl/ecs, so anchor
-        // on the canonical client project file path instead.
-        var dir = new DirectoryInfo(AppContext.BaseDirectory);
-        while (dir is not null)
-        {
-            var marker = Path.Combine(dir.FullName, "src", "ClassicUO.Client", "ClassicUO.Client.csproj");
-            if (File.Exists(marker))
-                return dir.FullName;
-            dir = dir.Parent;
-        }
-        throw new InvalidOperationException(
-            "could not locate src/ClassicUO.Client/ClassicUO.Client.csproj by walking up from "
-            + AppContext.BaseDirectory);
+        var clientVersion = DotEnv.Get("UO_CLIENT_VERSION");
+        var uoDirectory = DotEnv.Get("UO_DIRECTORY");
+        if (clientVersion is null && uoDirectory is null)
+            return;
+
+        var settingsPath = Path.Combine(repoRoot, "settings.json");
+        var root = File.Exists(settingsPath)
+            ? JsonNode.Parse(File.ReadAllText(settingsPath)) as JsonObject
+            : null;
+        root ??= new JsonObject();
+
+        if (clientVersion is not null)
+            root["clientversion"] = clientVersion;
+        if (uoDirectory is not null)
+            root["ultimaonlinedirectory"] = uoDirectory;
+
+        File.WriteAllText(settingsPath,
+            root.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
     }
 
     private static void TryKill(Process? child)
