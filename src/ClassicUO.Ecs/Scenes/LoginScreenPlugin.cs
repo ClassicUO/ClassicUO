@@ -3,6 +3,7 @@ using System.Numerics;
 using ClassicUO.Configuration;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using TinyEcs;
 using TinyEcs.Bevy;
 using TinyEcs.Bevy.UI;
@@ -22,6 +23,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
         var deleteMenuFn = DeleteMenu;
         var applyDpiFn = ApplyLoginScreenDpiSize;
         var updateInputHueFn = UpdateInputHue;
+        var submitOnEnterFn = SubmitOnEnter;
 
         app
             .AddState(LoginInteraction.None)
@@ -51,6 +53,14 @@ internal readonly struct LoginScreenPlugin : IPlugin
             .AddSystem(updateInputHueFn)
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> s) => s.Value.Current == GameState.LoginScreen)
+            .Build()
+
+            // Enter submits the login (either field focused) — mirrors the arrow
+            // button observer.
+            .AddSystem(submitOnEnterFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> s, Res<KeyboardContext> kb)
+                => s.Value.Current == GameState.LoginScreen && kb.Value.IsPressedOnce(Keys.Enter))
             .Build()
 
             .AddPlugin<ServerSelectionPlugin>()
@@ -323,6 +333,19 @@ internal readonly struct LoginScreenPlugin : IPlugin
             .Insert<UiContainsByBounds>()
             .Insert(new TinyEcs.Bevy.UI.Widgets.CheckboxLabel { Target = checkboxId });
         parent.AddChild(label);
+    }
+
+    private static void SubmitOnEnter(
+        Commands commands,
+        Res<Settings> settings,
+        ResMut<NextState<LoginInteraction>> state,
+        Single<Data<Text>, Filter<With<UsernameInput>, With<LoginScene>, With<TextInput>>> queryUsername,
+        Single<Data<MaskedText>, Filter<With<PasswordInput>, With<LoginScene>, With<TextInput>>> queryPassword)
+    {
+        (_, var username) = queryUsername.Get();
+        (_, var password) = queryPassword.Get();
+        Login(commands, settings.Value, username.Ref.Value, password.Ref.Value ?? string.Empty);
+        state.Value.Set(LoginInteraction.LoginRequested);
     }
 
     private static void DeleteMenu(
