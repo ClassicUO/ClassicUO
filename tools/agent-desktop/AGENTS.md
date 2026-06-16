@@ -40,8 +40,13 @@ verb auto-reads that file if `--port` is omitted.
 
 ## ModernUO
 
-Supervisor expects ModernUO already running on `127.0.0.1:2593`. Boot
-manually from a published ModernUO checkout:
+Two options:
+
+1. **Let the harness launch it.** Set `MODERNUO_PATH` in `.env` (see below)
+   to `ModernUO.exe` or the distribution dir. `up` spawns the server, waits
+   for it to accept on the shard port, and `down`/Ctrl-C kills it.
+2. **Manage it yourself.** Leave `MODERNUO_PATH` unset; `up` assumes a
+   server already listening on `127.0.0.1:2593`. Boot manually:
 
 ```bash
 cd <modernuo-distribution-dir> && ./ModernUO.exe   # or ./ModernUO on linux/mac
@@ -98,6 +103,7 @@ UO_CLIENT_VERSION=7.0.115.0
 UO_DIRECTORY=D:\path\to\UltimaOnline
 UO_USERNAME=admin
 UO_PASSWORD=admin
+MODERNUO_PATH=D:\path\to\ModernUO\Distribution
 ```
 
 How each key is consumed:
@@ -108,12 +114,20 @@ How each key is consumed:
 | `UO_DIRECTORY` | `up` | written to `settings.json` → `ultimaonlinedirectory` (UO data/assets folder) |
 | `UO_USERNAME` | `smoke` default; `${UO_USERNAME}` in `script` | login account |
 | `UO_PASSWORD` | `smoke` default; `${UO_PASSWORD}` in `script` | login password (plaintext) |
+| `MODERNUO_PATH` | `up` / `down` | `ModernUO.exe` or its distribution dir; `up` launches the server, `down`/Ctrl-C kills it. Unset → external server |
 
 Notes:
 
 - `up` **patches** `settings.json` in place — it only overwrites
   `clientversion` / `ultimaonlinedirectory` and leaves every other pin
   (window size, ip/port) untouched. If `.env` is absent, nothing is touched.
+- `MODERNUO_PATH` may be the server executable or the directory holding it
+  (`ModernUO.exe` on Windows, `ModernUO` elsewhere). After spawning, `up`
+  waits up to 30 s for the server to accept on the shard `port` (from
+  `settings.json`, default 2593) so a login doesn't race a booting world; a
+  timeout is a warning, not a failure. A set-but-unresolvable path warns and
+  falls back to an external server. The launched server pid is recorded in
+  `.runtime/pids.json` so `down` can tear it down.
 - Login credentials are **not** written to `settings.json`. `smoke` reads
   them as its `--username` / `--password` defaults (explicit flags still
   win). For `script --file`, reference them as `${UO_USERNAME}` /
@@ -209,7 +223,9 @@ dotnet build src/ClassicUO.Client/ClassicUO.Client.csproj -p:AGENT_BUILD=true
   `%LOCALAPPDATA%`, Linux `~/.local/share`, macOS `~/Library/Application Support`).
 - Pid file (after `up --persist`): `tools/agent-desktop/.runtime/pids.json`
   (gitignored via `tools/agent-desktop/.gitignore`). Created by `up --persist`,
-  consumed and removed by `down`. Schema: `{"client":{"pid":N,"port":N}}`.
+  consumed and removed by `down`. Schema:
+  `{"client":{"pid":N,"port":N},"server":{"pid":N}}` (`server` present only
+  when `up` launched ModernUO from `MODERNUO_PATH`).
 - `.runtime/` is the only on-disk state the CLI writes inside the repo;
   no client stdout/stderr is logged to disk. `ClientProcess` keeps a 64-line
   in-memory ring buffer of each stream for inclusion in spawn-failure errors.

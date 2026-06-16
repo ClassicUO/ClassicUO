@@ -18,9 +18,17 @@ internal static class Pids
         [JsonPropertyName("port")] public int Port { get; set; }
     }
 
+    public sealed class ServerEntry
+    {
+        [JsonPropertyName("pid")] public int Pid { get; set; }
+    }
+
     public sealed class Registry
     {
         [JsonPropertyName("client")] public ClientEntry? Client { get; set; }
+        // Present only when `up` launched ModernUO from MODERNUO_PATH; null
+        // when an external server is used.
+        [JsonPropertyName("server")] public ServerEntry? Server { get; set; }
     }
 
     public static string PidsFilePath()
@@ -33,13 +41,14 @@ internal static class Pids
         return Path.Combine(projectRoot, ".runtime", "pids.json");
     }
 
-    public static void SavePids(int clientPid, int port)
+    public static void SavePids(int clientPid, int port, int? serverPid = null)
     {
         var path = PidsFilePath();
         Directory.CreateDirectory(Path.GetDirectoryName(path)!);
         var registry = new Registry
         {
-            Client = new ClientEntry { Pid = clientPid, Port = port }
+            Client = new ClientEntry { Pid = clientPid, Port = port },
+            Server = serverPid is int sp ? new ServerEntry { Pid = sp } : null,
         };
         var json = JsonSerializer.Serialize(registry, PidsJsonContext.Default.Registry);
         File.WriteAllText(path, json);
@@ -88,5 +97,6 @@ internal static class Pids
 
 [JsonSerializable(typeof(Pids.Registry))]
 [JsonSerializable(typeof(Pids.ClientEntry))]
+[JsonSerializable(typeof(Pids.ServerEntry))]
 [JsonSourceGenerationOptions(WriteIndented = true)]
 internal sealed partial class PidsJsonContext : JsonSerializerContext;

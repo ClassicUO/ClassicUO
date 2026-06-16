@@ -72,7 +72,26 @@ internal static class UpCommand
         }
 
         using var cts = new CancellationTokenSource();
+        Process? server = null;
         Process? child = null;
+
+        // Optional: launch ModernUO from MODERNUO_PATH before the client so
+        // its world is loading while the client boots to the login screen.
+        // Absent/unresolvable key → assume an externally managed server.
+        var serverExe = ServerProcess.ResolveExecutable();
+        if (DotEnv.Get("MODERNUO_PATH") is { Length: > 0 } && serverExe is null)
+            EmitWarning("MODERNUO_PATH set but no ModernUO executable found there; using external server");
+        if (serverExe is not null)
+        {
+            try
+            {
+                server = ServerProcess.Spawn(serverExe);
+            }
+            catch (Exception ex)
+            {
+                EmitWarning($"failed to launch ModernUO: {ex.Message}; using external server");
+            }
+        }
 
         try
         {
@@ -81,6 +100,7 @@ internal static class UpCommand
         catch (Exception ex)
         {
             EmitError($"spawn failed: {ex.Message}");
+            TryKill(server);
             Environment.ExitCode = 1;
             return;
         }
@@ -94,15 +114,28 @@ internal static class UpCommand
         {
             EmitError(ex.Message);
             TryKill(child);
+            TryKill(server);
             Environment.ExitCode = 1;
             return;
         }
 
-        EmitStatus(new { status = "up", pid = child.Id, port });
+        // Wait for the launched server to accept connections so a login
+        // immediately after `up` doesn't race a still-booting world.
+        // ponytail: fixed 30s; add a flag if a slow shard needs longer.
+        if (server is not null)
+        {
+            var shardPort = ReadServerPort(repoRoot);
+            var listening = await ServerProcess.WaitForListeningAsync(
+                shardPort, TimeSpan.FromSeconds(30), cts.Token);
+            if (!listening)
+                EmitWarning($"ModernUO not accepting on 127.0.0.1:{shardPort} yet; login may need a retry");
+        }
+
+        EmitStatus(new { status = "up", pid = child.Id, port, serverPid = server?.Id });
 
         if (persistMode)
         {
-            try { Pids.SavePids(child.Id, port); }
+            try { Pids.SavePids(child.Id, port, server?.Id); }
             catch (Exception ex)
             {
                 // Non-fatal: the rig is already up. Report and exit 0.
@@ -124,8 +157,28 @@ internal static class UpCommand
         await done.Task;
 
         TryKill(child);
+        TryKill(server);
         Pids.Clear();
         EmitStatus(new { status = "down" });
+    }
+
+    // The shard port the client (and thus our readiness probe) connects to.
+    // Mirrors the `port` pin in repo settings.json; ModernUO default 2593.
+    private static int ReadServerPort(string repoRoot)
+    {
+        try
+        {
+            var settingsPath = Path.Combine(repoRoot, "settings.json");
+            if (File.Exists(settingsPath) &&
+                JsonNode.Parse(File.ReadAllText(settingsPath)) is JsonObject root &&
+                root["port"] is JsonNode p)
+                return p.GetValue<int>();
+        }
+        catch
+        {
+            // Fall through to the default.
+        }
+        return 2593;
     }
 
     // Overlay .env onto the repo-level settings.json the client reads from
