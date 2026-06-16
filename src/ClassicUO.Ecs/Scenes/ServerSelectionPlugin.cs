@@ -17,16 +17,33 @@ internal readonly struct ServerSelectionPlugin : IPlugin
     {
         var cleanupFn = Cleanup;
         var serverInfoSetupFn = ServerInfoSetup;
+        var hoverFn = ServerNameHover;
+
+        // One-shot send latch (legacy LoginScene.SelectServer is idempotent via
+        // the login-step guard; without it a double-click sends the packet twice).
+        app.AddResource(new ServerSelectLatch());
 
         app
             .AddSystem(cleanupFn)
             .OnExit(GameState.ServerSelection)
             .Build()
 
+            // Re-arm the latch each time the screen is entered.
+            .AddSystem((ResMut<ServerSelectLatch> latch) => latch.Value.Sent = false)
+            .OnEnter(GameState.ServerSelection)
+            .Build()
+
             .AddSystem(serverInfoSetupFn)
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> state, EventReader<ServerSelectionInfoEvent> reader)
                        => reader.HasEvents && state.Value.Current == GameState.ServerSelection)
+            .Build()
+
+            // Highlight a server row's name while the row is hovered (legacy
+            // HoveredLabel: normal 0x034F → selected 0x0021).
+            .AddSystem(hoverFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.ServerSelection)
             .Build();
     }
 
@@ -46,7 +63,6 @@ internal readonly struct ServerSelectionPlugin : IPlugin
     private static void ServerInfoSetup(
         Commands commands,
         Res<GumpBuilder> gumpBuilder,
-        Res<NetClient> network,
         EventReader<ServerSelectionInfoEvent> reader)
     {
         // Root: full window, top-left anchored. mainMenu = chest's 640x480 canvas.
@@ -93,15 +109,13 @@ internal readonly struct ServerSelectionPlugin : IPlugin
             commands, (0x15A1, 0x15A3, 0x15A2), XnaVector3.UnitZ, new XnaVector2(586, 445))
             .Insert<ServerSelectionScene>());
 
-        // Next arrow (confirm selection).
+        // Next arrow (confirm selection). main's Next/Earth:
+        // SelectServer(GetServerIndexFromSettings()). We don't track the
+        // highlight; just confirm the first server.
         mainMenu.AddChild(gumpBuilder.Value.AddButton(
             commands, (0x15A4, 0x15A6, 0x15A5), XnaVector3.UnitZ, new XnaVector2(610, 445))
-            .Observe((On<UiClick> _) =>
-            {
-                // main's Next/Earth: SelectServer(GetServerIndexFromSettings()).
-                // We don't track the highlight; just confirm the first server.
-                network.Value.Send_SelectServer(0);
-            })
+            .Observe((On<UiClick> _, ResMut<ServerSelectLatch> latch, Res<NetClient> net) =>
+                SelectServer(latch.Value, net.Value, 0))
             .Insert<ServerSelectionScene>());
 
         // Header labels: OOP (CV>=500A) draws these unicode, font 1, hue
@@ -133,7 +147,8 @@ internal readonly struct ServerSelectionPlugin : IPlugin
             .Insert<ServerSelectionScene>());
         mainMenu.AddChild(gumpBuilder.Value.AddButton(
             commands, (0x15E8, 0x15EA, 0x15E9), XnaVector3.UnitZ, new XnaVector2(160, 400))
-            .Observe((On<UiClick> _) => network.Value.Send_SelectServer(0))
+            .Observe((On<UiClick> _, ResMut<ServerSelectLatch> latch, Res<NetClient> net) =>
+                SelectServer(latch.Value, net.Value, 0))
             .Insert<ServerSelectionScene>());
 
         // Scroll-area background — ResizePic 0x0DAC sized to match main (393-14 x 271).
@@ -151,16 +166,14 @@ internal readonly struct ServerSelectionPlugin : IPlugin
 
             foreach (var server in ev.Servers)
             {
-                var capturedServer = server;
-                // Single click anywhere on the row selects the server. The name
-                // label is opaque text that sits topmost over the row, so without
-                // its own handler a click on the name would be swallowed (Clay
-                // routes to the topmost Interaction-bearing element). Mirror
-                // CharacterSelectionPlugin: attach the same select observer to the
-                // label so the click "bubbles" to the row's select.
-                Action selectServer = () =>
-                    network.Value.Send_SelectServer((byte)capturedServer.Index);
+                var serverIndex = (byte)server.Index;
 
+                // Click anywhere on the row selects (latched so a double-click
+                // sends once). The name label is an absolute child = a Clay
+                // floating element, which captures the pointer over the text — so
+                // it needs its OWN click+Interaction (else a click/hover on the
+                // name wouldn't reach the row). ServerNameHover checks both the
+                // row and the name label so hover works over the whole row.
                 var rowEnt = commands.Spawn()
                     .Insert<ServerSelectionScene>()
                     .Insert(server)
@@ -173,20 +186,61 @@ internal readonly struct ServerSelectionPlugin : IPlugin
                         Height = Val.Px(25),
                     })
                     .Insert(Interaction.None)
-                    .Observe((On<UiClick> _) => selectServer());
+                    .Observe((On<UiClick> _, ResMut<ServerSelectLatch> latch, Res<NetClient> net) =>
+                        SelectServer(latch.Value, net.Value, serverIndex));
 
                 var nameLabel = AddLabelChild(commands, rowEnt, server.Name, 74, 4, rowColor);
                 commands.Entity(nameLabel)
                     .Insert(Interaction.None)
-                    .Observe((On<UiClick> _) => selectServer());
+                    .Observe((On<UiClick> _, ResMut<ServerSelectLatch> latch, Res<NetClient> net) =>
+                        SelectServer(latch.Value, net.Value, serverIndex));
                 AddLabelChild(commands, rowEnt, "-", 250, 4, rowColor);
                 AddLabelChild(commands, rowEnt, "-", 320, 4, rowColor);
+                commands.Entity(rowEnt.Id).Insert(new ServerRowUI { NameLabel = nameLabel });
 
                 mainMenu.AddChild(rowEnt);
                 rowY += 25;
             }
         }
     }
+
+    // Send the SelectServer packet at most once per visit (legacy
+    // LoginScene.SelectServer guards on the login step; ECS uses a latch).
+    private static void SelectServer(ServerSelectLatch latch, NetClient net, byte index)
+    {
+        if (latch.Sent) return;
+        latch.Sent = true;
+        net.Send_SelectServer(index);
+    }
+
+    // Recolour each row's name label to the selected hue while the row OR its
+    // (floating, pointer-capturing) name label is hovered (legacy HoveredLabel
+    // OnMouseEnter/Exit highlights on row hover).
+    private static void ServerNameHover(
+        Query<Data<Interaction, ServerRowUI>> rowsQ,
+        Query<Data<Interaction>> interQ,
+        Query<Data<TextColor>> colorsQ)
+    {
+        var over = UoFontRuntime.AsciiHue(0x0021);
+        var normal = UoFontRuntime.AsciiHue(0x034F);
+        foreach (var (_, rowInter, row) in rowsQ)
+        {
+            var labelId = row.Ref.NameLabel;
+            if (!colorsQ.Contains(labelId)) continue;
+
+            bool hovered = IsHover(rowInter.Ref);
+            if (!hovered && interQ.Contains(labelId))
+            {
+                var (_, labelInter) = interQ.Get(labelId);
+                hovered = IsHover(labelInter.Ref);
+            }
+
+            var (_, color) = colorsQ.Get(labelId);
+            color.Ref = new TextColor(hovered ? over : normal);
+        }
+    }
+
+    private static bool IsHover(Interaction i) => i == Interaction.Hovered || i == Interaction.Pressed;
 
     private static void AddLabel(
         Commands commands, EntityCommands parent,
@@ -230,7 +284,14 @@ internal readonly struct ServerSelectionPlugin : IPlugin
     }
 
     private struct ServerSelectionScene;
+
+    // Links a server row to its name label so the hover system can recolour it.
+    private struct ServerRowUI { public ulong NameLabel; }
 }
+
+// One-shot guard so a double-click on a server row (or Next/Earth) sends the
+// SelectServer packet once. Re-armed on entering the screen.
+internal sealed class ServerSelectLatch { public bool Sent; }
 
 internal struct ServerSelectionInfoEvent
 {
