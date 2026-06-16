@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using ClassicUO.Game.Data;
 using ClassicUO.Network;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
@@ -68,6 +69,31 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
         Res<GameContext> gameCtx,
         EventReader<CharacterSelectionInfoEvent> reader)
     {
+        // Drain the list up front so the panel can size to the char count before
+        // spawning (legacy reads loginScene.Characters first). Empty slots are
+        // already stripped by the 0xA9 parser.
+        var chars = new List<CharacterInfo>();
+        foreach (var ev in reader.Read())
+        {
+            if (ev.Characters == null) continue;
+            foreach (var c in ev.Characters)
+                if (!string.IsNullOrEmpty(c.Name)) chars.Add(c);
+        }
+
+        // Legacy CharacterSelectionGump layout: modern clients (>= CV_6040), or
+        // 5020+ with >5 chars, grow the panel and shift title/rows/New+Delete down
+        // by yBonus so 6–7 rows fit; otherwise the 5-slot layout.
+        int listTitleY = 106, yOffset = 150, yBonus = 0;
+        var ver = gameCtx.Value.ClientVersion;
+        if (ver >= ClientVersion.CV_6040 || (ver >= ClientVersion.CV_5020 && chars.Count > 5))
+        {
+            listTitleY = 96;
+            yOffset = 125;
+            yBonus = 45;
+        }
+        var maxChars = MaxCharacterSlots(gameCtx.Value.ClientFeatures);
+        var locked = gameCtx.Value.LockedFeatures;
+
         var root = commands.Spawn()
             .Insert<CharacterSelectionScene>()
             .Insert(new Node
@@ -106,10 +132,10 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
             commands, 0x0151, XnaVector3.UnitZ, new XnaVector2(0, 4))
             .Insert<CharacterSelectionScene>());
 
-        // Inner panel 0x0A28 — sized per main (408 x 343).
+        // Inner panel 0x0A28 — sized per main (408 x 343, +yBonus for 6–7 slots).
         mainMenu.AddChild(gumpBuilder.Value.AddGumpNinePatch(
             commands, 0x0A28, XnaVector3.UnitZ,
-            new XnaVector2(160, 70), new XnaVector2(408, 343))
+            new XnaVector2(160, 70), new XnaVector2(408, 343 + yBonus))
             .Insert<CharacterSelectionScene>());
 
         // Title: OOP draws it ASCII font 2, hue 0x0386. TextColor carries the
@@ -118,7 +144,7 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
         var titleColor = UoFontRuntime.AsciiHue(0x0386);
 
         // Header.
-        AddLabel(commands, mainMenu, "Character Selection", 267, 106, titleColor);
+        AddLabel(commands, mainMenu, "Character Selection", 267, listTitleY, titleColor);
 
         // Matches main's CharacterEntryGump: single click highlights the
         // name (SelectCharacter), double click logs in (LoginCharacter).
@@ -133,72 +159,73 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
         var highlightColor = UoFontRuntime.AsciiHue(0x0021);
 
         // Character rows.
-        var yOffset = 150;
         var posInList = 0;
-        foreach (var ev in reader.Read())
+        var valid = 0;
+        foreach (var character in chars)
         {
-            if (ev.Characters == null) continue;
+            // Legacy per-slot caps: stop at ClientFeatures.MaxChars, and at 5
+            // when the account isn't unlocked for the 6th/7th slot.
+            valid++;
+            if (valid > maxChars) break;
+            if (locked != 0 && (locked & LockedFeatureFlags.SeventhCharacterSlot) == 0
+                && valid == 6 && (locked & LockedFeatureFlags.SixthCharacterSlot) == 0)
+                break;
 
-            foreach (var character in ev.Characters)
+            var idx = character.Index;
+
+            // Single-click selects/highlights the row. Attached to both row
+            // and label so a click on the name text behaves like a click on
+            // the tan border (Clay routes to whichever entity is topmost).
+            Action<Commands> handleRowSelect = innerCmd =>
             {
-                if (string.IsNullOrEmpty(character.Name)) continue;
-
-                var idx = character.Index;
-
-                // Single-click selects/highlights the row. Attached to both row
-                // and label so a click on the name text behaves like a click on
-                // the tan border (Clay routes to whichever entity is topmost).
-                Action<Commands> handleRowSelect = innerCmd =>
+                selectedRef.Index = idx;
+                foreach (var (rowIdx, lbl, _) in rows)
                 {
-                    selectedRef.Index = idx;
-                    foreach (var (rowIdx, lbl, _) in rows)
-                    {
-                        var color = rowIdx == idx ? highlightColor : normalColor;
-                        innerCmd.Entity(lbl).Insert(new TextColor(color));
-                    }
-                };
+                    var color = rowIdx == idx ? highlightColor : normalColor;
+                    innerCmd.Entity(lbl).Insert(new TextColor(color));
+                }
+            };
 
-                // Tan ResizePic bg (0x0BB8) — same frame main draws around
-                // each character row (CharacterEntryGump.ctor in main). Carries
-                // the CharacterInfo so the global UiDoubleClick observer can log
-                // it in.
-                // Center the name in the 280x30 row via flex (both axes). The row
-                // is a custom-render (GumpNinePatch) node; its gump fill now paints
-                // BEFORE its children (Clay.NET ClayContext custom-command order
-                // fix), so a flow label renders on top — no Absolute / manual
-                // measure. Mirrors OOP CharacterEntryGump (Label maxwidth 270,
-                // TS_CENTER). The override Node is the last Node insert, which wins.
-                var rowTop = yOffset + posInList * 40;
-                var rowEnt = gumpBuilder.Value.AddGumpNinePatch(
-                    commands, 0x0BB8, XnaVector3.UnitZ,
-                    new XnaVector2(224, rowTop),
-                    new XnaVector2(280, 30))
-                    .Insert(new Node
-                    {
-                        Display = Display.Flex,
-                        PositionType = PositionType.Absolute,
-                        Left = Val.Px(224), Top = Val.Px(rowTop),
-                        Width = Val.Px(280), Height = Val.Px(30),
-                        JustifyContent = JustifyContent.Center,
-                        AlignItems = AlignItems.Center,
-                    })
-                    .Insert<CharacterSelectionScene>()
-                    .Insert(character)
-                    .Insert(Interaction.None)
-                    .Observe((On<UiClick> _, Commands innerCmd) => handleRowSelect(innerCmd));
+            // Tan ResizePic bg (0x0BB8) — same frame main draws around
+            // each character row (CharacterEntryGump.ctor in main). Carries
+            // the CharacterInfo so the global UiDoubleClick observer can log
+            // it in.
+            // Center the name in the 280x30 row via flex (both axes). The row
+            // is a custom-render (GumpNinePatch) node; its gump fill now paints
+            // BEFORE its children (Clay.NET ClayContext custom-command order
+            // fix), so a flow label renders on top — no Absolute / manual
+            // measure. Mirrors OOP CharacterEntryGump (Label maxwidth 270,
+            // TS_CENTER). The override Node is the last Node insert, which wins.
+            var rowTop = yOffset + posInList * 40;
+            var rowEnt = gumpBuilder.Value.AddGumpNinePatch(
+                commands, 0x0BB8, XnaVector3.UnitZ,
+                new XnaVector2(224, rowTop),
+                new XnaVector2(280, 30))
+                .Insert(new Node
+                {
+                    Display = Display.Flex,
+                    PositionType = PositionType.Absolute,
+                    Left = Val.Px(224), Top = Val.Px(rowTop),
+                    Width = Val.Px(280), Height = Val.Px(30),
+                    JustifyContent = JustifyContent.Center,
+                    AlignItems = AlignItems.Center,
+                })
+                .Insert<CharacterSelectionScene>()
+                .Insert(character)
+                .Insert(Interaction.None)
+                .Observe((On<UiClick> _, Commands innerCmd) => handleRowSelect(innerCmd));
 
-                var labelEnt = SpawnRowLabel(commands, rowEnt, character.Name, normalColor);
-                // Clicking the name (not just the tan border) selects too, and
-                // the label carries CharacterInfo so a double-click on the text
-                // logs in via the same global observer.
-                commands.Entity(labelEnt)
-                    .Insert(Interaction.None)
-                    .Insert(character)
-                    .Observe((On<UiClick> _, Commands innerCmd) => handleRowSelect(innerCmd));
-                rows.Add((idx, labelEnt, character.Name));
-                mainMenu.AddChild(rowEnt);
-                posInList++;
-            }
+            var labelEnt = SpawnRowLabel(commands, rowEnt, character.Name, normalColor);
+            // Clicking the name (not just the tan border) selects too, and
+            // the label carries CharacterInfo so a double-click on the text
+            // logs in via the same global observer.
+            commands.Entity(labelEnt)
+                .Insert(Interaction.None)
+                .Insert(character)
+                .Observe((On<UiClick> _, Commands innerCmd) => handleRowSelect(innerCmd));
+            rows.Add((idx, labelEnt, character.Name));
+            mainMenu.AddChild(rowEnt);
+            posInList++;
         }
 
         // Default highlight: main's CharacterSelectionGump starts with the
@@ -213,12 +240,10 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
         // New character button (Buttons.New = 0x159D/0x159F/0x159E) —
         // mirrors main's Buttons.New: loginScene.StartCharCreation(). Hidden once
         // used slots reach the server's cap (legacy CanCreateChar / MaxChars).
-        // ponytail: skips legacy's per-row 6th/7th-slot break — a server never
-        // sends more chars than the account holds; add if a shard proves otherwise.
-        if (posInList < MaxCharacterSlots(gameCtx.Value.ClientFeatures))
+        if (posInList < maxChars)
         {
             mainMenu.AddChild(gumpBuilder.Value.AddButton(
-                commands, (0x159D, 0x159F, 0x159E), XnaVector3.UnitZ, new XnaVector2(224, 350))
+                commands, (0x159D, 0x159F, 0x159E), XnaVector3.UnitZ, new XnaVector2(224, 350 + yBonus))
                 .Insert<CharacterSelectionScene>()
                 .Observe((On<UiClick> _, ResMut<NextState<GameState>> state) =>
                     state.Value.Set(GameState.CharacterCreation)));
@@ -226,7 +251,7 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
 
         // Delete button (0x159A/0x159C/0x159B).
         mainMenu.AddChild(gumpBuilder.Value.AddButton(
-            commands, (0x159A, 0x159C, 0x159B), XnaVector3.UnitZ, new XnaVector2(442, 350))
+            commands, (0x159A, 0x159C, 0x159B), XnaVector3.UnitZ, new XnaVector2(442, 350 + yBonus))
             .Insert<CharacterSelectionScene>());
 
         // Prev arrow — mirrors main's CharacterSelectionGump Buttons.Prev:
