@@ -242,6 +242,14 @@ internal readonly struct CharacterCreationPlugin : IPlugin
         var race = ctx.Race;
         var isFemale = ctx.IsFemale;
 
+        // Race availability is server-driven, not client-version-driven. Legacy
+        // CreateCharAppearanceGump: elf = CLF_ELVEN_RACE + ML expansion;
+        // gargoyle = SA expansion (the CV_60144 art guard still applies).
+        var locks = p.GameCtx.Value.LockedFeatures;
+        var feats = p.GameCtx.Value.ClientFeatures;
+        bool allowElf = (feats & CharacterListFlags.CLF_ELVEN_RACE) != 0 && locks.HasFlag(LockedFeatureFlags.ML);
+        bool allowGarg = locks.HasFlag(LockedFeatureFlags.SA);
+
         var dyn = commands.Spawn()
             .Insert<AppearanceDynamic>()
             .Insert(new Node
@@ -351,12 +359,15 @@ internal readonly struct CharacterCreationPlugin : IPlugin
             static c => SelectRace(c, RaceType.HUMAN));
         SpawnWordButton(commands, builder, dynId, (0x0702, 0x0704, 0x0703), new Vector2(200, 435),
             static c => SelectRace(c, RaceType.HUMAN));
-        SpawnRadio(commands, builder, dynId, new Vector2(180, 455), race == RaceType.ELF,
-            static c => SelectRace(c, RaceType.ELF));
-        SpawnWordButton(commands, builder, dynId, (0x0705, 0x0707, 0x0706), new Vector2(200, 455),
-            static c => SelectRace(c, RaceType.ELF));
+        if (allowElf)
+        {
+            SpawnRadio(commands, builder, dynId, new Vector2(180, 455), race == RaceType.ELF,
+                static c => SelectRace(c, RaceType.ELF));
+            SpawnWordButton(commands, builder, dynId, (0x0705, 0x0707, 0x0706), new Vector2(200, 455),
+                static c => SelectRace(c, RaceType.ELF));
+        }
 
-        if (version >= ClientVersion.CV_60144)
+        if (allowGarg && version >= ClientVersion.CV_60144)
         {
             SpawnRadio(commands, builder, dynId, new Vector2(60, 435), race == RaceType.GARGOYLE,
                 static c => SelectRace(c, RaceType.GARGOYLE));

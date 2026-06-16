@@ -26,6 +26,7 @@ using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
@@ -179,8 +180,11 @@ internal static class MobileHpOverheads
                 if (per > 0)
                 {
                     // Blue, green when poisoned, yellow on YellowBar status.
+                    // Bit 0x04 is Poisoned pre-7.0 but Flying on 7.0+ (same value),
+                    // so only treat it as poison on older clients — otherwise a
+                    // flying gargoyle would show a green bar. SA poison isn't tracked.
                     ushort hue = 90;
-                    if ((f & Flags.Poisoned) != 0) hue = 63;
+                    if (gameCtx.ClientVersion < ClientVersion.CV_7000 && (f & Flags.Poisoned) != 0) hue = 63;
                     else if ((f & Flags.YellowBar) != 0) hue = 53;
 
                     batch.DrawTiled(

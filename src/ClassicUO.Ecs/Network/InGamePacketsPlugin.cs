@@ -709,7 +709,12 @@ readonly struct InGamePacketsPlugin : IPlugin
         {
             var sc = packet.SpellbookContent.Value;
             ulong bits = sc.SpellBitfields[0] | ((ulong)sc.SpellBitfields[1] << 32);
-            spellbooks.Value.BySerial[sc.Serial] = new SpellbookData { School = SpellSchools.Resolve(sc.Graphic), Bitfields = bits };
+            spellbooks.Value.BySerial[sc.Serial] = new SpellbookData
+            {
+                School = SpellSchools.Resolve(sc.Graphic,
+                    (gameCtx.Value.ClientFeatures & CharacterListFlags.CLF_SAMURAI_NINJA) != 0),
+                Bitfields = bits
+            };
             spellbooks.Value.Revision++;
         }
 
@@ -728,7 +733,10 @@ readonly struct InGamePacketsPlugin : IPlugin
                 if (packet.MapIndex.HasValue)
                 {
                     var mapIdx = packet.MapIndex.Value;
-                    fileManager.Value.Maps.LoadMap(mapIdx);
+                    // CLF_UNLOCK_FELUCCA_AREAS picks the "X files" map variant
+                    // (new-haven / unlocked Felucca areas) — legacy World.Map setter.
+                    fileManager.Value.Maps.LoadMap(mapIdx,
+                        gameCtx.Value.ClientFeatures.HasFlag(CharacterListFlags.CLF_UNLOCK_FELUCCA_AREAS));
                     if (gameCtx.Value.Map != mapIdx)
                         gameCtx.Value.Map = mapIdx;
                 }

@@ -161,5 +161,18 @@ internal static class SpellSchools
         _ => SpellBookType.Magery,
     };
 
+    // Bushido/Ninjitsu books only resolve when the server advertised the
+    // Samurai/Ninja expansion (CLF_SAMURAI_NINJA) — legacy SpellbookGump.AssignGraphic.
+    // ponytail: falls back to Magery rather than refusing to open (a non-SE shard
+    // never sends these graphics anyway); upgrade to a "don't open" path if a shard
+    // ever pushes a ninja book with the flag cleared.
+    public static SpellBookType Resolve(ushort itemGraphic, bool samuraiNinjaEnabled)
+    {
+        var type = Resolve(itemGraphic);
+        if (!samuraiNinjaEnabled && (type == SpellBookType.Bushido || type == SpellBookType.Ninjitsu))
+            return SpellBookType.Magery;
+        return type;
+    }
+
     public static SpellSchool Get(SpellBookType type) => _byType[type];
 }

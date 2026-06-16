@@ -22,6 +22,7 @@ using ClassicUO.Assets;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Network;
+using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
@@ -602,6 +603,7 @@ internal readonly struct HealthBarPlugin : IPlugin
         Commands commands,
         Res<NetworkEntitiesMap> entities,
         Res<NetClient> net,
+        Res<GameContext> gameCtx,
         Res<ClassicUO.Configuration.Profile> profile,
         Query<Data<Hits>> hitsQ,
         Query<Data<Mana>> manaQ,
@@ -637,6 +639,12 @@ internal readonly struct HealthBarPlugin : IPlugin
                 if (r != null)
                 {
                     var flags = flagsQ.Contains(ent) ? Get(flagsQ, ent).Value : Flags.None;
+                    // Bit 0x04 is Poisoned pre-7.0 but Flying on 7.0+ (same value).
+                    // Clear it on modern clients so a flying gargoyle doesn't show a
+                    // green (poisoned) bar — legacy gates via the version-aware
+                    // Mobile.IsPoisoned. SA buff-based poison isn't tracked yet.
+                    if (gameCtx.Value.ClientVersion >= ClientVersion.CV_7000)
+                        flags &= ~Flags.Poisoned;
                     (r.AssetId, r.Hue) = ResolveHpFillSprite(fill.Ref.Party, flags);
                 }
             }

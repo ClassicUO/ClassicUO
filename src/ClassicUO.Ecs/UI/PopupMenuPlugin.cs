@@ -12,6 +12,7 @@
 using System.Collections.Generic;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Utility;
@@ -96,6 +97,7 @@ internal readonly struct PopupMenuPlugin : IPlugin
         Res<TargetingState> targeting,
         Res<KeyboardContext> keyboard,
         Res<Profile> profile,
+        Res<GameContext> gameCtx,
         ResMut<PopupMenuState> state,
         Query<Data<NetworkSerial>> serialQ,
         Query<Data<ComputedNode>, With<PopupMenuRoot>> popupQ,
@@ -115,6 +117,12 @@ internal readonly struct PopupMenuPlugin : IPlugin
         if (!mouse.Value.IsReleased(MouseButtonType.Left)) return;
         if (targeting.Value.IsTargeting) return;
         if (grabbed.Value.IsActive || grabbed.Value.Serial != 0) return;
+
+        // Only request a popup if the server advertised context-menu support
+        // (CLF_CONTEXT_MENU). Legacy gates DelayedObjectClickManager.OpenPopupMenu
+        // on ClientFeatures.PopupEnabled; without this we spam 0xBF requests at
+        // servers that have no context menus.
+        if ((gameCtx.Value.ClientFeatures & CharacterListFlags.CLF_CONTEXT_MENU) == 0) return;
 
         // Legacy GameActions.OpenPopupMenu: with HoldShiftForContext set, the
         // menu only opens while Shift is held.

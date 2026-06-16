@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using ClassicUO.Game.Data;
 using ClassicUO.Network;
 using Microsoft.Xna.Framework;
 using TinyEcs;
@@ -210,12 +211,18 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
         }
 
         // New character button (Buttons.New = 0x159D/0x159F/0x159E) —
-        // mirrors main's Buttons.New: loginScene.StartCharCreation().
-        mainMenu.AddChild(gumpBuilder.Value.AddButton(
-            commands, (0x159D, 0x159F, 0x159E), XnaVector3.UnitZ, new XnaVector2(224, 350))
-            .Insert<CharacterSelectionScene>()
-            .Observe((On<UiClick> _, ResMut<NextState<GameState>> state) =>
-                state.Value.Set(GameState.CharacterCreation)));
+        // mirrors main's Buttons.New: loginScene.StartCharCreation(). Hidden once
+        // used slots reach the server's cap (legacy CanCreateChar / MaxChars).
+        // ponytail: skips legacy's per-row 6th/7th-slot break — a server never
+        // sends more chars than the account holds; add if a shard proves otherwise.
+        if (posInList < MaxCharacterSlots(gameCtx.Value.ClientFeatures))
+        {
+            mainMenu.AddChild(gumpBuilder.Value.AddButton(
+                commands, (0x159D, 0x159F, 0x159E), XnaVector3.UnitZ, new XnaVector2(224, 350))
+                .Insert<CharacterSelectionScene>()
+                .Observe((On<UiClick> _, ResMut<NextState<GameState>> state) =>
+                    state.Value.Set(GameState.CharacterCreation)));
+        }
 
         // Delete button (0x159A/0x159C/0x159B).
         mainMenu.AddChild(gumpBuilder.Value.AddButton(
@@ -301,6 +308,15 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
             .Insert(new TextColor(color));
         parent.AddChild(label);
         return label.Id;
+    }
+
+    // Server-driven character-slot cap (legacy ClientFeatures.MaxChars).
+    private static uint MaxCharacterSlots(CharacterListFlags feats)
+    {
+        if ((feats & CharacterListFlags.CLF_ONE_CHARACTER_SLOT) != 0) return 1;
+        if ((feats & CharacterListFlags.CLF_7_CHARACTER_SLOT) != 0) return 7;
+        if ((feats & CharacterListFlags.CLF_6_CHARACTER_SLOT) != 0) return 6;
+        return 5;
     }
 
     // Spawn label and return its entity id so the caller can mutate
