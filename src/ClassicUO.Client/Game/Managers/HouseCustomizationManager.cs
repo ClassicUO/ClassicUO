@@ -316,11 +316,11 @@ namespace ClassicUO.Game.Managers
             // that cannot be legally supported in its current position.
             ValidateDesignGrid(foundationItem, house);
 
-            z = foundationItem.Z + 7 + 20;
+            z = foundationItem.Z + 7;
 
             ushort color = 0x0051;
 
-            for (int i = 1; i < CurrentFloor; i++)
+            for (int i = 0; i < CurrentFloor; i++)
             {
                 for (int x = _bounds.X; x < EndPos.X; x++)
                 {

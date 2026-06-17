@@ -19,11 +19,11 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class ModernBookGump : Gump
     {
-        internal const int MAX_BOOK_LINES = 8;
+        internal const int MAX_BOOK_LINES = 10;
         private const int MAX_BOOK_CHARS_PER_LINE = 53;
         private const int LEFT_X = 38;
         private const int RIGHT_X = 223;
-        private const int UPPER_MARGIN = 34;
+        private const int UPPER_MARGIN = 26;
         private const int PAGE_HEIGHT = 166;
         private StbPageTextBox _bookPage;
 
@@ -163,7 +163,7 @@ namespace ClassicUO.Game.UI.Gumps
                 156,
                 IsNewBook,
                 FontStyle.ExtraHeight,
-                2
+                0x01B5
             )
             {
                 X = 0,
@@ -180,7 +180,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     X = 40,
                     Y = 60,
-                    Height = 25,
+                    Height = 25 * 2,
                     Width = 155,
                     IsEditable = IsEditable
                 },
@@ -226,7 +226,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 page >>= 1;
-                Add(new Label(k.ToString(), true, 1) { X = x + 80, Y = 200 }, page);
+                Add(new Label(k.ToString(), true, 1) { X = x + 80, Y = 220 }, page);
             }
 
             ActivePage = 1;
@@ -320,9 +320,25 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             string[] text = new string[MAX_BOOK_LINES];
 
-                            for (int x = (i - 1) * MAX_BOOK_LINES, l = 0; x < (i - 1) * MAX_BOOK_LINES + 8; x++, l++)
+                            for (int x = (i - 1) * MAX_BOOK_LINES, l = 0; x < (i - 1) * MAX_BOOK_LINES + MAX_BOOK_LINES; x++, l++)
                             {
                                 text[l] = BookLines[x];
+                            }
+
+                            // Most servers expect at most 8 lines per page: send lines
+                            // 9-10 only when they actually contain text. Empty lines are
+                            // stored as "\n", so strip newlines before testing. Only
+                            // trailing lines are trimmed: empty lines between text stay.
+                            int lineCount = MAX_BOOK_LINES;
+
+                            while (lineCount > 8 && IsEmptyBookLine(text[lineCount - 1]))
+                            {
+                                lineCount--;
+                            }
+
+                            if (lineCount < text.Length)
+                            {
+                                Array.Resize(ref text, lineCount);
                             }
 
                             NetClient.Socket.Send_BookPageData(LocalSerial, text, i);
@@ -338,6 +354,24 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 UIManager.SystemChat.TextBoxControl.SetKeyboardFocus();
             }
+        }
+
+        private static bool IsEmptyBookLine(string line)
+        {
+            if (string.IsNullOrEmpty(line))
+            {
+                return true;
+            }
+
+            for (int i = 0; i < line.Length; i++)
+            {
+                if (line[i] != '\n')
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public override void OnButtonClick(int buttonID)
@@ -793,9 +827,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                     for (int i = 0; i < _pageLines.Length; i++)
                     {
-                        if (!_pagesChanged[(i >> 3) + 1] && _handler[i] != _pageLines[i])
+                        if (!_pagesChanged[i / MAX_BOOK_LINES + 1] && _handler[i] != _pageLines[i])
                         {
-                            _pagesChanged[(i >> 3) + 1] = true;
+                            _pagesChanged[i / MAX_BOOK_LINES + 1] = true;
                         }
 
                         _sb.Append(_pageLines[i] = _handler[i]);
