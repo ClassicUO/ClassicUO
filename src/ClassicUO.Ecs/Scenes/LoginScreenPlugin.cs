@@ -285,54 +285,91 @@ internal readonly struct LoginScreenPlugin : IPlugin
             .Insert(new TextColor(versionColor));
         mainMenu.AddChild(cuoVersion);
 
-        // Autologin / SaveAccount checkboxes — main's LoginGump (CV>=706400)
-        // uses ASCII font 9, hue 0x0481, toggling 0x00D2 unchecked / 0x00D3
-        // checked. AddCheckbox is the real widget: CheckboxPlugin flips
-        // Checkbox.Checked on click and fires CheckboxChanged; UpdateUOCheckboxes
-        // swaps the sprite. hue UnitZ — AddCheckbox's default Vector3.Zero has
-        // alpha 0 (invisible box). The .Observe persists the new value into the
-        // Settings singleton so it round-trips like main's SaveCheckboxStatus.
+        // Autologin / SaveAccount / Encryption checkboxes — main's LoginGump
+        // (CV>=706400) style: ASCII font 9, hue 0x0481, sprite 0x00D2 unchecked
+        // / 0x00D3 checked. AddCheckbox is the real widget (CheckboxPlugin flips
+        // Checkbox.Checked on click + fires CheckboxChanged; the GuiPlugin swaps
+        // the sprite); each .Observe persists into the Settings singleton so it
+        // round-trips like main's SaveCheckboxStatus. hue UnitZ — AddCheckbox's
+        // default Vector3.Zero has alpha 0 (invisible box).
+        //
+        // Only the row is positioned (Absolute); the three checkbox+label pairs
+        // flow inside it via flex (FlexDirection.Row + Gap), so the spacing is
+        // layout-driven instead of hand-placed.
         var checkboxColor = UoFontRuntime.AsciiHue(0x0481);
         var checkboxFont = new TextFont { FontId = (ushort)(9 | UoFontRuntime.AsciiFlag), Size = 11 };
 
-        var autologinCheck = gumpBuilder.Value.AddCheckbox(
-            commands, settings.Value.AutoLogin, new XnaVector2(150, 417), hue: XnaVector3.UnitZ)
-            .Insert<LoginScene>()
-            .Observe((On<CheckboxChanged> trig, Res<Settings> s) => s.Value.AutoLogin = trig.Event.Checked);
-        mainMenu.AddChild(autologinCheck);
-        AddCheckboxLabel(commands, mainMenu, "Autologin", new XnaVector2(170, 419), checkboxFont, checkboxColor, autologinCheck.Id);
-
-        var saveAccountCheck = gumpBuilder.Value.AddCheckbox(
-            commands, settings.Value.SaveAccount, new XnaVector2(240, 417), hue: XnaVector3.UnitZ)
-            .Insert<LoginScene>()
-            .Observe((On<CheckboxChanged> trig, Res<Settings> s) => s.Value.SaveAccount = trig.Event.Checked);
-        mainMenu.AddChild(saveAccountCheck);
-        AddCheckboxLabel(commands, mainMenu, "Save Account", new XnaVector2(260, 419), checkboxFont, checkboxColor, saveAccountCheck.Id);
-    }
-
-    // Caption next to a checkbox that toggles it on click, so the checkbox +
-    // its label read as one control. CheckboxLabel + CheckboxPlugin's observer
-    // (Bevy.UI) do the toggling generically; the label just has to be hittable
-    // (Interaction.None + UiContainsByBounds).
-    private static void AddCheckboxLabel(Commands commands, EntityCommands parent, string text, XnaVector2 pos, TextFont font, ClayColor color, ulong checkboxId)
-    {
-        var label = commands.Spawn()
+        var checkboxRow = commands.Spawn()
             .Insert<LoginScene>()
             .Insert(new Node
             {
+                Display = Display.Flex,
                 PositionType = PositionType.Absolute,
-                Left = Val.Px(pos.X),
-                Top = Val.Px(pos.Y),
+                Left = Val.Px(150),
+                Top = Val.Px(417),
+                FlexDirection = FlexDirection.Row,
+                AlignItems = AlignItems.Center,
+                Gap = Val.Px(20),
                 Width = Val.Auto,
                 Height = Val.Auto,
-            })
+            });
+        mainMenu.AddChild(checkboxRow);
+
+        var autologinCheck = gumpBuilder.Value.AddCheckbox(
+            commands, settings.Value.AutoLogin, hue: XnaVector3.UnitZ)
+            .Insert<LoginScene>()
+            .Observe((On<CheckboxChanged> trig, Res<Settings> s) => s.Value.AutoLogin = trig.Event.Checked);
+        AddCheckboxPair(commands, checkboxRow, autologinCheck, "Autologin", checkboxFont, checkboxColor);
+
+        var saveAccountCheck = gumpBuilder.Value.AddCheckbox(
+            commands, settings.Value.SaveAccount, hue: XnaVector3.UnitZ)
+            .Insert<LoginScene>()
+            .Observe((On<CheckboxChanged> trig, Res<Settings> s) => s.Value.SaveAccount = trig.Event.Checked);
+        AddCheckboxPair(commands, checkboxRow, saveAccountCheck, "Save Account", checkboxFont, checkboxColor);
+
+        // Encryption toggle. Settings.Encryption is the EncryptionType byte:
+        // 0 = NONE (no encryption), non-zero = enabled. NetClient.Load auto-
+        // detects the real type from the client version at connect and writes it
+        // back, so a plain non-zero flag is enough to switch it on.
+        var encryptionCheck = gumpBuilder.Value.AddCheckbox(
+            commands, settings.Value.Encryption != 0, hue: XnaVector3.UnitZ)
+            .Insert<LoginScene>()
+            .Observe((On<CheckboxChanged> trig, Res<Settings> s) =>
+                s.Value.Encryption = trig.Event.Checked ? (byte)1 : (byte)0);
+        AddCheckboxPair(commands, checkboxRow, encryptionCheck, "Encryption", checkboxFont, checkboxColor);
+    }
+
+    // A checkbox + its caption as one flex pair under the (absolutely-positioned)
+    // checkbox row — neither child is absolutely placed, they flow (Row + Gap).
+    // The label toggles the checkbox on click (CheckboxLabel + CheckboxPlugin's
+    // observer), so it has to be hittable (Interaction.None + UiContainsByBounds).
+    private static void AddCheckboxPair(Commands commands, EntityCommands row, EntityCommands checkbox, string text, TextFont font, ClayColor color)
+    {
+        var pair = commands.Spawn()
+            .Insert<LoginScene>()
+            .Insert(new Node
+            {
+                Display = Display.Flex,
+                FlexDirection = FlexDirection.Row,
+                AlignItems = AlignItems.Center,
+                Gap = Val.Px(4),
+                Width = Val.Auto,
+                Height = Val.Auto,
+            });
+        pair.AddChild(checkbox);
+
+        var label = commands.Spawn()
+            .Insert<LoginScene>()
+            .Insert(new Node { Width = Val.Auto, Height = Val.Auto })
             .Insert(new Text(text))
             .Insert(font)
             .Insert(new TextColor(color))
             .Insert(Interaction.None)
             .Insert<UiContainsByBounds>()
-            .Insert(new TinyEcs.Bevy.UI.Widgets.CheckboxLabel { Target = checkboxId });
-        parent.AddChild(label);
+            .Insert(new TinyEcs.Bevy.UI.Widgets.CheckboxLabel { Target = checkbox.Id });
+        pair.AddChild(label);
+
+        row.AddChild(pair);
     }
 
     private static void SubmitOnEnter(
