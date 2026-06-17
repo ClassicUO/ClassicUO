@@ -177,7 +177,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         Query<Empty, With<NormalMulti>> qNormalMultis,
         Single<Data<WorldPosition>, With<Player>> queryPlayer,
         Query<Data<WorldPosition, ScreenPosition, Graphic, TileStretched, AlphaFade>, Filter<With<IsTile>, Optional<TileStretched>>> queryTiles,
-        Query<Data<WorldPosition, ScreenPosition, Graphic, Hue, Amount, NetworkSerial, Facing, AlphaFade>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>, Optional<Amount>, Optional<NetworkSerial>, Optional<Facing>>> queryStatics,
+        Query<Data<WorldPosition, ScreenPosition, Graphic, Hue, Amount, NetworkSerial, Facing, AlphaFade, HouseVisionFade>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>, Optional<Amount>, Optional<NetworkSerial>, Optional<Facing>, Optional<HouseVisionFade>>> queryStatics,
         Query<Data<WorldPosition, Graphic, Hue, NetworkSerial, ScreenPositionOffset, Facing, MobAnimation, MobileSteps, ServerFlags, Notoriety, AlphaFade>,
             Filter<Without<ContainedInto>, Optional<Facing>, Optional<MobAnimation>, Optional<MobileSteps>, Optional<ServerFlags>, Optional<Notoriety>>> queryBodyOnly,
         Query<Data<EquipmentSlots, ScreenPositionOffset, WorldPosition, Graphic, Facing, MobileSteps, MobAnimation, ServerFlags, Notoriety, AlphaFade>,
@@ -513,7 +513,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         int playerY,
         int? maxZ,
         Rectangle? playerRect,
-        Query<Data<WorldPosition, ScreenPosition, Graphic, Hue, Amount, NetworkSerial, Facing, AlphaFade>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>, Optional<Amount>, Optional<NetworkSerial>, Optional<Facing>>> queryStatics)
+        Query<Data<WorldPosition, ScreenPosition, Graphic, Hue, Amount, NetworkSerial, Facing, AlphaFade, HouseVisionFade>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>, Optional<Amount>, Optional<NetworkSerial>, Optional<Facing>, Optional<HouseVisionFade>>> queryStatics)
     {
         marks.Clear();
 
@@ -524,7 +524,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         var arts = assetsServer.Value.Arts;
         var pRect = playerRect.Value;
 
-        foreach (var (_, worldPos, screenPos, graphic, _, _, _, _, _) in queryStatics)
+        foreach (var (_, worldPos, screenPos, graphic, _, _, _, _, _, _) in queryStatics)
         {
             var g = graphic.Ref.Value;
             ref readonly var tileData = ref tileDataCache.StaticData[g];
@@ -926,7 +926,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         Vector2 mousePos,
         Rectangle cameraBounds,
         Query<Empty, With<NormalMulti>> qNormalMultis,
-        Query<Data<WorldPosition, ScreenPosition, Graphic, Hue, Amount, NetworkSerial, Facing, AlphaFade>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>, Optional<Amount>, Optional<NetworkSerial>, Optional<Facing>>> queryStatics,
+        Query<Data<WorldPosition, ScreenPosition, Graphic, Hue, Amount, NetworkSerial, Facing, AlphaFade, HouseVisionFade>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>, Optional<Amount>, Optional<NetworkSerial>, Optional<Facing>, Optional<HouseVisionFade>>> queryStatics,
         Dictionary<long, int> lightOccluders,
         List<PendingLight> pendingLights)
     {
@@ -937,7 +937,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         var lightCeiling = maxZ ?? 127;
 
         // Process all statics in one pass with optimized property access
-        foreach (var (entity, worldPos, screenPos, graphic, hue, amount, serial, facing, fade) in queryStatics)
+        foreach (var (entity, worldPos, screenPos, graphic, hue, amount, serial, facing, fade, vision) in queryStatics)
         {
             ref readonly var tileData = ref tileDataCache.StaticData[graphic.Ref.Value];
             int amountVal = amount.IsValid() ? amount.Ref.Value : 1;
@@ -1093,8 +1093,22 @@ internal readonly struct WorldRenderingPlugin : IPlugin
                     CalculateAlpha(ref fade.Ref.Value,
                         foliageTransparent ? Constants.FOLIAGE_ALPHA : 0xFF, fx.ObjectsFading);
             }
-            else if (!ProcessFade(ref fade.Ref.Value, hide, tileData.IsTranslucent, in fx))
-                continue;
+            else
+            {
+                // House-design floor vision: let the fade system target the
+                // right value (translucent 178 / hidden 0) instead of ApplyFloor
+                // Vision fighting it via AlphaFade, which flickered.
+                bool vHide = hide;
+                bool vTrans = tileData.IsTranslucent;
+                if (vision.IsValid())
+                {
+                    var mode = vision.Ref.Mode;
+                    if (mode == 2) vHide = true;
+                    else if (mode == 1) vTrans = true;
+                }
+                if (!ProcessFade(ref fade.Ref.Value, vHide, vTrans, in fx))
+                    continue;
+            }
 
             // Position calculation
             position.X -= (short)((artInfo.UV.Width >> 1) - 22);
@@ -1971,6 +1985,11 @@ internal sealed class SelectedEntity
     // Gated each frame by mouse-in-viewport; off => no world object picks.
     public bool Enabled = true;
 
+    // An entity the pick must never select (house-design placement ghost): it is
+    // a renderable static sitting on the cursor tile, so it would otherwise win
+    // the pick and get the selection-highlight hue. Set by HouseCustomization.
+    public ulong IgnoreEntity;
+
     // bypassViewport: UI window claims (paperdoll / container / server gumps)
     // must register even when the cursor is outside Camera.Bounds — gumps live
     // in the side gutters and top bar, which are off the world viewport. The
@@ -1982,6 +2001,9 @@ internal sealed class SelectedEntity
     public void Set(ulong entity, float depth, bool bypassViewport = false, bool isText = false)
     {
         if (!Enabled && !bypassViewport)
+            return;
+
+        if (IgnoreEntity != 0 && entity == IgnoreEntity)
             return;
 
         if (_lastEntity.IsValid() && _lastEntity != entity)

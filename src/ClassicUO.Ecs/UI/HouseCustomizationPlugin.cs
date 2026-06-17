@@ -20,6 +20,7 @@ using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using TinyEcs;
 using TinyEcs.Bevy;
 using TinyEcs.Bevy.UI;
@@ -33,6 +34,11 @@ internal struct HouseDesignWindow { public ulong Content; public uint Serial; }
 // build surface — you place pieces onto it — and the visual floor guide. Not a
 // CustomMulti, so the 0xD8 child-clear leaves it alone and it isn't counted.
 internal struct HouseFloorMarker;
+
+// Per-piece floor-vision render mode (set by ApplyFloorVision, read by the world
+// static render's ProcessFade so the fade system targets the right value — no
+// AlphaFade tug-of-war / flicker). 0 = normal, 1 = translucent, 2 = hidden.
+internal struct HouseVisionFade { public byte Mode; }
 
 // Semi-transparent ghost of the selected piece following the cursor tile.
 // Not a CustomMulti (not counted/erasable); deliberately NOT excluded from the
@@ -358,6 +364,20 @@ internal readonly struct HouseCustomizationPlugin : IPlugin
             .RunIf((Res<State<GameState>> s) => s.Value.Current == GameState.GameScreen)
             .RunIf((Res<HouseCustomizationState> st) => st.Value.Active).Build();
 
+        // Escape cancels the armed tool (legacy TargetManager.CancelTarget resets
+        // the design selection). No server target is held, so just clear locally.
+        app.AddSystem((Res<KeyboardContext> kb, ResMut<HouseCustomizationState> st) =>
+        {
+            if (!st.Value.Active || !kb.Value.IsPressedOnce(Keys.Escape)) return;
+            if (st.Value.SelectedGraphic == 0 && !st.Value.Erasing && !st.Value.SeekTile) return;
+            st.Value.SelectedGraphic = 0;
+            st.Value.Erasing = false;
+            st.Value.SeekTile = false;
+            st.Value.CombinedStair = false;
+            st.Value.Dirty = true;
+        }).InStage(Stage.First)
+          .RunIf((Res<State<GameState>> s) => s.Value.Current == GameState.GameScreen).Build();
+
         var despawnFn = DespawnOnExit;
         app.AddSystem(despawnFn).OnExit(GameState.GameScreen).Build();
     }
@@ -414,6 +434,9 @@ internal readonly struct HouseCustomizationPlugin : IPlugin
                         .Insert(new Graphic { Value = 0x0496 })
                         .Insert(new Hue { Value = hue })
                         .Insert(new WorldPosition { X = (ushort)x, Y = (ushort)y, Z = (sbyte)z })
+                        // Translucent like legacy (0x0496 grid spawned CHMOF_TRANSPARENT);
+                        // Mode 1 makes the static render's ProcessFade target alpha 178.
+                        .Insert(new HouseVisionFade { Mode = 1 })
                         .Insert<HouseFloorMarker>();
                     commands.AddChild(houseId, m.Id);
                 }
@@ -430,63 +453,58 @@ internal readonly struct HouseCustomizationPlugin : IPlugin
     private static void SyncPreview(
         Commands commands,
         ResMut<HouseCustomizationState> stRes,
-        Res<Camera> camera,
-        Res<GameContext> ctx,
+        Res<SelectedEntity> selected,
+        Query<Data<WorldPosition, Graphic>> worldQ,
         Query<Data<WorldPosition, ScreenPosition, Graphic, Hue, AlphaFade>, With<HouseDesignPreview>> previewQ)
     {
         var st = stRes.Value;
-        bool show = st.Active && st.SelectedGraphic != 0 && !st.Erasing && !st.SeekTile
-            && camera.Value.IsMouseInsideBounds();
+        bool show = st.Active && st.SelectedGraphic != 0 && !st.Erasing && !st.SeekTile;
 
         ulong prevEnt = 0;
         foreach (var (e, _, _, _, _, _) in previewQ) { prevEnt = e.Ref; break; }
 
-        if (!show)
+        // The tile under the cursor = the render's own pixel-perfect pick (same one
+        // placement uses), so the ghost lands exactly where the piece will. The
+        // ghost is excluded from that pick (IgnoreEntity) so it can't pick itself.
+        var hit = selected.Value.Entity;
+        if (!show || hit == 0 || !worldQ.TryGet(hit, out var hitRow))
         {
             if (prevEnt != 0) commands.Entity(prevEnt).Despawn();
+            selected.Value.IgnoreEntity = 0;
             return;
         }
 
-        sbyte tz = (sbyte)(st.FoundationZ + 7 + (st.CurrentFloor - 1) * 20);
+        var (_, hitPos, _) = hitRow;
+        int tx = hitPos.Ref.X, ty = hitPos.Ref.Y;
 
-        // Mouse -> iso tile at the design-floor plane. center mirrors the world
-        // render pass (WorldRenderingPlugin.cs:309-314) so the tile picked is the
-        // one visually under the cursor; MouseToWorldPosition2 is unzoomed world
-        // space comparable to IsoToScreen - center.
-        var center = Isometric.IsoToScreen(ctx.Value.CenterX, ctx.Value.CenterY, ctx.Value.CenterZ);
-        center.X -= camera.Value.Bounds.Width / 2f;
-        center.Y -= camera.Value.Bounds.Height / 2f;
-        center.X += 22f;
-        center.Y += 22f;
-        center -= ctx.Value.CenterOffset;
-
-        var m = camera.Value.MouseToWorldPosition2();
-        float a = (m.X + center.X) / 22f;                 // = X - Y
-        float b = (m.Y + center.Y + (tz << 2)) / 22f;     // = X + Y (Z lift re-added)
-        int tx = (int)MathF.Round((a + b) * 0.5f);
-        int ty = (int)MathF.Round((b - a) * 0.5f);
-
+        // Render at the piece's placement Z (legacy OnTargetWorld: roof lifts by
+        // (RoofZ-2)*3, a single stair sits at the foundation Z), +1 so it sorts
+        // ABOVE whatever already occupies the tile (a floor would otherwise hide
+        // behind the existing floor/foundation — low static priority).
+        sbyte renderZ = (sbyte)(PlacementZ(st) + 1);
         ushort hue = st.Bounds.Contains(tx, ty) ? (ushort)0 : (ushort)0x002B;
-        var screen = Isometric.IsoToScreen((ushort)tx, (ushort)ty, tz);
+        var screen = Isometric.IsoToScreen((ushort)tx, (ushort)ty, renderZ);
 
         if (prevEnt != 0 && previewQ.TryGet(prevEnt, out var prow))
         {
             var (_, wp, sp, g, h, af) = prow;
-            wp.Ref.X = (ushort)tx; wp.Ref.Y = (ushort)ty; wp.Ref.Z = tz;
+            wp.Ref.X = (ushort)tx; wp.Ref.Y = (ushort)ty; wp.Ref.Z = renderZ;
             sp.Ref.Value = screen; // set directly — field mutation doesn't retrigger iso recompute
             g.Ref.Value = st.SelectedGraphic;
             h.Ref.Value = hue;
             af.Ref.Value = 178;
+            selected.Value.IgnoreEntity = prevEnt; // keep the ghost out of the world pick
         }
         else
         {
-            commands.Spawn()
+            var e = commands.Spawn()
                 .Insert(new Graphic { Value = st.SelectedGraphic })
                 .Insert(new Hue { Value = hue })
-                .Insert(new WorldPosition { X = (ushort)tx, Y = (ushort)ty, Z = tz })
+                .Insert(new WorldPosition { X = (ushort)tx, Y = (ushort)ty, Z = renderZ })
                 .Insert(new ScreenPosition { Value = screen })
                 .Insert(new AlphaFade { Value = 178 })
                 .Insert<HouseDesignPreview>();
+            selected.Value.IgnoreEntity = e.Id;
         }
     }
 
@@ -500,7 +518,8 @@ internal readonly struct HouseCustomizationPlugin : IPlugin
         Query<Data<TinyEcs.Children>> childrenQ,
         Query<Empty, With<CustomMulti>> customMultiQ,
         Query<Data<Graphic>> graphicQ,
-        Res<NetworkEntitiesMap> emap)
+        Res<NetworkEntitiesMap> emap,
+        Res<ObjectPropertyLists> opl)
     {
         var st = stRes.Value;
 
@@ -545,6 +564,7 @@ internal readonly struct HouseCustomizationPlugin : IPlugin
         }
 
         RecountComponents(st, emap.Value, childrenQ, customMultiQ, graphicQ);
+        SeedDesignTooltips(opl.Value);
         BuildChrome(commands, builder.Value, content, st);
         BuildContent(commands, builder.Value, assets.Value, content, st);
     }
@@ -562,17 +582,18 @@ internal readonly struct HouseCustomizationPlugin : IPlugin
         Child(commands, content, builder.AddGump(commands, st.FloorCount == 4 ? RightFrame4 : RightFrame3, z, new Vector2(486, 17)));
 
         // Category tabs.
-        Tab(commands, builder, content, (0x5654, 0x5656, 0x5655), 9, 41, CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL);
-        Tab(commands, builder, content, (0x5657, 0x5659, 0x5658), 39, 40, CUSTOM_HOUSE_GUMP_STATE.CHGS_DOOR);
-        Tab(commands, builder, content, (0x565A, 0x565C, 0x565B), 70, 40, CUSTOM_HOUSE_GUMP_STATE.CHGS_FLOOR);
-        Tab(commands, builder, content, (0x565D, 0x565F, 0x565E), 9, 72, CUSTOM_HOUSE_GUMP_STATE.CHGS_STAIR);
-        Tab(commands, builder, content, (0x5788, 0x578A, 0x5789), 39, 72, CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF);
-        Tab(commands, builder, content, (0x5663, 0x5665, 0x5664), 69, 72, CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC);
-        Tab(commands, builder, content, (0x566C, 0x566E, 0x566D), 69, 100, CUSTOM_HOUSE_GUMP_STATE.CHGS_MENU);
+        Tab(commands, builder, content, (0x5654, 0x5656, 0x5655), 9, 41, CUSTOM_HOUSE_GUMP_STATE.CHGS_WALL, TT + 1);
+        Tab(commands, builder, content, (0x5657, 0x5659, 0x5658), 39, 40, CUSTOM_HOUSE_GUMP_STATE.CHGS_DOOR, TT + 2);
+        Tab(commands, builder, content, (0x565A, 0x565C, 0x565B), 70, 40, CUSTOM_HOUSE_GUMP_STATE.CHGS_FLOOR, TT + 3);
+        Tab(commands, builder, content, (0x565D, 0x565F, 0x565E), 9, 72, CUSTOM_HOUSE_GUMP_STATE.CHGS_STAIR, TT + 4);
+        Tab(commands, builder, content, (0x5788, 0x578A, 0x5789), 39, 72, CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF, TT + 5);
+        Tab(commands, builder, content, (0x5663, 0x5665, 0x5664), 69, 72, CUSTOM_HOUSE_GUMP_STATE.CHGS_MISC, TT + 6);
+        Tab(commands, builder, content, (0x566C, 0x566E, 0x566D), 69, 100, CUSTOM_HOUSE_GUMP_STATE.CHGS_MENU, TT + 7);
 
         // Erase toggle (sprite +1 while active).
         var eraseN = (ushort)(0x5666 + (st.Erasing ? 1 : 0));
         var erase = builder.AddButton(commands, (eraseN, 0x5668, 0x5667), z, new Vector2(9, 100)).Insert<UiContainsByBounds>();
+        Tip(erase, eraseN, TT + 8);
         erase.Observe((On<UiClick> _, ResMut<HouseCustomizationState> s) =>
         {
             s.Value.Erasing = !s.Value.Erasing;
@@ -586,6 +607,7 @@ internal readonly struct HouseCustomizationPlugin : IPlugin
         // Eyedropper / seek toggle.
         var seekN = (ushort)(0x5669 + (st.SeekTile ? 1 : 0));
         var seek = builder.AddButton(commands, (seekN, 0x566B, 0x566A), z, new Vector2(39, 100)).Insert<UiContainsByBounds>();
+        Tip(seek, seekN, TT + 9);
         seek.Observe((On<UiClick> _, ResMut<HouseCustomizationState> s) =>
         {
             s.Value.SeekTile = !s.Value.SeekTile;
@@ -600,10 +622,12 @@ internal readonly struct HouseCustomizationPlugin : IPlugin
         if (st.MaxPage > 1)
         {
             var prev = builder.AddButton(commands, (0x5625, 0x5627, 0x5626), z, new Vector2(110, 63)).Insert<UiContainsByBounds>();
+            Tip(prev, 0x5625, TT + 10);
             prev.Observe((On<UiClick> _, ResMut<HouseCustomizationState> s) => s.Value.PageDelta(-1));
             Child(commands, content, prev);
 
             var next = builder.AddButton(commands, (0x5628, 0x562A, 0x5629), z, new Vector2(510, 63)).Insert<UiContainsByBounds>();
+            Tip(next, 0x5628, TT + 11);
             next.Observe((On<UiClick> _, ResMut<HouseCustomizationState> s) => s.Value.PageDelta(1));
             Child(commands, content, next);
         }
@@ -623,11 +647,32 @@ internal readonly struct HouseCustomizationPlugin : IPlugin
         Child(commands, content, Label(commands, ((st.Components + st.Fixtures) * 500).ToString(), 524, 142, 0x0481));
     }
 
-    private static void Tab(Commands commands, GumpBuilder builder, ulong content, (ushort, ushort, ushort) ids, int x, int y, CUSTOM_HOUSE_GUMP_STATE state)
+    private static void Tab(Commands commands, GumpBuilder builder, ulong content, (ushort, ushort, ushort) ids, int x, int y, CUSTOM_HOUSE_GUMP_STATE state, uint tip)
     {
         var btn = builder.AddButton(commands, ids, Vector3.UnitZ, new Vector2(x, y)).Insert<UiContainsByBounds>();
+        Tip(btn, ids.Item1, tip);
         btn.Observe((On<UiClick> _, ResMut<HouseCustomizationState> s) => s.Value.SetState(state));
         Child(commands, content, btn);
+    }
+
+    // Hover-tooltip support: stamp a synthetic OPL serial on a button's render
+    // (same path as the spellbook / racial book) so TooltipPlugin shows its text.
+    private const uint TT = 0x7F00_0000;
+
+    private static EntityCommands Tip(EntityCommands btn, ushort normalArt, uint serial)
+        => btn.Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.Gump, AssetId = normalArt, Hue = Vector3.UnitZ, TooltipSerial = serial } });
+
+    private static void SeedDesignTooltips(ObjectPropertyLists opl)
+    {
+        void T(uint s, string t) => opl.Add(s, 1, t, string.Empty, 0);
+        T(TT + 1, "Walls"); T(TT + 2, "Doors"); T(TT + 3, "Floors"); T(TT + 4, "Stairs");
+        T(TT + 5, "Roofs"); T(TT + 6, "Miscellaneous"); T(TT + 7, "System Menu");
+        T(TT + 8, "Erase"); T(TT + 9, "Eyedropper");
+        T(TT + 10, "Previous Page"); T(TT + 11, "Next Page");
+        T(TT + 12, "Go to Category"); T(TT + 13, "Toggle Window"); T(TT + 14, "Lower Roof Z"); T(TT + 15, "Raise Roof Z");
+        T(TT + 20, "Backup"); T(TT + 21, "Restore"); T(TT + 22, "Synchronize");
+        T(TT + 23, "Clear"); T(TT + 24, "Commit"); T(TT + 25, "Revert");
+        for (uint f = 1; f <= 4; f++) { T(TT + 30 + f, $"Go to floor {f}"); T(TT + 40 + f, $"Floor {f} visibility"); }
     }
 
     // Visibility-button art bases (legacy HouseCustomizationGump.cs:253-256).
@@ -672,6 +717,7 @@ internal readonly struct HouseCustomizationPlugin : IPlugin
             int floorIdx = f;
             var vis = builder.AddButton(commands, (visBase, (ushort)(visBase + 2), (ushort)(visBase + 1)), Vector3.UnitZ, new Vector2(533, visY[f]))
                 .Insert<UiContainsByBounds>();
+            Tip(vis, visBase, TT + 40 + (uint)n);
             vis.Observe((On<UiClick> _, ResMut<HouseCustomizationState> s) =>
             {
                 s.Value.FloorVisionState[floorIdx] = (s.Value.FloorVisionState[floorIdx] + 1) % 7;
@@ -682,11 +728,13 @@ internal readonly struct HouseCustomizationPlugin : IPlugin
             // Two go-to-floor buttons (small + large); both jump to floor n.
             var small = builder.AddButton(commands, ((ushort)(smallN + off2), smallP, (ushort)(smallN + off2)), Vector3.UnitZ, new Vector2(smallX[f], smallY[f]))
                 .Insert<UiContainsByBounds>();
+            Tip(small, (ushort)(smallN + off2), TT + 30 + (uint)n);
             small.Observe((On<UiClick> _, ResMut<HouseCustomizationState> s, Res<NetClient> net, Res<GameContext> ctx) => GoToFloor(s.Value, net.Value, ctx.Value, n));
             Child(commands, content, small);
 
             var large = builder.AddButton(commands, ((ushort)(largeN + off), (ushort)(largeP + off), (ushort)(largeO + off)), Vector3.UnitZ, new Vector2(623, largeY[f]))
                 .Insert<UiContainsByBounds>();
+            Tip(large, (ushort)(largeN + off), TT + 30 + (uint)n);
             large.Observe((On<UiClick> _, ResMut<HouseCustomizationState> s, Res<NetClient> net, Res<GameContext> ctx) => GoToFloor(s.Value, net.Value, ctx.Value, n));
             Child(commands, content, large);
         }
@@ -699,34 +747,34 @@ internal readonly struct HouseCustomizationPlugin : IPlugin
     // world fade can't override it; on exit ProcessFade restores 255 naturally.
     private static void ApplyFloorVision(
         Res<HouseCustomizationState> stRes,
-        Query<Data<WorldPosition, Graphic, AlphaFade>, With<CustomMulti>> piecesQ)
+        Query<Data<WorldPosition, Graphic, HouseVisionFade>, With<CustomMulti>> piecesQ)
     {
         var st = stRes.Value;
         int baseZ = st.FoundationZ + 7;
-        foreach (var (_, wp, g, af) in piecesQ)
+        foreach (var (_, wp, g, vf) in piecesQ)
         {
             int rel = wp.Ref.Z - baseZ;
             int floor = rel / 20;
-            if (rel < 0 || floor < 0 || floor >= 4) { af.Ref.Value = 255; continue; }
+            if (rel < 0 || floor < 0 || floor >= 4) { vf.Ref.Mode = 0; continue; }
 
             int vis = st.FloorVisionState[floor];
             bool isFloor = st.ExistsInList(g.Ref.Value, out var gs) && gs == CUSTOM_HOUSE_GUMP_STATE.CHGS_FLOOR;
 
-            byte alpha = 255;
+            byte mode = 0; // 0 normal, 1 translucent, 2 hidden
             if (vis == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_ALL)
-                alpha = 0;
+                mode = 2;
             else if (isFloor)
             {
-                if (vis == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_FLOOR) alpha = 0;
+                if (vis == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_FLOOR) mode = 2;
                 else if (vis == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_FLOOR
-                      || vis == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSLUCENT_FLOOR) alpha = 192;
+                      || vis == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSLUCENT_FLOOR) mode = 1;
             }
             else
             {
-                if (vis == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_CONTENT) alpha = 0;
-                else if (vis == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_CONTENT) alpha = 192;
+                if (vis == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_HIDE_CONTENT) mode = 2;
+                else if (vis == (int)CUSTOM_HOUSE_FLOOR_VISION_STATE.CHGVS_TRANSPARENT_CONTENT) mode = 1;
             }
-            af.Ref.Value = alpha;
+            vf.Ref.Mode = mode;
         }
     }
 
@@ -858,6 +906,7 @@ internal readonly struct HouseCustomizationPlugin : IPlugin
     private static void MenuButton(Commands commands, GumpBuilder builder, ulong content, string label, int x, int y, int action)
     {
         var btn = TextButton(commands, builder, label, x, y, 100);
+        Tip(btn, 0x098D, TT + 20 + (uint)action);
         btn.Observe((On<UiClick> _, Res<NetClient> net, Res<GameContext> ctx) =>
         {
             uint ps = ctx.Value.PlayerSerial;
@@ -878,6 +927,7 @@ internal readonly struct HouseCustomizationPlugin : IPlugin
     {
         // "Go to category" back button.
         var back = builder.AddButton(commands, (0x5622, 0x5624, 0x5623), Vector3.UnitZ, new Vector2(167, 5)).Insert<UiContainsByBounds>();
+        Tip(back, 0x5622, TT + 12);
         back.Observe((On<UiClick> _, ResMut<HouseCustomizationState> s) => s.Value.SetCategory(-1));
         Child(commands, content, back);
 
@@ -885,6 +935,7 @@ internal readonly struct HouseCustomizationPlugin : IPlugin
         {
             var ids = st.ShowWindow ? ((ushort)0x562E, (ushort)0x5630, (ushort)0x562F) : ((ushort)0x562B, (ushort)0x562D, (ushort)0x562C);
             var toggle = builder.AddButton(commands, ids, Vector3.UnitZ, new Vector2(228, 9)).Insert<UiContainsByBounds>();
+            Tip(toggle, ids.Item1, TT + 13);
             toggle.Observe((On<UiClick> _, ResMut<HouseCustomizationState> s) => { s.Value.ShowWindow = !s.Value.ShowWindow; s.Value.Dirty = true; });
             Child(commands, content, toggle);
         }
@@ -892,10 +943,12 @@ internal readonly struct HouseCustomizationPlugin : IPlugin
         if (roofZ)
         {
             var down = builder.AddButton(commands, (0x578B, 0x578D, 0x578C), Vector3.UnitZ, new Vector2(305, 5)).Insert<UiContainsByBounds>();
+            Tip(down, 0x578B, TT + 14);
             down.Observe((On<UiClick> _, ResMut<HouseCustomizationState> s) => { if (s.Value.RoofZ > 1) { s.Value.RoofZ--; s.Value.Dirty = true; } });
             Child(commands, content, down);
 
             var up = builder.AddButton(commands, (0x578E, 0x5790, 0x578F), Vector3.UnitZ, new Vector2(349, 5)).Insert<UiContainsByBounds>();
+            Tip(up, 0x578E, TT + 15);
             up.Observe((On<UiClick> _, ResMut<HouseCustomizationState> s) => { if (s.Value.RoofZ < 6) { s.Value.RoofZ++; s.Value.Dirty = true; } });
             Child(commands, content, up);
 
@@ -1136,6 +1189,19 @@ internal readonly struct HouseCustomizationPlugin : IPlugin
         SendPlacement(st, net.Value, ctx.Value.PlayerSerial, commands, houseId, px, py);
     }
 
+    // World Z a piece of the current state lands at (legacy OnTargetWorld): the
+    // floor base, +(RoofZ-2)*3 for roofs, the foundation Z for a single stair.
+    private static sbyte PlacementZ(HouseCustomizationState st)
+    {
+        int baseZ = st.FoundationZ + 7 + (st.CurrentFloor - 1) * 20;
+        return st.State switch
+        {
+            CUSTOM_HOUSE_GUMP_STATE.CHGS_ROOF => (sbyte)(baseZ + (st.RoofZ - 2) * 3),
+            CUSTOM_HOUSE_GUMP_STATE.CHGS_STAIR => (sbyte)st.FoundationZ,
+            _ => (sbyte)baseZ,
+        };
+    }
+
     // Translate the selected object + editor state into the 0xD7 add command,
     // mirroring HouseCustomizationManager.OnTargetWorld + CanBuildHere offsets.
     // Also spawns the piece locally (legacy house.Add) so it renders instantly —
@@ -1192,6 +1258,7 @@ internal readonly struct HouseCustomizationPlugin : IPlugin
             .Insert(new Graphic { Value = graphic })
             .Insert(new Hue())
             .Insert(new WorldPosition { X = (ushort)x, Y = (ushort)y, Z = (sbyte)z })
+            .Insert(new HouseVisionFade())
             .Insert<CustomMulti>();
         commands.AddChild(houseId, m.Id);
     }

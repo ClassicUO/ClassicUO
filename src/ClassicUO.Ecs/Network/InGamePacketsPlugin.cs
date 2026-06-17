@@ -961,6 +961,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                     Y = (ushort)(startY + offsetY),
                     Z = (sbyte)(startZ + offsetZ)
                 })
+                .Insert(new HouseVisionFade())
                 .Insert<CustomMulti>();
 
             parent.AddChild(child);
@@ -991,6 +992,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                     Y = (ushort)(startY + offsetY),
                     Z = (sbyte)(startZ + z)
                 })
+                .Insert(new HouseVisionFade())
                 .Insert<CustomMulti>();
 
             parent.AddChild(child);
@@ -1048,6 +1050,7 @@ readonly struct InGamePacketsPlugin : IPlugin
                     Y = (ushort)(startY + relativeY),
                     Z = (sbyte)(startZ + z)
                 })
+                .Insert(new HouseVisionFade())
                 .Insert<CustomMulti>();
 
             parent.AddChild(child);
