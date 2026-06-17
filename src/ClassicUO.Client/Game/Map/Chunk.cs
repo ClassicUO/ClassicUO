@@ -431,6 +431,46 @@ namespace ClassicUO.Game.Map
             Destroy();
         }
 
+        /// <summary>
+        /// Clears the chunk's tile objects for an in-place reload (UltimaLive block
+        /// update) and marks the mesh dirty so it rebuilds — WITHOUT destroying or
+        /// pooling the chunk itself. The chunk stays owned by the map: its
+        /// <see cref="_terrainChunks"/> slot and <see cref="Node"/> are left intact.
+        /// Using <see cref="Destroy"/>/<see cref="Clear"/> here would enqueue this
+        /// chunk to the shared pool while it is still referenced by the map, so it
+        /// would later be handed out by <see cref="Create"/> for a different block
+        /// (double ownership) — the original block then renders a stale/empty mesh
+        /// (black, world-locked, permanent).
+        /// </summary>
+        public void ClearForReload()
+        {
+            for (int i = 0; i < 8; i++)
+            {
+                for (int j = 0; j < 8; j++)
+                {
+                    GameObject first = GetHeadObject(i, j);
+
+                    while (first != null)
+                    {
+                        GameObject next = first.TNext;
+
+                        if (!ReferenceEquals(first, _world.Player))
+                        {
+                            first.Destroy();
+                        }
+
+                        first.TPrevious = null;
+                        first.TNext = null;
+                        first = next;
+                    }
+
+                    Tiles[i, j] = null;
+                }
+            }
+
+            Mesh.SoftClear();
+        }
+
         public bool HasNoExternalData()
         {
             for (int i = 0; i < 8; i++)

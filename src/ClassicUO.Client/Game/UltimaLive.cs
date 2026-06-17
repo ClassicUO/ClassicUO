@@ -290,7 +290,7 @@ namespace ClassicUO.Game
                                 }
                             }
 
-                            mapChunk.Clear();
+                            mapChunk.ClearForReload();
                             _UL._ULMap.ReloadBlock(mapId, block);
                             mapChunk.Load(mapId);
 
@@ -511,7 +511,7 @@ namespace ClassicUO.Game
                             }
                         }
 
-                        mapChunk.Clear();
+                        mapChunk.ClearForReload();
                         mapChunk.Load(mapId);
 
                         foreach (GameObject obj in gameObjects)
