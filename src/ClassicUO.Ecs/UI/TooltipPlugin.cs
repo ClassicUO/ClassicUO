@@ -344,7 +344,13 @@ internal readonly struct TooltipPlugin : IPlugin
                         Text = html,
                         TextFont = font,
                         TextHue = 0,
-                        WrapWidth = wrapWidth,
+                        // Center within the measured content box, not the 600px
+                        // wrap budget — the box hugs `w`, so centering on wrapWidth
+                        // (what DrawGlyphs does via layout.MaxWidth) would shove
+                        // every line ~(wrapWidth-w)/2 px right, out of the box.
+                        // w is the widest wrapped line, so re-wrapping at w keeps
+                        // the same line breaks Measure produced.
+                        WrapWidth = w,
                         IsHtml = true,
                         HtmlStartColor = startColor,
                         HtmlBg = false,
