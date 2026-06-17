@@ -13,6 +13,8 @@
 // shows. Object vs position is decided by whether the hit entity carries a
 // NetworkSerial (mobile/ground item) or is a land/static tile.
 
+using System.Runtime.InteropServices;
+using ClassicUO.Assets;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -54,8 +56,30 @@ internal readonly struct TargetingPlugin : IPlugin
             targeting.Value.CursorType = packet.CursorType;
         });
 
+        // 0x99 is self-arming (legacy SetTargetingMulti): the server does NOT send
+        // a 0x6C for house-deed placement — 0x99 alone puts the cursor in multi
+        // placement mode AND carries the multi graphic + drop offset. The deed
+        // serial is the cursor id echoed in the click response (Send_TargetXYZ).
+        app.AddObserver((
+            On<PacketReceived<OnPlaceMultiPacket_0x99>> trig,
+            ResMut<TargetingState> targeting) =>
+        {
+            var packet = trig.Event.Packet;
+            targeting.Value.IsTargeting = true;
+            targeting.Value.Mode = MultiMode;
+            targeting.Value.CursorId = packet.TargetSerial;
+            targeting.Value.CursorType = 0; // neutral
+            targeting.Value.MultiId = packet.MultiId;
+            targeting.Value.MultiOffsetX = packet.OffsetX;
+            targeting.Value.MultiOffsetY = packet.OffsetY;
+            targeting.Value.MultiOffsetZ = packet.OffsetZ;
+            targeting.Value.MultiHue = packet.Hue;
+        });
+
         var clickFn = ResolveTargetClick;
         var cancelFn = CancelTarget;
+        var previewFn = SyncMultiPreview;
+        var previewExitFn = DespawnMultiPreviewOnExit;
 
         // Stage.First so the target/cancel consume their mouse button before the
         // pickup latch (also Stage.First, gated off while targeting) and before
@@ -71,8 +95,137 @@ internal readonly struct TargetingPlugin : IPlugin
                 .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
                 .RunIf((Res<TargetingState> t) => t.Value.IsTargeting)
                 .RunIf((Res<MouseContext> m) => m.Value.IsPressedOnce(Input.MouseButtonType.Left))
+                .Build()
+            // Not gated on IsTargeting — the !show branch despawns the ghost when
+            // targeting ends. Runs in Update like HouseCustomization.SyncPreview.
+            .AddSystem(previewFn)
+                .InStage(Stage.Update)
+                .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
                 .Build();
+
+        app.AddSystem(previewExitFn).OnExit(GameState.GameScreen).Build();
     }
+
+    // Legacy GameScene multi-placement preview: a translucent ghost of the multi
+    // follows the cursor tile while a 0x99 multi target is armed. Blocks are
+    // spawned once per graphic and repositioned each frame (no per-frame
+    // spawn/despawn churn), mirroring legacy's reuse of _multi + House.Components.
+    private static void SyncMultiPreview(
+        Commands commands,
+        ResMut<TargetingState> targeting,
+        Res<SelectedEntity> selected,
+        Res<MultiCache> multis,
+        Query<Data<WorldPosition>> worldQ,
+        Query<Data<WorldPosition, ScreenPosition, AlphaFade, MultiPreviewOffset>, With<MultiPlacementPreview>> previewQ)
+    {
+        var st = targeting.Value;
+        bool show = st.IsTargeting && st.Mode == MultiMode && st.MultiId != 0;
+
+        // Targeting ended -> tear down the ghost.
+        if (!show)
+        {
+            if (st.PreviewBuiltId != 0)
+                ClearMultiPreview(commands, selected, previewQ, st);
+            return;
+        }
+
+        // Hovered tile = the render's pixel pick (preview blocks excluded via
+        // IgnorePickEntities), so the ghost lands where the deed will drop. On a
+        // stray no-hit frame (cursor over a transparent gap / world edge / a gump)
+        // KEEP the ghost where it is — despawn+rebuild every such frame is what
+        // made it flicker. Legacy only repositions on a hit, removes only on end.
+        var hit = selected.Value.Entity;
+        if (hit == 0 || !worldQ.TryGet(hit, out var hitRow))
+            return;
+
+        var (_, hitPos) = hitRow;
+        // base = hovered tile - deed offset (legacy). We use the hovered tile's
+        // own Z for ground; legacy re-derives via GetMapZ — equivalent for the
+        // terrain tiles a deed targets.
+        int baseX = hitPos.Ref.X - st.MultiOffsetX;
+        int baseY = hitPos.Ref.Y - st.MultiOffsetY;
+        int baseZ = hitPos.Ref.Z - st.MultiOffsetZ;
+
+        // (Re)build when the multi graphic changes; blocks become queryable next
+        // sync point, so reposition + ignore-set are filled on the following frame.
+        if (st.PreviewBuiltId != st.MultiId)
+        {
+            ClearMultiPreview(commands, selected, previewQ, st);
+            foreach (ref readonly var block in CollectionsMarshal.AsSpan(multis.Value.GetMulti(st.MultiId).Blocks))
+            {
+                if (!block.IsVisible)
+                    continue;
+
+                var wp = new WorldPosition
+                {
+                    X = (ushort)(baseX + block.X),
+                    Y = (ushort)(baseY + block.Y),
+                    Z = (sbyte)(baseZ + block.Z),
+                };
+                commands.Spawn()
+                    .Insert(new Graphic { Value = block.ID })
+                    .Insert(new Hue { Value = st.MultiHue })
+                    .Insert(wp)
+                    .Insert(new ScreenPosition { Value = wp.WorldToScreen() })
+                    .Insert(new AlphaFade { Value = PreviewAlpha })
+                    // Mode 1 = translucent: RenderStatics' ProcessFade settles the
+                    // alpha at 178 and HOLDS it. Without this it treats the block as
+                    // a normal visible static and ramps alpha to 0xFF each fade tick,
+                    // so re-stamping a low alpha per frame pulsed it (the flicker).
+                    .Insert(new HouseVisionFade { Mode = 1 })
+                    .Insert(new MultiPreviewOffset { X = block.X, Y = block.Y, Z = block.Z })
+                    .Insert<MultiPlacementPreview>()
+                    .Insert<NormalMulti>();
+            }
+            st.PreviewBuiltId = st.MultiId;
+            return;
+        }
+
+        // Reposition existing blocks and rebuild the pick-ignore set (so the
+        // preview never selects itself). Alpha is owned by ProcessFade now (held
+        // translucent via HouseVisionFade) — do NOT re-stamp it here.
+        selected.Value.IgnorePickEntities.Clear();
+        foreach (var (e, wp, sp, _, off) in previewQ)
+        {
+            wp.Ref.X = (ushort)(baseX + off.Ref.X);
+            wp.Ref.Y = (ushort)(baseY + off.Ref.Y);
+            wp.Ref.Z = (sbyte)(baseZ + off.Ref.Z);
+            sp.Ref.Value = wp.Ref.WorldToScreen();
+            selected.Value.IgnorePickEntities.Add(e.Ref);
+        }
+    }
+
+    private static void ClearMultiPreview(
+        Commands commands,
+        Res<SelectedEntity> selected,
+        Query<Data<WorldPosition, ScreenPosition, AlphaFade, MultiPreviewOffset>, With<MultiPlacementPreview>> previewQ,
+        TargetingState st)
+    {
+        foreach (var (e, _, _, _, _) in previewQ)
+            commands.Entity(e.Ref).Despawn();
+        selected.Value.IgnorePickEntities.Clear();
+        st.PreviewBuiltId = 0;
+    }
+
+    private static void DespawnMultiPreviewOnExit(
+        Commands commands,
+        Res<SelectedEntity> selected,
+        ResMut<TargetingState> targeting,
+        Query<Data<WorldPosition>, With<MultiPlacementPreview>> previewQ)
+    {
+        foreach (var (e, _) in previewQ)
+            commands.Entity(e.Ref).Despawn();
+        selected.Value.IgnorePickEntities.Clear();
+        targeting.Value.PreviewBuiltId = 0;
+    }
+
+    // 0x6C CursorTarget byte: 2 = multi placement.
+    private const byte MultiMode = 2;
+    // Spawn at the translucent settle value (ProcessFade's mode-1 target, 178) so
+    // the ghost is half-transparent from frame one with no fade-in ramp. Legacy
+    // MultiView.IsHousePreview shows it at ~0.5; 178 (~0.7) is the closest the
+    // shared fade path holds steady.
+    private const byte PreviewAlpha = 178;
 
     private static void ResolveTargetClick(
         Res<MouseContext> mouse,
@@ -160,11 +313,26 @@ internal sealed class TargetingState
     public uint CursorId { get; set; }
     public byte CursorType { get; set; }  // 0 neutral, 1 harmful, 2 beneficial
 
+    // 0x99 multi-placement preview (legacy MultiTargetInfo). The deed's multi
+    // graphic + drop offset; consumed by SyncMultiPreview while Mode==2 is live.
+    public ushort MultiId { get; set; }
+    public short MultiOffsetX { get; set; }
+    public short MultiOffsetY { get; set; }
+    public short MultiOffsetZ { get; set; }
+    public ushort MultiHue { get; set; }
+    // Which multi the ghost blocks are currently spawned for (0 = none) so
+    // SyncMultiPreview rebuilds only on graphic change. Reset by the preview
+    // system when it despawns the ghost, not by Clear (Clear has no Commands).
+    public ushort PreviewBuiltId { get; set; }
+
     public void Clear()
     {
         IsTargeting = false;
         Mode = 0;
         CursorId = 0;
         CursorType = 0;
+        MultiId = 0;
+        MultiOffsetX = MultiOffsetY = MultiOffsetZ = 0;
+        MultiHue = 0;
     }
 }

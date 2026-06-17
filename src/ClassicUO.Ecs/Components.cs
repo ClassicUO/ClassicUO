@@ -194,3 +194,10 @@ internal struct HouseRevision
 
 internal struct CustomMulti;
 internal struct NormalMulti;
+
+// Translucent ghost blocks of a multi following the cursor during 0x99 multi
+// placement (house deed). Legacy MultiView.IsHousePreview: half alpha + excluded
+// from mouse selection. MultiPreviewOffset is the block's offset from the multi
+// origin so SyncMultiPreview can reposition it each frame.
+internal struct MultiPlacementPreview;
+internal struct MultiPreviewOffset { public short X, Y, Z; }

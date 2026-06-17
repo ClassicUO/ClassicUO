@@ -1990,6 +1990,13 @@ internal sealed class SelectedEntity
     // the pick and get the selection-highlight hue. Set by HouseCustomization.
     public ulong IgnoreEntity;
 
+    // Same intent for the multi-placement preview (legacy MultiView excludes
+    // IsHousePreview from selection): a whole house of ghost blocks sits on the
+    // cursor tiles, so without this they'd win the pick and the base tile would
+    // resolve to a preview block — the multi jitters. Maintained by
+    // SyncMultiPreview; empty (and skipped) in normal play.
+    public readonly HashSet<ulong> IgnorePickEntities = new();
+
     // bypassViewport: UI window claims (paperdoll / container / server gumps)
     // must register even when the cursor is outside Camera.Bounds — gumps live
     // in the side gutters and top bar, which are off the world viewport. The
@@ -2004,6 +2011,9 @@ internal sealed class SelectedEntity
             return;
 
         if (IgnoreEntity != 0 && entity == IgnoreEntity)
+            return;
+
+        if (IgnorePickEntities.Count != 0 && IgnorePickEntities.Contains(entity))
             return;
 
         if (_lastEntity.IsValid() && _lastEntity != entity)

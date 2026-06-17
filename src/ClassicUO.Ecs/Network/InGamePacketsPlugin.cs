@@ -303,7 +303,7 @@ readonly struct InGamePacketsPlugin : IPlugin
         Stub<OnColorPickerPacket_0x95>(app);
         Stub<OnMovePlayerPacket_0x97>(app);
         Stub<OnUpdateNamePacket_0x98>(app);
-        Stub<OnPlaceMultiPacket_0x99>(app);
+        // 0x99 (multi placement target) is handled by TargetingPlugin.
         Stub<OnAsciiPromptPacket_0x9A>(app);
         Stub<OnSellListPacket_0x9E>(app);
         Stub<OnOpenUrlPacket_0xA5>(app);
