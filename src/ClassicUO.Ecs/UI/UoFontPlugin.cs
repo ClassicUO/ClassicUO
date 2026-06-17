@@ -165,6 +165,9 @@ internal static class UoFontRenderer
         public MultilinesFontInfo? Info;
         public int Width;
         public int Height;
+        // Wrap width the layout was built with — TS_CENTER/TS_RIGHT align each
+        // line within this (legacy FontsLoader's `width`), NOT the content Width.
+        public int MaxWidth;
         // Lazy 1-bit ink mask for pixel-perfect hit testing (PixelHit). Built
         // on first query by re-rendering each glyph's pixels; border pixels are
         // included when the mask was built with border=true so the hit area
@@ -238,7 +241,7 @@ internal static class UoFontRenderer
                 h += LinePitch(ptr, font, isUnicode: !ascii);
             }
 
-            var layout = new Layout { Info = info, Width = w, Height = h };
+            var layout = new Layout { Info = info, Width = w, Height = h, MaxWidth = maxWidth };
             _layouts[key] = layout;
             return layout;
         }
@@ -281,7 +284,9 @@ internal static class UoFontRenderer
 
         int lineOffsY = 0;
         var ptr = layout.Info;
-        int textWidth = layout.Width;
+        // Center/right alignment is relative to the wrap width (matches legacy
+        // FontsLoader), so the block centers in the box, not in its own content.
+        int textWidth = layout.MaxWidth > 0 ? layout.MaxWidth : layout.Width;
 
         while (ptr != null)
         {
