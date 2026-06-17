@@ -526,15 +526,28 @@ internal readonly struct TradingGumpPlugin : IPlugin
             if (!entry.IsNew) continue;
 
             uint gold = entry.LastGoldSent, plat = entry.LastPlatSent;
+            uint rawGold = 0, rawPlat = 0;
             bool found = false;
             foreach (var (_, tag, text) in entriesQ)
             {
                 if (tag.Ref.Id1 != entry.Id1) continue;
                 found = true;
-                uint val = ParseClamp(text.Ref.Value, tag.Ref.IsPlatinum ? entry.Platinum : entry.Gold);
-                if (tag.Ref.IsPlatinum) plat = val; else gold = val;
+                uint raw = ParseUInt(text.Ref.Value);
+                if (tag.Ref.IsPlatinum) rawPlat = raw; else rawGold = raw;
             }
             if (!found) continue;
+
+            // The server converts between currencies (1 platinum == 1e9 gold)
+            // and validates the combined offer against combined wealth, so cap
+            // each field by total wealth minus what the other field already
+            // offers — not by its own currency balance alone.
+            const ulong PlatinumValue = 1_000_000_000;
+            ulong totalWealth = entry.Gold + (ulong)entry.Platinum * PlatinumValue;
+            ulong platOffered = (ulong)rawPlat * PlatinumValue;
+            uint maxGold = (uint)Math.Min(uint.MaxValue, totalWealth > platOffered ? totalWealth - platOffered : 0);
+            uint maxPlat = (uint)Math.Min(uint.MaxValue, (totalWealth > rawGold ? totalWealth - rawGold : 0) / PlatinumValue);
+            gold = Math.Min(rawGold, maxGold);
+            plat = Math.Min(rawPlat, maxPlat);
 
             if (gold != entry.LastGoldSent || plat != entry.LastPlatSent)
             {
@@ -545,11 +558,10 @@ internal readonly struct TradingGumpPlugin : IPlugin
         }
     }
 
-    private static uint ParseClamp(string text, uint max)
+    private static uint ParseUInt(string text)
     {
         if (string.IsNullOrEmpty(text)) return 0;
-        if (!uint.TryParse(text.Replace(",", ""), out var v)) return 0;
-        return v > max ? max : v;
+        return uint.TryParse(text.Replace(",", ""), out var v) ? v : 0;
     }
 
     private static void DisposeOnLogout(
