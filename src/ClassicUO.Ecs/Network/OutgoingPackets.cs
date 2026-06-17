@@ -2146,6 +2146,137 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
+        // 0xD7 custom-house design commands. Each is a u16BE op after the player
+        // serial, an op-specific payload, then a 0x0A terminator. The server
+        // validates the action and echoes the resulting house state back via
+        // 0xD8, so the client never needs to apply changes locally.
+        private static void SendCustomHouseOp(NetClient socket, uint playerSerial, ushort op)
+        {
+            const byte ID = 0xD7;
+            int length = socket.PacketsTable.GetPacketLength(ID);
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+            if (length < 0)
+                writer.WriteZero(2);
+            writer.WriteUInt32BE(playerSerial);
+            writer.WriteUInt16BE(op);
+            writer.WriteUInt8(0x0A);
+            FinishCustomHousePacket(socket, ref writer, length);
+        }
+
+        private static void SendCustomHouseXY(NetClient socket, uint playerSerial, ushort op, ushort graphic, int x, int y)
+        {
+            const byte ID = 0xD7;
+            int length = socket.PacketsTable.GetPacketLength(ID);
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+            if (length < 0)
+                writer.WriteZero(2);
+            writer.WriteUInt32BE(playerSerial);
+            writer.WriteUInt16BE(op);
+            writer.WriteUInt8(0x00);
+            writer.WriteUInt32BE(graphic);
+            writer.WriteUInt8(0x00);
+            writer.WriteUInt32BE((uint)x);
+            writer.WriteUInt8(0x00);
+            writer.WriteUInt32BE((uint)y);
+            writer.WriteUInt8(0x0A);
+            FinishCustomHousePacket(socket, ref writer, length);
+        }
+
+        private static void SendCustomHouseXYZ(NetClient socket, uint playerSerial, ushort op, ushort graphic, int x, int y, int z)
+        {
+            const byte ID = 0xD7;
+            int length = socket.PacketsTable.GetPacketLength(ID);
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+            if (length < 0)
+                writer.WriteZero(2);
+            writer.WriteUInt32BE(playerSerial);
+            writer.WriteUInt16BE(op);
+            writer.WriteUInt8(0x00);
+            writer.WriteUInt32BE(graphic);
+            writer.WriteUInt8(0x00);
+            writer.WriteUInt32BE((uint)x);
+            writer.WriteUInt8(0x00);
+            writer.WriteUInt32BE((uint)y);
+            writer.WriteUInt8(0x00);
+            writer.WriteUInt32BE((uint)z);
+            writer.WriteUInt8(0x0A);
+            FinishCustomHousePacket(socket, ref writer, length);
+        }
+
+        private static void FinishCustomHousePacket(NetClient socket, ref StackDataWriter writer, int length)
+        {
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
+        public static void Send_CustomHouseBackup(this NetClient socket, uint playerSerial)
+            => SendCustomHouseOp(socket, playerSerial, 0x02);
+
+        public static void Send_CustomHouseRestore(this NetClient socket, uint playerSerial)
+            => SendCustomHouseOp(socket, playerSerial, 0x03);
+
+        public static void Send_CustomHouseCommit(this NetClient socket, uint playerSerial)
+            => SendCustomHouseOp(socket, playerSerial, 0x04);
+
+        public static void Send_CustomHouseBuildingExit(this NetClient socket, uint playerSerial)
+            => SendCustomHouseOp(socket, playerSerial, 0x0C);
+
+        public static void Send_CustomHouseSync(this NetClient socket, uint playerSerial)
+            => SendCustomHouseOp(socket, playerSerial, 0x0E);
+
+        public static void Send_CustomHouseClear(this NetClient socket, uint playerSerial)
+            => SendCustomHouseOp(socket, playerSerial, 0x10);
+
+        public static void Send_CustomHouseResponse(this NetClient socket, uint playerSerial)
+            => SendCustomHouseOp(socket, playerSerial, 0x0A);
+
+        public static void Send_CustomHouseRevert(this NetClient socket, uint playerSerial)
+            => SendCustomHouseOp(socket, playerSerial, 0x1A);
+
+        public static void Send_CustomHouseAddItem(this NetClient socket, uint playerSerial, ushort graphic, int x, int y)
+            => SendCustomHouseXY(socket, playerSerial, 0x06, graphic, x, y);
+
+        public static void Send_CustomHouseAddStair(this NetClient socket, uint playerSerial, ushort graphic, int x, int y)
+            => SendCustomHouseXY(socket, playerSerial, 0x0D, graphic, x, y);
+
+        public static void Send_CustomHouseDeleteItem(this NetClient socket, uint playerSerial, ushort graphic, int x, int y, int z)
+            => SendCustomHouseXYZ(socket, playerSerial, 0x05, graphic, x, y, z);
+
+        public static void Send_CustomHouseAddRoof(this NetClient socket, uint playerSerial, ushort graphic, int x, int y, int z)
+            => SendCustomHouseXYZ(socket, playerSerial, 0x13, graphic, x, y, z);
+
+        public static void Send_CustomHouseDeleteRoof(this NetClient socket, uint playerSerial, ushort graphic, int x, int y, int z)
+            => SendCustomHouseXYZ(socket, playerSerial, 0x14, graphic, x, y, z);
+
+        public static void Send_CustomHouseGoToFloor(this NetClient socket, uint playerSerial, byte floor)
+        {
+            const byte ID = 0xD7;
+            int length = socket.PacketsTable.GetPacketLength(ID);
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+            writer.WriteUInt8(ID);
+            if (length < 0)
+                writer.WriteZero(2);
+            writer.WriteUInt32BE(playerSerial);
+            writer.WriteUInt16BE(0x12);
+            writer.WriteUInt32BE(0);
+            writer.WriteUInt8(floor);
+            writer.WriteUInt8(0x0A);
+            FinishCustomHousePacket(socket, ref writer, length);
+        }
+
         public static void Send_Resync(this NetClient socket)
         {
             const byte ID = 0x22;

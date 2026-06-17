@@ -354,6 +354,8 @@ readonly struct InGamePacketsPlugin : IPlugin
         public Query<Data<WorldPosition, Graphic>> qPosAndGraphic { get; } = new();
         public Query<Empty, With<IsMulti>> qMultis { get; } = new();
         public Query<Empty, With<ContainedInto>> qContainedItems { get; } = new();
+        public Query<Data<TinyEcs.Children>> qChildren { get; } = new();
+        public Query<Empty, With<CustomMulti>> qCustomMulti { get; } = new();
 
         public void Initialize(App app)
         {
@@ -362,6 +364,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             qPosAndGraphic.Initialize(app);
             qMultis.Initialize(app);
             qContainedItems.Initialize(app);
+            qChildren.Initialize(app);
+            qCustomMulti.Initialize(app);
         }
 
         public void Fetch(App app)
@@ -371,6 +375,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             qPosAndGraphic.Fetch(app);
             qMultis.Fetch(app);
             qContainedItems.Fetch(app);
+            qChildren.Fetch(app);
+            qCustomMulti.Fetch(app);
         }
 
         public SystemParamAccess GetAccess()
@@ -392,6 +398,12 @@ readonly struct InGamePacketsPlugin : IPlugin
             foreach (var write in multis.WriteResources) access.WriteResources.Add(write);
             foreach (var read in contained.ReadResources) access.ReadResources.Add(read);
             foreach (var write in contained.WriteResources) access.WriteResources.Add(write);
+            var children = qChildren.GetAccess();
+            var customMulti = qCustomMulti.GetAccess();
+            foreach (var read in children.ReadResources) access.ReadResources.Add(read);
+            foreach (var write in children.WriteResources) access.WriteResources.Add(write);
+            foreach (var read in customMulti.ReadResources) access.ReadResources.Add(read);
+            foreach (var write in customMulti.WriteResources) access.WriteResources.Add(write);
 
             return access;
         }
@@ -891,6 +903,17 @@ readonly struct InGamePacketsPlugin : IPlugin
 
         (var pos, var graphic) = posAndGraphicRow;
         (var startX, var startY, var startZ) = pos.Ref;
+
+        // A fresh 0xD8 replaces the whole component set (every design edit bumps
+        // the revision and the server re-sends all planes). Despawn the previous
+        // CustomMulti children first, else successive revisions pile up duplicates.
+        if (queries.qChildren.TryGet(parent.Id, out var childrenRow))
+        {
+            var (_, kids) = childrenRow;
+            foreach (var childId in kids.Ref)
+                if (queries.qCustomMulti.Contains(childId))
+                    commands.Entity(childId).Despawn();
+        }
 
         parent.Insert(new HouseRevision { Value = packet.Revision });
 

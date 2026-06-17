@@ -153,8 +153,13 @@ internal readonly struct GameCursorPlugin : IPlugin
             worldDirection = GameCursor.GetMouseDirection(cx, cy, (int)mousePos.X, (int)mousePos.Y, 1);
         }
 
+        // House design with a tool armed shows the targeting reticle (legacy
+        // SetTargetingMulti puts the cursor in MultiPlacement) without arming the
+        // real TargetingState — design placement owns the click, not 0x6C. The
+        // flag is set by HouseCustomizationPlugin (the cursor system is already at
+        // the 16-param delegate limit, so it can't take the resource directly).
         int index = PickCursorIndex(
-            targeting: targeting.Value.IsTargeting,
+            targeting: targeting.Value.IsTargeting || cursorState.Value.DesignReticle,
             dragging: gateDragging && cursorState.Value.DragHandLatched,
             textInput: hovered != 0 && IsTextInput(hovered, textInputQ, children),
             overWorld: overWorld,
@@ -263,6 +268,10 @@ internal sealed class GameCursorState
     // RenderGameCursor); gates the grab-hand graphic so a stationary press
     // keeps the neutral/direction cursor, matching legacy UIManager.IsDragging.
     public bool DragHandLatched;
+
+    // Set each frame by HouseCustomizationPlugin: true while design mode has a
+    // tool armed, so RenderGameCursor shows the targeting reticle.
+    public bool DesignReticle;
 
     public (Texture2D Texture, int X, int Y) Cursor(ClassicUO.Renderer.Arts.Art arts, ushort graphic)
     {
