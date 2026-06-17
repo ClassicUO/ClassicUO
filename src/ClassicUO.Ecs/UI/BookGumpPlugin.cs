@@ -9,12 +9,12 @@
 //
 // Layout mirrors legacy: open-book background 0x1FE, page-flip arrows 0x1FF /
 // 0x200, title + author on the left side of the first spread, two 156x166
-// 8-line pages per spread (left x=38, right x=223, text at y=34), page number
-// labels at y=200.
+// 10-line pages per spread (left x=38, right x=223, text at y=26), page number
+// labels at y=220.
 //
 // Legacy runs ONE text box flowing across every page; here each page is an
 // independent field, and NormalizeFlow recreates the flow: after every edit
-// the whole book is re-wrapped and re-sliced into 8-visual-line pages, so
+// the whole book is re-wrapped and re-sliced into MaxBookLines-line pages, so
 // typing past a page's last line pushes the overflow onto the next page (and
 // deleting pulls it back), with the caret/focus following the flowed text —
 // flipping the spread when it crosses to a page that isn't displayed.
@@ -74,9 +74,9 @@ internal readonly struct BookGumpPlugin : IPlugin
 {
     private const ushort BackgroundGump = 0x1FE;
     private const ushort BackArrow = 0x1FF, ForwardArrow = 0x200;
-    private const int MaxBookLines = 8;
+    private const int MaxBookLines = 10;
     private const int LeftX = 38, RightX = 223;
-    private const int UpperMargin = 34;
+    private const int UpperMargin = 26;
     private const int PageWidth = 156, PageHeight = 166;
     private const byte Font = 1; // unicode font 1 (legacy DefaultFont for CV > 2.0)
     private const uint TextColorBlack = 0x010101FF; // RGBA, near-black like profile/tip text
@@ -250,7 +250,7 @@ internal readonly struct BookGumpPlugin : IPlugin
             else
             {
                 // Read-only page: a bare WrappedText custom the 0x66 observer
-                // fills in. Fixed to the page box; 8 lines always fit.
+                // fills in. Fixed to the page box; MaxBookLines lines fit.
                 var text = commands.Spawn()
                     .Insert(new Node { Display = Display.Flex, Width = Val.Px(PageWidth), Height = Val.Px(PageHeight) })
                     .Insert(new UiCustom
@@ -277,7 +277,7 @@ internal readonly struct BookGumpPlugin : IPlugin
                 {
                     Display = Display.Flex,
                     PositionType = PositionType.Absolute,
-                    Left = Val.Px(x + 80), Top = Val.Px(200),
+                    Left = Val.Px(x + 80), Top = Val.Px(220),
                     Width = Val.Px(40), Height = Val.Px(20),
                 })
                 .Insert(new BookPageVis { Window = rootId, Page = k });
@@ -433,7 +433,8 @@ internal readonly struct BookGumpPlugin : IPlugin
         return texts;
     }
 
-    // Wrap the whole book text and cut it into pages of 8 visual lines. The
+    // Wrap the whole book text and cut it into pages of MaxBookLines visual
+    // lines. The
     // wrap MUST be the PLAIN wrap: its line Counts are raw-buffer indices that
     // partition the string exactly. The HTML wrap (what the field renders for
     // its near-black color) reflows/collapses, so its Counts don't add up to
@@ -630,8 +631,11 @@ internal readonly struct BookGumpPlugin : IPlugin
         }
     }
 
-    // Re-wrap a page's text the way the renderer draws it and emit exactly 8
-    // lines (the wire page size), clipping overflow and padding with empties.
+    // Re-wrap a page's text the way the renderer draws it and emit up to
+    // MaxBookLines lines (clipping overflow, padding with empties). Most servers
+    // expect at most 8 lines per page, so trailing empty lines past 8 are
+    // trimmed off — lines 9-10 go out only when they actually hold text. Empty
+    // lines between text stay; the page's "\n"-only lines already stripped here.
     private static string[] SplitPageLines(string text)
     {
         var result = new string[MaxBookLines];
@@ -648,6 +652,13 @@ internal readonly struct BookGumpPlugin : IPlugin
                 result[i] = string.Empty;
             }
         }
+
+        int lineCount = MaxBookLines;
+        while (lineCount > 8 && result[lineCount - 1].Length == 0)
+            lineCount--;
+        if (lineCount < result.Length)
+            Array.Resize(ref result, lineCount);
+
         return result;
     }
 
