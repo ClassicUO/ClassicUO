@@ -46,12 +46,17 @@ internal readonly struct TargetingPlugin : IPlugin
     {
         app.AddResource(new TargetingState());
         app.AddResource(new CriminalConfirmState());
+        app.AddResource(new TargetQueueState());
 
         // Server -> client target request. Cancel (type 3) just clears; any
         // other type arms targeting with the server's echoed cursor id/type.
         app.AddObserver((
             On<PacketReceived<OnTargetCursorPacket_0x6C>> trig,
-            ResMut<TargetingState> targeting) =>
+            ResMut<TargetingState> targeting,
+            ResMut<TargetQueueState> queue,
+            ResMut<LastTargetState> lastTarget,
+            Res<Time> time,
+            Res<NetClient> net) =>
         {
             var packet = trig.Event.Packet;
             if (packet.CursorType >= (byte)TargetType.Cancel)
@@ -64,6 +69,29 @@ internal readonly struct TargetingPlugin : IPlugin
             targeting.Value.Mode = packet.CursorTarget;
             targeting.Value.CursorId = packet.CursorId;
             targeting.Value.CursorType = packet.CursorType;
+
+            // UOSteam target queue: a target queued while no cursor was up
+            // auto-applies to this fresh OBJECT cursor, within the 5s timeout.
+            // Expired → drop it. A positional/multi cursor leaves the queue armed
+            // for a later object cursor.
+            if (queue.Value.Armed)
+            {
+                if (time.Value.Total > queue.Value.ExpireAt)
+                {
+                    queue.Value.Clear();
+                }
+                else if (targeting.Value.Mode == 0)
+                {
+                    net.Value.Send_TargetObject(
+                        queue.Value.Serial, queue.Value.Graphic,
+                        queue.Value.X, queue.Value.Y, queue.Value.Z,
+                        targeting.Value.CursorId, targeting.Value.CursorType);
+                    lastTarget.Value.Set(queue.Value.Serial, queue.Value.Graphic,
+                        queue.Value.X, queue.Value.Y, queue.Value.Z);
+                    targeting.Value.Clear();
+                    queue.Value.Clear();
+                }
+            }
         });
 
         // 0x99 is self-arming (legacy SetTargetingMulti): the server does NOT send
@@ -91,6 +119,7 @@ internal readonly struct TargetingPlugin : IPlugin
         var previewFn = SyncMultiPreview;
         var previewExitFn = DespawnMultiPreviewOnExit;
         var resetConfirmFn = ResetConfirmIfClosed;
+        var selectUiFn = SelectUiItemWhileTargeting;
 
         // Stage.First so the target/cancel consume their mouse button before the
         // pickup latch (also Stage.First, gated off while targeting) and before
@@ -126,6 +155,15 @@ internal readonly struct TargetingPlugin : IPlugin
             .AddSystem(resetConfirmFn)
                 .InStage(Stage.First)
                 .RunIf((Res<CriminalConfirmState> c) => c.Value.Open)
+                .Build()
+            // While targeting, claim the hovered container/paperdoll UI item as the
+            // SelectedEntity so ResolveTargetClick can object-target it. Stage.Last,
+            // built after WindowDragPlugin, so it overrides that plugin's window
+            // claim (paperdoll items would otherwise resolve to the window root).
+            .AddSystem(selectUiFn)
+                .InStage(Stage.Last)
+                .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+                .RunIf((Res<TargetingState> t) => t.Value.IsTargeting)
                 .Build();
 
         app.AddSystem(previewExitFn).OnExit(GameState.GameScreen).Build();
@@ -264,10 +302,9 @@ internal readonly struct TargetingPlugin : IPlugin
         Res<UiSurface> surface,
         Res<UiZCounter> zCounter,
         ResMut<CriminalConfirmState> confirm,
-        Query<Data<NetworkSerial, Graphic, WorldPosition, Notoriety>, Filter<Optional<Notoriety>>> objectQ,
-        Query<Data<Graphic, WorldPosition>, Filter<With<IsTile>>> landQ,
-        Query<Data<Graphic, WorldPosition>, Filter<With<IsStatic>>> staticQ,
-        Query<Data<Notoriety>, Filter<With<Player>>> playerNotoQ)
+        ResMut<LastTargetState> lastTarget,
+        Res<NetworkEntitiesMap> entitiesMap,
+        TargetClickQueries q)
     {
         // The click belongs to targeting whether or not it lands on something —
         // swallow it so a miss doesn't fall through to movement/pickup.
@@ -280,7 +317,28 @@ internal readonly struct TargetingPlugin : IPlugin
         var cursorId = targeting.Value.CursorId;
         var cursorType = targeting.Value.CursorType;
 
-        if (objectQ.TryGet(ent, out var objectRow))
+        // Container / paperdoll UI item: it has no WorldPosition, so resolve its
+        // serial to the backing game entity for the graphic and object-target it
+        // (serial-keyed; x/y/z are the item's world pos when it has one, else 0).
+        uint uiSerial = 0;
+        if (q.ContainerItems.TryGet(ent, out var ciRow)) { var (_, ci) = ciRow; uiSerial = ci.Ref.Serial; }
+        else if (q.EquipItems.TryGet(ent, out var peRow)) { var (_, pe) = peRow; uiSerial = pe.Ref.ItemSerial; }
+        if (uiSerial != 0)
+        {
+            if (entitiesMap.Value.TryGet(uiSerial, out var gameEnt) && q.ItemGraphic.TryGet(gameEnt, out var giRow))
+            {
+                var (_, gfx, wpos) = giRow;
+                ushort gx = wpos.IsValid() ? wpos.Ref.X : (ushort)0;
+                ushort gy = wpos.IsValid() ? wpos.Ref.Y : (ushort)0;
+                sbyte gz = wpos.IsValid() ? wpos.Ref.Z : (sbyte)0;
+                net.Value.Send_TargetObject(uiSerial, gfx.Ref.Value, gx, gy, gz, cursorId, cursorType);
+                lastTarget.Value.Set(uiSerial, gfx.Ref.Value, gx, gy, gz);
+            }
+            targeting.Value.Clear();
+            return;
+        }
+
+        if (q.Objects.TryGet(ent, out var objectRow))
         {
             var (_, serial, graphic, pos, noto) = objectRow;
             var targetNoto = noto.IsValid() ? noto.Ref.Value : NotorietyFlag.Unknown;
@@ -289,7 +347,7 @@ internal readonly struct TargetingPlugin : IPlugin
             // or ally, a harmful target on an innocent — or a beneficial target on
             // a criminal/murderer/gray — pops a confirm before sending. The cursor
             // stays armed under the gump; OK sends, Cancel sends TargetCancel.
-            if (ShouldConfirmCriminal(profile.Value, cursorType, targetNoto, playerNotoQ))
+            if (ShouldConfirmCriminal(profile.Value, cursorType, targetNoto, q.PlayerNoto))
             {
                 ShowCriminalConfirm(
                     commands, builder.Value, assets.Value, surface.Value, zCounter.Value, confirm.Value,
@@ -300,12 +358,19 @@ internal readonly struct TargetingPlugin : IPlugin
             net.Value.Send_TargetObject(
                 serial.Ref.Value, graphic.Ref.Value,
                 pos.Ref.X, pos.Ref.Y, pos.Ref.Z, cursorId, cursorType);
+            // Remember it for the LastTarget hotkey.
+            lastTarget.Value.Has = true;
+            lastTarget.Value.Serial = serial.Ref.Value;
+            lastTarget.Value.Graphic = graphic.Ref.Value;
+            lastTarget.Value.X = pos.Ref.X;
+            lastTarget.Value.Y = pos.Ref.Y;
+            lastTarget.Value.Z = pos.Ref.Z;
             targeting.Value.Clear();
             return;
         }
 
         // Land sends graphic 0; a static sends its own graphic (legacy parity).
-        if (landQ.TryGet(ent, out var landRow))
+        if (q.Lands.TryGet(ent, out var landRow))
         {
             var (_, _, pos) = landRow;
             net.Value.Send_TargetXYZ(0, pos.Ref.X, pos.Ref.Y, pos.Ref.Z, cursorId, cursorType);
@@ -313,12 +378,30 @@ internal readonly struct TargetingPlugin : IPlugin
             return;
         }
 
-        if (staticQ.TryGet(ent, out var staticRow))
+        if (q.Statics.TryGet(ent, out var staticRow))
         {
             var (_, graphic, pos) = staticRow;
             net.Value.Send_TargetXYZ(graphic.Ref.Value, pos.Ref.X, pos.Ref.Y, pos.Ref.Z, cursorId, cursorType);
             targeting.Value.Clear();
         }
+    }
+
+    // Topmost container/paperdoll UI item under the cursor becomes the selection
+    // while a cursor is up, so a target click resolves to it (float.MaxValue beats
+    // the world pick; runs after the movable-window claim so it wins for paperdoll).
+    private static void SelectUiItemWhileTargeting(
+        Res<MouseContext> mouse,
+        Res<SelectedEntity> selected,
+        Res<AssetsServer> assets,
+        UiGesturePick pick,
+        Query<Data<ContainerItemUI>> containerItems,
+        Query<Data<PaperdollEquipUI>> equipItems)
+    {
+        var hit = pick.Topmost(mouse.Value.Position, assets.Value);
+        if (!hit.Found)
+            return;
+        if (containerItems.Contains(hit.Entity) || equipItems.Contains(hit.Entity))
+            selected.Value.Set(hit.Entity, float.MaxValue, bypassViewport: true);
     }
 
     private static void CancelTarget(
@@ -466,6 +549,55 @@ internal sealed class TargetingState
 // Open while a client-side criminal-action confirm gump is up. Suspends the
 // targeting click/cancel resolvers so the gump's own buttons own the click.
 internal sealed class CriminalConfirmState { public bool Open; }
+
+// UOSteam-style target queue: a target issued while no cursor is up is held here
+// and auto-applied to the next object cursor within the timeout (default 5s, the
+// UOS default). Stores the resolved target so apply needs no entity lookup.
+internal sealed class TargetQueueState
+{
+    public const float TimeoutMs = 5000f;
+
+    public bool Armed;
+    public float ExpireAt;
+    public uint Serial;
+    public ushort Graphic;
+    public ushort X, Y;
+    public sbyte Z;
+
+    public void Set(uint serial, ushort graphic, ushort x, ushort y, sbyte z, float now)
+    {
+        Armed = true;
+        Serial = serial; Graphic = graphic; X = x; Y = y; Z = z;
+        ExpireAt = now + TimeoutMs;
+    }
+
+    public void Clear() => Armed = false;
+}
+
+// Query bundle for ResolveTargetClick (keeps it under the 16-param cap). Adds the
+// container/paperdoll UI-item queries + a by-id graphic lookup so UI items (no
+// WorldPosition) can be object-targeted.
+internal sealed class TargetClickQueries : CompositeSystemParam
+{
+    public readonly Query<Data<NetworkSerial, Graphic, WorldPosition, Notoriety>, Filter<Optional<Notoriety>>> Objects;
+    public readonly Query<Data<Graphic, WorldPosition>, Filter<With<IsTile>>> Lands;
+    public readonly Query<Data<Graphic, WorldPosition>, Filter<With<IsStatic>>> Statics;
+    public readonly Query<Data<Notoriety>, Filter<With<Player>>> PlayerNoto;
+    public readonly Query<Data<ContainerItemUI>> ContainerItems;
+    public readonly Query<Data<PaperdollEquipUI>> EquipItems;
+    public readonly Query<Data<Graphic, WorldPosition>, Filter<Optional<WorldPosition>>> ItemGraphic;
+
+    public TargetClickQueries()
+    {
+        Objects = Add(new Query<Data<NetworkSerial, Graphic, WorldPosition, Notoriety>, Filter<Optional<Notoriety>>>());
+        Lands = Add(new Query<Data<Graphic, WorldPosition>, Filter<With<IsTile>>>());
+        Statics = Add(new Query<Data<Graphic, WorldPosition>, Filter<With<IsStatic>>>());
+        PlayerNoto = Add(new Query<Data<Notoriety>, Filter<With<Player>>>());
+        ContainerItems = Add(new Query<Data<ContainerItemUI>>());
+        EquipItems = Add(new Query<Data<PaperdollEquipUI>>());
+        ItemGraphic = Add(new Query<Data<Graphic, WorldPosition>, Filter<Optional<WorldPosition>>>());
+    }
+}
 
 // Marker on the confirm gump root (existence check for the un-stick safety net).
 internal struct CriminalConfirmGump;

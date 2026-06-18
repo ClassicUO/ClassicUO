@@ -1,9 +1,62 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 
 namespace ClassicUO.Configuration
 {
+    // Built-in hotkey actions the configurable Hotkeys section can bind. The
+    // walk directions are continuous (held-key) and ignore the pressed/released
+    // selector; the rest are edge actions.
+    internal enum HotkeyAction : byte
+    {
+        None = 0,
+        ToggleWar,
+        WalkNorth, WalkSouth, WalkEast, WalkWest,
+        ChatHistoryPrev, ChatHistoryNext,
+        AllNames,
+        TargetSelf,
+        LastTarget,
+        UseLastObject,
+        ToggleAlwaysRun,
+        OpenDoor,
+        OpenBackpack,
+        OpenPaperdoll,
+        OpenJournal,
+        OpenWorldMap,
+        OpenMinimap,
+        OpenSkills,
+        OpenStatus,
+        OpenBuffs,
+        OpenCombatBook,
+        OpenOptions,
+        Logout,
+        CancelTarget,
+        ClearTargetQueue,
+        CastSpell,
+        UseSkill,
+    }
+
+    // One configurable binding. Key/Mouse stored as ints (the int-enum
+    // serialization convention this file already uses): Key = (int)Keys (0 =
+    // unbound), Mouse = (int)ClassicUO.Input.MouseButtonType (0 = unbound; only
+    // the X buttons are bindable), Wheel = 1 up / -1 down / 0 none. The three are
+    // mutually exclusive. OnRelease picks the trigger edge for key/button edge
+    // actions (ignored for wheel, which is a momentary tick).
+    internal sealed class Hotkey
+    {
+        public HotkeyAction Action { get; set; }
+        public int Key { get; set; }
+        public int Mouse { get; set; }
+        public int Wheel { get; set; }
+        public bool Ctrl { get; set; }
+        public bool Shift { get; set; }
+        public bool Alt { get; set; }
+        public bool OnRelease { get; set; }
+        // Action parameter: CastSpell = server cast id, UseSkill = skill index.
+        public int Param { get; set; }
+    }
     // ECS per-character profile. Read by gump plugins via Res<Profile>. Field
     // names + defaults mirror the legacy Profile (src/ClassicUO.Client/
     // Configuration/Profile.cs) so a future profile.json load can deserialize
@@ -167,6 +220,41 @@ namespace ClassicUO.Configuration
         public bool DisableTabBtn { get; set; }
         public bool DisableCtrlQWBtn { get; set; }
         public bool DisableAutoMove { get; set; }
+
+        // Configurable hotkeys (the Options "Hotkeys" page). Seeded with the
+        // classic defaults; HotkeyPlugin dispatches them and PlayerMovementPlugin
+        // reads the walk bindings. Supersedes the dead Disable*Btn flags above.
+        public List<Hotkey> Hotkeys { get; set; } = DefaultHotkeys();
+
+        private static List<Hotkey> DefaultHotkeys() => new()
+        {
+            new Hotkey { Action = HotkeyAction.ToggleWar,       Key = (int)Keys.Tab },
+            new Hotkey { Action = HotkeyAction.WalkNorth,       Key = (int)Keys.Up },
+            new Hotkey { Action = HotkeyAction.WalkSouth,       Key = (int)Keys.Down },
+            new Hotkey { Action = HotkeyAction.WalkEast,        Key = (int)Keys.Right },
+            new Hotkey { Action = HotkeyAction.WalkWest,        Key = (int)Keys.Left },
+            new Hotkey { Action = HotkeyAction.ChatHistoryPrev, Key = (int)Keys.Q, Ctrl = true },
+            new Hotkey { Action = HotkeyAction.ChatHistoryNext, Key = (int)Keys.W, Ctrl = true },
+            new Hotkey { Action = HotkeyAction.AllNames,        Key = (int)Keys.LeftShift },
+            new Hotkey { Action = HotkeyAction.TargetSelf,      Key = (int)Keys.F1 },
+            new Hotkey { Action = HotkeyAction.LastTarget,      Key = (int)Keys.F2 },
+            new Hotkey { Action = HotkeyAction.OpenPaperdoll,   Key = (int)Keys.F3 },
+            new Hotkey { Action = HotkeyAction.OpenJournal,     Key = (int)Keys.F4 },
+            new Hotkey { Action = HotkeyAction.OpenSkills,      Key = (int)Keys.F5 },
+            new Hotkey { Action = HotkeyAction.OpenWorldMap,    Key = (int)Keys.F6 },
+            new Hotkey { Action = HotkeyAction.OpenMinimap,     Key = (int)Keys.F7 },
+            new Hotkey { Action = HotkeyAction.OpenBackpack,    Key = (int)Keys.F8 },
+            new Hotkey { Action = HotkeyAction.OpenStatus,      Key = (int)Keys.F9 },
+            new Hotkey { Action = HotkeyAction.OpenBuffs,       Key = (int)Keys.F10 },
+            new Hotkey { Action = HotkeyAction.OpenCombatBook,  Key = (int)Keys.F11 },
+            new Hotkey { Action = HotkeyAction.OpenOptions,     Key = (int)Keys.F12 },
+            new Hotkey { Action = HotkeyAction.UseLastObject },
+            new Hotkey { Action = HotkeyAction.ToggleAlwaysRun },
+            new Hotkey { Action = HotkeyAction.OpenDoor },
+            new Hotkey { Action = HotkeyAction.CancelTarget },
+            new Hotkey { Action = HotkeyAction.ClearTargetQueue },
+            new Hotkey { Action = HotkeyAction.Logout },
+        };
 
         // --- drag select ---
         public bool EnableDragSelect { get; set; }

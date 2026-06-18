@@ -2346,6 +2346,40 @@ namespace ClassicUO.Network
             writer.Dispose();
         }
 
+        // Auto-open-doors (legacy Send_OpenDoor): 0x12 general command 0x58
+        // ("open door in facing direction").
+        public static void Send_OpenDoor(this NetClient socket)
+        {
+            const byte ID = 0x12;
+
+            int length = socket.PacketsTable.GetPacketLength(ID);
+
+            var writer = new StackDataWriter(length < 0 ? 64 : length);
+
+            writer.WriteUInt8(ID);
+
+            if (length < 0)
+            {
+                writer.WriteZero(2);
+            }
+
+            writer.WriteUInt8(0x58);
+            writer.WriteUInt8(0x00);
+
+            if (length < 0)
+            {
+                writer.Seek(1, SeekOrigin.Begin);
+                writer.WriteUInt16BE((ushort)writer.BytesWritten);
+            }
+            else
+            {
+                writer.WriteZero(length - writer.BytesWritten);
+            }
+
+            socket.Send(writer.BufferWritten);
+            writer.Dispose();
+        }
+
         public static void Send_ClientViewRange(this NetClient socket, byte range)
         {
             const byte ID = 0xC8;

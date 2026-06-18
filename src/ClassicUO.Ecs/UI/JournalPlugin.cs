@@ -50,6 +50,31 @@ internal struct JournalEntry
     public ushort Hue;
     public JournalTextType TextType;
     public string TimeLabel; // "HH:mm" captured at append (legacy uses wall clock)
+    public byte Font;        // resolved at append (OverrideAllFonts / ForceUnicodeJournal)
+    public bool Ascii;       // font is an ASCII gump font (vs unicode)
+}
+
+// Resolve the journal text font from the profile (legacy JournalManager): default
+// is unicode font 1; OverrideAllFonts forces ChatFont + its unicode/ascii choice;
+// ForceUnicodeJournal forces unicode font 0 (takes precedence).
+internal static class JournalFont
+{
+    public static (byte Font, bool Ascii) Resolve(Profile p)
+    {
+        byte font = 1;
+        bool ascii = false;
+        if (p.OverrideAllFonts)
+        {
+            font = p.ChatFont;
+            ascii = !p.OverrideAllFontsIsUnicode;
+        }
+        if (p.ForceUnicodeJournal)
+        {
+            font = 0;
+            ascii = false;
+        }
+        return (font, ascii);
+    }
 }
 
 // Session-wide store. Accumulates regardless of whether the window is open
@@ -299,6 +324,7 @@ internal readonly struct JournalPlugin : IPlugin
                 _ => t.Hue,
             };
 
+            var (jFont, jAscii) = JournalFont.Resolve(profile.Value);
             var entry = new JournalEntry
             {
                 Text = t.Text,
@@ -306,6 +332,8 @@ internal readonly struct JournalPlugin : IPlugin
                 Hue = hue,
                 TextType = type,
                 TimeLabel = clock.Value.NowLabel(),
+                Font = jFont,
+                Ascii = jAscii,
             };
             store.Value.Append(entry);
             fileLog.Value.Append(profile.Value.SaveJournalToFile, entry);
@@ -326,6 +354,7 @@ internal readonly struct JournalPlugin : IPlugin
     {
         foreach (var m in msgs.Read())
         {
+            var (jFont, jAscii) = JournalFont.Resolve(profile.Value);
             var entry = new JournalEntry
             {
                 Text = m.Text,
@@ -333,6 +362,8 @@ internal readonly struct JournalPlugin : IPlugin
                 Hue = m.Hue,
                 TextType = JournalTextType.System,
                 TimeLabel = clock.Value.NowLabel(),
+                Font = jFont,
+                Ascii = jAscii,
             };
             store.Value.Append(entry);
             fileLog.Value.Append(profile.Value.SaveJournalToFile, entry);
@@ -603,7 +634,7 @@ internal readonly struct JournalPlugin : IPlugin
 
                 // Message text: "{Name}: {Text}" (or bare text), wrapped + hued.
                 var msg = string.IsNullOrEmpty(e.Name) ? (e.Text ?? string.Empty) : $"{e.Name}: {e.Text}";
-                var (tw, th) = UoFontRenderer.Measure(msg, font: 1, textCol, isHtml: false, 0, htmlBg: false);
+                var (tw, th) = UoFontRenderer.Measure(msg, e.Font, textCol, isHtml: false, 0, htmlBg: false, ascii: e.Ascii);
                 var textNode = commands.Spawn()
                     .Insert(new Node { Display = Display.Flex, Width = Val.Px(textCol), Height = Val.Px(Math.Max(th, 1)) })
                     .Insert(new UiCustom
@@ -613,10 +644,11 @@ internal readonly struct JournalPlugin : IPlugin
                             Kind = UOCustomKind.WrappedText,
                             Hue = Vector3.UnitZ,
                             Text = msg,
-                            TextFont = 1,
+                            TextFont = e.Font,
                             TextHue = e.Hue,
                             WrapWidth = textCol,
                             IsHtml = false,
+                            TextAscii = e.Ascii,
                         },
                     });
                 commands.AddChild(row.Id, textNode.Id);

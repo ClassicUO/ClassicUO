@@ -70,6 +70,13 @@ internal readonly struct TextOverheadPlugin : IPlugin
             var copyText = text;
             if (text.MessageType == MessageType.Party)
                 copyText.Hue = profile.Value.PartyMessageHue;
+            // OverrideAllFonts (legacy MessageManager): force every overhead line
+            // to the profile's ChatFont + unicode/ascii choice.
+            if (profile.Value.OverrideAllFonts)
+            {
+                copyText.Font = profile.Value.ChatFont;
+                copyText.IsUnicode = profile.Value.OverrideAllFontsIsUnicode;
+            }
             copyText.Time = time.Value.Total + TimeToLive(profile.Value, in text);
 
             textOverHeadManager.Value.Append(copyText);

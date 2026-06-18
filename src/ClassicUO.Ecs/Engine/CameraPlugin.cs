@@ -13,7 +13,7 @@ internal readonly struct CameraPlugin : IPlugin
     public void Build(App app)
     {
         var updateCameraFn = UpdateCamera;
-        var initZoomFn = InitCameraZoom;
+        var initZoomFn = InitCamera;
         var applyBoundsFn = ApplyCameraBounds;
         var maximizeOnEnterFn = MaximizeOnEnterGameScreen;
         var watchDpiFn = WatchDpiChange;
@@ -50,6 +50,18 @@ internal readonly struct CameraPlugin : IPlugin
             // game state — borderless applies on the login screen too.
             .AddSystem(borderlessFn)
             .InStage(Stage.First)
+            .Build()
+
+            // ReduceFPSWhenInactive: this app drives its own loop (while(true)
+            // app.Update()), so FNA's InactiveSleepTime never fires — throttle by
+            // sleeping at frame end when the window is unfocused. ~5 FPS: enough
+            // to keep input/focus responsive, big GPU/CPU saving in the tray.
+            .AddSystem((Res<UoGame> game, Res<Profile> profile) =>
+            {
+                if (profile.Value.ReduceFPSWhenInactive && !game.Value.IsActive)
+                    System.Threading.Thread.Sleep(200);
+            })
+            .InStage(Stage.Last)
             .Build()
 
             .AddSystem(updateCameraFn)
@@ -118,11 +130,20 @@ internal readonly struct CameraPlugin : IPlugin
             game.Value.MaximizeWindow();
     }
 
-    // Mirror main's GameScene.Load: world entry starts at the profile scale.
-    // OnEnter only — wheel/ctrl zoom moves it from here each frame.
-    private static void InitCameraZoom(Res<Camera> camera, Res<Profile> profile)
+    // Mirror main's GameScene.Load: world entry starts at the profile scale +
+    // the profile viewport bounds. OnEnter only — wheel/ctrl zoom moves the zoom
+    // and the border drag / resize handle (GameScreenPlugin) own camera.Bounds
+    // from here on (so the viewport stays movable). GameWindowFullSize, if set,
+    // is taken over live by ApplyCameraBounds next frame.
+    private static void InitCamera(Res<Camera> camera, Res<Profile> profile)
     {
         camera.Value.Zoom = profile.Value.DefaultScale;
+        if (!profile.Value.GameWindowFullSize)
+            camera.Value.Bounds = new(
+                profile.Value.GameWindowPosition.X,
+                profile.Value.GameWindowPosition.Y,
+                profile.Value.GameWindowSize.X,
+                profile.Value.GameWindowSize.Y);
     }
 
     // Apply the borderless-window profile flag on change (Local sentinel: 0 =
@@ -135,38 +156,45 @@ internal readonly struct CameraPlugin : IPlugin
         applied.Value = want;
     }
 
-    // Camera bounds in LOGICAL pixels (after DpiScale), recomputed every frame.
-    // GameWindowFullSize fills the whole backbuffer (minus the top-bar strip)
-    // regardless of maximize state — legacy resizes the WorldViewportGump to the
-    // full window on every resize/maximize, not only when maximized. Otherwise
-    // position/size come from the profile. Live so an options toggle or a window
-    // resize applies immediately (and so wheel-zoom's bounds hit-test is correct).
+    // GameWindowFullSize fills the whole backbuffer, live, regardless of maximize
+    // state (legacy resizes the viewport to the full window on every resize). When
+    // it's OFF the viewport is owned by the border drag / resize handle
+    // (GameScreenPlugin mutates camera.Bounds), so this MUST NOT overwrite it each
+    // frame — doing so snapped the window back and made it un-movable. It only
+    // restores the profile bounds once, on the frame fullsize is turned off.
     private static void ApplyCameraBounds(
         Res<Camera> camera,
         Res<Profile> profile,
         Res<UoGame> game,
-        Res<GraphicsDevice> device
+        Res<GraphicsDevice> device,
+        Local<bool> wasFullSize
     )
     {
         if (profile.Value.GameWindowFullSize)
         {
-            // Fill the whole backbuffer — the top bar floats over the world
-            // (legacy resizes the viewport to the full window, no reservation).
+            // Fill the whole backbuffer — the top bar floats over the world.
             var dpi = game.Value.DpiScale;
             if (dpi <= 0f) dpi = 1f;
             var pp = device.Value.PresentationParameters;
             var logicalW = (int)(pp.BackBufferWidth / dpi);
             var logicalH = (int)(pp.BackBufferHeight / dpi);
             camera.Value.Bounds = new(0, 0, logicalW, logicalH);
+            wasFullSize.Value = true;
             return;
         }
 
-        camera.Value.Bounds = new(
-            profile.Value.GameWindowPosition.X,
-            profile.Value.GameWindowPosition.Y,
-            profile.Value.GameWindowSize.X,
-            profile.Value.GameWindowSize.Y
-        );
+        // Just left full-size → restore the manual viewport from the profile once.
+        if (wasFullSize.Value)
+        {
+            camera.Value.Bounds = new(
+                profile.Value.GameWindowPosition.X,
+                profile.Value.GameWindowPosition.Y,
+                profile.Value.GameWindowSize.X,
+                profile.Value.GameWindowSize.Y);
+            wasFullSize.Value = false;
+        }
+        // Otherwise leave camera.Bounds alone — the border drag / resize handle
+        // own it, and clobbering it here makes the game window un-movable.
     }
 
     private static void UpdateCamera(

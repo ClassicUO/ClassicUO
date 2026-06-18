@@ -26,6 +26,7 @@ internal readonly struct UseObjectPlugin : IPlugin
         Res<MouseContext> mouseContext,
         Res<SelectedEntity> selectedEntity,
         Res<NetClient> network,
+        ResMut<LastUsedObjectState> lastObj,
         Query<Data<NetworkSerial>> query,
         Query<Data<ContainerItemUI>> uiItemQ
     )
@@ -48,6 +49,9 @@ internal readonly struct UseObjectPlugin : IPlugin
         if (serial.IsValid())
         {
             network.Value.Send_DoubleClick(serial.Ref.Value);
+            // Remember it for the UseLastObject hotkey.
+            lastObj.Value.Has = true;
+            lastObj.Value.Serial = serial.Ref.Value;
         }
     }
 }

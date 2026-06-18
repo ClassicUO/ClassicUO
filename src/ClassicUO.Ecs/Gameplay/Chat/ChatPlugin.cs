@@ -323,6 +323,7 @@ internal readonly struct ChatPlugin : IPlugin
         Res<GameContext> gameCtx,
         Res<Settings> settings,
         Res<Profile> profile,
+        ResMut<ChatHistory> history,
         Query<Data<Text>> textQ)
     {
         var glyph = field.Value.Glyph;
@@ -331,6 +332,11 @@ internal readonly struct ChatPlugin : IPlugin
         var (_, t) = textRow;
         var text = t.Ref.Value ?? string.Empty;
         if (text.Length == 0) return;
+
+        // Record the sent line for the Ctrl+Q/W history-recall hotkeys; point the
+        // cursor past the end so the first "prev" recalls this line.
+        history.Value.Items.Add(text);
+        history.Value.Index = history.Value.Items.Count;
 
         var entries = fileManager.Value.Speeches.GetKeywords(text);
         // Hue from the profile (legacy GameActions.Say); font 3 is the wire

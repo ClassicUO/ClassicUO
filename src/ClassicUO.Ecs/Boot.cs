@@ -67,9 +67,11 @@ internal readonly struct CuoPlugin : IPlugin
         app.AddPlugin<GridContainerGumpPlugin>();
         app.AddPlugin<HouseCustomizationPlugin>();
         app.AddPlugin<TooltipPlugin>();
+        app.AddPlugin<DeathScreenPlugin>();
 
         app.AddPlugin<NetworkPlugin>();
         app.AddPlugin<GameplayPlugin>();
+        app.AddPlugin<HotkeyPlugin>();
         app.AddPlugin<AudioPlugin>();
         app.AddPlugin<RenderingPlugin>();
         // After RenderingPlugin: its WorldRenderingPlugin child registers the

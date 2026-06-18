@@ -18,6 +18,7 @@ using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Input;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using TinyEcs;
 using TinyEcs.Bevy;
 using TinyEcs.Bevy.UI;
@@ -135,9 +136,6 @@ internal readonly struct OptionsGumpPlugin : IPlugin
         // Hue (numbers-only editable value + swatch that opens the palette).
         void H(string label, Func<Profile, int> g, Action<Profile, int> s, string kw = "")
             => AddDef(new OptionDef { Label = label, Keywords = kw + " hue color", Kind = OptionKind.Hue, Min = 0, Max = 3000, Step = 1, GetI = g, SetI = s });
-        // Action (client-local feature launcher button).
-        void A(string label, Action<Commands, OptionsButtonParams> run, string kw = "")
-            => AddDef(new OptionDef { Label = label, Keywords = kw, Kind = OptionKind.Action, Run = run });
 
         Cat("General");
             Grp("Movement");
@@ -406,12 +404,6 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             Grp("Network");
                 T("KR equip/unequip packets", p => p.UseKrEquipUnequipPacket, (p, v) => p.UseKrEquipUnequipPacket = v, "network");
 
-        Cat("Debug");
-            Grp("Tools");
-                A("Open color picker", static (cmd, p) =>
-                    ColorPickerPlugin.Open(cmd, p.Assets.Value, p.Builder.Value, p.Files.Value.Hues,
-                        p.ZCounter.Value, p.Surface.Value, serial: 0, graphic: 0x0FAB), "dye hue test");
-
         return list.ToArray();
     }
 
@@ -424,6 +416,9 @@ internal readonly struct OptionsGumpPlugin : IPlugin
         var list = new List<string>();
         foreach (var o in opts)
             if (!list.Contains(o.Category)) list.Add(o.Category);
+        // Hotkeys has no s_options rows — its page is rendered specially in
+        // Rebuild from Profile.Hotkeys.
+        list.Add("Hotkeys");
         return list.ToArray();
     }
 
@@ -443,9 +438,17 @@ internal readonly struct OptionsGumpPlugin : IPlugin
         // Right-click close (UiMovable) despawns the window without going
         // through the X button — keep the state in sync or the rebuild system
         // would AddChild onto a dead container.
-        app.AddObserver((On<OnRemove<OptionsWindow>> trig, Res<OptionsUiState> state) =>
+        app.AddObserver((On<OnRemove<OptionsWindow>> trig, Res<OptionsUiState> state,
+            ResMut<HotkeyCapture> cap, Res<Profile> profile) =>
         {
             if (state.Value.Window == trig.EntityId) state.Value.Window = 0;
+            // Abort an in-progress hotkey recording (restore the snapshot) so the
+            // capture latch doesn't outlive the window and wedge dispatch off.
+            if (cap.Value.Index >= 0)
+            {
+                HotkeyPlugin.RestoreCapture(cap.Value, profile.Value);
+                cap.Value.Index = -1;
+            }
         });
 
         var pollSearchFn = PollSearch;
@@ -743,6 +746,8 @@ internal readonly struct OptionsGumpPlugin : IPlugin
         Commands commands,
         Res<OptionsUiState> stateRes,
         Res<Profile> profile,
+        Res<HotkeyCapture> capture,
+        Res<AssetsServer> assets,
         Res<UOFileManager> files,
         Query<Data<Node>, Filter<With<OptionsListItem>>> itemsQ,
         Query<Data<ScrollPosition>> scrollQ)
@@ -841,6 +846,20 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                 SpawnRow(commands, profile.Value, files.Value.Hues, state, def, i,
                     searching: true, parentId: state.Viewport, rowWidth: RowW, transparent: false);
             }
+            // Hotkeys aren't in s_options — match them by name/category/combo too.
+            var hk = profile.Value.Hotkeys;
+            if (hk != null)
+                for (var i = 0; i < hk.Count; i++)
+                    if (hk[i] != null && HotkeyMatches(hk[i], needle, assets.Value))
+                        SpawnHotkeyRow(commands, profile.Value, capture.Value, assets.Value, i, state.Viewport, RowW, searching: true);
+            return;
+        }
+
+        // Hotkeys page: not in s_options — rendered from Profile.Hotkeys with a
+        // key-capture box + pressed/released select per binding.
+        if (state.Category == "Hotkeys")
+        {
+            BuildHotkeysPage(commands, profile.Value, capture.Value, assets.Value, state);
             return;
         }
 
@@ -894,6 +913,637 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             .Id);
         commands.AddChild(viewport, cardId);
         return cardId;
+    }
+
+    // Display order of the hotkey category cards on the Hotkeys page. Spells and
+    // Skills are user-built lists (an "+ Add" button per card).
+    private static readonly string[] s_hotkeyCategories =
+        { "Movement", "Combat & Targeting", "Spells", "Skills", "Windows", "Chat", "General" };
+
+    private static string HotkeyCategory(HotkeyAction a) => a switch
+    {
+        HotkeyAction.WalkNorth or HotkeyAction.WalkSouth or HotkeyAction.WalkEast or HotkeyAction.WalkWest
+            or HotkeyAction.ToggleAlwaysRun or HotkeyAction.OpenDoor => "Movement",
+        HotkeyAction.ToggleWar or HotkeyAction.TargetSelf or HotkeyAction.LastTarget
+            or HotkeyAction.ClearTargetQueue or HotkeyAction.CancelTarget => "Combat & Targeting",
+        HotkeyAction.CastSpell => "Spells",
+        HotkeyAction.UseSkill => "Skills",
+        HotkeyAction.OpenPaperdoll or HotkeyAction.OpenBackpack or HotkeyAction.OpenJournal
+            or HotkeyAction.OpenSkills or HotkeyAction.OpenWorldMap or HotkeyAction.OpenMinimap
+            or HotkeyAction.OpenStatus or HotkeyAction.OpenBuffs or HotkeyAction.OpenCombatBook
+            or HotkeyAction.OpenOptions => "Windows",
+        HotkeyAction.ChatHistoryPrev or HotkeyAction.ChatHistoryNext => "Chat",
+        _ => "General",
+    };
+
+    // The display name shown on a hotkey row (spell/skill rows resolve their Param).
+    private static string HotkeyLabel(Hotkey hk, AssetsServer assets) => hk.Action switch
+    {
+        HotkeyAction.CastSpell => HotkeySpells.NameOf(hk.Param),
+        HotkeyAction.UseSkill => SkillName(assets, hk.Param),
+        _ => ActionName(hk.Action),
+    };
+
+    private static string SkillName(AssetsServer assets, int index)
+    {
+        var skills = assets.Skills?.Skills;
+        return skills != null && index >= 0 && index < skills.Count ? skills[index].Name : "(skill)";
+    }
+
+    // Search match for a hotkey row: display name, category, bound combo, or the
+    // literal "hotkeys" (so a search for "hotkey" surfaces them all).
+    private static bool HotkeyMatches(Hotkey hk, string needle, AssetsServer assets) =>
+        HotkeyLabel(hk, assets).Contains(needle, StringComparison.OrdinalIgnoreCase)
+        || HotkeyCategory(hk.Action).Contains(needle, StringComparison.OrdinalIgnoreCase)
+        || FormatCombo(hk).Contains(needle, StringComparison.OrdinalIgnoreCase)
+        || "hotkeys".Contains(needle, StringComparison.OrdinalIgnoreCase);
+
+    // The Hotkeys page: one card per category. Fixed-action cards spawn only when
+    // non-empty; the Spells/Skills cards always show (with an "+ Add" button) since
+    // they're user-built lists.
+    private static void BuildHotkeysPage(
+        Commands commands, Profile profile, HotkeyCapture capture, AssetsServer assets, OptionsUiState state)
+    {
+        var hotkeys = profile.Hotkeys;
+        if (hotkeys == null) return;
+        int cardInnerW = RowW - 24;
+        foreach (var cat in s_hotkeyCategories)
+        {
+            bool addable = cat == "Spells" || cat == "Skills";
+            ulong cardId = 0;
+            for (int i = 0; i < hotkeys.Count; i++)
+            {
+                if (hotkeys[i] == null || HotkeyCategory(hotkeys[i].Action) != cat) continue;
+                if (cardId == 0) cardId = SpawnCard(commands, state.Viewport, cat);
+                SpawnHotkeyRow(commands, profile, capture, assets, i, cardId, cardInnerW);
+            }
+            if (addable)
+            {
+                if (cardId == 0) cardId = SpawnCard(commands, state.Viewport, cat);
+                SpawnAddHotkeyButton(commands, cardId,
+                    cat == "Spells" ? HotkeyAction.CastSpell : HotkeyAction.UseSkill);
+            }
+        }
+    }
+
+    // "+ Add Spell" / "+ Add Skill" button at the bottom of those cards. Appends a
+    // new hotkey of that kind (defaulting to the first available entry).
+    private static void SpawnAddHotkeyButton(Commands commands, ulong cardId, HotkeyAction action)
+    {
+        var btn = commands.Spawn()
+            .Insert(new Node
+            {
+                Display = Display.Flex,
+                Width = Val.Px(140), Height = Val.Px(26),
+                JustifyContent = JustifyContent.Center, AlignItems = AlignItems.Center,
+            })
+            .Insert(new BackgroundColor(s_accent))
+            .Insert(new OptionsHover { Normal = s_accent, Hover = s_accentHover })
+            .Insert(BorderRadius.All(7))
+            .Insert(new Text(action == HotkeyAction.CastSpell ? "+ Add Spell" : "+ Add Skill"))
+            .Insert(new TextFont { FontId = 1, Size = 12 })
+            .Insert(new TextColor(s_textMain))
+            .Insert(Interaction.None)
+            .Insert<UiNoWindowDrag>();
+        var act = action;
+        btn.Observe((On<UiClick> _, ResMut<HotkeyCapture> cap, Res<Profile> p, Res<OptionsUiState> st, Res<AssetsServer> a) =>
+        {
+            if (cap.Value.Index >= 0) return; // not while recording
+            int param = act == HotkeyAction.CastSpell
+                ? (HotkeySpells.All.Length > 0 ? HotkeySpells.All[0].CastId : 0)
+                : FirstUsableSkill(a.Value);
+            p.Value.Hotkeys.Add(new Hotkey { Action = act, Param = param });
+            st.Value.Dirty = true;
+        });
+        commands.AddChild(cardId, btn.Id);
+    }
+
+    private static int FirstUsableSkill(AssetsServer assets)
+    {
+        var skills = assets.Skills?.Skills;
+        if (skills != null)
+            foreach (var s in skills)
+                if (s.HasAction) return s.Index;
+        return 0;
+    }
+
+    // Scrollable spell picker (grouped by book). Sets the hotkey's Param to the
+    // chosen server cast id.
+    private static void OpenSpellPicker(
+        Commands commands, OptionsUiState state, Profile profile, int hkIndex, ulong anchorId,
+        Query<Data<ComputedNode>> geomQ,
+        Query<Data<Node>, Filter<With<OptionsOverlay>>> overlays)
+    {
+        foreach (var (ent, _) in overlays) commands.Entity(ent.Ref).Despawn();
+        if (hkIndex < 0 || hkIndex >= profile.Hotkeys.Count) return;
+        if (!geomQ.TryGet(state.Window, out var winRow)) return;
+        var (_, wn) = winRow;
+
+        const int PanelW = 210, ItemH = 22, HeaderH = 20;
+        int contentH = 8 * (HeaderH + 2) + HotkeySpells.All.Length * (ItemH + 2) + 12;
+        ulong panelId = SpawnPickerPanel(commands, state,
+            wn.Ref.Position.X, wn.Ref.Position.Y, wn.Ref.Size.X, wn.Ref.Size.Y, anchorId, geomQ, PanelW, contentH);
+
+        var curBook = (SpellBookType)0xFF;
+        foreach (var e in HotkeySpells.All)
+        {
+            if (e.Book != curBook)
+            {
+                curBook = e.Book;
+                commands.AddChild(panelId, commands.Spawn()
+                    .Insert(new Node { Display = Display.Flex, AlignItems = AlignItems.Center, Width = Val.Px(PanelW - 14), Height = Val.Px(HeaderH) })
+                    .Insert(new Text(HotkeySpells.BookName(curBook).ToUpperInvariant()))
+                    .Insert(new TextFont { FontId = 1, Size = 11 })
+                    .Insert(new TextColor(s_accent))
+                    .Id);
+            }
+            var castId = e.CastId;
+            var idx = hkIndex;
+            var item = commands.Spawn()
+                .Insert(new Node { Display = Display.Flex, Width = Val.Px(PanelW - 14), Height = Val.Px(ItemH), JustifyContent = JustifyContent.Center, AlignItems = AlignItems.Center })
+                .Insert(new BackgroundColor(s_controlBg))
+                .Insert(new OptionsHover { Normal = s_controlBg, Hover = s_controlHover })
+                .Insert(BorderRadius.All(5))
+                .Insert(new Text(e.Name))
+                .Insert(new TextFont { FontId = 1, Size = 11 })
+                .Insert(new TextColor(s_textMain))
+                .Insert(Interaction.None)
+                .Insert<UiNoWindowDrag>();
+            item.Observe((On<UiClick> _, Commands cmd, Res<Profile> p, Res<OptionsUiState> st) =>
+            {
+                if (idx >= 0 && idx < p.Value.Hotkeys.Count) p.Value.Hotkeys[idx].Param = castId;
+                st.Value.Dirty = true;
+                cmd.Entity(panelId).Despawn();
+            });
+            commands.AddChild(panelId, item.Id);
+        }
+    }
+
+    // Scrollable usable-skill picker. Sets the hotkey's Param to the skill index.
+    private static void OpenSkillPicker(
+        Commands commands, OptionsUiState state, Profile profile, AssetsServer assets, int hkIndex, ulong anchorId,
+        Query<Data<ComputedNode>> geomQ,
+        Query<Data<Node>, Filter<With<OptionsOverlay>>> overlays)
+    {
+        foreach (var (ent, _) in overlays) commands.Entity(ent.Ref).Despawn();
+        if (hkIndex < 0 || hkIndex >= profile.Hotkeys.Count) return;
+        if (!geomQ.TryGet(state.Window, out var winRow)) return;
+        var (_, wn) = winRow;
+        var skills = assets.Skills?.Skills;
+        if (skills == null) return;
+
+        const int PanelW = 210, ItemH = 22;
+        int usable = 0;
+        foreach (var s in skills) if (s.HasAction) usable++;
+        int contentH = usable * (ItemH + 2) + 12;
+        ulong panelId = SpawnPickerPanel(commands, state,
+            wn.Ref.Position.X, wn.Ref.Position.Y, wn.Ref.Size.X, wn.Ref.Size.Y, anchorId, geomQ, PanelW, contentH);
+
+        foreach (var s in skills)
+        {
+            if (!s.HasAction) continue;
+            var useId = s.Index;
+            var idx = hkIndex;
+            var item = commands.Spawn()
+                .Insert(new Node { Display = Display.Flex, Width = Val.Px(PanelW - 14), Height = Val.Px(ItemH), JustifyContent = JustifyContent.Center, AlignItems = AlignItems.Center })
+                .Insert(new BackgroundColor(s_controlBg))
+                .Insert(new OptionsHover { Normal = s_controlBg, Hover = s_controlHover })
+                .Insert(BorderRadius.All(5))
+                .Insert(new Text(s.Name))
+                .Insert(new TextFont { FontId = 1, Size = 11 })
+                .Insert(new TextColor(s_textMain))
+                .Insert(Interaction.None)
+                .Insert<UiNoWindowDrag>();
+            item.Observe((On<UiClick> _, Commands cmd, Res<Profile> p, Res<OptionsUiState> st) =>
+            {
+                if (idx >= 0 && idx < p.Value.Hotkeys.Count) p.Value.Hotkeys[idx].Param = useId;
+                st.Value.Dirty = true;
+                cmd.Entity(panelId).Despawn();
+            });
+            commands.AddChild(panelId, item.Id);
+        }
+    }
+
+    // Shared scrollable overlay panel for the spell/skill pickers: anchored under
+    // the button, clamped inside the window, scrolls via the wheel (RouteWheel).
+    private static ulong SpawnPickerPanel(
+        Commands commands, OptionsUiState state,
+        float winX, float winY, float winW, float winH,
+        ulong anchorId, Query<Data<ComputedNode>> geomQ, int panelW, int contentH)
+    {
+        int maxH = Math.Max(120, (int)winH - 40);
+        int panelH = Math.Min(maxH, contentH);
+
+        float x = 6, y = 30;
+        if (geomQ.TryGet(anchorId, out var anchorRow))
+        {
+            var (_, an) = anchorRow;
+            x = an.Ref.Position.X - winX;
+            y = an.Ref.Position.Y - winY + an.Ref.Size.Y + 4;
+        }
+        if (y + panelH > winH - 6) y = Math.Max(6, winH - 6 - panelH);
+        if (x + panelW > winW - 6) x = Math.Max(6, winW - 6 - panelW);
+
+        var panel = commands.Spawn()
+            .Insert<OptionsOverlay>()
+            .Insert(new Node
+            {
+                Display = Display.Flex,
+                PositionType = PositionType.Absolute,
+                FlexDirection = FlexDirection.Column,
+                Left = Val.Px(x), Top = Val.Px(y),
+                Width = Val.Px(panelW), Height = Val.Px(panelH),
+                Padding = UiRect.All(5),
+                Gap = Val.Px(2),
+                Border = UiRect.All(1),
+                Overflow = Overflow.Scroll,
+            })
+            .Insert(new ScrollPosition())
+            .Insert(new BackgroundColor(new ClayColor(20, 21, 27, 254)))
+            .Insert(new BorderColor(s_panelBorder))
+            .Insert(BorderRadius.All(10))
+            .Insert(new BoxShadow { Color = s_shadow, OffsetX = 0, OffsetY = 8, BlurRadius = 32, SpreadRadius = 0 });
+        commands.AddChild(state.Window, panel.Id);
+        return panel.Id;
+    }
+
+    // One hotkey row. Idle: [label] [capture box] [pressed/released select].
+    // Recording: [label] [live combo box] [OK] [Cancel] — recording stays open
+    // until OK commits (with the duplicate check) or Cancel restores the snapshot.
+    private static void SpawnHotkeyRow(
+        Commands commands, Profile profile, HotkeyCapture capture, AssetsServer assets,
+        int hkIndex, ulong parentId, int rowWidth, bool searching = false)
+    {
+        const int LabelWHk = 150, GapW = 6, TriggerW = 92, OkW = 42, BtnGap = 4, CancelW = 60, RemoveW = 28;
+
+        var hk = profile.Hotkeys[hkIndex];
+        // Spell/skill rows: the label is a clickable picker button, and the
+        // trailing control is a remove (×) instead of pressed/released.
+        bool isMacro = hk.Action == HotkeyAction.CastSpell || hk.Action == HotkeyAction.UseSkill;
+        bool recording = capture.Index == hkIndex;
+        int captureW = recording ? 116 : 132;
+        int controlsW = recording ? (OkW + BtnGap + CancelW) : (isMacro ? RemoveW : TriggerW);
+        int contentW = rowWidth - 20;
+        int controlsTotal = captureW + GapW + controlsW;
+        // Search rows + macro rows give the label all the room left of the
+        // controls; fixed category rows use the fixed label column.
+        int labelW = (searching || isMacro) ? Math.Max(LabelWHk, contentW - controlsTotal) : LabelWHk;
+
+        // Search rows are flat pills tagged for the rebuild sweep; card rows are
+        // transparent and die with their card's cascade.
+        var rowBg = searching ? s_rowBg : new ClayColor(0, 0, 0, 0);
+        var row = commands.Spawn()
+            .Insert(new Node
+            {
+                Display = Display.Flex,
+                FlexDirection = FlexDirection.Row,
+                AlignItems = AlignItems.Center,
+                Width = Val.Px(rowWidth), Height = Val.Px(RowH),
+                Padding = new UiRect { Left = Val.Px(14), Right = Val.Px(12) },
+            })
+            .Insert(new BackgroundColor(rowBg))
+            .Insert(new OptionsHover { Normal = rowBg, Hover = s_rowHover })
+            .Insert(BorderRadius.All(8))
+            .Insert(Interaction.None)
+            .Insert<UiNoWindowDrag>();
+        if (searching)
+            row.Insert<OptionsListItem>();
+        commands.AddChild(parentId, row.Id);
+        var rowId = row.Id;
+
+        if (isMacro)
+        {
+            // Clickable name button — opens the spell / skill picker.
+            var name = HotkeyLabel(hk, assets);
+            var nameBtn = commands.Spawn()
+                .Insert(new Node
+                {
+                    Display = Display.Flex,
+                    Width = Val.Px(labelW), Height = Val.Px(26),
+                    JustifyContent = JustifyContent.Center, AlignItems = AlignItems.Center,
+                    Padding = new UiRect { Left = Val.Px(8), Right = Val.Px(8) },
+                })
+                .Insert(new BackgroundColor(s_controlBg))
+                .Insert(new OptionsHover { Normal = s_controlBg, Hover = s_controlHover })
+                .Insert(BorderRadius.All(7))
+                .Insert(new Text(searching ? $"Hotkeys  ·  {name}" : name))
+                .Insert(new TextFont { FontId = 1, Size = 12 })
+                .Insert(new TextColor(s_textMain))
+                .Insert(Interaction.None)
+                .Insert<UiNoWindowDrag>();
+            var nameId = nameBtn.Id;
+            var pickIndex = hkIndex;
+            var pickAction = hk.Action;
+            nameBtn.Observe((
+                On<UiClick> _,
+                Commands cmd,
+                Res<Profile> p,
+                Res<OptionsUiState> st,
+                Res<AssetsServer> a,
+                Query<Data<ComputedNode>> geomQ,
+                Query<Data<Node>, Filter<With<OptionsOverlay>>> overlays) =>
+            {
+                if (pickAction == HotkeyAction.CastSpell)
+                    OpenSpellPicker(cmd, st.Value, p.Value, pickIndex, nameId, geomQ, overlays);
+                else
+                    OpenSkillPicker(cmd, st.Value, p.Value, a.Value, pickIndex, nameId, geomQ, overlays);
+            });
+            commands.AddChild(rowId, nameId);
+        }
+        else
+        {
+            var labelText = searching ? $"Hotkeys  ·  {ActionName(hk.Action)}" : ActionName(hk.Action);
+            commands.AddChild(rowId, commands.Spawn()
+                .Insert(new Node { Width = Val.Px(labelW), Height = Val.Auto })
+                .Insert(new Text(labelText))
+                .Insert(new TextFont { FontId = 1, Size = 13 })
+                .Insert(new TextColor(s_textMain))
+                .Id);
+        }
+
+        AddSpacer(commands, rowId, contentW - labelW - controlsTotal);
+
+        // Capture box. Idle: click arms recording. Recording: shows the live
+        // combo (or "press a key…" before the first press).
+        var capLabel = recording
+            ? (capture.HasPending ? FormatCombo(hk) : "press a key…")
+            : FormatCombo(hk);
+        var capBox = commands.Spawn()
+            .Insert(new Node
+            {
+                Display = Display.Flex,
+                Width = Val.Px(captureW), Height = Val.Px(26),
+                JustifyContent = JustifyContent.Center,
+                AlignItems = AlignItems.Center,
+            })
+            .Insert(new BackgroundColor(recording ? s_accent : s_controlBg))
+            .Insert(BorderRadius.All(7))
+            .Insert(new Text(capLabel))
+            .Insert(new TextFont { FontId = 1, Size = 12 })
+            .Insert(new TextColor(s_textMain))
+            .Insert(Interaction.None)
+            .Insert<UiNoWindowDrag>();
+        if (!recording)
+            capBox.Insert(new OptionsHover { Normal = s_controlBg, Hover = s_controlHover });
+        var armIndex = hkIndex;
+        capBox.Observe((On<UiClick> _, ResMut<HotkeyCapture> cap, Res<Profile> p, Res<OptionsUiState> st) =>
+        {
+            if (cap.Value.Index >= 0) return; // already recording one — finish it first
+            HotkeyPlugin.BeginCapture(cap.Value, p.Value, armIndex);
+            st.Value.Dirty = true;
+        });
+        commands.AddChild(rowId, capBox.Id);
+
+        AddSpacer(commands, rowId, GapW);
+
+        if (recording)
+        {
+            var ok = commands.Spawn()
+                .Insert(new Node
+                {
+                    Display = Display.Flex,
+                    Width = Val.Px(OkW), Height = Val.Px(26),
+                    JustifyContent = JustifyContent.Center, AlignItems = AlignItems.Center,
+                })
+                .Insert(new BackgroundColor(s_accent))
+                .Insert(new OptionsHover { Normal = s_accent, Hover = s_accentHover })
+                .Insert(BorderRadius.All(7))
+                .Insert(new Text("OK"))
+                .Insert(new TextFont { FontId = 1, Size = 12 })
+                .Insert(new TextColor(s_textMain))
+                .Insert(Interaction.None)
+                .Insert<UiNoWindowDrag>();
+            ok.Observe((
+                On<UiClick> _,
+                Commands cmd,
+                ResMut<HotkeyCapture> cap,
+                Res<Profile> p,
+                Res<OptionsUiState> st,
+                Res<GumpBuilder> b,
+                Res<AssetsServer> a,
+                Res<UiSurface> sf,
+                Res<UiZCounter> z) =>
+            {
+                int i = cap.Value.Index;
+                if (i < 0) return;
+                if (HotkeyPlugin.IsDuplicate(p.Value.Hotkeys, i))
+                {
+                    MessageBoxGumpPlugin.Open(cmd, b.Value, a.Value, sf.Value, z.Value,
+                        280, 140, "This key combination is already assigned to another hotkey.",
+                        MessageButtonType.OK);
+                    return; // keep recording — pick another combo or Cancel
+                }
+                cap.Value.Index = -1; // commit (the live binding stays)
+                st.Value.Dirty = true;
+            });
+            commands.AddChild(rowId, ok.Id);
+
+            AddSpacer(commands, rowId, BtnGap);
+
+            var cancel = commands.Spawn()
+                .Insert(new Node
+                {
+                    Display = Display.Flex,
+                    Width = Val.Px(CancelW), Height = Val.Px(26),
+                    JustifyContent = JustifyContent.Center, AlignItems = AlignItems.Center,
+                })
+                .Insert(new BackgroundColor(s_controlBg))
+                .Insert(new OptionsHover { Normal = s_controlBg, Hover = new ClayColor(196, 72, 72, 255) })
+                .Insert(BorderRadius.All(7))
+                .Insert(new Text("Cancel"))
+                .Insert(new TextFont { FontId = 1, Size = 12 })
+                .Insert(new TextColor(s_textMain))
+                .Insert(Interaction.None)
+                .Insert<UiNoWindowDrag>();
+            cancel.Observe((On<UiClick> _, ResMut<HotkeyCapture> cap, Res<Profile> p, Res<OptionsUiState> st) =>
+            {
+                if (cap.Value.Index >= 0)
+                    HotkeyPlugin.RestoreCapture(cap.Value, p.Value);
+                cap.Value.Index = -1;
+                st.Value.Dirty = true;
+            });
+            commands.AddChild(rowId, cancel.Id);
+        }
+        else if (isMacro)
+        {
+            // Remove this spell/skill hotkey.
+            var rm = commands.Spawn()
+                .Insert(new Node
+                {
+                    Display = Display.Flex,
+                    Width = Val.Px(RemoveW), Height = Val.Px(26),
+                    JustifyContent = JustifyContent.Center, AlignItems = AlignItems.Center,
+                })
+                .Insert(new BackgroundColor(s_controlBg))
+                .Insert(new OptionsHover { Normal = s_controlBg, Hover = new ClayColor(196, 72, 72, 255) })
+                .Insert(BorderRadius.All(7))
+                .Insert(new Text("X"))
+                .Insert(new TextFont { FontId = 1, Size = 12 })
+                .Insert(new TextColor(s_textMain))
+                .Insert(Interaction.None)
+                .Insert<UiNoWindowDrag>();
+            var rmIndex = hkIndex;
+            rm.Observe((On<UiClick> _, ResMut<HotkeyCapture> cap, Res<Profile> p, Res<OptionsUiState> st) =>
+            {
+                if (cap.Value.Index >= 0) return; // not while recording
+                if (rmIndex >= 0 && rmIndex < p.Value.Hotkeys.Count)
+                    p.Value.Hotkeys.RemoveAt(rmIndex);
+                st.Value.Dirty = true;
+            });
+            commands.AddChild(rowId, rm.Id);
+        }
+        else
+        {
+            // Pressed/released select (dropdown overlay, like the Cycle widget).
+            var trig = commands.Spawn()
+                .Insert(new Node
+                {
+                    Display = Display.Flex,
+                    Width = Val.Px(TriggerW), Height = Val.Px(26),
+                    JustifyContent = JustifyContent.Center,
+                    AlignItems = AlignItems.Center,
+                })
+                .Insert(new BackgroundColor(s_controlBg))
+                .Insert(new OptionsHover { Normal = s_controlBg, Hover = s_controlHover })
+                .Insert(BorderRadius.All(7))
+                .Insert(new Text((hk.OnRelease ? "Released" : "Pressed") + "  v"))
+                .Insert(new TextFont { FontId = 1, Size = 12 })
+                .Insert(new TextColor(s_textMain))
+                .Insert(Interaction.None)
+                .Insert<UiNoWindowDrag>();
+            var trigId = trig.Id;
+            var selIndex = hkIndex;
+            trig.Observe((
+                On<UiClick> _,
+                Commands cmd,
+                Res<Profile> p,
+                Res<OptionsUiState> st,
+                Query<Data<ComputedNode>> geomQ,
+                Query<Data<Node>, Filter<With<OptionsOverlay>>> overlays) =>
+                    OpenHotkeyTriggerOverlay(cmd, st.Value, p.Value, selIndex, trigId, geomQ, overlays));
+            commands.AddChild(rowId, trigId);
+        }
+    }
+
+    private static string ActionName(HotkeyAction a) => a switch
+    {
+        HotkeyAction.ToggleWar => "Toggle War",
+        HotkeyAction.WalkNorth => "Walk North",
+        HotkeyAction.WalkSouth => "Walk South",
+        HotkeyAction.WalkEast => "Walk East",
+        HotkeyAction.WalkWest => "Walk West",
+        HotkeyAction.ChatHistoryPrev => "Chat History Prev",
+        HotkeyAction.ChatHistoryNext => "Chat History Next",
+        HotkeyAction.AllNames => "All Names",
+        HotkeyAction.TargetSelf => "Target Self",
+        HotkeyAction.LastTarget => "Last Target",
+        HotkeyAction.UseLastObject => "Use Last Object",
+        HotkeyAction.ToggleAlwaysRun => "Toggle Always Run",
+        HotkeyAction.OpenDoor => "Open Door",
+        HotkeyAction.OpenBackpack => "Open Backpack",
+        HotkeyAction.OpenPaperdoll => "Open Paperdoll",
+        HotkeyAction.OpenJournal => "Open Journal",
+        HotkeyAction.OpenWorldMap => "Open World Map",
+        HotkeyAction.OpenMinimap => "Open Minimap",
+        HotkeyAction.OpenSkills => "Open Skills",
+        HotkeyAction.OpenStatus => "Open Status",
+        HotkeyAction.OpenBuffs => "Open Buffs",
+        HotkeyAction.OpenCombatBook => "Open Combat Book",
+        HotkeyAction.OpenOptions => "Open Options",
+        HotkeyAction.Logout => "Logout",
+        HotkeyAction.CancelTarget => "Cancel Target",
+        HotkeyAction.ClearTargetQueue => "Clear Target Queue",
+        HotkeyAction.CastSpell => "Cast Spell",
+        HotkeyAction.UseSkill => "Use Skill",
+        _ => a.ToString(),
+    };
+
+    private static string FormatCombo(Hotkey hk)
+    {
+        if (hk.Key == 0 && hk.Mouse == 0 && hk.Wheel == 0) return "(unbound)";
+        var s = string.Empty;
+        if (hk.Ctrl) s += "Ctrl + ";
+        if (hk.Shift) s += "Shift + ";
+        if (hk.Alt) s += "Alt + ";
+        if (hk.Key != 0) s += ((Keys)hk.Key).ToString();
+        else if (hk.Wheel > 0) s += "Wheel Up";
+        else if (hk.Wheel < 0) s += "Wheel Down";
+        else s += "Mouse: " + ((MouseButtonType)hk.Mouse);
+        return s;
+    }
+
+    // Pressed/released dropdown for a hotkey, reusing the Cycle overlay style.
+    private static void OpenHotkeyTriggerOverlay(
+        Commands commands, OptionsUiState state, Profile profile, int hkIndex, ulong anchorId,
+        Query<Data<ComputedNode>> geomQ,
+        Query<Data<Node>, Filter<With<OptionsOverlay>>> overlays)
+    {
+        foreach (var (ent, _) in overlays) commands.Entity(ent.Ref).Despawn();
+        if (hkIndex < 0 || hkIndex >= profile.Hotkeys.Count) return;
+        if (!geomQ.TryGet(anchorId, out var anchorRow) || !geomQ.TryGet(state.Window, out var winRow))
+            return;
+        var (_, an) = anchorRow;
+        var (_, wn) = winRow;
+
+        string[] choices = { "Pressed", "Released" };
+        const int ItemH = 28, PanelW = 110;
+        int listH = choices.Length * ItemH + 10;
+        float x = an.Ref.Position.X - wn.Ref.Position.X;
+        float y = an.Ref.Position.Y - wn.Ref.Position.Y + an.Ref.Size.Y + 4;
+        if (y + listH > wn.Ref.Size.Y - 6) y = an.Ref.Position.Y - wn.Ref.Position.Y - listH - 4;
+
+        var panel = commands.Spawn()
+            .Insert<OptionsOverlay>()
+            .Insert(new Node
+            {
+                Display = Display.Flex,
+                PositionType = PositionType.Absolute,
+                FlexDirection = FlexDirection.Column,
+                Left = Val.Px(x), Top = Val.Px(y),
+                Width = Val.Px(PanelW), Height = Val.Px(listH),
+                Padding = UiRect.All(5),
+                Gap = Val.Px(3),
+                Border = UiRect.All(1),
+            })
+            .Insert(new BackgroundColor(new ClayColor(20, 21, 27, 254)))
+            .Insert(new BorderColor(s_panelBorder))
+            .Insert(BorderRadius.All(10))
+            .Insert(new BoxShadow { Color = s_shadow, OffsetX = 0, OffsetY = 8, BlurRadius = 32, SpreadRadius = 0 });
+        commands.AddChild(state.Window, panel.Id);
+        var panelId = panel.Id;
+
+        int current = profile.Hotkeys[hkIndex].OnRelease ? 1 : 0;
+        for (var i = 0; i < choices.Length; i++)
+        {
+            var idx = hkIndex;
+            var release = i == 1;
+            var sel = i == current;
+            var item = commands.Spawn()
+                .Insert(new Node
+                {
+                    Display = Display.Flex,
+                    Width = Val.Px(PanelW - 10), Height = Val.Px(ItemH - 2),
+                    JustifyContent = JustifyContent.Center,
+                    AlignItems = AlignItems.Center,
+                })
+                .Insert(new BackgroundColor(sel ? s_accent : s_controlBg))
+                .Insert(BorderRadius.All(6))
+                .Insert(new Text(choices[i]))
+                .Insert(new TextFont { FontId = 1, Size = 12 })
+                .Insert(new TextColor(s_textMain))
+                .Insert(Interaction.None)
+                .Insert<UiNoWindowDrag>()
+                .Observe((On<UiClick> _, Commands cmd, Res<Profile> p, Res<OptionsUiState> st) =>
+                {
+                    if (idx >= 0 && idx < p.Value.Hotkeys.Count)
+                        p.Value.Hotkeys[idx].OnRelease = release;
+                    st.Value.Dirty = true;
+                    cmd.Entity(panelId).Despawn();
+                });
+            if (!sel)
+                item.Insert(new OptionsHover { Normal = s_controlBg, Hover = s_controlHover });
+            commands.AddChild(panelId, item.Id);
+        }
     }
 
     private static void SpawnRow(

@@ -97,7 +97,7 @@ internal readonly struct GuiPlugin : IPlugin
         // Sync FNA surface size + pointer state into Bevy.UI before the layout stage.
         Action<Res<GraphicsDevice>, Res<UoGame>, ResMut<UiSurface>> syncSurfaceFn = SyncSurface;
         Action<Res<MouseContext>, Res<UoGame>, ResMut<UiPointer>> syncPointerFn = SyncPointer;
-        Action<Res<MouseContext>, ResMut<UiClayContext>> syncDeltaAndScrollFn = SyncDeltaAndScroll;
+        Action<Res<MouseContext>, Res<HotkeyCapture>, ResMut<UiClayContext>> syncDeltaAndScrollFn = SyncDeltaAndScroll;
         Action<Query<Data<UiCustom, UOButton, Interaction>>> updateUOButtonsStateFn = UpdateUOButtonsState;
         Action<Query<Data<UiCustom, UOCheckbox, TinyEcs.Bevy.UI.Widgets.Checkbox>>> updateUOCheckboxesFn = UpdateUOCheckboxes;
         Action<Query<Data<Text, MaskedText>>> syncMaskedTextFn = SyncMaskedText;
@@ -116,6 +116,7 @@ internal readonly struct GuiPlugin : IPlugin
         // Res<T> would skip scheduler write-tracking + risk parallel run.
         Action<
             ResMut<MouseContext>,
+            Res<HotkeyCapture>,
             ResMut<UiClayContext>,
             Res<AssetsServer>,
             Query<Data<ScrollPosition>>,
@@ -230,8 +231,19 @@ internal readonly struct GuiPlugin : IPlugin
 
     private static void SyncDeltaAndScroll(
         Res<MouseContext> mouseCtx,
+        Res<HotkeyCapture> capture,
         ResMut<UiClayContext> ctx)
     {
+        // While a hotkey is being recorded, the wheel belongs to capture — don't
+        // scroll the list under the cursor, and consume the notch so the camera
+        // (and the floating-scroll router) ignore it too.
+        if (capture.Value.Index >= 0)
+        {
+            mouseCtx.Value.ConsumeWheel();
+            ctx.Value.ScrollDelta = System.Numerics.Vector2.Zero;
+            ctx.Value.EnableDragScrolling = false;
+            return;
+        }
         // Frame delta now flows through the shared Res<Time> — Bevy.UI reads it
         // directly; only the scroll input still needs host feeding.
         ctx.Value.ScrollDelta = new System.Numerics.Vector2(0, mouseCtx.Value.Wheel * 3);
@@ -251,6 +263,7 @@ internal readonly struct GuiPlugin : IPlugin
     // scroll via ScrollDelta doesn't reach floating containers here).
     private static void RouteWheelToScrollable(
         ResMut<MouseContext> mouseCtx,
+        Res<HotkeyCapture> capture,
         ResMut<UiClayContext> ctx,
         Res<AssetsServer> assets,
         Query<Data<ScrollPosition>> scrollPosQ,
@@ -262,6 +275,8 @@ internal readonly struct GuiPlugin : IPlugin
     {
         var wheel = mouseCtx.Value.Wheel;
         if (Math.Abs(wheel) < 0.001f) return;
+        // Recording a hotkey — the wheel is being captured, not scrolled.
+        if (capture.Value.Index >= 0) return;
 
         var pos = mouseCtx.Value.Position;
 

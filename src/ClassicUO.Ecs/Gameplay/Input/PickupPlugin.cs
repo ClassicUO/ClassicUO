@@ -23,6 +23,7 @@ internal readonly struct PickupPlugin : IPlugin
         var latchFn = LatchPressTarget;
         var shouldFirePickupFn = ShouldFirePickup;
         var pickupEligibleFn = PickupTargetEligible;
+        var sallosFn = ResolveSallosEasyGrab;
 
         app
             .AddResource(new GrabbedItem())
@@ -34,6 +35,21 @@ internal readonly struct PickupPlugin : IPlugin
             // A press while targeting is the target click (TargetingPlugin owns
             // it) — don't latch a pickup candidate from it.
             .RunIf((Res<TargetingState> targeting) => !targeting.Value.IsTargeting)
+            .Build()
+
+            // SallosEasyGrab: with the press NOT on a pickable item, substitute
+            // the currently-hovered item into the latch so the pickup below grabs
+            // it (legacy GameSceneInputHandler easy-grab). Runs before PickupItem
+            // (registration order = run order) so its gate sees the substitution.
+            // Off by default → press-origin pickup only.
+            .AddSystem(sallosFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+            .RunIf((Res<TargetingState> targeting) => !targeting.Value.IsTargeting)
+            .RunIf((Res<SplitPrompt> split) => !split.Value.Open)
+            .RunIf((Res<GrabbedItem> grabbedItem) => grabbedItem.Value.Serial == 0)
+            .RunIf((Res<LeftPressLatch> latch) => !latch.Value.Consumed)
+            .RunIf((Res<Profile> p) => p.Value.SallosEasyGrab)
             .Build()
 
             .AddSystem(pickupItemFn)
@@ -279,32 +295,60 @@ internal readonly struct PickupPlugin : IPlugin
         Query<Data<NetworkSerial>, Filter<With<Items>>> q,
         Query<Data<ContainerItemUI>> uiItemQ,
         Query<Data<PaperdollEquipUI>> equipUiQ)
+        => IsPickable(latch.Value.Entity, entitiesMap.Value, q, uiItemQ, equipUiQ);
+
+    // True when `ent` is a liftable item: a world/ground item (NetworkSerial in
+    // the item range), or a container-slot / paperdoll-equipment UI resolving to
+    // one. Shared by the pickup gate and the SallosEasyGrab substitution.
+    private static bool IsPickable(
+        ulong ent,
+        NetworkEntitiesMap entitiesMap,
+        Query<Data<NetworkSerial>, Filter<With<Items>>> q,
+        Query<Data<ContainerItemUI>> uiItemQ,
+        Query<Data<PaperdollEquipUI>> equipUiQ)
     {
-        var ent = latch.Value.Entity;
         if (!ent.IsValid()) return false;
         if (q.TryGet(ent, out var serialRow))
         {
             var (_, ns) = serialRow;
             return SerialHelper.IsItem(ns.Ref.Value);
         }
-        // Container item UI selections resolve to their backing game entity via
-        // NetworkEntitiesMap. Pickup body re-resolves.
         if (uiItemQ.TryGet(ent, out var uiItemRow))
         {
             var (_, link) = uiItemRow;
             if (!SerialHelper.IsItem(link.Ref.Serial)) return false;
-            return entitiesMap.Value.TryGet(link.Ref.Serial, out var gameEnt)
-                && q.Contains(gameEnt);
+            return entitiesMap.TryGet(link.Ref.Serial, out var gameEnt) && q.Contains(gameEnt);
         }
-        // Paperdoll equipment overlay -> game entity by ItemSerial.
         if (equipUiQ.TryGet(ent, out var equipUiRow))
         {
             var (_, link) = equipUiRow;
             if (!SerialHelper.IsItem(link.Ref.ItemSerial)) return false;
-            return entitiesMap.Value.TryGet(link.Ref.ItemSerial, out var gameEnt)
-                && q.Contains(gameEnt);
+            return entitiesMap.TryGet(link.Ref.ItemSerial, out var gameEnt) && q.Contains(gameEnt);
         }
         return false;
+    }
+
+    // SallosEasyGrab (legacy GameSceneInputHandler): when the left press did NOT
+    // start on a pickable item, grab whatever pickable item the cursor is hovering
+    // now — substitute it into the latch so the normal pickup path lifts it. A
+    // press that DID land on an item keeps that origin (press-origin wins).
+    private static void ResolveSallosEasyGrab(
+        Res<MouseContext> m,
+        Res<SelectedEntity> sel,
+        Res<NetworkEntitiesMap> entitiesMap,
+        ResMut<LeftPressLatch> latch,
+        Query<Data<NetworkSerial>, Filter<With<Items>>> q,
+        Query<Data<ContainerItemUI>> uiItemQ,
+        Query<Data<PaperdollEquipUI>> equipUiQ)
+    {
+        if (!m.Value.IsPressed(Input.MouseButtonType.Left))
+            return;
+        if (IsPickable(latch.Value.Entity, entitiesMap.Value, q, uiItemQ, equipUiQ))
+            return;
+
+        var hover = sel.Value.Entity;
+        if (hover != 0 && IsPickable(hover, entitiesMap.Value, q, uiItemQ, equipUiQ))
+            latch.Value.Entity = hover;
     }
 
     // A readdress packet acks the pending drop if it touches the held item OR

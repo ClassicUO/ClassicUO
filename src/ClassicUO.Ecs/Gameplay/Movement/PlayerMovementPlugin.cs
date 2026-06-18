@@ -55,6 +55,7 @@ readonly struct PlayerMovementPlugin : IPlugin
     {
         var computeMovementStateFn = ComputeMovementState;
         var enqueuePlayerStepsFn = EnqueuePlayerSteps;
+        var enqueueKeyboardStepsFn = EnqueueKeyboardSteps;
         var parseAcceptedStepsFn = ParseAcceptedSteps;
         var parseDeniedStepsFn = ParseDeniedSteps;
 
@@ -117,6 +118,25 @@ readonly struct PlayerMovementPlugin : IPlugin
                    })
             // MobileSteps clamps at COUNT and overwrites the newest step when
             // full — don't issue into a full animation queue (see PathfinderPlugin).
+            .RunIf((Query<Data<MobileSteps>, With<Player>> q) =>
+            {
+                foreach ((_, var steps) in q)
+                    return steps.Ref.Index < MobileSteps.COUNT - 1;
+                return false;
+            })
+            .Build()
+
+            // Keyboard movement: the four walk hotkeys (default arrows). Held-key
+            // sibling of the mouse walk above — same TryStep engine + queue guards,
+            // facing from the held-key combo. Suspended while a hotkey is being
+            // recorded so binding an arrow doesn't also walk.
+            .AddSystem(enqueueKeyboardStepsFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+            .RunIf((Res<HotkeyCapture> cap) => cap.Value.Index < 0)
+            .RunIf((Res<KeyboardContext> kb, Res<Profile> profile) => AnyWalkHeld(profile.Value, kb.Value))
+            .RunIf((Res<PlayerStepsContext> playerRequestedSteps, Res<Time> time, Query<Data<MobileSteps>, With<Player>> q) =>
+                playerRequestedSteps.Value.LastStep < time.Value.Total && playerRequestedSteps.Value.Count < 5 && q.Count() > 0)
             .RunIf((Query<Data<MobileSteps>, With<Player>> q) =>
             {
                 foreach ((_, var steps) in q)
@@ -265,6 +285,78 @@ readonly struct PlayerMovementPlugin : IPlugin
             playerQuery
         );
     }
+
+    // Keyboard walk: facing from the held walk-hotkey combo (legacy
+    // GameScene arrow movement via DirectionFromKeyboardArrows). Same TryStep
+    // engine + queue guards as the mouse path; run flag from AlwaysRun.
+    static void EnqueueKeyboardSteps(
+        Res<MovementState> moveState,
+        Res<UOFileManager> fileManager,
+        Res<KeyboardContext> keyboard,
+        Res<NetClient> network,
+        ResMut<PlayerStepsContext> playerRequestedSteps,
+        Res<TerrainPlugin.ChunksLoadedMap> chunksLoaded,
+        Res<MultiCache> multiCache,
+        Query<Empty, With<HouseRevision>> qHouseRevision,
+        Query<Data<Children>> childrenQuery,
+        Query<Data<WorldPosition, Graphic, MobAnimation>, Filter<Without<IsTile>, Without<IsStatic>, Optional<MobAnimation>, Without<Player>>> othersQuery,
+        Single<Data<WorldPosition, Facing, MobileSteps, MobAnimation, ServerFlags>, With<Player>> playerQuery,
+        Query<Data<WorldPosition, Graphic, TileStretched>, Filter<With<IsTile>, Optional<TileStretched>>> tilesQuery,
+        Query<Data<WorldPosition, Graphic>, Filter<With<IsStatic>, Without<IsTile>, Without<MobAnimation>>> staticsQuery,
+        Res<Time> time,
+        Res<Profile> profile
+    )
+    {
+        bool up = WalkHeld(profile.Value, keyboard.Value, HotkeyAction.WalkNorth);
+        bool down = WalkHeld(profile.Value, keyboard.Value, HotkeyAction.WalkSouth);
+        bool right = WalkHeld(profile.Value, keyboard.Value, HotkeyAction.WalkEast);
+        bool left = WalkHeld(profile.Value, keyboard.Value, HotkeyAction.WalkWest);
+
+        var facing = ClassicUO.Game.Data.DirectionHelper.DirectionFromKeyboardArrows(up, down, left, right);
+        if (facing == Direction.NONE)
+            return;
+
+        TryStep(
+            facing,
+            profile.Value.AlwaysRun,
+            moveState.Value,
+            chunksLoaded.Value,
+            multiCache.Value,
+            qHouseRevision,
+            childrenQuery,
+            othersQuery,
+            tilesQuery,
+            staticsQuery,
+            fileManager.Value.TileData,
+            network.Value,
+            playerRequestedSteps,
+            time.Value.Total,
+            profile.Value,
+            playerQuery
+        );
+    }
+
+    private static bool WalkHeld(Profile profile, KeyboardContext kb, HotkeyAction action)
+    {
+        var list = profile.Hotkeys;
+        if (list == null)
+            return false;
+        foreach (var hk in list)
+        {
+            if (hk == null || hk.Action != action || hk.Key == 0)
+                continue;
+            var k = (Microsoft.Xna.Framework.Input.Keys)hk.Key;
+            if (kb.IsPressed(k) || kb.IsPressedOnce(k))
+                return true;
+        }
+        return false;
+    }
+
+    private static bool AnyWalkHeld(Profile profile, KeyboardContext kb)
+        => WalkHeld(profile, kb, HotkeyAction.WalkNorth)
+        || WalkHeld(profile, kb, HotkeyAction.WalkSouth)
+        || WalkHeld(profile, kb, HotkeyAction.WalkEast)
+        || WalkHeld(profile, kb, HotkeyAction.WalkWest);
 
     // One walk attempt toward `facing` from the player's end position:
     // walkability + diagonal rules + turn handling + step enqueue + walk
@@ -443,6 +535,25 @@ readonly struct PlayerMovementPlugin : IPlugin
 
             if (hasNoSteps)
                 mobSteps.Ref.Time = timeTotal;
+
+            // AutoOpenDoors (legacy PlayerMobile.TryOpenDoors): on a real step,
+            // if the tile ahead in the facing direction holds a door item, send
+            // the open-door command so the next step walks through it.
+            if (canMove && profile.AutoOpenDoors)
+            {
+                Walkability.GetNewXY((Direction)((byte)playerDir & 0x7), out var doorOx, out var doorOy);
+                int doorX = playerX + doorOx, doorY = playerY + doorOy;
+                foreach (var (_, oPos, oGfx, _) in othersQuery)
+                {
+                    if (oPos.Ref.X == doorX && oPos.Ref.Y == doorY
+                        && Math.Abs(oPos.Ref.Z - playerZ) <= 15
+                        && tileData.StaticData[oGfx.Ref.Value].IsDoor)
+                    {
+                        network.Send_OpenDoor();
+                        break;
+                    }
+                }
+            }
         }
 
         return canMove || !sameDir;
