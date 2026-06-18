@@ -71,6 +71,38 @@ internal sealed class JournalStore
     }
 }
 
+// Optional on-disk journal log (legacy JournalManager: SaveJournalToFile writes
+// every entry to Data/Client/JournalLogs/<timestamp>.txt). Lazily opens one file
+// per process on the first enabled append; AutoFlush so a crash keeps the log.
+// A failed open disables further attempts (no per-line throw spam).
+internal sealed class JournalFileLog
+{
+    private System.IO.StreamWriter _writer;
+    private bool _failed;
+
+    public void Append(bool enabled, in JournalEntry e)
+    {
+        if (!enabled || _failed)
+            return;
+
+        if (_writer == null)
+        {
+            try
+            {
+                var dir = System.IO.Path.Combine("Data", "Client", "JournalLogs");
+                System.IO.Directory.CreateDirectory(dir);
+                var file = System.IO.Path.Combine(dir, $"journal_{DateTime.Now:yyyyMMdd_HHmmss}.txt");
+                _writer = new System.IO.StreamWriter(file, append: true) { AutoFlush = true };
+            }
+            catch { _failed = true; return; }
+        }
+
+        var line = string.IsNullOrEmpty(e.Name) ? (e.Text ?? string.Empty) : $"{e.Name}: {e.Text}";
+        try { _writer.WriteLine($"[{e.TimeLabel}] {line}"); }
+        catch { _failed = true; }
+    }
+}
+
 // Marker + full UI state on the window root. Geometry (LayoutWindow) and content
 // (RebuildContent) are derived from these fields; observers flip them.
 internal struct JournalWindow
@@ -124,6 +156,7 @@ internal readonly struct JournalPlugin : IPlugin
     {
         app.AddResource(new JournalStore());
         app.AddResource(new JournalTimeProvider());
+        app.AddResource(new JournalFileLog());
 
         var captureFn = Capture;
         var captureSystemFn = CaptureSystem;
@@ -225,7 +258,8 @@ internal readonly struct JournalPlugin : IPlugin
         Res<JournalTimeProvider> clock,
         Res<Profile> profile,
         EventReader<TextOverheadEvent> texts,
-        ResMut<JournalStore> store)
+        ResMut<JournalStore> store,
+        ResMut<JournalFileLog> fileLog)
     {
         foreach (var t in texts.Read())
         {
@@ -265,14 +299,16 @@ internal readonly struct JournalPlugin : IPlugin
                 _ => t.Hue,
             };
 
-            store.Value.Append(new JournalEntry
+            var entry = new JournalEntry
             {
                 Text = t.Text,
                 Name = t.Name,
                 Hue = hue,
                 TextType = type,
                 TimeLabel = clock.Value.NowLabel(),
-            });
+            };
+            store.Value.Append(entry);
+            fileLog.Value.Append(profile.Value.SaveJournalToFile, entry);
         }
     }
 
@@ -283,19 +319,23 @@ internal readonly struct JournalPlugin : IPlugin
     // filter). Independent EventReader cursor; the system log keeps its own.
     private static void CaptureSystem(
         Res<JournalTimeProvider> clock,
+        Res<Profile> profile,
         EventReader<SystemMessageEvent> msgs,
-        ResMut<JournalStore> store)
+        ResMut<JournalStore> store,
+        ResMut<JournalFileLog> fileLog)
     {
         foreach (var m in msgs.Read())
         {
-            store.Value.Append(new JournalEntry
+            var entry = new JournalEntry
             {
                 Text = m.Text,
                 Name = "System",
                 Hue = m.Hue,
                 TextType = JournalTextType.System,
                 TimeLabel = clock.Value.NowLabel(),
-            });
+            };
+            store.Value.Append(entry);
+            fileLog.Value.Append(profile.Value.SaveJournalToFile, entry);
         }
     }
 

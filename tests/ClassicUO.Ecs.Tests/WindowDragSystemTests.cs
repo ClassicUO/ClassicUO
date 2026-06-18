@@ -34,6 +34,8 @@ public class WindowDragSystemTests
         app.AddResource(new NetClient());        // socketless ctor
         app.AddResource(new SelectedEntity());
         app.AddResource(new ServerGumpRegistry());
+        app.AddResource(new Configuration.Profile());           // Drag reads HoldAltToMoveGumps
+        app.AddResource<KeyboardContext>(new KeyboardContext(null));  // headless: empty snapshot, no Alt held
         app.AddPlugin<WindowDragPlugin>();       // registers UiZCounter + the 3 systems
         return app;
     }

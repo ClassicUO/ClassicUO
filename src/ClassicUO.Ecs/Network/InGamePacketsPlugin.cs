@@ -136,6 +136,7 @@ readonly struct InGamePacketsPlugin : IPlugin
             Res<NetworkEntitiesMap>,
             Res<NetClient>,
             Res<Settings>,
+            Res<Profile>,
             ResMut<GameContext>,
             ResMut<NextState<GameState>>>(OnEnterWorld);
 
@@ -184,6 +185,8 @@ readonly struct InGamePacketsPlugin : IPlugin
             Commands,
             Res<NetworkEntitiesMap>,
             Res<MultiCache>,
+            Res<NetClient>,
+            Res<Profile>,
             EventWriter<MobileQueuedStep>,
             InGameQueries>(OnUpdateItem);
 
@@ -191,18 +194,24 @@ readonly struct InGamePacketsPlugin : IPlugin
             Commands,
             Res<NetworkEntitiesMap>,
             Res<MultiCache>,
+            Res<NetClient>,
+            Res<Profile>,
             EventWriter<MobileQueuedStep>,
             InGameQueries>(OnUpdateItemSA);
 
         app.AddObserver<On<PacketReceived<OnUpdateObjectPacket_0xD3>>,
             Commands,
             Res<NetworkEntitiesMap>,
+            Res<NetClient>,
+            Res<Profile>,
             EventWriter<MobileQueuedStep>,
             InGameQueries>(OnUpdateObjectD3);
 
         app.AddObserver<On<PacketReceived<OnUpdateObjectAltPacket_0x78>>,
             Commands,
             Res<NetworkEntitiesMap>,
+            Res<NetClient>,
+            Res<Profile>,
             EventWriter<MobileQueuedStep>,
             InGameQueries>(OnUpdateObject78);
 
@@ -415,6 +424,7 @@ readonly struct InGamePacketsPlugin : IPlugin
         Res<NetworkEntitiesMap> entitiesMap,
         Res<NetClient> network,
         Res<Settings> settings,
+        Res<Profile> profile,
         ResMut<GameContext> gameCtx,
         ResMut<NextState<GameState>> state)
     {
@@ -431,7 +441,7 @@ readonly struct InGamePacketsPlugin : IPlugin
         network.Value.Send_SkillsRequest(packet.Serial);
 
         if (gameCtx.Value.ClientVersion >= ClientVersion.CV_70796)
-            network.Value.Send_ShowPublicHouseContent(true);
+            network.Value.Send_ShowPublicHouseContent(profile.Value.ShowHouseContent);
 
         gameCtx.Value.CenterX = packet.Position.X;
         gameCtx.Value.CenterY = packet.Position.Y;
@@ -780,13 +790,20 @@ readonly struct InGamePacketsPlugin : IPlugin
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
         Res<MultiCache> multiCache,
+        Res<NetClient> network,
+        Res<Profile> profile,
         EventWriter<MobileQueuedStep> mobileQueuedSteps,
         InGameQueries queries)
     {
         var packet = trig.Event.Packet;
 
         var finalGraphic = (ushort)(packet.Graphic + packet.GraphicIncrement);
+        bool created = !entitiesMap.Value.TryGet(commands, packet.Serial, out _);
         var ent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
+        // Legacy UpdateGameObject: a NEW corpse (graphic 0x2006) in range is
+        // auto single-clicked so its name label appears.
+        if (created && finalGraphic == 0x2006 && profile.Value.ShowNewCorpseNameIncoming)
+            network.Value.Send_ClickRequest(packet.Serial);
         ent.Insert(new Graphic() { Value = finalGraphic })
             .Insert(new Hue() { Value = packet.Hue })
             .Insert(new ServerFlags() { Value = packet.Flags });
@@ -848,13 +865,18 @@ readonly struct InGamePacketsPlugin : IPlugin
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
         Res<MultiCache> multiCache,
+        Res<NetClient> network,
+        Res<Profile> profile,
         EventWriter<MobileQueuedStep> mobileQueuedSteps,
         InGameQueries queries)
     {
         var packet = trig.Event.Packet;
 
         var finalGraphic = (ushort)(packet.Graphic + packet.GraphicIncrement);
+        bool created = !entitiesMap.Value.TryGet(commands, packet.Serial, out _);
         var ent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
+        if (created && finalGraphic == 0x2006 && profile.Value.ShowNewCorpseNameIncoming)
+            network.Value.Send_ClickRequest(packet.Serial);
         ent.Insert(new Graphic() { Value = finalGraphic })
             .Insert(new Hue() { Value = packet.Hue })
             .Insert(new Amount() { Value = packet.Amount })
@@ -1061,11 +1083,18 @@ readonly struct InGamePacketsPlugin : IPlugin
         On<PacketReceived<OnUpdateObjectPacket_0xD3>> trig,
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
+        Res<NetClient> network,
+        Res<Profile> profile,
         EventWriter<MobileQueuedStep> mobileQueuedSteps,
         InGameQueries queries)
     {
         var packet = trig.Event.Packet;
+        // Legacy UpdateGameObject: a NEW mobile in range is auto single-clicked
+        // so its name label appears. created == GetOrCreate would spawn fresh.
+        bool created = !entitiesMap.Value.TryGet(commands, packet.Serial, out _);
         var ent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
+        if (created && profile.Value.ShowNewMobileNameIncoming)
+            network.Value.Send_ClickRequest(packet.Serial);
         ent.Insert(new Graphic() { Value = packet.Graphic })
             .Insert(new Hue() { Value = packet.Hue })
             .Insert(new ServerFlags() { Value = packet.Flags })
@@ -1116,11 +1145,16 @@ readonly struct InGamePacketsPlugin : IPlugin
         On<PacketReceived<OnUpdateObjectAltPacket_0x78>> trig,
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
+        Res<NetClient> network,
+        Res<Profile> profile,
         EventWriter<MobileQueuedStep> mobileQueuedSteps,
         InGameQueries queries)
     {
         var packet = trig.Event.Packet;
+        bool created = !entitiesMap.Value.TryGet(commands, packet.Serial, out _);
         var ent = entitiesMap.Value.GetOrCreate(commands, packet.Serial);
+        if (created && profile.Value.ShowNewMobileNameIncoming)
+            network.Value.Send_ClickRequest(packet.Serial);
         ent.Insert(new Graphic() { Value = packet.Graphic })
             .Insert(new Hue() { Value = packet.Hue })
             .Insert(new ServerFlags() { Value = packet.Flags })

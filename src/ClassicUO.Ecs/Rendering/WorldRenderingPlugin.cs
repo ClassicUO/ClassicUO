@@ -16,6 +16,23 @@ using World = TinyEcs.World;
 
 namespace ClassicUO.Ecs;
 
+// Bundles render inputs that don't fit the Rendering system's 16-param budget:
+// the normal-multi membership query (forwarded to RenderStatics) plus the
+// keyboard + party state the feet aura needs.
+internal sealed class WorldAuraInputs : CompositeSystemParam
+{
+    public readonly Query<Empty, With<NormalMulti>> NormalMultis;
+    public readonly Res<KeyboardContext> Keyboard;
+    public readonly Res<PartyState> Party;
+
+    public WorldAuraInputs()
+    {
+        NormalMultis = Add(new Query<Empty, With<NormalMulti>>());
+        Keyboard = Add(new Res<KeyboardContext>());
+        Party = Add(new Res<PartyState>());
+    }
+}
+
 internal readonly struct WorldRenderingPlugin : IPlugin
 {
     public void Build(App app)
@@ -174,7 +191,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         Res<Time> time,
         Local<RenderScratch> scratch,
         Query<Data<Graphic, Hue>> qLayers,
-        Query<Empty, With<NormalMulti>> qNormalMultis,
+        WorldAuraInputs auraInputs,
         Single<Data<WorldPosition>, With<Player>> queryPlayer,
         Query<Data<WorldPosition, ScreenPosition, Graphic, TileStretched, AlphaFade>, Filter<With<IsTile>, Optional<TileStretched>>> queryTiles,
         Query<Data<WorldPosition, ScreenPosition, Graphic, Hue, Amount, NetworkSerial, Facing, AlphaFade, HouseVisionFade>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>, Optional<Amount>, Optional<NetworkSerial>, Optional<Facing>, Optional<HouseVisionFade>>> queryStatics,
@@ -342,8 +359,28 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         RenderStatics(
             selectedEntity, gameCtx, batch, assetsServer, fileManager,
             camera, profile.Value, in fx, calculateZ, ref workingZInfo, playerX, playerY, playerZ14,
-            backupZInfo, maxZ, center, mousePos, cameraBounds, qNormalMultis, queryStatics,
+            backupZInfo, maxZ, center, mousePos, cameraBounds, auraInputs.NormalMultis, queryStatics,
             lightOccluders, pendingLights);
+
+        // Feet-aura gating (legacy AuraManager.IsEnabled): mode 1 needs the
+        // player's warmode flag, mode 2 needs Ctrl+Shift held.
+        bool auraCtrlShift =
+            (auraInputs.Keyboard.Value.IsPressed(Keys.LeftControl) || auraInputs.Keyboard.Value.IsPressed(Keys.RightControl)) &&
+            (auraInputs.Keyboard.Value.IsPressed(Keys.LeftShift) || auraInputs.Keyboard.Value.IsPressed(Keys.RightShift));
+        bool auraWarmode = false;
+        if (profile.Value.AuraUnderFeetType == 1 && queryBodyOnly.TryGet(playerEnt.Ref, out var pbRow))
+        {
+            var (_, _, _, _, _, _, _, _, pFlags, _, _) = pbRow;
+            auraWarmode = pFlags.IsValid() && (pFlags.Ref.Value & Flags.WarMode) != 0;
+        }
+        bool auraFeet = AuraOverlay.FeetEnabled(profile.Value, auraWarmode, auraCtrlShift);
+
+        // Feet auras as a ground-decal pass: depth buffer OFF so the circle isn't
+        // clipped by the tile in front and doesn't occlude mobiles behind it. Runs
+        // after statics, before bodies — the bodies (drawn next, depth ON) paint
+        // over it, so it reads as "under the feet".
+        if (auraFeet)
+            RenderFeetAuras(batch, profile.Value, center, auraInputs.Party.Value, queryBodyOnly);
 
         RenderBodies(
             selectedEntity, batch, assetsServer, fileManager,
@@ -1245,6 +1282,36 @@ internal readonly struct WorldRenderingPlugin : IPlugin
     private static void RenderEffects()
     {
         // TODO: implement
+    }
+
+    // Feet-aura ground decal (legacy MobileView aura). Depth buffer OFF so the
+    // circle paints over the ground without being clipped by the tile in front
+    // and without writing depth (which would occlude mobiles behind it). Runs
+    // after statics, before bodies, so the bodies paint over it = under the feet.
+    private static void RenderFeetAuras(
+        Res<UltimaBatcher2D> batch,
+        Profile profile,
+        Vector2 center,
+        PartyState party,
+        Query<Data<WorldPosition, Graphic, Hue, NetworkSerial, ScreenPositionOffset, Facing, MobAnimation, MobileSteps, ServerFlags, Notoriety, AlphaFade>,
+            Filter<Without<ContainedInto>, Optional<Facing>, Optional<MobAnimation>, Optional<MobileSteps>, Optional<ServerFlags>, Optional<Notoriety>>> queryBodyOnly)
+    {
+        batch.Value.SetStencil(DepthStencilState.None);
+        foreach (var (_, pos, _, _, serial, offset, _, _, _, _, notoriety, _) in queryBodyOnly)
+        {
+            if (!SerialHelper.IsMobile(serial.Ref.Value))
+                continue;
+
+            var feet = pos.Ref.WorldToScreen() - center;
+            feet.X += 22f;
+            feet.Y += 22f;
+            feet += offset.Ref.Value;
+
+            var notoFlag = notoriety.IsValid() ? notoriety.Ref.Value : NotorietyFlag.Unknown;
+            ushort auraHue = AuraOverlay.FeetHue(profile, notoFlag, party.Contains(serial.Ref.Value));
+            AuraOverlay.DrawCircle(batch.Value, (int)feet.X, (int)feet.Y, auraHue);
+        }
+        batch.Value.SetStencil(DepthStencilState.Default);
     }
 
     private static void RenderBodies(

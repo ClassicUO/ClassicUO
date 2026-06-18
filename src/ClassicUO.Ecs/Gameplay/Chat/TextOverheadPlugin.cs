@@ -214,6 +214,7 @@ internal sealed class TextOverHeadManager
         public uint Serial;
         public Rectangle Rect;
         public bool Transparent;
+        public float Time;       // expiry clock (ms) — drives TextFading
     }
 
     // Per-frame scratch; Render is single-threaded (GuiRenderingPlugin).
@@ -227,6 +228,8 @@ internal sealed class TextOverHeadManager
         Query<Data<WorldPosition, ScreenPositionOffset>> query,
         MouseContext mouse,
         SelectedEntity selected,
+        float now,
+        bool textFading,
         IReadOnlyDictionary<uint, float> plateTops = null
     )
     {
@@ -309,6 +312,7 @@ internal sealed class TextOverHeadManager
                     Ent = entId,
                     Serial = t.Serial,
                     Rect = new Rectangle(x, dy, w, h),
+                    Time = t.Time,
                 });
             }
 
@@ -380,12 +384,25 @@ internal sealed class TextOverHeadManager
         {
             ref var e = ref entries[i];
 
-            var hue = i == hoverIdx && selected.Entity == e.Ent
-                ? (ushort)0x0035
-                : NormalizeHue(e.Hue);
-            // 0x7F/255 — same half-fade legacy applies to covered text.
+            bool isHover = i == hoverIdx && selected.Entity == e.Ent;
+            var hue = isHover ? (ushort)0x0035 : NormalizeHue(e.Hue);
+
+            // 0x7F/255 — same half-fade legacy applies to covered text. With
+            // TextFading on, alpha additionally ramps to 0 over the last second
+            // of life (legacy TextRenderer.CalculateAlpha). The hovered/topmost
+            // line stays fully opaque — legacy exempts the lifted text.
+            float alpha = e.Transparent ? 0x7F / 255f : 1f;
+            if (textFading && !isHover)
+            {
+                float delta = e.Time - now;   // ms of life remaining
+                if (delta >= 0f && delta <= 1000f)
+                {
+                    float fade = Math.Clamp(delta / 1000f, 0f, 1f);
+                    alpha = e.Transparent ? Math.Min(alpha, fade) : fade;
+                }
+            }
             UoFontRenderer.Draw(batch, e.Text, e.FontId, hue, e.Rect.X, e.Rect.Y, MaxWidth, 0f,
-                allowHtml: false, alpha: e.Transparent ? 0x7F / 255f : 1f);
+                allowHtml: false, alpha: alpha);
         }
     }
 

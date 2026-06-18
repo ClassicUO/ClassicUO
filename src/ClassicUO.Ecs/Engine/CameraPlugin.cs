@@ -13,9 +13,11 @@ internal readonly struct CameraPlugin : IPlugin
     public void Build(App app)
     {
         var updateCameraFn = UpdateCamera;
-        var setCameraBoundsFn = SetCameraBounds;
+        var initZoomFn = InitCameraZoom;
+        var applyBoundsFn = ApplyCameraBounds;
         var maximizeOnEnterFn = MaximizeOnEnterGameScreen;
         var watchDpiFn = WatchDpiChange;
+        var borderlessFn = ApplyWindowBorderless;
 
         app
             .AddResource(new Camera(0.5f, 2.5f, 0.1f) { Bounds = new(0, 0, 800, 600) })
@@ -24,11 +26,29 @@ internal readonly struct CameraPlugin : IPlugin
             .OnEnter(GameState.GameScreen)
             .Build()
 
-            .AddSystem(setCameraBoundsFn)
+            // Initial zoom from the profile on world entry (wheel/ctrl zoom then
+            // moves it from here — so this is OnEnter only, NOT per-frame).
+            .AddSystem(initZoomFn)
             .OnEnter(GameState.GameScreen)
             .Build()
 
+            // Viewport bounds recomputed EVERY frame so GameWindowFullSize /
+            // GameWindowSize / GameWindowPosition changes apply live (legacy
+            // resizes the WorldViewportGump on every window resize + on the
+            // options toggle). PreUpdate so UpdateCamera's wheel-zoom hit-test
+            // reads the fresh bounds the same frame.
+            .AddSystem(applyBoundsFn)
+            .InStage(Stage.PreUpdate)
+            .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+            .Build()
+
             .AddSystem(watchDpiFn)
+            .InStage(Stage.First)
+            .Build()
+
+            // Apply WindowBorderless on change (and once at boot). Not gated on
+            // game state — borderless applies on the login screen too.
+            .AddSystem(borderlessFn)
             .InStage(Stage.First)
             .Build()
 
@@ -98,31 +118,46 @@ internal readonly struct CameraPlugin : IPlugin
             game.Value.MaximizeWindow();
     }
 
-    // Camera bounds in LOGICAL pixels (after DpiScale). Position from
-    // profile.GameWindowPosition; size from profile.GameWindowSize unless
-    // GameWindowFullSize is on AND the window is maximized, in which case
-    // the viewport fills the backbuffer minus the TopBarGump reservation.
-    // Mirrors main's WorldViewportGump sizing path.
-    private static void SetCameraBounds(
+    // Mirror main's GameScene.Load: world entry starts at the profile scale.
+    // OnEnter only — wheel/ctrl zoom moves it from here each frame.
+    private static void InitCameraZoom(Res<Camera> camera, Res<Profile> profile)
+    {
+        camera.Value.Zoom = profile.Value.DefaultScale;
+    }
+
+    // Apply the borderless-window profile flag on change (Local sentinel: 0 =
+    // not yet applied, so the first frame syncs the OS window to the profile).
+    private static void ApplyWindowBorderless(Res<UoGame> game, Res<Profile> profile, Local<int> applied)
+    {
+        int want = profile.Value.WindowBorderless ? 1 : 2;
+        if (applied.Value == want) return;
+        game.Value.SetBorderless(profile.Value.WindowBorderless);
+        applied.Value = want;
+    }
+
+    // Camera bounds in LOGICAL pixels (after DpiScale), recomputed every frame.
+    // GameWindowFullSize fills the whole backbuffer (minus the top-bar strip)
+    // regardless of maximize state — legacy resizes the WorldViewportGump to the
+    // full window on every resize/maximize, not only when maximized. Otherwise
+    // position/size come from the profile. Live so an options toggle or a window
+    // resize applies immediately (and so wheel-zoom's bounds hit-test is correct).
+    private static void ApplyCameraBounds(
         Res<Camera> camera,
         Res<Profile> profile,
-        Res<Settings> settings,
         Res<UoGame> game,
         Res<GraphicsDevice> device
     )
     {
-        // Mirror main's GameScene.Load: world entry starts at the profile scale.
-        camera.Value.Zoom = profile.Value.DefaultScale;
-
-        if (settings.Value.IsWindowMaximized && profile.Value.GameWindowFullSize)
+        if (profile.Value.GameWindowFullSize)
         {
-            const int TopBarHeight = 27;
+            // Fill the whole backbuffer — the top bar floats over the world
+            // (legacy resizes the viewport to the full window, no reservation).
             var dpi = game.Value.DpiScale;
             if (dpi <= 0f) dpi = 1f;
             var pp = device.Value.PresentationParameters;
             var logicalW = (int)(pp.BackBufferWidth / dpi);
             var logicalH = (int)(pp.BackBufferHeight / dpi);
-            camera.Value.Bounds = new(0, TopBarHeight, logicalW, logicalH - TopBarHeight);
+            camera.Value.Bounds = new(0, 0, logicalW, logicalH);
             return;
         }
 
@@ -139,9 +174,19 @@ internal readonly struct CameraPlugin : IPlugin
         Res<Camera> camera,
         Res<MouseContext> mouseCtx,
         Res<KeyboardContext> keyboardCtx,
-        Res<Profile> profile
+        Res<Profile> profile,
+        Local<float> lastDefaultScale
     )
     {
+        // Live apply the "Default zoom" option: when the slider moves DefaultScale,
+        // push it to the camera now (wheel/ctrl zoom changes camera.Zoom but NOT
+        // DefaultScale, so this won't fight them — it only fires on a slider edit).
+        if (lastDefaultScale.Value != profile.Value.DefaultScale)
+        {
+            camera.Value.Zoom = profile.Value.DefaultScale;
+            lastDefaultScale.Value = profile.Value.DefaultScale;
+        }
+
         var mousePos = mouseCtx.Value.Position;
         var ctrl = keyboardCtx.Value.IsPressed(Keys.LeftControl) || keyboardCtx.Value.IsPressed(Keys.RightControl);
 

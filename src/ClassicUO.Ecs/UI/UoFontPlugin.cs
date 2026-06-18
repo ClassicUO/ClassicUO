@@ -267,11 +267,14 @@ internal static class UoFontRenderer
         float depth,
         bool border = false,
         uint unicodeBaked = 0,
-        float alpha = 1f)
+        float alpha = 1f,
+        float scale = 1f)
     {
         var atlas = UoFontRuntime.Atlas;
         if (atlas == null || layout.Info == null)
             return;
+
+        if (scale <= 0f) scale = 1f;
 
         // ASCII bakes the UO hue per pixel (the partial-hue gradient can't be
         // reproduced by a flat tint); HTML bakes the per-segment ARGB; overhead
@@ -340,8 +343,11 @@ internal static class UoFontRenderer
 
                 if (entry.IsValid)
                 {
-                    int dx = destX + w + entry.BearingX;
-                    int dy = destY + lineOffsY + entry.BearingY;
+                    // Placement is computed at native size then multiplied by the
+                    // draw scale, so glyphs stay aligned as they grow (the box +
+                    // wrap width were sized native * scale by the caller).
+                    int dx = destX + (int)((w + entry.BearingX) * scale);
+                    int dy = destY + (int)((lineOffsY + entry.BearingY) * scale);
 
                     // The ECS UI render target only honours SHADER_RGB_TINT (the
                     // neutral/mode-NONE Vector3 path renders white here). A glyph
@@ -363,7 +369,7 @@ internal static class UoFontRenderer
                         entry.UV,
                         drawTint,
                         0f,
-                        Vector2.One,
+                        new Vector2(scale),
                         depth);
                 }
 
@@ -424,7 +430,8 @@ internal static class UoFontRenderer
         int x, int y,
         float layerDepth,
         TEXT_ALIGN_TYPE align = TEXT_ALIGN_TYPE.TS_LEFT,
-        bool ascii = false)
+        bool ascii = false,
+        float scale = 1f)
     {
         if (string.IsNullOrEmpty(text) || UoFontRuntime.Fonts == null || UoFontRuntime.Atlas == null)
             return;
@@ -435,7 +442,7 @@ internal static class UoFontRenderer
         if (ascii)
         {
             var asciiLayout = GetLayout(text, font, ascii: true, isHtml: false, 0xFFFFFFFF, htmlBg: false, maxWidth, align);
-            DrawGlyphs(batcher, asciiLayout, font, isUnicode: false, isHtml: false, asciiHue: hue, XnaColor.White, x, y, layerDepth);
+            DrawGlyphs(batcher, asciiLayout, font, isUnicode: false, isHtml: false, asciiHue: hue, XnaColor.White, x, y, layerDepth, scale: scale);
             return;
         }
 
@@ -444,7 +451,7 @@ internal static class UoFontRenderer
         // hue — same flat-tint model as inline unicode labels. hue 0 → white.
         var tint = (!isHtml && hue != 0) ? HueToTint(hue) : XnaColor.White;
         var layout = GetLayout(text, font, ascii: false, isHtml, htmlStartColor, htmlBg, maxWidth, align);
-        DrawGlyphs(batcher, layout, font, isUnicode: true, isHtml, asciiHue: 0, tint, x, y, layerDepth);
+        DrawGlyphs(batcher, layout, font, isUnicode: true, isHtml, asciiHue: 0, tint, x, y, layerDepth, scale: scale);
     }
 
     // Legacy RenderedText unicode baked colour (MessageManager overhead path):

@@ -308,8 +308,15 @@ internal readonly struct TooltipPlugin : IPlugin
             if (w <= 0 || h <= 0)
                 return;
 
-            int boxW = w + Pad * 2;
-            int boxH = h + Pad * 2;
+            // TooltipDisplayZoom scales the rendered glyphs (legacy Tooltip zoom).
+            // Layout is measured native; the box + content node grow by the zoom
+            // and the WrappedText render multiplies each glyph by it.
+            float zoom = Math.Max(0.1f, profile.Value.TooltipDisplayZoom / 100f);
+            int contentW = Math.Max(1, (int)MathF.Round(w * zoom));
+            int contentH = Math.Max(1, (int)MathF.Round(h * zoom));
+
+            int boxW = contentW + Pad * 2;
+            int boxH = contentH + Pad * 2;
             var (bx, by) = ClampToScreen(pos, boxW, boxH, surface.Value);
 
             var root = commands.Spawn()
@@ -332,8 +339,8 @@ internal readonly struct TooltipPlugin : IPlugin
                     PositionType = PositionType.Absolute,
                     Left = Val.Px(Pad),
                     Top = Val.Px(Pad - 1),
-                    Width = Val.Px(w),
-                    Height = Val.Px(h),
+                    Width = Val.Px(contentW),
+                    Height = Val.Px(contentH),
                 })
                 .Insert(new UiCustom
                 {
@@ -355,6 +362,7 @@ internal readonly struct TooltipPlugin : IPlugin
                         HtmlStartColor = startColor,
                         HtmlBg = false,
                         TextCenter = true,
+                        TextScale = zoom,
                     }
                 });
             commands.AddChild(root.Id, label.Id);

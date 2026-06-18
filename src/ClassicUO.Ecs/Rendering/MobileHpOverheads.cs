@@ -332,6 +332,7 @@ internal sealed class WorldOverlayParams : CompositeSystemParam
     public readonly Res<MouseContext> Mouse;
     public readonly Res<SelectedEntity> Selected;
     public readonly Res<LightRenderTarget> Light;
+    public readonly Res<TargetingState> Targeting;
     public readonly Query<Data<WorldPosition, ScreenPositionOffset>> OverheadAnchors;
     public readonly Query<Data<NetworkSerial, WorldPosition, ScreenPositionOffset, Graphic, Hits, Notoriety, ServerFlags, EquipmentSlots>,
         Filter<Optional<ScreenPositionOffset>, Optional<Hits>, Optional<Notoriety>, Optional<ServerFlags>, Optional<EquipmentSlots>,
@@ -355,6 +356,7 @@ internal sealed class WorldOverlayParams : CompositeSystemParam
         Mouse = Add(new Res<MouseContext>());
         Selected = Add(new Res<SelectedEntity>());
         Light = Add(new Res<LightRenderTarget>());
+        Targeting = Add(new Res<TargetingState>());
         OverheadAnchors = Add(new Query<Data<WorldPosition, ScreenPositionOffset>>());
         Mobiles = Add(new Query<Data<NetworkSerial, WorldPosition, ScreenPositionOffset, Graphic, Hits, Notoriety, ServerFlags, EquipmentSlots>,
             Filter<Optional<ScreenPositionOffset>, Optional<Hits>, Optional<Notoriety>, Optional<ServerFlags>, Optional<EquipmentSlots>,

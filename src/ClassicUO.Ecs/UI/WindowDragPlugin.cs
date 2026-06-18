@@ -17,10 +17,12 @@
 // pattern dodges that race without needing observers.
 
 using System;
+using ClassicUO.Configuration;
 using ClassicUO.Ecs.Modding.Host;
 using ClassicUO.Input;
 using ClassicUO.Network;
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Input;
 using TinyEcs;
 using TinyEcs.Bevy;
 using TinyEcs.Bevy.UI;
@@ -194,6 +196,8 @@ internal readonly struct WindowDragPlugin : IPlugin
         Res<DragGate> gate,
         Res<AssetsServer> assets,
         Res<ForcedWindowDrag> forced,
+        Res<Profile> profile,
+        Res<KeyboardContext> keyboard,
         Local<DragAnchor> anchor,
         UiGesturePick pick,
         Query<Data<ContainerItemUI>> itemsQ,
@@ -259,6 +263,16 @@ internal readonly struct WindowDragPlugin : IPlugin
         if (mouse.Value.IsPressedOnce(MouseButtonType.Left))
         {
             if (gate.Value.Mode != ActiveDrag.None) return; // another drag owns the gesture
+
+            // Legacy UIManager.AttemptDragControl: with HoldAltToMoveGumps a gump
+            // only moves while Alt is held — a press without Alt latches nothing,
+            // so clicks pass through to in-window controls. (The forced-drag path
+            // above — a torn-off healthbar — is intentionally exempt.)
+            if (profile.Value.HoldAltToMoveGumps
+                && !keyboard.Value.IsPressed(Keys.LeftAlt)
+                && !keyboard.Value.IsPressed(Keys.RightAlt))
+                return;
+
             var pos = mouse.Value.Position;
 
             // Topmost element under the cursor. Checking ALL rendered elements

@@ -19,8 +19,9 @@
 // legacy OnMouseDown. Wheel zooms over the legacy zoom table. Marker files
 // (.csv / .usr / .map / .xml in Data/Client) load without icon textures —
 // icon-only markers draw as colored dots (CurLoader's SDL surface path is not
-// ported). Zones, multis (no live-house grid in ECS yet), goto/markers-manager
-// gumps and positional targeting are not ported.
+// ported). Zones, multis (no live-house grid in ECS yet) and goto/markers-
+// manager gumps are not ported. Positional targeting (WorldMapAllowPositional
+// Target) IS wired: a left-click during a target cursor sends a ground target.
 
 using System;
 using System.Collections.Generic;
@@ -28,6 +29,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using ClassicUO.Assets;
+using ClassicUO.Network;
 using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Input;
@@ -94,6 +96,7 @@ internal sealed class WorldMapRenderData
     public float Zoom = 1f;
     public int ZoomIndex;
     public bool Flip;
+    public ushort Font;   // profile.WorldMapFont — all map text (coords, names, labels)
     public bool ShowGrid;
     public bool ShowMarkers;
     public bool ShowMarkerNames;
@@ -190,6 +193,8 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
         var menuFn = MenuGesture;
         var refreshFn = RefreshMenu;
         var despawnFn = DespawnAll;
+        var topMostFn = KeepTopMost;
+        var positionalFn = PositionalTarget;
 
         bool InGame(Res<State<GameState>> s) => s.Value.Current == GameState.GameScreen;
 
@@ -213,7 +218,81 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
             .RunIf((Res<State<GameState>> s) => InGame(s)).Build();
         app.AddSystem(refreshFn).InStage(Stage.Update).SingleThreaded()
             .RunIf((Res<State<GameState>> s) => InGame(s)).Build();
+        // WorldMapAllowPositionalTarget: a left-click on the map during a server
+        // target cursor sends a ground target at that world coord. Must beat the
+        // generic targeting click resolver (Stage.First) so the map coord wins
+        // over the world pick under the cursor.
+        // Labeled (not .Before the targeting click) — WorldMapGumpPlugin is added
+        // before TargetingPlugin in Boot, so the targeting click system references
+        // THIS label with .After (a .Before here would crash: the target label
+        // isn't registered yet).
+        app.AddSystem(positionalFn).InStage(Stage.First).SingleThreaded()
+            .Label("cuo:worldmap:positional")
+            .RunIf((Res<State<GameState>> s) => InGame(s))
+            .RunIf((Res<TargetingState> t) => t.Value.IsTargeting)
+            .RunIf((Res<Profile> p) => p.Value.WorldMapAllowPositionalTarget)
+            .Build();
+        // WorldMapTopMost: hold the window in a reserved high z-band so other
+        // windows (which bump from a low counter) never cover it.
+        app.AddSystem(topMostFn).InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> s) => InGame(s))
+            .RunIf((Res<Profile> p) => p.Value.WorldMapTopMost).Build();
         app.AddSystem(despawnFn).OnExit(GameState.GameScreen).Build();
+    }
+
+    // Reserved z just under the tooltip (short.MaxValue) so a top-most world map
+    // sits above every normal window but still under the tooltip overlay.
+    private const int TopMostZ = short.MaxValue - 4;
+
+    private static void KeepTopMost(
+        Query<Data<GlobalZIndex>, Filter<With<WorldMapWindow>>> windowsQ)
+    {
+        foreach (var (_, z) in windowsQ)
+            if (z.Ref.Value != TopMostZ)
+                z.Ref.Value = TopMostZ;
+    }
+
+    // Left-click on a world-map canvas while a target cursor is up: convert the
+    // pixel to a world coord and send the ground target (legacy WorldMapGump
+    // positional target). Runs before the generic targeting resolver.
+    private static void PositionalTarget(
+        Res<MouseContext> mouse,
+        Res<Profile> profile,
+        ResMut<TargetingState> targeting,
+        Res<NetClient> net,
+        Res<WorldMapState> stateRes,
+        Query<Data<ComputedNode>, Filter<With<WorldMapCanvas>>> canvasQ,
+        Query<Data<WorldPosition>, Filter<With<Player>>> playerQ)
+    {
+        if (!mouse.Value.IsPressedOnce(MouseButtonType.Left))
+            return;
+
+        var pos = mouse.Value.Position;
+        foreach (var (_, bb) in canvasQ)
+        {
+            if (pos.X < bb.Ref.Position.X || pos.Y < bb.Ref.Position.Y ||
+                pos.X >= bb.Ref.Position.X + bb.Ref.Size.X || pos.Y >= bb.Ref.Position.Y + bb.Ref.Size.Y)
+                continue;
+
+            float zoom = WorldMapState.Zooms[Math.Clamp(profile.Value.WorldMapZoomIndex, 0, WorldMapState.Zooms.Length - 1)];
+            CanvasToWorld(
+                (int)(pos.X - bb.Ref.Position.X), (int)(pos.Y - bb.Ref.Position.Y),
+                (int)bb.Ref.Size.X, (int)bb.Ref.Size.Y,
+                stateRes.Value.CenterX, stateRes.Value.CenterY, zoom, profile.Value.WorldMapFlipMap,
+                out int worldX, out int worldY);
+
+            worldX = Math.Max(0, worldX);
+            worldY = Math.Max(0, worldY);
+
+            sbyte pz = 0;
+            foreach (var (_, ppos) in playerQ) { pz = ppos.Ref.Z; break; }
+
+            mouse.Value.Consume(MouseButtonType.Left);
+            net.Value.Send_TargetXYZ(0, (ushort)worldX, (ushort)worldY, pz,
+                targeting.Value.CursorId, targeting.Value.CursorType);
+            targeting.Value.Clear();
+            return;
+        }
     }
 
     // ── Window ────────────────────────────────────────────────────────────
@@ -855,6 +934,7 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
         d.Zoom = WorldMapState.Zooms[zoomIndex];
         d.ZoomIndex = zoomIndex;
         d.Flip = p.WorldMapFlipMap;
+        d.Font = (ushort)Math.Clamp(p.WorldMapFont, 0, 9);
         d.ShowGrid = p.WorldMapShowGridIfZoomed && d.Zoom >= 4f;
         d.ShowMarkers = p.WorldMapShowMarkers;
         d.ShowMarkerNames = p.WorldMapShowMarkersNames;
@@ -1592,8 +1672,8 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
         if (d.Map == null || d.Map.IsDisposed)
         {
             var msg = d.Loading ? "Please wait, I'm making the map file..." : "No map loaded";
-            var (mw, mh) = UoFontRenderer.MeasureFont(msg, NAME_FONT, 1000, allowHtml: false);
-            UoFontRenderer.Draw(b, msg, NAME_FONT, XnaColor.White,
+            var (mw, mh) = UoFontRenderer.MeasureFont(msg, d.Font, 1000, allowHtml: false);
+            UoFontRenderer.Draw(b, msg, d.Font, XnaColor.White,
                 gX + halfWidth - mw / 2, gY + halfHeight - mh / 2, mw + 4, z, allowHtml: false, border: true);
             b.ClipEnd();
             return;
@@ -1655,14 +1735,14 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
             DrawGrid(b, d, srcRect, gX, gY, halfWidth, halfHeight, z);
 
         if (!string.IsNullOrEmpty(d.TopText))
-            DrawTextLines(b, d.TopText, gX + 6, gY + 6, z);
+            DrawTextLines(b, d.TopText, gX + 6, gY + 6, z, d.Font);
 
         if (!string.IsNullOrEmpty(d.BottomText))
         {
             int lines = 1;
             foreach (var ch in d.BottomText)
                 if (ch == '\n') lines++;
-            DrawTextLines(b, d.BottomText, gX + 5, gY + gHeight - lines * 16 - 6, z);
+            DrawTextLines(b, d.BottomText, gX + 5, gY + gHeight - lines * 16 - 6, z, d.Font);
         }
 
         b.ClipEnd();
@@ -1712,7 +1792,7 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
         rot.X += gX + halfWidth;
         rot.Y += gY + halfHeight;
 
-        var (tw, th) = UoFontRenderer.MeasureFont(name, NAME_FONT, 600, allowHtml: false);
+        var (tw, th) = UoFontRenderer.MeasureFont(name, d.Font, 600, allowHtml: false);
         if (tw <= 0)
             return;
 
@@ -1727,7 +1807,7 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
         if (above > 0)
             DrawSolid(b, white, xx - 2, yy - 2, tw + 4, th + 4, new XnaColor(0, 0, 0, 128), z);
 
-        UoFontRenderer.Draw(b, name, NAME_FONT, color, xx, yy, tw + 4, z, allowHtml: false, border: true);
+        UoFontRenderer.Draw(b, name, d.Font, color, xx, yy, tw + 4, z, allowHtml: false, border: true);
     }
 
     private static void DrawHpBar(UltimaBatcher2D b, Texture2D white, int x, int y, int percent, float z)
@@ -1771,12 +1851,12 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
         return new Vector2(rot.X + gX + halfWidth, rot.Y + gY + halfHeight);
     }
 
-    private static void DrawTextLines(UltimaBatcher2D b, string text, int x, int y, float z)
+    private static void DrawTextLines(UltimaBatcher2D b, string text, int x, int y, float z, ushort font)
     {
         foreach (var line in text.Split('\n'))
         {
-            var (tw, _) = UoFontRenderer.MeasureFont(line, NAME_FONT, 1000, allowHtml: false);
-            UoFontRenderer.Draw(b, line, NAME_FONT, XnaColor.White, x, y, tw + 4, z, allowHtml: false, border: true);
+            var (tw, _) = UoFontRenderer.MeasureFont(line, font, 1000, allowHtml: false);
+            UoFontRenderer.Draw(b, line, font, XnaColor.White, x, y, tw + 4, z, allowHtml: false, border: true);
             y += 16;
         }
     }

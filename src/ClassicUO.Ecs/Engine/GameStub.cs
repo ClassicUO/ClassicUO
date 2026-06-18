@@ -77,6 +77,12 @@ internal sealed class UoGame : Microsoft.Xna.Framework.Game
         return (flags & SDL.SDL_WindowFlags.SDL_WINDOW_MAXIMIZED) != 0;
     }
 
+    // Toggle the OS window decoration (legacy GameController.SetWindowBorderless).
+    public void SetBorderless(bool borderless)
+    {
+        SDL.SDL_SetWindowBordered(Window.Handle, !borderless);
+    }
+
     // Whether the window can be drawn/presented this frame. FNA's own Game
     // loop skips Draw (via BeginDraw) while the device isn't presentable; this
     // app drives its own render loop (FnaPlugin), so it must check explicitly.

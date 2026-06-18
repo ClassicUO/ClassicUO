@@ -275,12 +275,21 @@ internal readonly struct AudioPlugin : IPlugin
         ResMut<AudioState> audio,
         Res<Time> time,
         Res<Profile> profile,
-        Res<Settings> settings)
+        Res<Settings> settings,
+        Res<UoGame> game)
     {
         var state = audio.Value;
 
         if (!state.CanReproduceAudio)
             return;
+
+        // Legacy AudioManager: a deactivated (unfocused) window mutes all audio
+        // unless ReproduceSoundsInBackground is set. MasterVolume gates the
+        // one-shot UOSound instances (SoundEffectInstance); music is a
+        // DynamicSoundEffectInstance unaffected by it, so it's muted via the
+        // explicit per-slot volume below.
+        bool muted = !game.Value.IsActive && !profile.Value.ReproduceSoundsInBackground;
+        Microsoft.Xna.Framework.Audio.SoundEffect.MasterVolume = muted ? 0f : 1f;
 
         bool runningWarMusic = state.CurrentMusic[1] != null;
 
@@ -296,6 +305,9 @@ internal readonly struct AudioPlugin : IPlugin
                 : (profile.Value.EnableMusic ? profile.Value.MusicVolume / AudioState.SOUND_DELTA : 0);
 
             if (i == 0 && runningWarMusic)
+                volume = 0;
+
+            if (muted)
                 volume = 0;
 
             if (volume >= -1 && volume <= 1f)

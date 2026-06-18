@@ -200,13 +200,18 @@ internal readonly struct GuiRenderingPlugin : IPlugin
 
                         var camBounds = camera.Value.Bounds;
                         b.ClipBegin(camBounds.X, camBounds.Y, camBounds.Width, camBounds.Height);
+                        // Mouse-target aura (cursor effect, on top). The feet
+                        // aura is drawn inside the world pass (RenderBodies) so
+                        // it sorts under the mobiles.
+                        AuraOverlay.RenderMouse(b, overlay.Profile.Value, overlay.Targeting.Value, overlay.Mouse.Value.Position);
                         // HP overheads first: speech (and everything painted
                         // after) sits on top of the bars/labels like legacy.
                         MobileHpOverheads.Render(b, assets.Value, overlay.Profile.Value,
                             gameCtx.Value, camera.Value, overlay.Mobiles, nameplates.Value.PlateTops);
                         overlay.Overhead.Value.Update(time.Value, networkEntities.Value, gumpAnchors);
                         overlay.Overhead.Value.Render(networkEntities.Value, b, gameCtx.Value, camera.Value, overlay.OverheadAnchors,
-                            overlay.Mouse.Value, overlay.Selected.Value, nameplates.Value.PlateTops);
+                            overlay.Mouse.Value, overlay.Selected.Value, time.Value.Total, overlay.Profile.Value.TextFading,
+                            nameplates.Value.PlateTops);
                         StaticNameOverheads.Render(b, assets.Value, gameCtx.Value, camera.Value, overlay.StaticLabels);
                         b.ClipEnd();
                     }
@@ -463,6 +468,11 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                 ref readonly var info = ref assets.Gumps.GetGump(custom.AssetId);
                 if (info.Texture != null)
                 {
+                    // Fit the sprite to the node box so a window sized native*scale
+                    // (container ContainersScale, large-gump) scales its background
+                    // too — not just its items. A native-sized node (every other
+                    // gump) gives scale 1: bb.Width == the sprite width, no-op.
+                    float gscale = info.UV.Width > 0 ? bb.Width / info.UV.Width : 1f;
                     // Snap to integer logical pixels. The RT is point-sampled at
                     // logical size and text / rect / image / ninepatch siblings
                     // all floor; drawing this sprite at fractional coords made it
@@ -475,19 +485,19 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                         custom.Hue,
                         0f,
                         Vector2.Zero,
-                        1f,
+                        gscale,
                         SpriteEffects.None,
                         cmd.ZIndex);
                     if (custom.Stacked)
                     {
                         b.Draw(
                             info.Texture,
-                            new Vector2((int)bb.X + 5, (int)bb.Y + 5),
+                            new Vector2((int)bb.X + (int)(5 * gscale), (int)bb.Y + (int)(5 * gscale)),
                             info.UV,
                             custom.Hue,
                             0f,
                             Vector2.Zero,
-                            1f,
+                            gscale,
                             SpriteEffects.None,
                             cmd.ZIndex);
                     }
@@ -648,7 +658,8 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                     (int)bb.Y,
                     cmd.ZIndex,
                     custom.TextCenter ? ClassicUO.Assets.TEXT_ALIGN_TYPE.TS_CENTER : ClassicUO.Assets.TEXT_ALIGN_TYPE.TS_LEFT,
-                    custom.TextAscii);
+                    custom.TextAscii,
+                    custom.TextScale);
                 // Caret bar on top of the glyphs (in-content so it scrolls/clips
                 // with the text inside a scroll box).
                 if (custom.CaretOn)

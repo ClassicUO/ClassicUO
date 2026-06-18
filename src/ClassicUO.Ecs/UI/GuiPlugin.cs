@@ -751,6 +751,10 @@ internal sealed class UOCustomRender
     public bool HtmlBg;
     // Center each wrapped line within WrapWidth (legacy tooltip uses TS_CENTER).
     public bool TextCenter;
+    // Draw-time glyph scale (legacy TooltipDisplayZoom). 1 = native atlas size;
+    // the layout is measured at native size and each glyph quad + its placement
+    // is multiplied by this at draw — no atlas re-bake. <=0 treated as 1.
+    public float TextScale = 1f;
     // Text-selection highlight range (char indices into Text) for an editable
     // WrappedText field. SelEnd > SelStart draws a per-visual-line highlight rect
     // behind the glyphs — set by TextEditPlugin only on the focused multiline

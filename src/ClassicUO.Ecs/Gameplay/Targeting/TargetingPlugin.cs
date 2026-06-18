@@ -13,8 +13,11 @@
 // shows. Object vs position is decided by whether the hit entity carries a
 // NetworkSerial (mobile/ground item) or is a land/static tile.
 
+using System;
 using System.Runtime.InteropServices;
 using ClassicUO.Assets;
+using ClassicUO.Configuration;
+using ClassicUO.Game.Data;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
 using Microsoft.Xna.Framework;
@@ -33,9 +36,16 @@ internal readonly struct TargetingPlugin : IPlugin
     // hue) so the reticle gets the same treatment as every other cursor state.
     // This plugin only owns the targeting STATE + click/cancel resolution.
 
+    // QuestionGump art (legacy Game/UI/Gumps/QuestionGump.cs) — reused for the
+    // client-side criminal-action confirm, same as LogoutGumpPlugin.
+    private const ushort QuestionBg = 0x0816;
+    private const ushort CancelN = 0x0817, CancelP = 0x0818, CancelO = 0x0819;
+    private const ushort OkN = 0x081A, OkP = 0x081B, OkO = 0x081C;
+
     public void Build(App app)
     {
         app.AddResource(new TargetingState());
+        app.AddResource(new CriminalConfirmState());
 
         // Server -> client target request. Cancel (type 3) just clears; any
         // other type arms targeting with the server's echoed cursor id/type.
@@ -80,20 +90,29 @@ internal readonly struct TargetingPlugin : IPlugin
         var cancelFn = CancelTarget;
         var previewFn = SyncMultiPreview;
         var previewExitFn = DespawnMultiPreviewOnExit;
+        var resetConfirmFn = ResetConfirmIfClosed;
 
         // Stage.First so the target/cancel consume their mouse button before the
         // pickup latch (also Stage.First, gated off while targeting) and before
         // PreUpdate's right-click gump-close / world movement see it.
+        // Both suspend while a criminal-action confirm gump is open so its
+        // Cancel/OK buttons own the click and the cursor stays armed underneath.
         app
             .AddSystem(cancelFn)
                 .InStage(Stage.First)
                 .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
                 .RunIf((Res<TargetingState> t) => t.Value.IsTargeting)
+                .RunIf((Res<CriminalConfirmState> c) => !c.Value.Open)
                 .Build()
             .AddSystem(clickFn)
                 .InStage(Stage.First)
+                .Label("cuo:targeting:click")
+                // WorldMap positional-target (added earlier in Boot) must resolve a
+                // map click before this generic resolver consumes it.
+                .After("cuo:worldmap:positional")
                 .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
                 .RunIf((Res<TargetingState> t) => t.Value.IsTargeting)
+                .RunIf((Res<CriminalConfirmState> c) => !c.Value.Open)
                 .RunIf((Res<MouseContext> m) => m.Value.IsPressedOnce(Input.MouseButtonType.Left))
                 .Build()
             // Not gated on IsTargeting — the !show branch despawns the ghost when
@@ -101,6 +120,12 @@ internal readonly struct TargetingPlugin : IPlugin
             .AddSystem(previewFn)
                 .InStage(Stage.Update)
                 .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
+                .Build()
+            // Safety net: if the confirm gump vanished by any path (right-click,
+            // scene exit) without resetting the flag, un-stick targeting.
+            .AddSystem(resetConfirmFn)
+                .InStage(Stage.First)
+                .RunIf((Res<CriminalConfirmState> c) => c.Value.Open)
                 .Build();
 
         app.AddSystem(previewExitFn).OnExit(GameState.GameScreen).Build();
@@ -228,13 +253,21 @@ internal readonly struct TargetingPlugin : IPlugin
     private const byte PreviewAlpha = 178;
 
     private static void ResolveTargetClick(
+        Commands commands,
         Res<MouseContext> mouse,
         ResMut<TargetingState> targeting,
         Res<SelectedEntity> selected,
         Res<NetClient> net,
-        Query<Data<NetworkSerial, Graphic, WorldPosition>> objectQ,
+        Res<Profile> profile,
+        Res<GumpBuilder> builder,
+        Res<AssetsServer> assets,
+        Res<UiSurface> surface,
+        Res<UiZCounter> zCounter,
+        ResMut<CriminalConfirmState> confirm,
+        Query<Data<NetworkSerial, Graphic, WorldPosition, Notoriety>, Filter<Optional<Notoriety>>> objectQ,
         Query<Data<Graphic, WorldPosition>, Filter<With<IsTile>>> landQ,
-        Query<Data<Graphic, WorldPosition>, Filter<With<IsStatic>>> staticQ)
+        Query<Data<Graphic, WorldPosition>, Filter<With<IsStatic>>> staticQ,
+        Query<Data<Notoriety>, Filter<With<Player>>> playerNotoQ)
     {
         // The click belongs to targeting whether or not it lands on something —
         // swallow it so a miss doesn't fall through to movement/pickup.
@@ -249,7 +282,21 @@ internal readonly struct TargetingPlugin : IPlugin
 
         if (objectQ.TryGet(ent, out var objectRow))
         {
-            var (_, serial, graphic, pos) = objectRow;
+            var (_, serial, graphic, pos, noto) = objectRow;
+            var targetNoto = noto.IsValid() ? noto.Ref.Value : NotorietyFlag.Unknown;
+
+            // Legacy TargetManager client-side query: when the player is innocent
+            // or ally, a harmful target on an innocent — or a beneficial target on
+            // a criminal/murderer/gray — pops a confirm before sending. The cursor
+            // stays armed under the gump; OK sends, Cancel sends TargetCancel.
+            if (ShouldConfirmCriminal(profile.Value, cursorType, targetNoto, playerNotoQ))
+            {
+                ShowCriminalConfirm(
+                    commands, builder.Value, assets.Value, surface.Value, zCounter.Value, confirm.Value,
+                    serial.Ref.Value, graphic.Ref.Value, pos.Ref.X, pos.Ref.Y, pos.Ref.Z);
+                return; // wait for the user's answer (click already consumed)
+            }
+
             net.Value.Send_TargetObject(
                 serial.Ref.Value, graphic.Ref.Value,
                 pos.Ref.X, pos.Ref.Y, pos.Ref.Z, cursorId, cursorType);
@@ -290,6 +337,85 @@ internal readonly struct TargetingPlugin : IPlugin
 
         net.Value.Send_TargetCancel(targeting.Value.Mode, targeting.Value.CursorId, targeting.Value.CursorType);
         targeting.Value.Clear();
+    }
+
+    // Legacy TargetManager: only query when the player is innocent/ally (a
+    // criminal/red has nothing to lose). Harmful-on-innocent or beneficial-on-
+    // criminal both risk flagging the player.
+    private static bool ShouldConfirmCriminal(
+        Profile profile, byte cursorType, NotorietyFlag target,
+        Query<Data<Notoriety>, Filter<With<Player>>> playerNotoQ)
+    {
+        var player = NotorietyFlag.Unknown;
+        foreach (var (_, pn) in playerNotoQ) { player = pn.Ref.Value; break; }
+        if (player != NotorietyFlag.Innocent && player != NotorietyFlag.Ally)
+            return false;
+
+        if (cursorType == (byte)TargetType.Harmful)
+            return profile.EnabledCriminalActionQuery && target == NotorietyFlag.Innocent;
+        if (cursorType == (byte)TargetType.Beneficial)
+            return profile.EnabledBeneficialCriminalActionQuery
+                && (target == NotorietyFlag.Criminal || target == NotorietyFlag.Murderer || target == NotorietyFlag.Gray);
+        return false;
+    }
+
+    // Client-side criminal-action confirm (legacy QuestionGump). The pending
+    // target (serial/graphic/coords) is captured immutably; the cursor id/type
+    // are read live from TargetingState when a button fires (the cursor stays
+    // armed under the gump). OK sends the target; Cancel sends TargetCancel.
+    internal static void ShowCriminalConfirm(
+        Commands commands, GumpBuilder builder, AssetsServer assets, UiSurface surface,
+        UiZCounter zCounter, CriminalConfirmState state,
+        uint serial, ushort graphic, ushort x, ushort y, sbyte z)
+    {
+        state.Open = true;
+
+        ref readonly var bg = ref assets.Gumps.GetGump(QuestionBg);
+        var size = new Vector2(bg.UV.Width, bg.UV.Height);
+        var pos = new Vector2(
+            MathF.Max(0, (surface.LogicalSize.X - size.X) * 0.5f),
+            MathF.Max(0, (surface.LogicalSize.Y - size.Y) * 0.5f));
+
+        var root = builder.SpawnUOGump(commands, QuestionBg, Vector3.UnitZ, pos, zCounter)
+            .Insert<CriminalConfirmGump>()
+            .Insert<UiNoRightClickClose>();
+        var rootId = root.Id;
+
+        var label = builder.AddLabel(commands, "This may flag\nyou criminal!", new Vector2(33, 30), new Vector2(165, 40))
+            .Insert(new TextFont { FontId = (ushort)(1 | UoFontRuntime.AsciiFlag), Size = 12 })
+            .Insert(new TextColor(UoFontRuntime.AsciiHue(0x0386)));
+        commands.AddChild(rootId, label.Id);
+
+        var cancel = builder.AddButton(commands, (CancelN, CancelP, CancelO), Vector3.UnitZ, new Vector2(37, 75));
+        cancel.Observe((On<UiClick> _, Commands cmd, Res<NetClient> net2, ResMut<TargetingState> t, ResMut<CriminalConfirmState> cc) =>
+        {
+            net2.Value.Send_TargetCancel(t.Value.Mode, t.Value.CursorId, t.Value.CursorType);
+            t.Value.Clear();
+            cc.Value.Open = false;
+            cmd.Entity(rootId).Despawn();
+        });
+        commands.AddChild(rootId, cancel.Id);
+
+        var ok = builder.AddButton(commands, (OkN, OkP, OkO), Vector3.UnitZ, new Vector2(100, 75));
+        ok.Observe((On<UiClick> _, Commands cmd, Res<NetClient> net2, ResMut<TargetingState> t, ResMut<CriminalConfirmState> cc) =>
+        {
+            net2.Value.Send_TargetObject(serial, graphic, x, y, z, t.Value.CursorId, t.Value.CursorType);
+            t.Value.Clear();
+            cc.Value.Open = false;
+            cmd.Entity(rootId).Despawn();
+        });
+        commands.AddChild(rootId, ok.Id);
+    }
+
+    // Un-stick the confirm flag if the gump went away by any path that didn't
+    // reset it (right-click consumed elsewhere, scene exit despawn).
+    private static void ResetConfirmIfClosed(
+        ResMut<CriminalConfirmState> confirm,
+        Query<Data<CriminalConfirmGump>> gumps)
+    {
+        foreach (var _ in gumps)
+            return;
+        confirm.Value.Open = false;
     }
 
     // Legacy TargetType (0x6C cursorType byte). Cancel is the "not targeting"
@@ -336,3 +462,10 @@ internal sealed class TargetingState
         MultiHue = 0;
     }
 }
+
+// Open while a client-side criminal-action confirm gump is up. Suspends the
+// targeting click/cancel resolvers so the gump's own buttons own the click.
+internal sealed class CriminalConfirmState { public bool Open; }
+
+// Marker on the confirm gump root (existence check for the un-stick safety net).
+internal struct CriminalConfirmGump;
