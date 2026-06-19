@@ -434,6 +434,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             {
                 foreach (var (ent, _) in q) cmd.Entity(ent.Ref).Despawn();
                 state.Value.Window = 0;
+                state.Value.Pages.Clear();
             };
         app.AddSystem(teardownFn).OnExit(GameState.GameScreen).Build();
 
@@ -443,7 +444,11 @@ internal readonly struct OptionsGumpPlugin : IPlugin
         app.AddObserver((On<OnRemove<OptionsWindow>> trig, Res<OptionsUiState> state,
             ResMut<HotkeyCapture> cap, Res<Profile> profile) =>
         {
-            if (state.Value.Window == trig.EntityId) state.Value.Window = 0;
+            if (state.Value.Window == trig.EntityId)
+            {
+                state.Value.Window = 0;
+                state.Value.Pages.Clear();
+            }
             // Abort an in-progress hotkey recording (restore the snapshot) so the
             // capture latch doesn't outlive the window and wedge dispatch off.
             if (cap.Value.Index >= 0)
@@ -459,10 +464,34 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             .RunIf((Res<OptionsUiState> s) => s.Value.Window != 0)
             .Build();
 
-        var rebuildFn = Rebuild;
-        app.AddSystem(rebuildFn)
+        // One-shot: builds every category page + the search/hotkeys containers the
+        // first frame the window exists (Pages empty). Pages are persistent after
+        // — tab switches only toggle Display, never despawn.
+        var buildPagesFn = BuildPages;
+        app.AddSystem(buildPagesFn)
             .InStage(Stage.Update)
-            .RunIf((Res<OptionsUiState> s) => s.Value.Dirty && s.Value.Window != 0)
+            .RunIf((Res<OptionsUiState> s) => s.Value.Window != 0 && s.Value.Pages.Count == 0)
+            .Build();
+
+        // Tab/search change: flip page Display, repaint tab highlight, reset scroll.
+        var applyPageFn = ApplyPage;
+        app.AddSystem(applyPageFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<OptionsUiState> s) => s.Value.Window != 0 && s.Value.PageDirty && s.Value.Pages.Count != 0)
+            .Build();
+
+        // Dynamic flat search results (refills its own container only).
+        var rebuildSearchFn = RebuildSearch;
+        app.AddSystem(rebuildSearchFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<OptionsUiState> s) => s.Value.Window != 0 && s.Value.SearchDirty && s.Value.Pages.Count != 0)
+            .Build();
+
+        // Dynamic hotkeys page (add/remove/record refills its own container only).
+        var rebuildHotkeysFn = RebuildHotkeys;
+        app.AddSystem(rebuildHotkeysFn)
+            .InStage(Stage.Update)
+            .RunIf((Res<OptionsUiState> s) => s.Value.Window != 0 && s.Value.HotkeysDirty && s.Value.Pages.Count != 0)
             .Build();
 
         var syncHueFn = SyncHueEdits;
@@ -481,6 +510,15 @@ internal readonly struct OptionsGumpPlugin : IPlugin
         app.AddSystem(sliderFn)
             .InStage(Stage.Update)
             .RunIf((Res<OptionsUiState> s) => s.Value.Window != 0)
+            .Build();
+
+        // Reconcile control visuals from the profile (Stage.Last, after the
+        // value-writing handlers in Update) so the persistent pages are a live
+        // view — same-frame, no rebuild.
+        var syncControlsFn = SyncControls;
+        app.AddSystem(syncControlsFn)
+            .InStage(Stage.Last)
+            .RunIf((Res<OptionsUiState> s) => s.Value.Window != 0 && s.Value.Pages.Count != 0)
             .Build();
 
         // Hover tint: any element carrying OptionsHover swaps its background
@@ -521,6 +559,54 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             if (bg.Ref.Value.R != want.R || bg.Ref.Value.G != want.G
                 || bg.Ref.Value.B != want.B || bg.Ref.Value.A != want.A)
                 bg.Ref = new BackgroundColor(want);
+        }
+    }
+
+    // Reconcile every control's visual from the profile each frame, so the
+    // (persistent) pages stay a LIVE view: a value edited via a search-result
+    // duplicate, or written from outside the window, shows up — no rebuild.
+    // Click handlers just write the profile; this is the single repaint path.
+    private static void SyncControls(
+        Res<Profile> profile,
+        Query<Data<Node, BackgroundColor, OptionsToggle>> toggles,
+        Query<Data<Node, OptionsSliderFill>> fills,
+        Query<Data<Text, OptionsValueText>> vals,
+        Query<Data<Text, OptionsCycleBox>> cycles)
+    {
+        foreach (var (_, n, bg, tg) in toggles)
+        {
+            var def = s_options[tg.Ref.Index];
+            var on = def.GetB(profile.Value);
+            var jc = on ? JustifyContent.End : JustifyContent.Start;
+            if (n.Ref.JustifyContent != jc) n.Ref.JustifyContent = jc;
+            var col = on ? s_toggleOn : s_toggleOff;
+            if (bg.Ref.Value.R != col.R || bg.Ref.Value.G != col.G
+                || bg.Ref.Value.B != col.B || bg.Ref.Value.A != col.A)
+                bg.Ref = new BackgroundColor(col);
+        }
+        foreach (var (_, n, fl) in fills)
+        {
+            var def = s_options[fl.Ref.Index];
+            int sval = Math.Clamp(def.GetI(profile.Value), def.Min, def.Max);
+            int span = def.Max - def.Min;
+            int fillPx = span > 0
+                ? (int)MathF.Round((sval - def.Min) / (float)span * (SliderTrackW - SliderKnob))
+                : 0;
+            if (n.Ref.Width.Type != ValType.Px || (int)n.Ref.Width.Value != fillPx)
+                n.Ref.Width = Val.Px(fillPx);
+        }
+        foreach (var (_, t, link) in vals)
+        {
+            var def = s_options[link.Ref.Index];
+            var s = Math.Clamp(def.GetI(profile.Value), def.Min, def.Max).ToString();
+            if (!string.Equals(t.Ref.Value, s, StringComparison.Ordinal)) t.Ref = new Text(s);
+        }
+        foreach (var (_, t, cb) in cycles)
+        {
+            var def = s_options[cb.Ref.Index];
+            var cur = Math.Clamp(def.GetI(profile.Value), 0, def.Choices.Length - 1);
+            var s = $"{def.Choices[cur]}   v";
+            if (!string.Equals(t.Ref.Value, s, StringComparison.Ordinal)) t.Ref = new Text(s);
         }
     }
 
@@ -723,7 +809,65 @@ internal readonly struct OptionsGumpPlugin : IPlugin
         state.Viewport = viewport.Id;
         state.Search = string.Empty;
         state.Category = s_categories[0];
-        state.Dirty = true;
+        state.Pages.Clear();          // BuildPages refills the page containers next frame
+        state.PageDirty = false;
+        state.SearchDirty = false;
+        state.HotkeysDirty = false;
+
+        // Persistent sidebar tabs — built once. A tab click only flips the active
+        // category; ApplyPage toggles page Display + re-tints. No despawn.
+        BuildSidebar(commands, sidebar.Id);
+    }
+
+    // Persistent sidebar nav tabs. Each carries SidebarTab so ApplyPage can
+    // re-tint on switch without a rebuild. First category starts selected.
+    private static void BuildSidebar(Commands commands, ulong sidebarId)
+    {
+        int innerW = SidebarW - 12;
+        for (var c = 0; c < s_categories.Length; c++)
+        {
+            var cat = s_categories[c];
+            var selected = c == 0;
+            var normal = selected ? s_accent : s_rowBg;
+            var btn = commands.Spawn()
+                .Insert(new SidebarTab { Category = cat })
+                .Insert(new Node
+                {
+                    Display = Display.Flex,
+                    FlexDirection = FlexDirection.Row,
+                    Width = Val.Px(innerW), Height = Val.Px(SideBtnH),
+                    AlignItems = AlignItems.Center,
+                    Gap = Val.Px(8),
+                    Padding = new UiRect { Left = Val.Px(8), Right = Val.Px(8) },
+                })
+                .Insert(new BackgroundColor(normal))
+                // ApplyHover paints BackgroundColor from Normal/Hover each frame;
+                // ApplyPage rewrites Normal (accent when selected) on switch.
+                .Insert(new OptionsHover { Normal = normal, Hover = selected ? s_accentHover : s_sideHover })
+                .Insert(BorderRadius.All(7))
+                .Insert(Interaction.None)
+                .Insert<UiNoWindowDrag>()
+                .Observe((On<UiClick> _, Res<OptionsUiState> st) =>
+                {
+                    st.Value.Category = cat;
+                    st.Value.PageDirty = true;
+                });
+            var btnId = btn.Id;
+            commands.AddChild(sidebarId, btnId);
+            // Accent dot keeps labels left-aligned; static color (highlight reads
+            // off the tab background, which is enough signal).
+            commands.AddChild(btnId, commands.Spawn()
+                .Insert(new Node { Width = Val.Px(6), Height = Val.Px(6) })
+                .Insert(new BackgroundColor(s_textFaint))
+                .Insert(BorderRadius.All(3))
+                .Id);
+            commands.AddChild(btnId, commands.Spawn()
+                .Insert(new Node { Width = Val.Px(innerW - 30), Height = Val.Auto })
+                .Insert(new Text(cat))
+                .Insert(new TextFont { FontId = 1, Size = 12 })
+                .Insert(new TextColor(s_textMain))
+                .Id);
+        }
     }
 
     // The search field's Text is edited by the global text editor; diff it
@@ -738,92 +882,103 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             if (!string.Equals(v, state.Value.Search, StringComparison.Ordinal))
             {
                 state.Value.Search = v;
-                state.Value.Dirty = true;
-                state.Value.FilterChanged = true;
+                state.Value.SearchDirty = true;  // refill the flat results
+                state.Value.PageDirty = true;    // re-resolve search-vs-category visibility
             }
         }
     }
 
-    private static void Rebuild(
+    // One-shot: pre-build every category page + the search/hotkeys containers
+    // into the viewport. Pages are persistent — a tab switch toggles Display
+    // (ApplyPage), never despawns. Runs the first frame the window exists.
+    private static void BuildPages(
+        Commands commands,
+        Res<OptionsUiState> stateRes,
+        Res<Profile> profile,
+        Res<HotkeyCapture> capture,
+        Res<AssetsServer> assets,
+        Res<UOFileManager> files)
+    {
+        var state = stateRes.Value;
+
+        // Dynamic flat search results — hidden until a query is typed.
+        state.SearchContainer = SpawnPageContainer(commands, state.Viewport, Display.None);
+
+        foreach (var cat in s_categories)
+        {
+            var page = SpawnPageContainer(commands, state.Viewport,
+                cat == state.Category ? Display.Flex : Display.None);
+            state.Pages[cat] = page;
+            SpawnSectionTitle(commands, page, cat);
+
+            if (cat == "Hotkeys")
+            {
+                state.HotkeysPage = page;
+                BuildHotkeysPage(commands, profile.Value, capture.Value, assets.Value, page);
+            }
+            else
+            {
+                FillCategoryPage(commands, profile.Value, files.Value.Hues, state, page, cat);
+            }
+        }
+    }
+
+    // Tab/search change: flip page Display, re-tint the sidebar, reset scroll.
+    // No despawn — the dislike that motivated this design.
+    private static void ApplyPage(
+        Res<OptionsUiState> stateRes,
+        Query<Data<Node>> nodes,
+        Query<Data<BackgroundColor, OptionsHover, SidebarTab>> tabs,
+        Query<Data<ScrollPosition>> scrollQ)
+    {
+        var state = stateRes.Value;
+        state.PageDirty = false;
+        bool searching = !string.IsNullOrWhiteSpace(state.Search);
+
+        SetDisplay(nodes, state.SearchContainer, searching ? Display.Flex : Display.None);
+        foreach (var kv in state.Pages)
+            SetDisplay(nodes, kv.Value, !searching && kv.Key == state.Category ? Display.Flex : Display.None);
+
+        // Selected tab paints accent via OptionsHover.Normal (ApplyHover reads
+        // it each frame). Highlight is suppressed while a search is live.
+        foreach (var (_, bg, hv, tab) in tabs)
+        {
+            bool sel = !searching && tab.Ref.Category == state.Category;
+            var normal = sel ? s_accent : s_rowBg;
+            hv.Ref = new OptionsHover { Normal = normal, Hover = sel ? s_accentHover : s_sideHover };
+            bg.Ref = new BackgroundColor(normal);
+        }
+
+        // New page shown -> scroll back to top (matches the old FilterChanged reset).
+        if (scrollQ.TryGet(state.Viewport, out var scrollRow))
+        {
+            var (_, sp) = scrollRow;
+            sp.Ref.OffsetX = 0;
+            sp.Ref.OffsetY = 0;
+        }
+    }
+
+    // Flat cross-category results. Despawns + refills the SearchContainer ONLY
+    // (the static pages are untouched). The one genuinely dynamic filter.
+    private static void RebuildSearch(
         Commands commands,
         Res<OptionsUiState> stateRes,
         Res<Profile> profile,
         Res<HotkeyCapture> capture,
         Res<AssetsServer> assets,
         Res<UOFileManager> files,
-        Query<Data<Node>, Filter<With<OptionsListItem>>> itemsQ,
-        Query<Data<ScrollPosition>> scrollQ)
+        Query<Data<Node>, Filter<With<OptionsSearchItem>>> itemsQ)
     {
         var state = stateRes.Value;
-        state.Dirty = false;
-
-        // New list, new scroll — but only when the FILTER changed (category /
-        // search), not on a value tweak: a stepper click rebuilds too, and
-        // jumping to the top would be obnoxious mid-edit.
-        if (state.FilterChanged && scrollQ.TryGet(state.Viewport, out var scrollRow))
-        {
-            var (_, sp) = scrollRow;
-            sp.Ref.OffsetX = 0;
-            sp.Ref.OffsetY = 0;
-        }
-        state.FilterChanged = false;
+        state.SearchDirty = false;
 
         foreach (var (ent, _) in itemsQ) commands.Entity(ent.Ref).Despawn();
 
-        bool searching = !string.IsNullOrWhiteSpace(state.Search);
+        var needle = (state.Search ?? string.Empty).Trim();
+        if (needle.Length == 0) return;   // container hidden by ApplyPage anyway
 
-        // Sidebar category buttons (highlight ignored while a search is live).
-        int innerW = SidebarW - 12;
-        foreach (var cat in s_categories)
-        {
-            var selected = !searching && cat == state.Category;
-            var catCopy = cat;
-            var btn = commands.Spawn()
-                .Insert<OptionsListItem>()
-                .Insert(new Node
-                {
-                    Display = Display.Flex,
-                    FlexDirection = FlexDirection.Row,
-                    Width = Val.Px(innerW), Height = Val.Px(SideBtnH),
-                    AlignItems = AlignItems.Center,
-                    Gap = Val.Px(8),
-                    Padding = new UiRect { Left = Val.Px(8), Right = Val.Px(8) },
-                })
-                .Insert(new BackgroundColor(selected ? s_accent : s_rowBg))
-                .Insert(BorderRadius.All(7))
-                .Insert(Interaction.None)
-                .Insert<UiNoWindowDrag>()
-                .Observe((On<UiClick> _, Res<OptionsUiState> st) =>
-                {
-                    st.Value.Category = catCopy;
-                    st.Value.Dirty = true;
-                    st.Value.FilterChanged = true;
-                });
-            if (!selected)
-                btn.Insert(new OptionsHover { Normal = s_rowBg, Hover = s_sideHover });
-            var btnId = btn.Id;
-            commands.AddChild(state.Sidebar, btnId);
-            // Accent dot marks the active page; a placeholder keeps inactive
-            // labels aligned to the same left edge.
-            commands.AddChild(btnId, commands.Spawn()
-                .Insert(new Node { Width = Val.Px(6), Height = Val.Px(6) })
-                .Insert(new BackgroundColor(selected ? s_textMain : s_textFaint))
-                .Insert(BorderRadius.All(3))
-                .Id);
-            commands.AddChild(btnId, commands.Spawn()
-                .Insert(new Node { Width = Val.Px(innerW - 30), Height = Val.Auto })
-                .Insert(new Text(cat))
-                .Insert(new TextFont { FontId = 1, Size = 12 })
-                .Insert(new TextColor(selected ? s_textMain : s_textDim))
-                .Id);
-        }
-
-        // Section header at the top of the list. Fixed height (SectionH) so the
-        // viewport holds a whole number of rows below it — keeps the scroll
-        // bottom flush instead of clipping a row sliver.
-        var headerLabel = searching ? $"Search: \"{state.Search.Trim()}\"" : state.Category;
-        commands.AddChild(state.Viewport, commands.Spawn()
-            .Insert<OptionsListItem>()
+        commands.AddChild(state.SearchContainer, commands.Spawn()
+            .Insert<OptionsSearchItem>()
             .Insert(new Node
             {
                 Display = Display.Flex,
@@ -832,65 +987,112 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                 Width = Val.Px(RowW), Height = Val.Px(SectionH),
                 Padding = new UiRect { Left = Val.Px(4) },
             })
-            .Insert(new Text(headerLabel))
+            .Insert(new Text($"Search: \"{needle}\""))
             .Insert(new TextFont { FontId = 1, Size = 15 })
             .Insert(new TextColor(s_textMain))
             .Id);
 
-        if (searching)
+        for (var i = 0; i < s_options.Length; i++)
         {
-            // Flat results — each row carries its category and its own pill bg.
-            var needle = state.Search.Trim();
-            for (var i = 0; i < s_options.Length; i++)
+            var def = s_options[i];
+            if (!def.Matches(needle)) continue;
+            SpawnRow(commands, profile.Value, files.Value.Hues, state, def, i,
+                searching: true, parentId: state.SearchContainer, rowWidth: RowW, transparent: false);
+        }
+        // Hotkeys aren't in s_options — match them by name/category/combo too.
+        var hk = profile.Value.Hotkeys;
+        if (hk != null)
+            for (var i = 0; i < hk.Count; i++)
+                if (hk[i] != null && HotkeyMatches(hk[i], needle, assets.Value))
+                    SpawnHotkeyRow(commands, profile.Value, capture.Value, assets.Value, i, state.SearchContainer, RowW, searching: true);
+    }
+
+    // Hotkeys page is user-editable (add/remove/record) so its container is
+    // rebuilt on change — but only ITS container, not the rest of the window.
+    private static void RebuildHotkeys(
+        Commands commands,
+        Res<OptionsUiState> stateRes,
+        Res<Profile> profile,
+        Res<HotkeyCapture> capture,
+        Res<AssetsServer> assets,
+        Query<Data<Node>, Filter<With<OptionsHotkeyItem>>> itemsQ)
+    {
+        var state = stateRes.Value;
+        state.HotkeysDirty = false;
+        foreach (var (ent, _) in itemsQ) commands.Entity(ent.Ref).Despawn();
+        if (state.HotkeysPage != 0)
+            BuildHotkeysPage(commands, profile.Value, capture.Value, assets.Value, state.HotkeysPage);
+    }
+
+    // Toggle a node's Display in place (the standard show/hide pattern).
+    private static void SetDisplay(Query<Data<Node>> nodes, ulong id, Display display)
+    {
+        if (id == 0 || !nodes.TryGet(id, out var row)) return;
+        var (_, node) = row;
+        node.Ref.Display = display;
+    }
+
+    // A category page: a Column under the viewport holding the section title +
+    // cards. Auto height; only the active one is Display.Flex.
+    private static ulong SpawnPageContainer(Commands commands, ulong viewport, Display display)
+    {
+        var page = commands.Spawn()
+            .Insert(new Node
             {
-                var def = s_options[i];
-                if (!def.Matches(needle)) continue;
-                SpawnRow(commands, profile.Value, files.Value.Hues, state, def, i,
-                    searching: true, parentId: state.Viewport, rowWidth: RowW, transparent: false);
-            }
-            // Hotkeys aren't in s_options — match them by name/category/combo too.
-            var hk = profile.Value.Hotkeys;
-            if (hk != null)
-                for (var i = 0; i < hk.Count; i++)
-                    if (hk[i] != null && HotkeyMatches(hk[i], needle, assets.Value))
-                        SpawnHotkeyRow(commands, profile.Value, capture.Value, assets.Value, i, state.Viewport, RowW, searching: true);
-            return;
-        }
+                Display = display,
+                FlexDirection = FlexDirection.Column,
+                Width = Val.Px(RowW), Height = Val.Auto,
+                Gap = Val.Px(RowGap),
+            });
+        commands.AddChild(viewport, page.Id);
+        return page.Id;
+    }
 
-        // Hotkeys page: not in s_options — rendered from Profile.Hotkeys with a
-        // key-capture box + pressed/released select per binding.
-        if (state.Category == "Hotkeys")
-        {
-            BuildHotkeysPage(commands, profile.Value, capture.Value, assets.Value, state);
-            return;
-        }
+    // Fixed-height section title at the top of a page (the page's category name).
+    private static void SpawnSectionTitle(Commands commands, ulong parentId, string label)
+    {
+        commands.AddChild(parentId, commands.Spawn()
+            .Insert(new Node
+            {
+                Display = Display.Flex,
+                FlexDirection = FlexDirection.Column,
+                JustifyContent = JustifyContent.Center,
+                Width = Val.Px(RowW), Height = Val.Px(SectionH),
+                Padding = new UiRect { Left = Val.Px(4) },
+            })
+            .Insert(new Text(label))
+            .Insert(new TextFont { FontId = 1, Size = 15 })
+            .Insert(new TextColor(s_textMain))
+            .Id);
+    }
 
-        // Category mode: bucket the page's options into labelled cards so
-        // related settings read together. The card is tagged OptionsListItem;
-        // its rows are untagged and die with it on the next rebuild's cascade.
+    // Bucket a category's options into labelled cards under its page container.
+    private static void FillCategoryPage(
+        Commands commands, Profile profile, HuesLoader hues, OptionsUiState state,
+        ulong pageId, string category)
+    {
         string curGroup = null;
         ulong cardId = 0;
         int cardInnerW = RowW - 24;
         for (var i = 0; i < s_options.Length; i++)
         {
             var def = s_options[i];
-            if (def.Category != state.Category) continue;
+            if (def.Category != category) continue;
             if (!string.Equals(def.Group, curGroup, StringComparison.Ordinal))
             {
                 curGroup = def.Group;
-                cardId = SpawnCard(commands, state.Viewport, curGroup);
+                cardId = SpawnCard(commands, pageId, curGroup);
             }
-            SpawnRow(commands, profile.Value, files.Value.Hues, state, def, i,
+            SpawnRow(commands, profile, hues, state, def, i,
                 searching: false, parentId: cardId, rowWidth: cardInnerW, transparent: true);
         }
     }
 
-    // A labelled card grouping related rows. Child of the viewport (flows with
-    // the scroll). Auto height = title + rows; rows are added as children.
-    private static ulong SpawnCard(Commands commands, ulong viewport, string title)
+    // A labelled card grouping related rows. Child of a page container (flows
+    // with the scroll). Auto height = title + rows; rows are added as children.
+    private static ulong SpawnCard(Commands commands, ulong parentId, string title)
     {
         var card = commands.Spawn()
-            .Insert<OptionsListItem>()
             .Insert(new Node
             {
                 Display = Display.Flex,
@@ -913,7 +1115,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             .Insert(new TextFont { FontId = 1, Size = 11 })
             .Insert(new TextColor(s_accent))
             .Id);
-        commands.AddChild(viewport, cardId);
+        commands.AddChild(parentId, cardId);
         return cardId;
     }
 
@@ -964,7 +1166,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
     // non-empty; the Spells/Skills cards always show (with an "+ Add" button) since
     // they're user-built lists.
     private static void BuildHotkeysPage(
-        Commands commands, Profile profile, HotkeyCapture capture, AssetsServer assets, OptionsUiState state)
+        Commands commands, Profile profile, HotkeyCapture capture, AssetsServer assets, ulong parentId)
     {
         var hotkeys = profile.Hotkeys;
         if (hotkeys == null) return;
@@ -976,16 +1178,24 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             for (int i = 0; i < hotkeys.Count; i++)
             {
                 if (hotkeys[i] == null || HotkeyCategory(hotkeys[i].Action) != cat) continue;
-                if (cardId == 0) cardId = SpawnCard(commands, state.Viewport, cat);
+                if (cardId == 0) cardId = SpawnHotkeyCard(commands, parentId, cat);
                 SpawnHotkeyRow(commands, profile, capture, assets, i, cardId, cardInnerW);
             }
             if (addable)
             {
-                if (cardId == 0) cardId = SpawnCard(commands, state.Viewport, cat);
+                if (cardId == 0) cardId = SpawnHotkeyCard(commands, parentId, cat);
                 SpawnAddHotkeyButton(commands, cardId,
                     cat == "Spells" ? HotkeyAction.CastSpell : HotkeyAction.UseSkill);
             }
         }
+    }
+
+    // A hotkey-page card, tagged so RebuildHotkeys sweeps only these on change.
+    private static ulong SpawnHotkeyCard(Commands commands, ulong parentId, string title)
+    {
+        var cardId = SpawnCard(commands, parentId, title);
+        commands.Entity(cardId).Insert<OptionsHotkeyItem>();
+        return cardId;
     }
 
     // "+ Add Spell" / "+ Add Skill" button at the bottom of those cards. Appends a
@@ -1015,7 +1225,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                 ? (HotkeySpells.All.Length > 0 ? HotkeySpells.All[0].CastId : 0)
                 : FirstUsableSkill(a.Value);
             p.Value.Hotkeys.Add(new Hotkey { Action = act, Param = param });
-            st.Value.Dirty = true;
+            st.Value.HotkeysDirty = true;
         });
         commands.AddChild(cardId, btn.Id);
     }
@@ -1074,7 +1284,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             item.Observe((On<UiClick> _, Commands cmd, Res<Profile> p, Res<OptionsUiState> st) =>
             {
                 if (idx >= 0 && idx < p.Value.Hotkeys.Count) p.Value.Hotkeys[idx].Param = castId;
-                st.Value.Dirty = true;
+                st.Value.HotkeysDirty = true;
                 cmd.Entity(panelId).Despawn();
             });
             commands.AddChild(panelId, item.Id);
@@ -1119,7 +1329,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             item.Observe((On<UiClick> _, Commands cmd, Res<Profile> p, Res<OptionsUiState> st) =>
             {
                 if (idx >= 0 && idx < p.Value.Hotkeys.Count) p.Value.Hotkeys[idx].Param = useId;
-                st.Value.Dirty = true;
+                st.Value.HotkeysDirty = true;
                 cmd.Entity(panelId).Despawn();
             });
             commands.AddChild(panelId, item.Id);
@@ -1209,7 +1419,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             .Insert(Interaction.None)
             .Insert<UiNoWindowDrag>();
         if (searching)
-            row.Insert<OptionsListItem>();
+            row.Insert<OptionsSearchItem>();
         commands.AddChild(parentId, row.Id);
         var rowId = row.Id;
 
@@ -1292,7 +1502,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
         {
             if (cap.Value.Index >= 0) return; // already recording one — finish it first
             HotkeyPlugin.BeginCapture(cap.Value, p.Value, armIndex);
-            st.Value.Dirty = true;
+            st.Value.HotkeysDirty = true;
         });
         commands.AddChild(rowId, capBox.Id);
 
@@ -1336,7 +1546,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                     return; // keep recording — pick another combo or Cancel
                 }
                 cap.Value.Index = -1; // commit (the live binding stays)
-                st.Value.Dirty = true;
+                st.Value.HotkeysDirty = true;
             });
             commands.AddChild(rowId, ok.Id);
 
@@ -1362,7 +1572,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                 if (cap.Value.Index >= 0)
                     HotkeyPlugin.RestoreCapture(cap.Value, p.Value);
                 cap.Value.Index = -1;
-                st.Value.Dirty = true;
+                st.Value.HotkeysDirty = true;
             });
             commands.AddChild(rowId, cancel.Id);
         }
@@ -1390,7 +1600,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                 if (cap.Value.Index >= 0) return; // not while recording
                 if (rmIndex >= 0 && rmIndex < p.Value.Hotkeys.Count)
                     p.Value.Hotkeys.RemoveAt(rmIndex);
-                st.Value.Dirty = true;
+                st.Value.HotkeysDirty = true;
             });
             commands.AddChild(rowId, rm.Id);
         }
@@ -1539,7 +1749,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                 {
                     if (idx >= 0 && idx < p.Value.Hotkeys.Count)
                         p.Value.Hotkeys[idx].OnRelease = release;
-                    st.Value.Dirty = true;
+                    st.Value.HotkeysDirty = true;
                     cmd.Entity(panelId).Despawn();
                 });
             if (!sel)
@@ -1571,7 +1781,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             .Insert(Interaction.None)
             .Insert<UiNoWindowDrag>();
         if (searching)
-            row.Insert<OptionsListItem>();
+            row.Insert<OptionsSearchItem>();
         commands.AddChild(parentId, row.Id);
         var rowId = row.Id;
 
@@ -1609,13 +1819,11 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                     })
                     .Insert(new BackgroundColor(on ? s_toggleOn : s_toggleOff))
                     .Insert(BorderRadius.All(TrackH / 2))
+                    .Insert(new OptionsToggle { Index = defIndex })
                     .Insert(Interaction.None)
                     .Insert<UiNoWindowDrag>()
-                    .Observe((On<UiClick> _, Res<Profile> p, Res<OptionsUiState> st) =>
-                    {
-                        def.SetB(p.Value, !def.GetB(p.Value));
-                        st.Value.Dirty = true;
-                    });
+                    // Just flip the profile bit; SyncControls repaints the track.
+                    .Observe((On<UiClick> _, Res<Profile> p) => def.SetB(p.Value, !def.GetB(p.Value)));
                 var trackId = track.Id;
                 commands.AddChild(trackId, commands.Spawn()
                     .Insert(new Node { Width = Val.Px(Knob), Height = Val.Px(Knob) })
@@ -1630,9 +1838,10 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             {
                 const int StepW = 26, ValW = 58;
                 AddSpacer(commands, rowId, contentW - labelW - (StepW + ValW + StepW + 8));
-                SpawnStepButton(commands, rowId, "−", () => def, -1);
+                SpawnStepButton(commands, rowId, "−", def, -1);
                 AddSpacer(commands, rowId, 4);
                 commands.AddChild(rowId, commands.Spawn()
+                    .Insert(new OptionsValueText { Index = defIndex })
                     .Insert(new Node
                     {
                         Display = Display.Flex,
@@ -1647,20 +1856,19 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                     .Insert(new TextColor(s_textMain))
                     .Id);
                 AddSpacer(commands, rowId, 4);
-                SpawnStepButton(commands, rowId, "+", () => def, +1);
+                SpawnStepButton(commands, rowId, "+", def, +1);
                 break;
             }
 
             case OptionKind.Slider:
             {
-                // Flow widget: [fill][knob][filler] inside a rounded track, plus
-                // a value readout. No absolute children, so it stays inside the
-                // scroll clip. The drag/click handling lives in UpdateSliderDrag
-                // (keyed by defIndex, which the OptionsSlider marker carries).
+                // Flow widget: [fill][knob] inside a rounded track, plus a value
+                // readout. No absolute children, so it stays inside the scroll
+                // clip. UpdateSliderDrag resizes the fill + value text in place
+                // (keyed by defIndex via the OptionsSlider/Fill/ValueText markers).
                 int sval = Math.Clamp(def.GetI(profile), def.Min, def.Max);
                 float ratio = def.Max > def.Min ? (sval - def.Min) / (float)(def.Max - def.Min) : 0f;
                 int fillPx = (int)MathF.Round(ratio * (SliderTrackW - SliderKnob));
-                int restPx = Math.Max(0, SliderTrackW - SliderKnob - fillPx);
 
                 AddSpacer(commands, rowId, contentW - labelW - (SliderTrackW + 8 + SliderValW));
 
@@ -1677,23 +1885,25 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                     .Insert(new OptionsSlider { Index = defIndex })
                     .Insert<UiNoWindowDrag>();
                 var trackId = track.Id;
-                if (fillPx > 0)
-                    commands.AddChild(trackId, commands.Spawn()
-                        .Insert(new Node { Width = Val.Px(fillPx), Height = Val.Px(SliderTrackH) })
-                        .Insert(new BackgroundColor(s_accent))
-                        .Insert(BorderRadius.All(SliderTrackH / 2))
-                        .Id);
+                // Fill always present (width 0 at min) so UpdateSliderDrag can
+                // resize it without a rebuild despawning the track mid-drag.
+                commands.AddChild(trackId, commands.Spawn()
+                    .Insert(new OptionsSliderFill { Index = defIndex })
+                    .Insert(new Node { Width = Val.Px(fillPx), Height = Val.Px(SliderTrackH) })
+                    .Insert(new BackgroundColor(s_accent))
+                    .Insert(BorderRadius.All(SliderTrackH / 2))
+                    .Id);
                 commands.AddChild(trackId, commands.Spawn()
                     .Insert(new Node { Width = Val.Px(SliderKnob), Height = Val.Px(SliderKnob) })
                     .Insert(new BackgroundColor(s_knob))
                     .Insert(BorderRadius.All(SliderKnob / 2))
                     .Id);
-                AddSpacer(commands, trackId, restPx);
                 commands.AddChild(rowId, trackId);
 
                 AddSpacer(commands, rowId, 8);
 
                 commands.AddChild(rowId, commands.Spawn()
+                    .Insert(new OptionsValueText { Index = defIndex })
                     .Insert(new Node
                     {
                         Display = Display.Flex,
@@ -1729,6 +1939,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                     .Insert(new Text($"{def.Choices[current]}   v"))
                     .Insert(new TextFont { FontId = 1, Size = 12 })
                     .Insert(new TextColor(s_textMain))
+                    .Insert(new OptionsCycleBox { Index = defIndex })
                     .Insert(Interaction.None)
                     .Insert<UiNoWindowDrag>();
                 var boxId = box.Id;
@@ -1794,22 +2005,17 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                         On<UiClick> _,
                         Commands cmd,
                         Res<Profile> p,
-                        Res<OptionsUiState> st,
                         OptionsButtonParams bp) =>
                     {
-                        // The classic dye picker in local mode: OK hands the
-                        // hue back instead of sending the dye packet. Profile
-                        // and state are app-lifetime resources — safe captures.
+                        // Classic dye picker in local mode: OK hands the hue back
+                        // instead of sending the dye packet. Profile is an
+                        // app-lifetime resource — safe to capture. SyncHueEdits
+                        // repaints the field + swatch from the profile, no rebuild.
                         var profileRef = p.Value;
-                        var stateRef = st.Value;
                         ColorPickerPlugin.Open(cmd, bp.Assets.Value, bp.Builder.Value,
                             bp.Files.Value.Hues, bp.ZCounter.Value, bp.Surface.Value,
                             serial: 0, graphic: 0x0FAB,
-                            onPick: hue =>
-                            {
-                                def.SetI(profileRef, hue);
-                                stateRef.Dirty = true;
-                            });
+                            onPick: hue => def.SetI(profileRef, hue));
                     });
                 commands.AddChild(rowId, swatch.Id);
                 break;
@@ -1842,9 +2048,8 @@ internal readonly struct OptionsGumpPlugin : IPlugin
     }
 
     private static void SpawnStepButton(
-        Commands commands, ulong rowId, string glyph, Func<OptionDef> defGet, int direction)
+        Commands commands, ulong rowId, string glyph, OptionDef def, int direction)
     {
-        var def = defGet();
         var btn = commands.Spawn()
             .Insert(new Node
             {
@@ -1861,12 +2066,9 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             .Insert(new TextColor(s_textMain))
             .Insert(Interaction.None)
             .Insert<UiNoWindowDrag>()
-            .Observe((On<UiClick> _, Res<Profile> p, Res<OptionsUiState> st) =>
-            {
-                var v = Math.Clamp(def.GetI(p.Value) + direction * def.Step, def.Min, def.Max);
-                def.SetI(p.Value, v);
-                st.Value.Dirty = true;
-            });
+            // Just clamp/step the profile value; SyncControls repaints the readout.
+            .Observe((On<UiClick> _, Res<Profile> p) =>
+                def.SetI(p.Value, Math.Clamp(def.GetI(p.Value) + direction * def.Step, def.Min, def.Max)));
         commands.AddChild(rowId, btn.Id);
     }
 
@@ -1889,10 +2091,9 @@ internal readonly struct OptionsGumpPlugin : IPlugin
 
     // Two-way binding for hue value fields, keyed on edit focus:
     //  - focused: the field drives the profile (numbers-only enforcement,
-    //    4-digit cap, clamp) and patches the matching swatch in place. No
-    //    Dirty flag — a rebuild would despawn the field mid-typing.
-    //  - not focused: the profile drives the field, so an overlay pick (or
-    //    any other writer) shows up without a rebuild fighting stale text.
+    //    4-digit cap, clamp) and patches the matching swatch in place.
+    //  - not focused: the profile drives BOTH the field and the swatch, so an
+    //    overlay pick (which only writes the profile, no rebuild) shows up.
     private static void SyncHueEdits(
         Res<Profile> profile,
         Res<UOFileManager> files,
@@ -1906,9 +2107,21 @@ internal readonly struct OptionsGumpPlugin : IPlugin
 
             if (edit.Value.Entity != ent.Ref)
             {
-                var pv = def.GetI(profile.Value).ToString();
+                var pvInt = def.GetI(profile.Value);
+                var pv = pvInt.ToString();
                 if (!string.Equals(t.Ref.Value, pv, StringComparison.Ordinal))
                     t.Ref = new Text(pv);
+                foreach (var (_, uc, sw) in swatches)
+                {
+                    if (sw.Ref.Index != link.Ref.Index) continue;
+                    var r = uc.Ref.Render();
+                    if (r?.GridColors is { Length: > 0 })
+                    {
+                        var baked = BakeHue(files.Value.Hues, (ushort)pvInt);
+                        if (r.GridColors[0] != baked) r.GridColors[0] = baked;
+                    }
+                    break;
+                }
                 continue;
             }
 
@@ -2003,10 +2216,9 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                 .Insert(new TextColor(s_textMain))
                 .Insert(Interaction.None)
                 .Insert<UiNoWindowDrag>()
-                .Observe((On<UiClick> _, Commands cmd, Res<Profile> p, Res<OptionsUiState> st) =>
+                .Observe((On<UiClick> _, Commands cmd, Res<Profile> p) =>
                 {
-                    def.SetI(p.Value, idx);
-                    st.Value.Dirty = true;
+                    def.SetI(p.Value, idx);   // SyncControls repaints the selectbox label
                     cmd.Entity(panelId).Despawn();
                 });
             if (!sel)
@@ -2035,14 +2247,13 @@ internal readonly struct OptionsGumpPlugin : IPlugin
     }
 
     // Continuous-held slider drag + click-to-set. Latch is keyed by catalog
-    // Index (NOT entity id) so it survives the per-tweak rebuild that despawns
-    // and respawns the track. Reads the raw mouse against the track's
-    // ComputedNode bounds — the same gesture style as window drag, which works
-    // because the gump children are deliberately non-interactive.
+    // Index so the fill bar + value readout (also Index-keyed) update in place —
+    // no rebuild despawning the track mid-drag. Reads the raw mouse against the
+    // track's ComputedNode bounds — the same gesture style as window drag, which
+    // works because the gump children are deliberately non-interactive.
     private static void UpdateSliderDrag(
         Res<MouseContext> mouse,
         Res<Profile> profile,
-        Res<OptionsUiState> stateRes,
         ResMut<OptionsSliderDrag> dragRes,
         Query<Data<ComputedNode, OptionsSlider>> sliders)
     {
@@ -2087,11 +2298,9 @@ internal readonly struct OptionsGumpPlugin : IPlugin
             int step = Math.Max(1, def.Step);
             int snapped = def.Min + (int)MathF.Round(ratio * span / step) * step;
             int v = Math.Clamp(snapped, def.Min, def.Max);
+            // Just write the profile; SyncControls resizes the fill + value text.
             if (def.GetI(profile.Value) != v)
-            {
                 def.SetI(profile.Value, v);
-                stateRes.Value.Dirty = true;
-            }
             break;
         }
     }
@@ -2102,8 +2311,17 @@ internal struct OptionsWindow;
 // Marker on the search field's editable Text entity.
 internal struct OptionsSearchText;
 
-// Marker on every rebuilt list element (sidebar buttons + option rows).
-internal struct OptionsListItem;
+// Direct child of the SearchContainer (section header + flat result rows).
+// RebuildSearch despawns these and refills; pages themselves are persistent.
+internal struct OptionsSearchItem;
+
+// Direct child of the HotkeysPage container (the category cards). RebuildHotkeys
+// despawns these and refills — the only dynamic page (add/remove/record).
+internal struct OptionsHotkeyItem;
+
+// Sidebar nav tab — persistent. ApplyPage re-tints by comparing Category to the
+// active category (no despawn/respawn on tab switch — the whole point).
+internal struct SidebarTab { public string Category; }
 
 // Marker on any open dropdown / hue-palette overlay (one at a time).
 internal struct OptionsOverlay;
@@ -2112,8 +2330,24 @@ internal struct OptionsOverlay;
 // cursor X over the track's ComputedNode bounds to the option's value.
 internal struct OptionsSlider { public int Index; }
 
-// Active slider-drag latch, keyed by catalog Index (NOT entity id) so it
-// survives the per-tweak rebuild that despawns + respawns the slider track.
+// Slider fill bar — Index into s_options. Resized in place by UpdateSliderDrag so
+// the slider reflects its value without a rebuild despawning the track mid-drag.
+internal struct OptionsSliderFill { public int Index; }
+
+// A value readout text (stepper / slider) — Index into s_options. Repainted from
+// the profile by SyncControls.
+internal struct OptionsValueText { public int Index; }
+
+// Toggle track — Index into s_options. SyncControls slides the knob (JustifyContent)
+// + repaints the track colour from the profile bit.
+internal struct OptionsToggle { public int Index; }
+
+// Cycle selectbox label — Index into s_options. SyncControls repaints the chosen
+// choice text from the profile.
+internal struct OptionsCycleBox { public int Index; }
+
+// Active slider-drag latch, keyed by catalog Index. UpdateSliderDrag uses it to
+// resize the matching fill bar + value text in place (no rebuild).
 internal sealed class OptionsSliderDrag { public int ActiveIndex = -1; }
 
 #if AGENT_BUILD
@@ -2141,11 +2375,19 @@ internal sealed class OptionsUiState
     public ulong Window;
     public ulong Sidebar;
     public ulong Viewport;
+    // Dynamic flat search-results container (refilled by RebuildSearch).
+    public ulong SearchContainer;
+    // The Hotkeys category container (refilled by RebuildHotkeys); also in Pages.
+    public ulong HotkeysPage;
+    // category -> its pre-built, Display-toggled page container. Built once by
+    // BuildPages; tab switch only flips Display (never despawns). Empty until
+    // BuildPages runs; cleared on window teardown so a reopen rebuilds.
+    public readonly Dictionary<string, ulong> Pages = new();
     public string Search = string.Empty;
     public string Category = "General";
-    public bool Dirty;
-    // Category/search change (scroll back to top) vs value tweak (keep scroll).
-    public bool FilterChanged;
+    public bool PageDirty;     // category/search changed -> re-resolve visibility + tab highlight + scroll
+    public bool SearchDirty;   // search text changed -> refill SearchContainer
+    public bool HotkeysDirty;  // hotkey list / recording changed -> refill HotkeysPage
 }
 
 // Resources an Action row's click handler may need (e.g. the Color Picker

@@ -524,7 +524,7 @@ internal readonly struct HotkeyPlugin : IPlugin
             cleared.Wheel = 0;
             cleared.Ctrl = cleared.Shift = cleared.Alt = false;
             capture.Value.Index = -1;
-            options.Value.Dirty = true;
+            options.Value.HotkeysDirty = true;
             return;
         }
 
@@ -556,7 +556,7 @@ internal readonly struct HotkeyPlugin : IPlugin
         hk.Shift = Held(kb.Value, Keys.LeftShift, Keys.RightShift);
         hk.Alt = Held(kb.Value, Keys.LeftAlt, Keys.RightAlt);
         capture.Value.HasPending = true;
-        options.Value.Dirty = true;
+        options.Value.HotkeysDirty = true;
     }
 
     // Snapshot the binding so CANCEL/ESC/window-close can restore it.
