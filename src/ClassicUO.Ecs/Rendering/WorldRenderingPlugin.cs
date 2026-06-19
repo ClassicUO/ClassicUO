@@ -24,12 +24,14 @@ internal sealed class WorldAuraInputs : CompositeSystemParam
     public readonly Query<Empty, With<NormalMulti>> NormalMultis;
     public readonly Res<KeyboardContext> Keyboard;
     public readonly Res<PartyState> Party;
+    public readonly Res<EffectsState> Effects;
 
     public WorldAuraInputs()
     {
         NormalMultis = Add(new Query<Empty, With<NormalMulti>>());
         Keyboard = Add(new Res<KeyboardContext>());
         Party = Add(new Res<PartyState>());
+        Effects = Add(new Res<EffectsState>());
     }
 }
 
@@ -390,7 +392,9 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             selectedEntity, batch, assetsServer, fileManager,
             profile.Value, in fx, maxZ, center, mousePos, qLayers, queryEquipmentSlots);
 
-        RenderEffects();
+        RenderEffects(
+            batch, assetsServer, fileManager, profile.Value,
+            auraInputs.Effects.Value, center, in fx, playerX, playerY, playerZ);
 
         // Late transparent pass — foliage deferred from RenderStatics blends
         // over the mobiles drawn above; depth test still hides it behind
@@ -1279,9 +1283,128 @@ internal readonly struct WorldRenderingPlugin : IPlugin
 
     private static long TileKey(int x, int y) => ((long)(uint)x << 32) | (uint)y;
 
-    private static void RenderEffects()
+    // Effect blend modes (legacy GameEffect's Lazy<BlendState> set). Immutable
+    // GPU state descriptors, built once.
+    private static readonly BlendState _multiplyBlend = new()
+    { ColorSourceBlend = Blend.Zero, ColorDestinationBlend = Blend.SourceColor };
+    private static readonly BlendState _screenBlend = new()
+    { ColorSourceBlend = Blend.One, ColorDestinationBlend = Blend.One };
+    private static readonly BlendState _screenLessBlend = new()
+    { ColorSourceBlend = Blend.DestinationColor, ColorDestinationBlend = Blend.InverseSourceAlpha };
+    private static readonly BlendState _normalHalfBlend = new()
+    { ColorSourceBlend = Blend.DestinationColor, ColorDestinationBlend = Blend.SourceColor };
+    private static readonly BlendState _shadowBlueBlend = new()
+    { ColorSourceBlend = Blend.SourceColor, ColorDestinationBlend = Blend.InverseSourceColor, ColorBlendFunction = BlendFunction.ReverseSubtract };
+    // Premultiplied-alpha additive. XNA's BlendState.Additive is (SourceAlpha,
+    // One) which double-applies alpha on the (premultiplied) UO atlas textures
+    // and renders the sprite invisible; (One, One) is the correct additive.
+    private static readonly BlendState _additiveBlend = new()
+    { ColorSourceBlend = Blend.One, ColorDestinationBlend = Blend.One };
+
+    private static BlendState EffectBlend(GraphicEffectBlendMode mode) => mode switch
     {
-        // TODO: implement
+        GraphicEffectBlendMode.Multiply => _multiplyBlend,
+        GraphicEffectBlendMode.Screen or GraphicEffectBlendMode.ScreenMore => _screenBlend,
+        GraphicEffectBlendMode.ScreenLess => _screenLessBlend,
+        GraphicEffectBlendMode.NormalHalfTransparent => _normalHalfBlend,
+        GraphicEffectBlendMode.ShadowBlue => _shadowBlueBlend,
+        _ => null,
+    };
+
+    // Port of GameEffectView / LightningEffectView / DragEffect.Draw. Effects
+    // are drawn after mobiles/equipment, inside the world batch (depth on), so
+    // they sit over the tile they occupy. Source/target tiles and Offset are
+    // maintained by EffectsPlugin's update pass.
+    private static void RenderEffects(
+        Res<UltimaBatcher2D> batch,
+        Res<AssetsServer> assets,
+        Res<UOFileManager> fileManager,
+        Profile profile,
+        EffectsState state,
+        Vector2 center,
+        ref readonly WorldFx fx,
+        int playerX,
+        int playerY,
+        int playerZ)
+    {
+        if (state.Effects.Count == 0)
+            return;
+
+        var arts = assets.Value.Arts;
+        var gumps = assets.Value.Gumps;
+        var tileDataCache = fileManager.Value.TileData;
+
+        foreach (ref readonly var e in System.Runtime.InteropServices.CollectionsMarshal.AsSpan(state.Effects))
+        {
+            if (e.Destroyed)
+                continue;
+
+            ushort hue = e.Hue;
+            if (fx.GrayWorld)
+                hue = Constants.DEAD_RANGE_COLOR;
+
+            var iso = Isometric.IsoToScreen(e.SrcX, e.SrcY, e.SrcZ);
+            Vector2.Subtract(ref iso, ref center, out var pos);
+            // Bias the depth on top of statics sharing the tile (legacy effects
+            // sort just above their source).
+            var depthZ = Isometric.GetDepthZ(e.SrcX, e.SrcY, e.SrcZ + 5) + 0.5f;
+
+            if (e.Kind == EffectKind.Lightning)
+            {
+                ref readonly var gumpInfo = ref gumps.GetGump(e.AnimationGraphic);
+                if (gumpInfo.Texture == null)
+                    continue;
+
+                pos.X -= gumpInfo.UV.Width >> 1;
+                pos.Y -= gumpInfo.UV.Height;
+
+                var hv = ShaderHueTranslator.GetHueVector(hue, false, 1);
+                hv.Y = hv.X > 1.0f ? ShaderHueTranslator.SHADER_LIGHTS : ShaderHueTranslator.SHADER_NONE;
+
+                batch.Value.SetBlendState(_additiveBlend);
+                batch.Value.Draw(gumpInfo.Texture, pos, gumpInfo.UV, hv, 0f, Vector2.Zero, 1f, SpriteEffects.None, depthZ);
+                batch.Value.SetBlendState(null);
+                continue;
+            }
+
+            if (e.AnimationGraphic == 0xFFFF)
+                continue;
+
+            ref readonly var artInfo = ref arts.GetArt(e.AnimationGraphic);
+            if (artInfo.Texture == null)
+                continue;
+
+            ref readonly var data = ref tileDataCache.StaticData[e.Graphic];
+            var hueVec = ShaderHueTranslator.GetHueVector(
+                hue, data.IsPartialHue, data.IsTranslucent ? 0.5f : 1f, effect: true);
+
+            if (e.Kind == EffectKind.Drag)
+            {
+                // Legacy DragEffect.Draw offset convention.
+                var dx = pos.X - (e.Offset.X + 22) - ((artInfo.UV.Width >> 1) - 22);
+                var dy = pos.Y - (-e.Offset.Y + 22) - (artInfo.UV.Height - 44);
+                batch.Value.Draw(artInfo.Texture, new Vector2(dx, dy), artInfo.UV, hueVec, 0f, Vector2.Zero, 1f, SpriteEffects.None, depthZ);
+                continue;
+            }
+
+            // Fixed / Moving — GameEffectView (rotated static, blended).
+            pos.X += e.Offset.X;
+            pos.Y += e.Offset.Y;
+            var rect = new Rectangle(
+                (int)(pos.X - ((artInfo.UV.Width >> 1) - 22)),
+                (int)(pos.Y - (artInfo.UV.Height - 44)),
+                artInfo.UV.Width,
+                artInfo.UV.Height);
+
+            var blend = EffectBlend(e.Blend);
+            if (blend != null)
+                batch.Value.SetBlendState(blend);
+
+            batch.Value.Draw(artInfo.Texture, rect, artInfo.UV, hueVec, e.AngleToTarget, Vector2.Zero, SpriteEffects.None, depthZ);
+
+            if (blend != null)
+                batch.Value.SetBlendState(null);
+        }
     }
 
     // Feet-aura ground decal (legacy MobileView aura). Depth buffer OFF so the

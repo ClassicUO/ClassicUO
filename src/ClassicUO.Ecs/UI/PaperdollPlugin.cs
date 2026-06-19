@@ -498,12 +498,30 @@ internal readonly struct PaperdollPlugin : IPlugin
         Res<GameContext> gameCtx,
         Res<PartyState> party,
         Res<NetworkEntitiesMap> map,
+        Res<GrabbedItem> grabbed,
         PaperdollScrollParams p)
     {
         if (!mouse.Value.IsPressedDouble(Input.MouseButtonType.Left)) return;
+        // Holding an item, a click on the doll is a drop/equip, not a use.
+        if (grabbed.Value.Serial != 0 || grabbed.Value.IsActive) return;
 
         var hit = UiPick.Topmost(mouse.Value.Position, assets.Value, p.Rendered);
-        if (!hit.Found || !p.Scrolls.TryGet(hit.Entity, out var scrollRow)) return;
+        if (!hit.Found) return;
+
+        // Worn equipment double-click -> use (legacy PaperDollInteractable
+        // OnMouseDoubleClick -> GameActions.DoubleClick). Equipment overlays carry
+        // no Interaction (they'd steal pointer events from the button column they
+        // overlap), so the pixel-perfect UiPick + IsPressedDouble path drives them
+        // here, exactly like the scroll gump-pics behind the body.
+        if (p.Equip.TryGet(hit.Entity, out var equipRow))
+        {
+            var (_, eq) = equipRow;
+            if (SerialHelper.IsItem(eq.Ref.ItemSerial))
+                net.Value.Send_DoubleClick(eq.Ref.ItemSerial);
+            return;
+        }
+
+        if (!p.Scrolls.TryGet(hit.Entity, out var scrollRow)) return;
 
         var (_, sc) = scrollRow;
         switch (sc.Ref.Kind)
@@ -1030,6 +1048,7 @@ internal sealed class PaperdollScrollParams : CompositeSystemParam
 {
     public readonly Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> Rendered;
     public readonly Query<Data<PaperdollScrollUI>> Scrolls;
+    public readonly Query<Data<PaperdollEquipUI>> Equip;
     public readonly Query<Data<EntityName>> Names;
     public readonly Query<Data<PlayerData>, With<Player>> Player;
     public readonly Query<Data<CombatBookWindow>> CombatBooks;
@@ -1040,6 +1059,7 @@ internal sealed class PaperdollScrollParams : CompositeSystemParam
     {
         Rendered     = Add(new Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>>());
         Scrolls      = Add(new Query<Data<PaperdollScrollUI>>());
+        Equip        = Add(new Query<Data<PaperdollEquipUI>>());
         Names        = Add(new Query<Data<EntityName>>());
         Player       = Add(new Query<Data<PlayerData>, With<Player>>());
         CombatBooks  = Add(new Query<Data<CombatBookWindow>>());

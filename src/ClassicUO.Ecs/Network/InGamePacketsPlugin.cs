@@ -302,7 +302,7 @@ readonly struct InGamePacketsPlugin : IPlugin
         Stub<OnWeatherPacket_0x65>(app);
         // 0x66 (book pages) is handled by BookGumpPlugin.
         Stub<OnCharacterAnimationPacket_0x6E>(app);
-        Stub<OnGraphicEffectPacket_0x70>(app);
+        // 0x70 (graphic effect) is handled by EffectsPlugin.
         Stub<OnPingPacket_0x73>(app);
         Stub<OnBuyListPacket_0x74>(app);
         Stub<OnUpdateCharacterPacket_0x77>(app);
@@ -323,9 +323,9 @@ readonly struct InGamePacketsPlugin : IPlugin
         Stub<OnOpenGumpPacket_0xB0>(app);
         Stub<OnChatMessagePacket_0xB2>(app);
         // 0xB8 (CharacterProfile) handled by ProfileGumpPlugin.
-        Stub<OnGraphicEffectC0Packet_0xC0>(app);
+        // 0xC0 (graphic effect, hued) is handled by EffectsPlugin.
         Stub<OnUnicodePromptPacket_0xC2>(app);
-        Stub<OnGraphicEffectC7Packet_0xC7>(app);
+        // 0xC7 (graphic effect, extended) is handled by EffectsPlugin.
         app.AddObserver<On<PacketReceived<OnClilocMessageAffixPacket_0xCC>>,
             Res<UOFileManager>,
             Res<Profile>,

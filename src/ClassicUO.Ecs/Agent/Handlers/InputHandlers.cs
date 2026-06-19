@@ -80,6 +80,70 @@ internal static class InputHandlers
         d.Register("debug.pathfindTo", DebugPathfindTo);
         d.Register("debug.pathfindState", DebugPathfindState);
         d.Register("debug.openBackpack", DebugOpenBackpack);
+        d.Register("debug.spawnEffect", DebugSpawnEffect);
+        d.Register("debug.openStatus", DebugOpenStatus);
+    }
+
+    // Test-only: open the player status bar (the same OpenOrFocus the paperdoll
+    // Status button calls) without driving the paperdoll UI.
+    public static JsonRpcResponse DebugOpenStatus(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        ctx.Runtime.GetResource<DebugStatusQueue>().OpenRequested = true;
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["opened"] = true } };
+    }
+
+    // Test-only: spawn a graphic effect through the real 0xC0 parse + observer +
+    // update + render path (no server spell). Optional type (0 Moving / 1
+    // Lightning / 2 FixedXYZ / 3 FixedFrom / 5 Drag), graphic, hue, blend,
+    // speed, duration, explode, fixedDir, source/target serials, and src/tgt
+    // coords. x/y/z default to the player tile so a FixedXYZ lands on-screen.
+    public static JsonRpcResponse DebugSpawnEffect(JsonRpcRequest req, in AgentRpcContext<App> ctx)
+    {
+        var s = new DebugEffectSpec
+        {
+            Type = 2,            // FixedXYZ
+            Graphic = 0x36CB,    // explosion sprite (animated)
+            Duration = 40,
+            Speed = 0,
+        };
+
+        var world = ctx.Runtime.GetWorld();
+        int px = 0, py = 0, pz = 0;
+        var q = world.QueryBuilder().With<Player>().With<WorldPosition>().Build();
+        var it = q.Iter();
+        while (it.Next())
+        {
+            var entities = it.Entities();
+            if (entities.Length == 0) continue;
+            ref var wp = ref world.Get<WorldPosition>(entities[0].ID);
+            px = wp.X; py = wp.Y; pz = wp.Z;
+            break;
+        }
+        s.SrcX = (ushort)px; s.SrcY = (ushort)py; s.SrcZ = (sbyte)pz;
+        s.TgtX = (ushort)px; s.TgtY = (ushort)py; s.TgtZ = (sbyte)pz;
+
+        if (req.Params is JsonElement p && p.ValueKind == JsonValueKind.Object)
+        {
+            if (p.TryGetProperty("type", out var te) && te.TryGetInt32(out var tv)) s.Type = (byte)tv;
+            if (p.TryGetProperty("graphic", out var ge) && ge.TryGetInt32(out var gv)) s.Graphic = (ushort)gv;
+            if (p.TryGetProperty("hue", out var he) && he.TryGetUInt32(out var hv)) s.Hue = hv;
+            if (p.TryGetProperty("blend", out var be) && be.TryGetUInt32(out var bv)) s.Blend = bv;
+            if (p.TryGetProperty("speed", out var spe) && spe.TryGetInt32(out var spv)) s.Speed = (byte)spv;
+            if (p.TryGetProperty("duration", out var de) && de.TryGetInt32(out var dv)) s.Duration = (byte)dv;
+            if (p.TryGetProperty("explode", out var ee) && (ee.ValueKind == JsonValueKind.True || ee.ValueKind == JsonValueKind.False)) s.Explode = ee.GetBoolean();
+            if (p.TryGetProperty("fixedDir", out var fe) && (fe.ValueKind == JsonValueKind.True || fe.ValueKind == JsonValueKind.False)) s.FixedDir = fe.GetBoolean();
+            if (p.TryGetProperty("source", out var soe) && soe.TryGetUInt32(out var sov)) s.Source = sov;
+            if (p.TryGetProperty("target", out var tae) && tae.TryGetUInt32(out var tav)) s.Target = tav;
+            if (p.TryGetProperty("srcX", out var sxe) && sxe.TryGetInt32(out var sxv)) s.SrcX = (ushort)sxv;
+            if (p.TryGetProperty("srcY", out var sye) && sye.TryGetInt32(out var syv)) s.SrcY = (ushort)syv;
+            if (p.TryGetProperty("srcZ", out var sze) && sze.TryGetInt32(out var szv)) s.SrcZ = (sbyte)szv;
+            if (p.TryGetProperty("tgtX", out var txe) && txe.TryGetInt32(out var txv)) s.TgtX = (ushort)txv;
+            if (p.TryGetProperty("tgtY", out var tye) && tye.TryGetInt32(out var tyv)) s.TgtY = (ushort)tyv;
+            if (p.TryGetProperty("tgtZ", out var tze) && tze.TryGetInt32(out var tzv)) s.TgtZ = (sbyte)tzv;
+        }
+
+        ctx.Runtime.GetResource<DebugEffectQueue>().Pending.Add(s);
+        return new JsonRpcResponse { Id = req.Id, Result = new JsonObject { ["spawned"] = true, ["type"] = s.Type, ["graphic"] = s.Graphic } };
     }
 
     // Test-only: double-click the player's backpack server-side (no pixel

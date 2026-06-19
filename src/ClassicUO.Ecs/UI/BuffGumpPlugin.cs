@@ -22,6 +22,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using ClassicUO.Assets;
 using ClassicUO.Game.Data;
 using ClassicUO.IO;
 using Microsoft.Xna.Framework;
@@ -37,8 +38,9 @@ namespace ClassicUO.Ecs;
 internal sealed class PlayerBuffs
 {
     // ExpiresAt: engine-clock ms when the buff runs out (legacy BuffIcon.Timer
-    // = Time.Ticks + timer*1000); float.MaxValue = no countdown.
-    public readonly Dictionary<BuffIconType, (ushort Graphic, float ExpiresAt)> Buffs = new();
+    // = Time.Ticks + timer*1000); float.MaxValue = no countdown. Text: the
+    // cliloc tooltip (title + description), resolved on the 0xDF parse.
+    public readonly Dictionary<BuffIconType, (ushort Graphic, float ExpiresAt, string Text)> Buffs = new();
     // Set when the buff set OR the bar direction changes; the open bar relays
     // its icons and clears it. Stays set while closed so a later open is current.
     public bool Dirty;
@@ -80,7 +82,8 @@ internal readonly struct BuffGumpPlugin : IPlugin
         app.AddObserver((
             On<PacketReceived<OnBuffDebuffPacket_0xDF>> trig,
             ResMut<PlayerBuffs> buffs,
-            Res<Time> time) => OnBuffDebuff(trig, buffs, time));
+            Res<UOFileManager> files,
+            Res<Time> time) => OnBuffDebuff(trig, buffs, files, time));
 
         var syncFn = Sync;
         var timersFn = UpdateTimers;
@@ -151,6 +154,7 @@ internal readonly struct BuffGumpPlugin : IPlugin
     private static void OnBuffDebuff(
         On<PacketReceived<OnBuffDebuffPacket_0xDF>> trig,
         ResMut<PlayerBuffs> buffs,
+        Res<UOFileManager> files,
         Res<Time> time)
     {
         var packet = trig.Event.Packet;
@@ -166,13 +170,13 @@ internal readonly struct BuffGumpPlugin : IPlugin
         // the existing slot on refresh), Remove(type) on a Count==0 packet.
         if (packet.Count != 0)
         {
+            var entry = packet.Entries[packet.Entries.Count - 1];
             // Timer is seconds remaining (legacy: Time.Ticks + timer*1000);
             // 0 / 0xFFFF mean "no countdown".
-            ushort timer = packet.Entries[packet.Entries.Count - 1].Timer;
-            float expires = timer == 0 || timer == 0xFFFF
+            float expires = entry.Timer == 0 || entry.Timer == 0xFFFF
                 ? float.MaxValue
-                : time.Value.Total + timer * 1000f;
-            buffs.Value.Buffs[packet.IconType] = (BuffTable.Table[iconID], expires);
+                : time.Value.Total + entry.Timer * 1000f;
+            buffs.Value.Buffs[packet.IconType] = (BuffTable.Table[iconID], expires, BuildTooltip(files.Value, in entry));
         }
         else
         {
@@ -180,6 +184,21 @@ internal readonly struct BuffGumpPlugin : IPlugin
         }
 
         buffs.Value.Dirty = true;
+    }
+
+    // Tooltip text from the buff's clilocs (legacy BuffGump SetTooltip = title +
+    // description + extra). Description takes the packet Arguments (spell values).
+    private static string BuildTooltip(UOFileManager files, in OnBuffDebuffPacket_0xDF.BuffEntry e)
+    {
+        string title = e.TitleCliloc != 0 ? files.Clilocs.GetString((int)e.TitleCliloc, true) : string.Empty;
+        string desc = e.DescriptionCliloc != 0 ? files.Clilocs.Translate((int)e.DescriptionCliloc, e.Arguments) : string.Empty;
+        string extra = e.AdditionalCliloc != 0 ? files.Clilocs.GetString((int)e.AdditionalCliloc, true) : string.Empty;
+
+        var sb = new System.Text.StringBuilder();
+        if (!string.IsNullOrEmpty(title)) sb.Append(title);
+        if (!string.IsNullOrEmpty(desc)) { if (sb.Length != 0) sb.Append('\n'); sb.Append(desc); }
+        if (!string.IsNullOrEmpty(extra)) { if (sb.Length != 0) sb.Append('\n'); sb.Append(extra); }
+        return sb.ToString();
     }
 
     // Rebuild the open bar's icon row (+ background + toggle pos) when the buff
@@ -235,6 +254,11 @@ internal readonly struct BuffGumpPlugin : IPlugin
             var (x, y) = IconPosition(dir, i, bgW, bgH);
             var icon = builder.Value.AddGump(commands, kv.Value.Graphic, Vector3.UnitZ, new Vector2(x, y));
             icon.Insert<BuffIconUI>();
+            // Cliloc tooltip (legacy BuffGump SetTooltip). The icon art is opaque
+            // so UiPick pixel-hits it; the countdown-label child resolves up to
+            // here via FindTip's ancestor walk.
+            if (!string.IsNullOrEmpty(kv.Value.Text))
+                icon.Insert(new UiTooltip { Text = kv.Value.Text });
             commands.AddChild(root, icon.Id);
 
             // Countdown label (legacy BuffIcon._gText: centered over the icon
@@ -414,7 +438,9 @@ internal readonly struct BuffGumpPlugin : IPlugin
             U32(0);              // skip 4
             U16(0xFFFF);         // Timer (0xFFFF = no countdown)
             buf.Add(0); buf.Add(0); buf.Add(0); // skip 3
-            U32(0); U32(0); U32(0);             // title / desc / additional cliloc
+            // Title cliloc 1075643 (Night Sight) so the harness can verify the
+            // buff tooltip renders; real servers send the buff's own clilocs.
+            U32(1075643); U32(0); U32(0);       // title / desc / additional cliloc
             U16(0);              // argsLen (Arguments) = 0
             U16(0);              // null terminator for the always-read ReadUnicodeLE()
             U16(0);              // argsLen (Arguments2) = 0

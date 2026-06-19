@@ -88,20 +88,31 @@ internal sealed class ObjectPropertyLists
     }
 }
 
-// Display singleton: the hovered serial + its hover-start clock, and the
-// currently rendered box (so we rebuild only on serial/revision change).
+// Display singleton: what's hovered this frame + its hover-start clock, and the
+// currently rendered box (so we rebuild only on target/revision/text change).
+// Kind 0 = nothing, 1 = OPL (serial), 2 = static UI text (UiTooltip).
 internal sealed class TooltipState
 {
-    public uint Serial;          // serial under the cursor this frame (0 = none)
+    public byte Kind;            // hover target kind this frame
+    public ulong Key;            // serial (Kind 1) or owning entity (Kind 2)
     public float HoverStart;     // Time.Total when the current hover began
-    public uint ShownSerial;     // serial the live box was built for
-    public uint ShownRevision;   // revision the live box was built for
+    public byte ShownKind;       // kind the live box was built for
+    public ulong ShownKey;       // serial/entity the live box was built for
+    public uint ShownRevision;   // OPL revision the live box was built for (Kind 1)
+    public string ShownText;     // static text the live box was built for (Kind 2)
     public ulong Root;           // tooltip box root entity (0 = none)
     public int Width, Height;
 }
 
 // Marker on the tooltip box root.
 internal struct TooltipRoot { }
+
+// Static-text tooltip attached to any UI element (status-bar field, buff icon,
+// button…). The TooltipPlugin renders Text (which may contain html tags) when
+// the cursor hovers the element or one of its descendants. This is the
+// non-serial path: no OPL request, no network — just a fixed string the gump
+// set when it spawned the control. MaxWidth 0 = default wrap width.
+internal struct UiTooltip { public string Text; public int MaxWidth; }
 
 // Queries for TrackAndRender, bundled to stay under the system-parameter cap
 // (Res<Profile> pushed the flat list past 16).
@@ -118,6 +129,11 @@ internal sealed class TooltipQueries : CompositeSystemParam
     // Parent chain for overflow-clip: a cell scrolled out of a grid's
     // Overflow.Scroll content must not tooltip past the viewport edge.
     public readonly Query<Data<TinyEcs.Parent>> Parents;
+    // Static-text tooltips (status fields, buff icons, buttons…). Bounds-hit via
+    // Clay's layout bbox, not UiPick's pixel mask — a plain Text control paints
+    // no Clay render command so it has no ComputedNode (see GuiPlugin's wheel
+    // routing note); its box only exists in the Clay layout.
+    public readonly Query<Data<UiTooltip, Node>> Tips;
 
     public TooltipQueries()
     {
@@ -128,6 +144,7 @@ internal sealed class TooltipQueries : CompositeSystemParam
         Roots          = Add(new Query<Data<Node>, With<TooltipRoot>>());
         Bounds         = Add(new Query<Data<UiContainsByBounds>>());
         Parents        = Add(new Query<Data<TinyEcs.Parent>>());
+        Tips           = Add(new Query<Data<UiTooltip, Node>>());
     }
 }
 
@@ -195,6 +212,7 @@ internal readonly struct TooltipPlugin : IPlugin
         Res<AssetsServer> assets,
         Res<UiSurface> surface,
         Res<Profile> profile,
+        Res<UiClayContext> clay,
         ResMut<ObjectPropertyLists> opl,
         ResMut<TooltipState> state,
         TooltipQueries q)
@@ -208,21 +226,46 @@ internal readonly struct TooltipPlugin : IPlugin
         if (!profile.Value.UseTooltip)
         {
             HideBox(commands, state);
-            state.Value.Serial = 0;
+            state.Value.Kind = 0; state.Value.Key = 0;
             return;
         }
 
         var pos = mouse.Value.Position;
+        var hit = UiPick.Topmost(pos, assets.Value, rendered, q.Parents, q.Bounds);
 
-        // A UI item under the cursor (container slot, paperdoll equipment) owns
-        // the tooltip — resolve it via the shared hit-test, same as pickup does.
-        // Otherwise fall back to the world pick in SelectedEntity (ground items,
-        // mobiles). The tooltip box is offset off the cursor point so it is never
-        // the UiPick hit.
+        // 1) Static UI tooltip (status-bar field, buff icon, button…). Bounds-hit
+        // the topmost UiTooltip element whose box contains the cursor — these are
+        // plain text / transparent controls UiPick's pixel mask would miss, so we
+        // test their ComputedNode box directly (legacy HitBox). Takes precedence
+        // over the serial/OPL path.
+        string staticText = null;
+        int staticWidth = 0;
+        ulong staticOwner = 0;
+        float bestArea = float.MaxValue;
+        foreach (var (ent, tip, node) in q.Tips)
+        {
+            if (node.Ref.Display == Display.None) continue;
+            if (string.IsNullOrEmpty(tip.Ref.Text)) continue;
+            if (!clay.Value.TryGetElementBoundingBox(ent.Ref, out var bb)) continue;
+            if (pos.X < bb.X || pos.Y < bb.Y || pos.X >= bb.X + bb.Width || pos.Y >= bb.Y + bb.Height)
+                continue;
+            // Most specific (smallest) box wins where field boxes overlap (e.g. a
+            // narrow stat under the wide centered name row).
+            float area = bb.Width * bb.Height;
+            if (area > bestArea) continue;
+            bestArea = area;
+            staticOwner = ent.Ref;
+            staticText = tip.Ref.Text;
+            staticWidth = tip.Ref.MaxWidth;
+        }
+
+        // 2) Serial/OPL fallback: a UI item under the cursor (container slot,
+        // paperdoll equipment) owns the tooltip — resolve it via the shared
+        // hit-test, same as pickup does. Otherwise fall back to the world pick in
+        // SelectedEntity (ground items, mobiles).
         uint serial = 0;
         var noto = NotorietyFlag.Unknown;
-        var hit = UiPick.Topmost(pos, assets.Value, rendered, q.Parents, q.Bounds);
-        if (hit.Found)
+        if (staticText == null && hit.Found)
         {
             if (contQ.TryGet(hit.Entity, out var contRow)) { var (_, c) = contRow; serial = c.Ref.Serial; }
             // Slot bg / frame / icon all carry the equipped item's serial, so the
@@ -241,7 +284,7 @@ internal readonly struct TooltipPlugin : IPlugin
         // archetype entry, so the tooltip would show for "nothing" hovered.
         // A pick that came from overhead TEXT doesn't count: legacy selects the
         // TextObject there, and the tooltip only fires on the entity proper.
-        if (serial == 0 && selected.Value.Entity != 0 && !selected.Value.IsText
+        if (staticText == null && serial == 0 && selected.Value.Entity != 0 && !selected.Value.IsText
             && worldQ.TryGet(selected.Value.Entity, out var worldRow))
         {
             var (_, s, n) = worldRow;
@@ -255,123 +298,70 @@ internal readonly struct TooltipPlugin : IPlugin
         // pickup in flight, or any active window/forced drag (e.g. a spell cast
         // button just torn off the spellbook riding the cursor).
         if (grabbed.Value.IsActive || grabbed.Value.Serial != 0 || gate.Value.Mode != ActiveDrag.None)
+        {
+            staticText = null;
             serial = 0;
+        }
 
-        if (serial == 0)
+        byte kind;
+        ulong key;
+        if (staticText != null) { kind = 2; key = staticOwner; }
+        else if (serial != 0) { kind = 1; key = serial; }
+        else
         {
             HideBox(commands, state);
-            state.Value.Serial = 0;
+            state.Value.Kind = 0; state.Value.Key = 0;
             return;
         }
 
-        if (serial != state.Value.Serial)
+        if (kind != state.Value.Kind || key != state.Value.Key)
         {
-            state.Value.Serial = serial;
+            state.Value.Kind = kind;
+            state.Value.Key = key;
             state.Value.HoverStart = time.Value.Total;
-            opl.Value.Request(serial);
+            if (kind == 1) opl.Value.Request((uint)key);
             HideBox(commands, state);   // drop the old box until the new one is ready
         }
 
         if (time.Value.Total - state.Value.HoverStart < profile.Value.TooltipDelayBeforeDisplay)
             return;
 
-        if (!opl.Value.TryGet(serial, out var entry))
+        string html;
+        int wrapWidth;
+        uint revision = 0;
+        if (kind == 2)
         {
-            opl.Value.Request(serial);   // delay elapsed but reply not in yet
-            return;
+            html = staticText;
+            wrapWidth = staticWidth > 0 ? staticWidth : MaxWidth;
+        }
+        else
+        {
+            if (!opl.Value.TryGet((uint)key, out var entry))
+            {
+                opl.Value.Request((uint)key);   // delay elapsed but reply not in yet
+                return;
+            }
+            html = BuildHtml((uint)key, entry, noto);
+            if (string.IsNullOrEmpty(html))
+                return;
+            wrapWidth = entry.MaxWidth > 0 ? entry.MaxWidth : MaxWidth;
+            revision = entry.Revision;
         }
 
-        string html = BuildHtml(serial, entry, noto);
-        if (string.IsNullOrEmpty(html))
-            return;
-
         bool needsBuild = state.Value.Root == 0
-            || state.Value.ShownSerial != serial
-            || state.Value.ShownRevision != entry.Revision;
+            || state.Value.ShownKind != kind
+            || state.Value.ShownKey != key
+            || (kind == 1 && state.Value.ShownRevision != revision)
+            || (kind == 2 && state.Value.ShownText != html);
 
         if (needsBuild)
         {
-            HideBox(commands, state);
-
-            byte font = profile.Value.TooltipFont;
-            // Base (untagged) text colour: legacy GeneratePixelsUnicode maps
-            // hue 0xFFFF to near-white, anything else through the hue palette
-            // (cell 5 = the RenderedText cell legacy Tooltip creates with).
-            uint startColor = profile.Value.TooltipTextHue == 0xFFFF
-                ? 0xFFFFFFFF
-                : (UoFontRuntime.Hues.GetPolygoneColor(5, profile.Value.TooltipTextHue) << 8) | 0xFF;
-            var background = new ClayColor(0, 0, 0,
-                (byte)(Math.Clamp(profile.Value.TooltipBackgroundOpacity, 0, 100) * 255 / 100));
-
-            int wrapWidth = entry.MaxWidth > 0 ? entry.MaxWidth : MaxWidth;
-            var (w, h) = UoFontRenderer.Measure(html, font, wrapWidth, isHtml: true, htmlStartColor: startColor, htmlBg: false, align: TEXT_ALIGN_TYPE.TS_CENTER);
-            if (w <= 0 || h <= 0)
+            if (!SpawnBox(commands, state, profile.Value, surface.Value, pos, html, wrapWidth))
                 return;
-
-            // TooltipDisplayZoom scales the rendered glyphs (legacy Tooltip zoom).
-            // Layout is measured native; the box + content node grow by the zoom
-            // and the WrappedText render multiplies each glyph by it.
-            float zoom = Math.Max(0.1f, profile.Value.TooltipDisplayZoom / 100f);
-            int contentW = Math.Max(1, (int)MathF.Round(w * zoom));
-            int contentH = Math.Max(1, (int)MathF.Round(h * zoom));
-
-            int boxW = contentW + Pad * 2;
-            int boxH = contentH + Pad * 2;
-            var (bx, by) = ClampToScreen(pos, boxW, boxH, surface.Value);
-
-            var root = commands.Spawn()
-                .Insert(new Node
-                {
-                    Display = Display.Flex,
-                    PositionType = PositionType.Absolute,
-                    Left = Val.Px(bx),
-                    Top = Val.Px(by),
-                    Width = Val.Px(boxW),
-                    Height = Val.Px(boxH),
-                })
-                .Insert(new BackgroundColor(background))
-                .Insert(new GlobalZIndex(short.MaxValue))   // always above every gump
-                .Insert(new TooltipRoot());
-
-            var label = commands.Spawn()
-                .Insert(new Node
-                {
-                    PositionType = PositionType.Absolute,
-                    Left = Val.Px(Pad),
-                    Top = Val.Px(Pad - 1),
-                    Width = Val.Px(contentW),
-                    Height = Val.Px(contentH),
-                })
-                .Insert(new UiCustom
-                {
-                    Data = new UOCustomRender
-                    {
-                        Kind = UOCustomKind.WrappedText,
-                        Hue = Vector3.UnitZ,
-                        Text = html,
-                        TextFont = font,
-                        TextHue = 0,
-                        // Center within the measured content box, not the 600px
-                        // wrap budget — the box hugs `w`, so centering on wrapWidth
-                        // (what DrawGlyphs does via layout.MaxWidth) would shove
-                        // every line ~(wrapWidth-w)/2 px right, out of the box.
-                        // w is the widest wrapped line, so re-wrapping at w keeps
-                        // the same line breaks Measure produced.
-                        WrapWidth = w,
-                        IsHtml = true,
-                        HtmlStartColor = startColor,
-                        HtmlBg = false,
-                        TextCenter = true,
-                        TextScale = zoom,
-                    }
-                });
-            commands.AddChild(root.Id, label.Id);
-
-            state.Value.Root = root.Id;
-            state.Value.ShownSerial = serial;
-            state.Value.ShownRevision = entry.Revision;
-            state.Value.Width = boxW;
-            state.Value.Height = boxH;
+            state.Value.ShownKind = kind;
+            state.Value.ShownKey = key;
+            state.Value.ShownRevision = revision;
+            state.Value.ShownText = kind == 2 ? html : null;
             return;   // box spawns deferred; reposition starts next frame
         }
 
@@ -384,6 +374,93 @@ internal readonly struct TooltipPlugin : IPlugin
             node.Ref.Left = Val.Px(cx);
             node.Ref.Top = Val.Px(cy);
         }
+    }
+
+    // Spawn the box + measured wrapped-text label for `html`, setting Root /
+    // Width / Height on the state. Returns false (no box) when the text measures
+    // to nothing. Shared by the OPL and static-text paths.
+    private static bool SpawnBox(
+        Commands commands, ResMut<TooltipState> state, Profile profile, UiSurface surface,
+        Vector2 pos, string html, int wrapWidth)
+    {
+        HideBox(commands, state);
+
+        byte font = profile.TooltipFont;
+        // Base (untagged) text colour: legacy GeneratePixelsUnicode maps hue
+        // 0xFFFF to near-white, anything else through the hue palette (cell 5 =
+        // the RenderedText cell legacy Tooltip creates with).
+        uint startColor = profile.TooltipTextHue == 0xFFFF
+            ? 0xFFFFFFFF
+            : (UoFontRuntime.Hues.GetPolygoneColor(5, profile.TooltipTextHue) << 8) | 0xFF;
+        var background = new ClayColor(0, 0, 0,
+            (byte)(Math.Clamp(profile.TooltipBackgroundOpacity, 0, 100) * 255 / 100));
+
+        var (w, h) = UoFontRenderer.Measure(html, font, wrapWidth, isHtml: true, htmlStartColor: startColor, htmlBg: false, align: TEXT_ALIGN_TYPE.TS_CENTER);
+        if (w <= 0 || h <= 0)
+            return false;
+
+        // TooltipDisplayZoom scales the rendered glyphs (legacy Tooltip zoom).
+        // Layout is measured native; the box + content node grow by the zoom and
+        // the WrappedText render multiplies each glyph by it.
+        float zoom = Math.Max(0.1f, profile.TooltipDisplayZoom / 100f);
+        int contentW = Math.Max(1, (int)MathF.Round(w * zoom));
+        int contentH = Math.Max(1, (int)MathF.Round(h * zoom));
+
+        int boxW = contentW + Pad * 2;
+        int boxH = contentH + Pad * 2;
+        var (bx, by) = ClampToScreen(pos, boxW, boxH, surface);
+
+        var root = commands.Spawn()
+            .Insert(new Node
+            {
+                Display = Display.Flex,
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(bx),
+                Top = Val.Px(by),
+                Width = Val.Px(boxW),
+                Height = Val.Px(boxH),
+            })
+            .Insert(new BackgroundColor(background))
+            .Insert(new GlobalZIndex(short.MaxValue))   // always above every gump
+            .Insert(new TooltipRoot());
+
+        var label = commands.Spawn()
+            .Insert(new Node
+            {
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(Pad),
+                Top = Val.Px(Pad - 1),
+                Width = Val.Px(contentW),
+                Height = Val.Px(contentH),
+            })
+            .Insert(new UiCustom
+            {
+                Data = new UOCustomRender
+                {
+                    Kind = UOCustomKind.WrappedText,
+                    Hue = Vector3.UnitZ,
+                    Text = html,
+                    TextFont = font,
+                    TextHue = 0,
+                    // Center within the measured content box, not the 600px wrap
+                    // budget — the box hugs `w`, so centering on wrapWidth (what
+                    // DrawGlyphs does via layout.MaxWidth) would shove every line
+                    // ~(wrapWidth-w)/2 px right, out of the box. w is the widest
+                    // wrapped line, so re-wrapping at w keeps Measure's breaks.
+                    WrapWidth = w,
+                    IsHtml = true,
+                    HtmlStartColor = startColor,
+                    HtmlBg = false,
+                    TextCenter = true,
+                    TextScale = zoom,
+                }
+            });
+        commands.AddChild(root.Id, label.Id);
+
+        state.Value.Root = root.Id;
+        state.Value.Width = boxW;
+        state.Value.Height = boxH;
+        return true;
     }
 
     // Cursor + offset, clamped to the window (legacy Tooltip.Draw clamps to
@@ -442,8 +519,10 @@ internal readonly struct TooltipPlugin : IPlugin
         if (state.Value.Root == 0) return;
         commands.Entity(state.Value.Root).Despawn();
         state.Value.Root = 0;
-        state.Value.ShownSerial = 0;
+        state.Value.ShownKind = 0;
+        state.Value.ShownKey = 0;
         state.Value.ShownRevision = 0;
+        state.Value.ShownText = null;
     }
 
     private static void DespawnOnExit(
@@ -451,6 +530,7 @@ internal readonly struct TooltipPlugin : IPlugin
         ResMut<TooltipState> state)
     {
         HideBox(commands, state);
-        state.Value.Serial = 0;
+        state.Value.Kind = 0;
+        state.Value.Key = 0;
     }
 }

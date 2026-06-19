@@ -60,5 +60,11 @@ namespace ClassicUO.Assets
         public byte FrameCount;
         public byte FrameInterval;
         public byte FrameStart;
+
+        public readonly sbyte FrameAt(int index)
+        {
+            fixed (sbyte* p = FrameData)
+                return p[index];
+        }
     }
 }

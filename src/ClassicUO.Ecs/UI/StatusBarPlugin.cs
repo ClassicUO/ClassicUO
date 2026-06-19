@@ -39,6 +39,10 @@ internal enum StatusField : byte
 // BoxLeft+CenterW] (legacy TS_CENTER columns); else left-aligned at BoxLeft.
 internal struct StatusLabel { public StatusField Field; public int BoxLeft; public int CenterW; }
 
+// Marks status fields whose UiTooltip text hasn't been resolved yet, so Refresh
+// fills the cliloc string once (and we don't re-resolve every frame).
+internal struct StatusTooltipPending { public int Cliloc; }
+
 // A stat-lock toggle (Str/Dex/Int). Stat 0/1/2. The lock STATE lives on the
 // player (StatLocks) so it survives reopening; the button just identifies which.
 internal struct StatLockButton { public byte Stat; }
@@ -63,7 +67,31 @@ internal readonly struct StatusBarPlugin : IPlugin
         app.AddSystem(refreshFn).InStage(Stage.Update).Build();
         app.AddSystem(despawnFn).OnExit(GameState.GameScreen).Build();
         // Opened from the paperdoll Status button via OpenOrFocus.
+
+#if AGENT_BUILD
+        app.AddResource(new DebugStatusQueue());
+        var drainStatusFn = DrainDebugStatus;
+        app.AddSystem(drainStatusFn).InStage(Stage.First).Build();
+#endif
     }
+
+#if AGENT_BUILD
+    // debug.openStatus — open the status bar without driving the paperdoll UI.
+    private static void DrainDebugStatus(
+        Commands commands,
+        ResMut<DebugStatusQueue> q,
+        Res<GumpBuilder> builder,
+        Res<AssetsServer> assets,
+        Res<GameContext> gameCtx,
+        Res<ClassicUO.Configuration.Profile> profile,
+        Res<UiZCounter> zCounter,
+        Query<Data<StatusBarWindow>> existing)
+    {
+        if (!q.Value.OpenRequested) return;
+        q.Value.OpenRequested = false;
+        OpenOrFocus(commands, builder.Value, assets.Value, gameCtx.Value, profile.Value, zCounter.Value, existing);
+    }
+#endif
 
     // (x, y, field, centerWidth) — centerWidth>0 centers the value in that box.
     // Classic layout (bg 0x0802) — two columns of plain left-aligned values.
@@ -148,6 +176,19 @@ internal readonly struct StatusBarPlugin : IPlugin
                 .Insert(new TextFont { FontId = fontId, Size = 12 })
                 .Insert(new TextColor(color))
                 .Insert(new StatusLabel { Field = field, BoxLeft = x, CenterW = cw });
+
+            // Cliloc tooltip per stat (legacy StatusGump SetTooltip). The label's
+            // box is the hover area: UiContainsByBounds makes the child a UiPick
+            // bounds-hit that wins over the window root by paint order; the text
+            // is resolved once in Refresh (needs the cliloc loader).
+            int cliloc = FieldCliloc(field);
+            if (cliloc != 0)
+            {
+                lbl.Insert<UiContainsByBounds>()
+                   .Insert(new UiTooltip())
+                   .Insert(new StatusTooltipPending { Cliloc = cliloc });
+            }
+
             commands.AddChild(root.Id, lbl.Id);
         }
 
@@ -219,6 +260,7 @@ internal readonly struct StatusBarPlugin : IPlugin
 
     private static void Refresh(
         Res<GameContext> gameCtx,
+        Res<UOFileManager> files,
         Query<Data<WorldPosition>, Filter<With<Player>>> playerQ,
         Query<Data<Hits>> hitsQ,
         Query<Data<Mana>> manaQ,
@@ -226,8 +268,17 @@ internal readonly struct StatusBarPlugin : IPlugin
         Query<Data<PlayerData>> dataQ,
         Query<Data<StatLocks>> locksQ,
         Query<Data<UiCustom, StatLockButton>> lockBtnsQ,
+        Query<Data<UiTooltip, StatusTooltipPending>> tipsQ,
         Query<Data<Text, Node, StatusLabel>> labelsQ)
     {
+        // Resolve each field's cliloc tooltip once (lazy: the cliloc loader isn't
+        // available at spawn). Idempotent — skipped once the text is filled.
+        foreach (var (_, tip, pending) in tipsQ)
+        {
+            if (string.IsNullOrEmpty(tip.Ref.Text) && pending.Ref.Cliloc != 0)
+                tip.Ref.Text = files.Value.Clilocs.GetString(pending.Ref.Cliloc, true);
+        }
+
         ulong pid = 0;
         foreach (var (ent, _) in playerQ) { pid = ent.Ref; break; }
         if (pid == 0) return;
@@ -260,6 +311,41 @@ internal readonly struct StatusBarPlugin : IPlugin
             }
         }
     }
+
+    // Tooltip cliloc per status field (legacy StatusGump SetTooltip ids). 0 = no
+    // tooltip (the Name field). Combined cur/max fields reuse the base stat's id.
+    internal static int FieldCliloc(StatusField f) => f switch
+    {
+        StatusField.Strength => 1061146,
+        StatusField.Dexterity => 1061147,
+        StatusField.Intelligence => 1061148,
+        StatusField.Hits or StatusField.HitsMax or StatusField.HitsCombined => 1061149,
+        StatusField.Mana or StatusField.ManaMax or StatusField.ManaCombined => 1061151,
+        StatusField.Stamina or StatusField.StaminaMax or StatusField.StaminaCombined => 1061150,
+        StatusField.Weight or StatusField.WeightMax or StatusField.WeightCombined => 1061154,
+        StatusField.StatCap => 1061152,
+        StatusField.Luck => 1061153,
+        StatusField.Gold => 1061156,
+        StatusField.Damage => 1061155,
+        StatusField.Followers => 1061157,
+        StatusField.HitChanceInc => 1075616,
+        StatusField.DefenseChanceInc => 1075620,
+        StatusField.SwingSpeedInc => 1075629,
+        StatusField.DamageInc => 1075619,
+        StatusField.LowerManaCost => 1075621,
+        StatusField.LowerReagentCost => 1075625,
+        StatusField.SpellDamageInc => 1075628,
+        StatusField.FasterCasting => 1075617,
+        StatusField.FasterCastRecovery => 1075618,
+        StatusField.Armor => 1061158,
+        StatusField.FireRes => 1061159,
+        StatusField.ColdRes => 1061160,
+        StatusField.PoisonRes => 1061161,
+        StatusField.EnergyRes => 1061162,
+        StatusField.Sex => 3000076,
+        StatusField.ArmorOld => 1062760,
+        _ => 0, // Name → no tooltip
+    };
 
     // Map a status field to its display string from the player's live stats.
     // Pure (no ECS / render) so it is unit-testable; the Refresh system just
@@ -316,3 +402,7 @@ internal readonly struct StatusBarPlugin : IPlugin
             commands.Entity(ent.Ref).Despawn();
     }
 }
+
+#if AGENT_BUILD
+internal sealed class DebugStatusQueue { public bool OpenRequested; }
+#endif
