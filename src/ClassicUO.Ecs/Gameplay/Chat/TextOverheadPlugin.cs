@@ -250,9 +250,10 @@ internal sealed class TextOverHeadManager
         var panelOrigin = new Vector2(camera.Bounds.X, camera.Bounds.Y);
         var bounds = camera.Bounds;
 
-        // Mouse in the same logical UI-RT space the text draws in. Hits only
-        // count inside the game window — the scissor trims anything outside,
-        // so an offscreen-clamped line must not pick.
+        // Mouse in the same UI-RT space the text draws in (overhead rects are
+        // camera.WorldToScreen + panelOrigin = UI-space, the layout is rendered at
+        // logical / UiScale). Position is already UI-space (UiScale folded in at
+        // MouseContext) so the in-view gate + per-line link hit-test (e.Rect) align.
         var mousePos = mouse.Position;
         bool mouseInView = bounds.Contains((int)mousePos.X, (int)mousePos.Y);
 

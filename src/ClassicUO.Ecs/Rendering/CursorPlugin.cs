@@ -56,13 +56,16 @@ internal readonly struct CursorPlugin : IPlugin
             && ItemGraphics.DrawStacked(grabbed.Graphic, grabbed.Amount, tileData[grabbed.Graphic].IsStackable);
 
         var b = batch.Value;
-        // Cursor position is in LOGICAL pixels; the batch otherwise draws in
-        // PHYSICAL pixels, so without the dpi scale the held sprite drifts
-        // (1 - dpi) * pos away from the cursor (visible as a growing offset
-        // toward bottom-right). Matches GuiRenderingPlugin's transform.
+        // Cursor position is UI-space (UiScale folded into Position); this draws to
+        // the backbuffer in PHYSICAL pixels. Transform = dpi * UiScale so the held
+        // sprite sits on the cursor AND scales with the UI like the in-gump item art
+        // ("scale everything"). Without dpi the sprite drifts (1-dpi)*pos toward
+        // bottom-right; without UiScale it drifts by the scale factor.
         var dpi = game.Value.DpiScale;
         if (dpi <= 0f) dpi = 1f;
-        b.Begin(null, Matrix.CreateScale(dpi));
+        var ui = UiScaleRuntime.Value;
+        if (ui <= 0f) ui = 1f;
+        b.Begin(null, Matrix.CreateScale(dpi * ui));
         // PointClamp keeps pixel art crisp at integer DPI; LinearClamp smooths
         // the per-sprite upscale at fractional DPI. Mirrors GuiRenderingPlugin.
         b.SetSampler(dpi == Math.Floor(dpi) ? SamplerState.PointClamp : SamplerState.LinearClamp);

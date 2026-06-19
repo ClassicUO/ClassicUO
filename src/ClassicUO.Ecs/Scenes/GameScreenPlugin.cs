@@ -416,6 +416,10 @@ internal readonly struct GameScreenPlugin : IPlugin
             if (!queryBorder.TryGet(out var data)) return;
             (_, _, var computed) = data;
             var bb = computed.Ref;
+            // UI-space cursor: the border ComputedNode + camera.Bounds (fed into
+            // the GameWindow node by SyncWindowToCamera) live in layout space,
+            // which the renderer upscales by UiScale. Hit-test + drag delta must
+            // match, or the window runs UiScale× ahead of the cursor.
             var pos = mouseCtx.Value.Position;
             // Border bbox is the OUTER rectangle (camera ± BORDER_SIZE/2),
             // which also covers the rendered world. Drag only when the click
@@ -489,6 +493,8 @@ internal readonly struct GameScreenPlugin : IPlugin
             if (!queryHandle.TryGet(out var data)) return;
             (_, _, var computed) = data;
             var bb = computed.Ref;
+            // UI-space cursor — same reason as DragWindow: the resize handle node
+            // and camera W/H are layout-space, upscaled by UiScale at render.
             var pos = mouseCtx.Value.Position;
             if (pos.X < bb.Position.X || pos.Y < bb.Position.Y) return;
             if (pos.X >= bb.Position.X + bb.Size.X) return;

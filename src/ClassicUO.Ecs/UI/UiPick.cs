@@ -72,6 +72,9 @@ internal static class UiPick
         Query<Data<TinyEcs.Parent>> parents,
         Query<Data<UiContainsByBounds>> bounds = null)
     {
+        // `pos` is already UI-layout space: MouseContext folds UiScale into Position
+        // itself (physical / (DpiScale*UiScale)), the same space every ComputedNode
+        // bound lives in. No per-call conversion here anymore.
         var hit = UiHit.None;
         foreach (var (ent, computed, node, custom, bg, text) in rendered)
         {

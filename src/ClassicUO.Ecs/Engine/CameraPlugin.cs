@@ -215,6 +215,10 @@ internal readonly struct CameraPlugin : IPlugin
             lastDefaultScale.Value = profile.Value.DefaultScale;
         }
 
+        // Position is UI-space (UiScale folded in at MouseContext). camera.Bounds
+        // is fed into the GameWindow UI node, so the viewport renders at Bounds ×
+        // UiScale — the world hit-tests (static/tile pick, hover highlight, peek,
+        // via MouseToWorldPosition / IsMouseInsideBounds) all read this one feed.
         var mousePos = mouseCtx.Value.Position;
         var ctrl = keyboardCtx.Value.IsPressed(Keys.LeftControl) || keyboardCtx.Value.IsPressed(Keys.RightControl);
 
@@ -224,7 +228,7 @@ internal readonly struct CameraPlugin : IPlugin
         {
             if (ctrl &&
                 !mouseCtx.Value.WheelConsumed &&
-                camera.Value.Bounds.Contains((int)mouseCtx.Value.Position.X, (int)mouseCtx.Value.Position.Y))
+                camera.Value.Bounds.Contains((int)mousePos.X, (int)mousePos.Y))
             {
                 if (mouseCtx.Value.Wheel > 0)
                     camera.Value.ZoomIn();

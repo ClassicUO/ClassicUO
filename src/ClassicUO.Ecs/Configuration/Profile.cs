@@ -83,6 +83,7 @@ namespace ClassicUO.Configuration
 
         // --- fonts and speech ---
         public byte ChatFont { get; set; } = 1;
+        public int UiTextScale { get; set; } = 100;                       // global text enlarge %, 100-200
         public int SpeechDelay { get; set; } = 100;
         public bool ScaleSpeechDelay { get; set; } = true;
         public bool SaveJournalToFile { get; set; } = true;

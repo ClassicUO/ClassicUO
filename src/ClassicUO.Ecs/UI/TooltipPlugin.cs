@@ -376,7 +376,8 @@ internal readonly struct TooltipPlugin : IPlugin
         }
 
         // Follow the cursor (in-place Node mutation; no structural change),
-        // clamped so the box never spills past the window edges.
+        // clamped so the box never spills past the window edges. Cursor, box Node
+        // and surface.LogicalSize are all UI-space (UiScale folded into Position).
         var (cx, cy) = ClampToScreen(pos, state.Value.Width, state.Value.Height, surface.Value);
         foreach (var (_, node) in rootQ)
         {

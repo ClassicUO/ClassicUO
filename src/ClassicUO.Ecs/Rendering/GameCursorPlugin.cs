@@ -99,7 +99,10 @@ internal readonly struct GameCursorPlugin : IPlugin
             }
         }
 
+        // Position is UI-space (UiScale folded in at MouseContext) — the one space
+        // every hit-test below (Topmost, camera.Bounds, cursor draw) shares.
         var mousePos = mouseCtx.Value.Position;
+        var uiMousePos = mousePos;
 
         // Topmost UI element under the cursor — drives the over-world test below.
         // Same pixel-perfect hit-test every gump gesture uses.
@@ -143,14 +146,14 @@ internal readonly struct GameCursorPlugin : IPlugin
         // hand. The GameWindowUI viewport node itself is a UI hit (it carries
         // BackgroundColor), so a hit on IT still counts as "over world".
         bool overWorld = inGame
-                      && camera.Value.Bounds.Contains((int)mousePos.X, (int)mousePos.Y)
+                      && camera.Value.Bounds.Contains((int)uiMousePos.X, (int)uiMousePos.Y)
                       && (!hit.Found || gameWindowQ.Contains(hit.Entity));
         int worldDirection = 9;
         if (overWorld)
         {
             int cx = camera.Value.Bounds.X + (camera.Value.Bounds.Width >> 1);
             int cy = camera.Value.Bounds.Y + (camera.Value.Bounds.Height >> 1);
-            worldDirection = GameCursor.GetMouseDirection(cx, cy, (int)mousePos.X, (int)mousePos.Y, 1);
+            worldDirection = GameCursor.GetMouseDirection(cx, cy, (int)uiMousePos.X, (int)uiMousePos.Y, 1);
         }
 
         // House design with a tool armed shows the targeting reticle (legacy
@@ -233,7 +236,14 @@ internal readonly struct GameCursorPlugin : IPlugin
 
         var dpi = game.DpiScale;
         if (dpi <= 0f) dpi = 1f;
-        b.Begin(null, Matrix.CreateScale(dpi));
+        // mousePos is UI-space (UiScale folded into Position). This draws straight
+        // to the backbuffer, so fold UiScale back into the transform — it positions
+        // AND scales the cursor with the rest of the UI ("scale everything"). hotX/
+        // hotY are texture px (pre-scale units), so the hotspot stays on the real
+        // pointer pixel under the uniform scale.
+        var ui = UiScaleRuntime.Value;
+        if (ui <= 0f) ui = 1f;
+        b.Begin(null, Matrix.CreateScale(dpi * ui));
         // PointClamp keeps the art crisp at fractional DPI. The texture is already
         // marker-cleaned (CreateCursorTexture strips the green/black/edge ring),
         // so it's drawn whole — no UV inset, no edge-bleed line to suppress.

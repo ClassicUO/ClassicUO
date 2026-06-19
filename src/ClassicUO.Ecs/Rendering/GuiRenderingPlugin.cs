@@ -97,9 +97,12 @@ internal readonly struct GuiRenderingPlugin : IPlugin
 
         // Allocate / resize the off-screen UI render target at LOGICAL size.
         // All UI sprites draw into it at 1:1 (no scaling), so adjacent tiles
-        // share exact pixel boundaries — no seams.
-        var logicalW = Math.Max(1, (int)(pp.BackBufferWidth / dpi));
-        var logicalH = Math.Max(1, (int)(pp.BackBufferHeight / dpi));
+        // share exact pixel boundaries — no seams. The UiScale divisor shrinks
+        // the RT so Phase 2's stretch-blit to the backbuffer enlarges the whole
+        // UI (gump art + boxes + text) with no canvas clipping.
+        var ui = MathF.Max(0.1f, UiScaleRuntime.Value);
+        var logicalW = Math.Max(1, (int)(pp.BackBufferWidth / (dpi * ui)));
+        var logicalH = Math.Max(1, (int)(pp.BackBufferHeight / (dpi * ui)));
         if (uiRt.Value.Rt == null || uiRt.Value.Rt.IsDisposed
             || uiRt.Value.Width != logicalW || uiRt.Value.Height != logicalH)
         {

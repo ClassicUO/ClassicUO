@@ -242,6 +242,8 @@ internal readonly struct WindowDragPlugin : IPlugin
             {
                 var ownerF = forced.Value.Owner;
                 var (_, nodeF, zF) = forcedRow;
+                // Position is UI-space (logical / UiScale): Node coords live in the
+                // smaller layout space, so the center math + anchor match.
                 var pos = mouse.Value.Position;
                 float wF = nodeF.Ref.Width.Type == ValType.Px ? nodeF.Ref.Width.Value : 0f;
                 float hF = nodeF.Ref.Height.Type == ValType.Px ? nodeF.Ref.Height.Value : 0f;
@@ -273,6 +275,8 @@ internal readonly struct WindowDragPlugin : IPlugin
                 && !keyboard.Value.IsPressed(Keys.RightAlt))
                 return;
 
+            // Position is UI-space (UiScale folded in at MouseContext) — the same
+            // space pick.Topmost and the Node / ComputedNode geometry below live in.
             var pos = mouse.Value.Position;
 
             // Topmost element under the cursor. Checking ALL rendered elements

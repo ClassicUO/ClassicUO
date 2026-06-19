@@ -12,6 +12,13 @@ using TinyEcs.Bevy.UI;
 
 namespace ClassicUO.Ecs;
 
+// Global UI scale (Options "UI size", Profile.UiTextScale/100). The Bevy.UI
+// layer renders at LogicalSize / Value and the render pass upscales by
+// DpiScale * Value, so the whole UI (gump art + boxes + text) grows together
+// with no canvas clipping. MouseContext folds Value into Position (physical /
+// (DpiScale*Value)) so every hit-test lines up. 1 = native (no-op).
+internal static class UiScaleRuntime { public static float Value = 1f; }
+
 internal readonly struct GuiPlugin : IPlugin
 {
     public void Build(App app)
@@ -209,9 +216,11 @@ internal readonly struct GuiPlugin : IPlugin
         var dpi = game.Value.DpiScale;
         if (dpi <= 0f) dpi = 1f;
         // Clay lays out in LOGICAL pixels (UO's native UI grid). Render pass
-        // applies CreateScale(DpiScale) so layout fills the physical backbuffer
-        // — mirrors main's RenderTargets pipeline.
-        surface.Value.LogicalSize = new System.Numerics.Vector2(pp.BackBufferWidth / dpi, pp.BackBufferHeight / dpi);
+        // applies CreateScale(DpiScale * UiScale) so layout fills the physical
+        // backbuffer — mirrors main's RenderTargets pipeline. The extra UiScale
+        // divisor shrinks the logical canvas so the upscale enlarges the whole UI.
+        var ui = MathF.Max(0.1f, UiScaleRuntime.Value);
+        surface.Value.LogicalSize = new System.Numerics.Vector2(pp.BackBufferWidth / (dpi * ui), pp.BackBufferHeight / (dpi * ui));
         surface.Value.PhysicalSize = new System.Numerics.Vector2(pp.BackBufferWidth, pp.BackBufferHeight);
     }
 
@@ -220,9 +229,10 @@ internal readonly struct GuiPlugin : IPlugin
         Res<UoGame> game,
         ResMut<UiPointer> pointer)
     {
-        // MouseContext.Position is already LOGICAL pixels (see MouseContext.cs).
-        // Clay layouts in logical too, so feed it through unchanged for both
-        // real-mouse and AGENT_BUILD synthetic paths.
+        // Clay layouts in UI space (logical / UiScale) and Position is already in
+        // that space (UiScale folded in at MouseContext), so the pointer lines up
+        // with the scaled layout. Covers every Clay-native interaction (buttons/
+        // hover/click/scroll/text fields); UiPick gestures share the same Position.
         var p = mouseCtx.Value.Position;
         pointer.Value.Position = new System.Numerics.Vector2(p.X, p.Y);
         pointer.Value.Down = mouseCtx.Value.IsPressed(MouseButtonType.Left);
@@ -278,6 +288,9 @@ internal readonly struct GuiPlugin : IPlugin
         // Recording a hotkey — the wheel is being captured, not scrolled.
         if (capture.Value.Index >= 0) return;
 
+        // Clay layout / bbox queries are in UI space (logical / UiScale); Position
+        // is already in that space (UiScale folded in at MouseContext), as is the
+        // cursor UiPick (below) consumes.
         var pos = mouseCtx.Value.Position;
 
         // Topmost scrollable container under the cursor. Scroll containers
@@ -319,7 +332,7 @@ internal readonly struct GuiPlugin : IPlugin
         // It's drawn first (lowest PaintOrder), so any real gump over it wins
         // Topmost; a hit ON it means the cursor is over bare game world.
         int topGumpZ = int.MinValue;
-        var uiHit = UiPick.Topmost(pos, assets.Value, rendered, parentQ);
+        var uiHit = UiPick.Topmost(mouseCtx.Value.Position, assets.Value, rendered, parentQ);
         bool overUi = uiHit.Found && !gameWindowQ.Contains(uiHit.Entity);
         if (overUi)
         {

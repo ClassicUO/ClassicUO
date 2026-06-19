@@ -218,6 +218,8 @@ internal readonly struct OptionsGumpPlugin : IPlugin
                 T("Mousewheel zoom", p => p.EnableMousewheelScaleZoom, (p, v) => p.EnableMousewheelScaleZoom = v, "ctrl scale");
                 T("Save zoom on close", p => p.SaveScaleAfterClose, (p, v) => p.SaveScaleAfterClose = v, "scale");
                 T("Restore zoom after ctrl release", p => p.RestoreScaleAfterUnpressCtrl, (p, v) => p.RestoreScaleAfterUnpressCtrl = v, "scale");
+            Grp("Interface");
+                S("UI size (%)", 100, 200, 10, p => p.UiTextScale, (p, v) => p.UiTextScale = v, "ui text scale enlarge bigger");
             Grp("Lighting");
                 T("Alternative lights", p => p.UseAlternativeLights, (p, v) => p.UseAlternativeLights = v);
                 T("Custom light level", p => p.UseCustomLightLevel, (p, v) => p.UseCustomLightLevel = v);

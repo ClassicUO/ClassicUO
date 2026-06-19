@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using ClassicUO.Assets;
+using ClassicUO.Input;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
@@ -44,6 +45,31 @@ internal readonly struct UoFontPlugin : IPlugin
             UoFontRuntime.Hues = fileManager.Value.Hues;
             UoFontRuntime.Device = batcher.Value.GraphicsDevice;
             UoFontRuntime.Atlas = new FontGlyphAtlas(fileManager.Value.Fonts, batcher.Value.GraphicsDevice);
+        });
+
+        // Apply the global UI scale from the profile (Options "UI size").
+        // Only in-game: the login / char-select screens are full-screen fixed art
+        // that would clip when enlarged, and Options is only reachable in-game.
+        //
+        // Commit on release, NOT every frame: the "UI size" slider live-writes
+        // UiTextScale as it's dragged, and re-applying mid-drag relayouts the whole
+        // UI (incl. the options gump the knob lives in) + resizes the UI RT every
+        // frame — visible flicker, and the rescaled knob jumps out from under the
+        // cursor. Freeze the scale while the left button is held; the slider value
+        // keeps tracking at the current scale, and the new scale snaps in once the
+        // button is released.
+        app.AddSystem(Stage.First, (Res<ClassicUO.Configuration.Profile> profile, Res<State<GameState>> state, Res<MouseContext> mouse) =>
+        {
+            if (state.Value.Current != GameState.GameScreen)
+            {
+                UiScaleRuntime.Value = 1f;
+                return;
+            }
+
+            if (mouse.Value.IsPressed(MouseButtonType.Left) || mouse.Value.IsPressedOnce(MouseButtonType.Left))
+                return; // dragging — defer until release
+
+            UiScaleRuntime.Value = System.Math.Clamp(profile.Value.UiTextScale, 100, 200) / 100f;
         });
     }
 }

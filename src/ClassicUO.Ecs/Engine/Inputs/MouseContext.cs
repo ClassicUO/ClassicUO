@@ -65,12 +65,14 @@ internal class MouseContext
     // "focused" with no Game.
     protected virtual bool IsActiveWindow => _game?.IsActive ?? false;
 
-    // All public positions are LOGICAL pixels (post-DpiScale): Update divides
-    // physical input by DpiScale before feeding the library. UI layout,
-    // Camera.Bounds and gump hit-tests all reason in logical space, so a single
-    // conversion here keeps every downstream consumer consistent. AGENT_BUILD
-    // synthetic input is already logical (the agent sends UO-grid coords), so
-    // GetScale returns 1 in that path.
+    // All public positions are UI-LAYOUT pixels: Update divides physical input by
+    // DpiScale * UiScale (see GetScale) before feeding the library. EVERYTHING the
+    // client draws — gumps, text, AND the game viewport (a UI node sampling the
+    // world RT) — is laid out at logical/UiScale and upscaled by UiScale at render,
+    // so this is the one space every hit-test (gump bounds, Camera.Bounds, world
+    // pick) reasons in. Offsets are UI-space deltas for the same reason (camera pan
+    // / drag thresholds scale correctly for free). AGENT_BUILD synthetic input is
+    // already UI-grid coords → GetScale returns 1.
     public Vector2 Position => ToXna(Input.Position);
     public Vector2 PositionOffset => ToXna(Input.PositionOffset);
     public Vector2 DraggingOffset => ToXna(Input.DraggingOffset);
@@ -133,17 +135,26 @@ internal class MouseContext
 
     private static Vector2 ToXna(System.Numerics.Vector2 v) => new(v.X, v.Y);
 
+    // Combined input divisor. Physical mouse → /DpiScale (hi-DPI logical) →
+    // /UiScale (Options "UI size"). Folding UiScale in here is THE single point
+    // that makes every Position consumer UI-space: the whole client — gumps AND
+    // the game viewport (a UI node) AND world picking via camera.Bounds — is laid
+    // out at logical/UiScale and upscaled by UiScale at render, so the cursor must
+    // be divided by it once, before the library ever sees it. AGENT_BUILD synthetic
+    // input is already UI-grid coords → divisor 1.
     private (float, float) GetScale()
     {
 #if AGENT_BUILD
         if (_agentSynthEnabled) return (1f, 1f);
 #endif
+        var ui = UiScaleRuntime.Value;
+        if (ui <= 0f) ui = 1f;
         if (_game is UoGame ug)
         {
             var d = ug.DpiScale;
             if (d <= 0f) d = 1f;
-            return (d, d);
+            return (d * ui, d * ui);
         }
-        return (1f, 1f);
+        return (ui, ui);
     }
 }
