@@ -778,28 +778,34 @@ internal readonly struct PaperdollPlugin : IPlugin
                 }
             }
 
+            // Click/dclick/use/target/pickup all resolve the slot's item through
+            // PaperdollEquipUI (every consumer guards on SerialHelper.IsItem). Put
+            // it on bg + frame too — not just the icon — so the whole 19x20 square
+            // responds (icon art rarely fills the square; the frame border and the
+            // icon's transparent gaps would otherwise be dead). Mirrors how the
+            // tooltip already fires over the whole square via PaperdollSlot. Gated
+            // on a real item so empty slots stay inert. No Interaction on any of
+            // them (UiPick reads bbox+PixelHit) — adding it would let an opaque
+            // slot bbox steal UiPointerDown from chrome it overlaps.
+            var equipUi = new PaperdollEquipUI
+            {
+                ItemSerial = slotItemSerial,
+                Layer = slLayer,
+                MobileSerial = serial,
+                WindowEntity = rootId,
+            };
+
             var slotBg = builder.AddGumpTiled(commands, 0x243A, Vector3.UnitZ, new Vector2(sx, sy), new Vector2(19, 20))
                 .Insert(new PaperdollBodyChild { WindowEntity = rootId })
                 .Insert(new PaperdollSlot { MobileSerial = serial, Layer = slLayer, ItemSerial = slotItemSerial });
+            if (slotItemSerial != 0) slotBg.Insert(equipUi);
             commands.AddChild(rootId, slotBg.Id, childIdx++);
 
             if (slotArtId != 0)
             {
-                // No Interaction component: PickupPlugin's latch reads
-                // bbox+PixelHit directly via equipUiQ — Interaction is
-                // unused. Adding it makes Bevy.UI's InteractionSystem
-                // route hovers/presses to this icon, which steals
-                // UiPointerDown from buttons/chrome when the icon's
-                // bbox+opaque-pixel overlaps theirs.
                 var icon = builder.AddArtSized(commands, slotArtId, slotArtHue, new Vector2(sx, sy), new Vector2(19, 20))
                     .Insert(new PaperdollBodyChild { WindowEntity = rootId })
-                    .Insert(new PaperdollEquipUI
-                    {
-                        ItemSerial = slotItemSerial,
-                        Layer = slLayer,
-                        MobileSerial = serial,
-                        WindowEntity = rootId,
-                    })
+                    .Insert(equipUi)
                     // Same slot serial as bg/frame so the tooltip resolves via the
                     // single PaperdollSlot query regardless of which slot element
                     // is the topmost hit.
@@ -810,6 +816,7 @@ internal readonly struct PaperdollPlugin : IPlugin
             var slotFrame = builder.AddGump(commands, 0x2344, Vector3.UnitZ, new Vector2(sx, sy))
                 .Insert(new PaperdollBodyChild { WindowEntity = rootId })
                 .Insert(new PaperdollSlot { MobileSerial = serial, Layer = slLayer, ItemSerial = slotItemSerial });
+            if (slotItemSerial != 0) slotFrame.Insert(equipUi);
             commands.AddChild(rootId, slotFrame.Id, childIdx++);
         }
 
