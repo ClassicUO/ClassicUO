@@ -89,6 +89,37 @@
     <PackageReference Include="Extism.Sdk" Version="1.9.1" />
   </ItemGroup>
 
+  <!-- NEW component-model modding API (tinyecs:modding WIT). Uses the local
+       wasmtime-dotnet fork (component-model host + WIT source generator). The
+       generator emits Wit.Tinyecs.Modding.* host bindings from the .wit AdditionalFile.
+       Independent of the Extism API above. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\wasmtime-dotnet\src\Wasmtime\Wasmtime.csproj" />
+    <ProjectReference Include="..\..\..\..\wasmtime-dotnet\src\Wasmtime.SourceGenerator\Wasmtime.SourceGenerator.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <!-- One package per directory: the WIT source generator drops ALL packages
+         in a directory that holds more than one (WSGEN001), so each package's
+         .wit lives in its own folder. -->
+    <AdditionalFiles Include="EcsModding\wit\tinyecs\tinyecs.wit" />
+    <AdditionalFiles Include="EcsModding\wit\cuo\cuo-modding.wit" />
+    <!-- Deploy built mod components next to the exe (output/ecs-mods/). -->
+    <None Include="..\..\ecs-mods\*.wasm" Link="ecs-mods\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <!-- The native wasmtime.dll is a NuGet-style runtime asset of the fork; it
+       does NOT flow reliably through a ProjectReference. Copy it explicitly
+       from the fork's net9.0 output (the TFM cuo-ecs consumes) so new Engine()
+       can P/Invoke it. Windows x64 only for now. -->
+  <ItemGroup>
+    <_WasmtimeNative Include="..\..\..\..\wasmtime-dotnet\src\Wasmtime\bin\$(Configuration)\net9.0\wasmtime.dll" />
+  </ItemGroup>
+  <Target Name="CopyWasmtimeNative_build" AfterTargets="Build" Condition="'$(_IsWindows)' == 'true'">
+    <Copy SourceFiles="@(_WasmtimeNative)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" Condition="Exists('@(_WasmtimeNative)')" />
+  </Target>
+  <Target Name="CopyWasmtimeNative_publish" AfterTargets="Publish" Condition="'$(_IsWindows)' == 'true'">
+    <Copy SourceFiles="@(_WasmtimeNative)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" Condition="Exists('@(_WasmtimeNative)')" />
+  </Target>
+
   <PropertyGroup>
     <_IsWindows Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Windows)))' == 'true'">true</_IsWindows>
     <_IsMacOS Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' == 'true'">true</_IsMacOS>
@@ -100,9 +131,6 @@
     <DataFiles_lib64 Include="$(ProjectDir)..\..\external\lib64\*.*" />
     <DataFiles_osx Include="$(ProjectDir)..\..\external\osx\*.*" />
     <DataFiles_vulkan Include="$(ProjectDir)..\..\external\vulkan\icd.d\*.*" />
-    <ClayLib_Windows Include="$(ProjectDir)..\..\external\Clay-cs\Clay-builder\zig-out\bin\*.*" />
-    <ClayLib_Linux Include="$(ProjectDir)..\..\external\Clay-cs\Clay-builder\zig-out\lib\libClay.so" />
-    <ClayLib_MacOS Include="$(ProjectDir)..\..\external\Clay-cs\Clay-builder\zig-out\lib\libClay.dylib" />
   </ItemGroup>
 
   <Target Name="CopyExternalDeps_build" AfterTargets="Build">
@@ -110,9 +138,6 @@
     <Copy SourceFiles="@(DataFiles_lib64)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" Condition="'$(_IsLinux)' == 'true'" />
     <Copy SourceFiles="@(DataFiles_osx)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" Condition="'$(_IsMacOS)' == 'true'" />
     <Copy SourceFiles="@(DataFiles_vulkan)" DestinationFolder="$(OutputPath)\vulkan\icd.d\" SkipUnchangedFiles="true" Condition="'$(_IsMacOS)' == 'true'" />
-    <Copy SourceFiles="@(ClayLib_Windows)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" Condition="'$(_IsWindows)' == 'true'" />
-    <Copy SourceFiles="@(ClayLib_Linux)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" Condition="'$(_IsLinux)' == 'true'" />
-    <Copy SourceFiles="@(ClayLib_MacOS)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" Condition="'$(_IsMacOS)' == 'true'" />
   </Target>
 
   <Target Name="CopyExternalDeps_publish" AfterTargets="Publish">
@@ -120,9 +145,6 @@
     <Copy SourceFiles="@(DataFiles_lib64)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" Condition="'$(_IsLinux)' == 'true'" />
     <Copy SourceFiles="@(DataFiles_osx)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" Condition="'$(_IsMacOS)' == 'true'" />
     <Copy SourceFiles="@(DataFiles_vulkan)" DestinationFolder="$(PublishDir)\vulkan\icd.d\" SkipUnchangedFiles="true" Condition="'$(_IsMacOS)' == 'true'" />
-    <Copy SourceFiles="@(ClayLib_Windows)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" Condition="'$(_IsWindows)' == 'true'" />
-    <Copy SourceFiles="@(ClayLib_Linux)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" Condition="'$(_IsLinux)' == 'true'" />
-    <Copy SourceFiles="@(ClayLib_MacOS)" DestinationFolder="$(PublishDir)" SkipUnchangedFiles="true" Condition="'$(_IsMacOS)' == 'true'" />
   </Target>
 
   <Import Project="$(MSBuildThisFileDirectory)..\..\ClassicUO.Agent.Settings.props" Condition="Exists('$(MSBuildThisFileDirectory)..\..\ClassicUO.Agent.Settings.props')" />
