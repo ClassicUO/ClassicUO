@@ -4,6 +4,7 @@ using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Input;
 using ClassicUO.Network;
+using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
 using TinyEcs;
@@ -69,8 +70,12 @@ internal readonly struct SingleClickNamePlugin : IPlugin
         Res<GrabbedItem> grabbed,
         Res<SelectedEntity> selected,
         Res<TargetingState> targeting,
+        Res<Camera> camera,
+        Res<AssetsServer> assets,
+        UiGesturePick pick,
         Local<SingleClickNameLatch> latch,
-        Query<Data<NetworkSerial>> entities)
+        Query<Data<NetworkSerial>> entities,
+        Query<Data<GameScreenPlugin.GameWindowUI>> gameWin)
     {
         // A target cursor click on an object belongs to targeting, not naming.
         // Clear the latch (don't just freeze it) so a pending request armed in
@@ -126,6 +131,15 @@ internal readonly struct SingleClickNamePlugin : IPlugin
         // A pick that came from overhead speech text resolves to its owner, not
         // the object under the cursor.
         if (selected.Value.IsText)
+            return;
+
+        // SelectedEntity lags a frame behind the cursor (Clear in PostUpdate, the
+        // window claim in Stage.Last), so a fast move from a world object onto a
+        // gump or the gutter leaves a stale serial in Entity at release. Gate on
+        // the live cursor — name world objects only when over the world viewport.
+        // (Items inside gumps are named by RequestGumpSingleClickName.) See
+        // WorldClickGate.
+        if (!WorldClickGate.OverWorld(mouse.Value.Position, camera.Value, pick, assets.Value, gameWin))
             return;
 
         // Statics carry no NetworkSerial (StaticNameLabelPlugin handles those);

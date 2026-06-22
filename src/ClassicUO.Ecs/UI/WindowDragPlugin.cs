@@ -53,9 +53,9 @@ internal readonly struct WindowDragPlugin : IPlugin
         app.AddSystem(closeOnRightClickFn)
             .InStage(Stage.PreUpdate)
             .Build();
-        // Click-capture: any UiMovable under the cursor claims SelectedEntity
-        // at float.MaxValue so world / pickup / use systems see the window
-        // entity (which carries no NetworkSerial / Items / ContainerItemUI)
+        // Click-capture: ANY UI under the cursor (not just a UiMovable window)
+        // claims SelectedEntity at float.MaxValue so world / pickup / use systems
+        // see a UI entity (which carries no NetworkSerial / Items / ContainerItemUI)
         // and bail. Container windows have their own item-aware claim in
         // ContainerGumpPlugin.UpdateSelectedFromContainerUI; filter them out
         // here so the two systems don't race on the same entity.
@@ -67,7 +67,8 @@ internal readonly struct WindowDragPlugin : IPlugin
         Res<SelectedEntity> selected,
         Res<AssetsServer> assets,
         UiGesturePick pick,
-        Query<Data<ContainerWindow>> containers)
+        Query<Data<ContainerWindow>> containers,
+        Query<Data<GameScreenPlugin.GameWindowUI>> gameWindow)
     {
         // Resolve via the SHARED pixel-perfect hit-test, same as drag/pickup, so
         // the claim follows the real topmost element and walks to its window root.
@@ -76,18 +77,33 @@ internal readonly struct WindowDragPlugin : IPlugin
         // up to the bare UiMovable root) — those let world clicks trespass through.
         var pos = mouse.Value.Position;
         var hit = pick.Topmost(pos, assets.Value);
-        if (!hit.Found) return;
 
+        // Over the world viewport (or nothing under the cursor) -> world picking
+        // owns the click. The GameWindowUI node itself is a UI hit (it carries a
+        // BackgroundColor), so a hit on IT still counts as "over world" — the same
+        // over-world test GameCursorPlugin uses to pick the directional hand. Any
+        // other hit (a gump, the top bar, the menu bar, the viewport border, the
+        // full-screen gutter background) means the cursor is over UI.
+        if (!hit.Found || gameWindow.Contains(hit.Entity)) return;
+
+        // Over UI of ANY kind -> claim SelectedEntity so world naming / use /
+        // pickup bail (legacy UIManager.IsMouseOverUI). Resolving only to a
+        // UiMovable root was too narrow: non-movable chrome (the top bar, menu
+        // bar, viewport border, gutter background) let single- and double-clicks
+        // fall straight through to the static / object behind them. Claim the
+        // owning movable root when there is one (drop / pickup target it);
+        // otherwise the hit element itself — it carries no NetworkSerial /
+        // IsStatic either, so the world systems still bail.
         var owner = pick.MovableRoot(hit.Entity);
-        if (owner == 0) return;
+
         // Container windows have their own item-aware claim
         // (ContainerGumpPlugin.UpdateSelectedFromContainerUI) — don't race it.
-        if (containers.Contains(owner)) return;
+        if (owner != 0 && containers.Contains(owner)) return;
 
-        // bypassViewport: a movable window parked in the side gutter / top bar
-        // sits outside Camera.Bounds, so the world-pick gate is off there. The
-        // window claim must still land or drop/pickup over it silently fail.
-        selected.Value.Set(owner, float.MaxValue, bypassViewport: true);
+        // bypassViewport: UI parked in the side gutter / top bar sits outside
+        // Camera.Bounds, so the world-pick gate is off there. The claim must
+        // still land or drop / pickup over it silently fail.
+        selected.Value.Set(owner != 0 ? owner : hit.Entity, float.MaxValue, bypassViewport: true);
     }
 
     // Right-click-close with UiClick semantics: the close fires on the right

@@ -58,6 +58,26 @@ public class WindowDragSystemTests
         return id;
     }
 
+    // A non-movable UI element: solid bbox via ComputedNode + null UiCustom, but
+    // NO UiMovable tag — the top bar, the menu bar, the viewport border, the
+    // full-screen gutter background. Optionally tagged GameWindowUI to stand in
+    // for the world viewport node itself.
+    private static ulong SpawnPlainUi(World w, float left, float top, float width, float height, int paintOrder = 1, bool isGameWindow = false)
+    {
+        var id = w.Entity()
+            .Set(new Node { PositionType = PositionType.Absolute, Left = Val.Px(left), Top = Val.Px(top) })
+            .Set(new UiCustom { Data = null })
+            .Set(new ComputedNode
+            {
+                Position = new Vector2(left, top),
+                Size = new Vector2(width, height),
+                PaintOrder = paintOrder,
+            }).ID;
+        if (isGameWindow)
+            w.Set<GameScreenPlugin.GameWindowUI>(id);
+        return id;
+    }
+
     private static int CountMovables(App app)
     {
         var q = new Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>>();
@@ -159,6 +179,48 @@ public class WindowDragSystemTests
         Assert.Equal(float.MaxValue, selected.DepthZ);
         selected.Clear();
         Assert.Equal(win, selected.Entity); // claim survives the world-pick gate
+    }
+
+    // Regression: clicking NON-movable UI (the top bar, menu bar, viewport
+    // border, gutter background) must also claim SelectedEntity so world naming /
+    // use / pickup bail. The old gate only claimed when the hit walked up to a
+    // UiMovable root, so a click on the top bar fell straight through to the
+    // static / object rendered behind it (names popped over statics, objects got
+    // used). Same shape as the movable test below but with NO UiMovable tag.
+    [Fact]
+    public void Non_movable_ui_under_cursor_claims_selection()
+    {
+        var app = MakeApp(out var mouse);
+        var w = app.GetWorld();
+        var bar = SpawnPlainUi(w, left: 0, top: 0, width: 400, height: 22);
+        var selected = app.GetResource<SelectedEntity>();
+
+        mouse.Frame(Idle(40, 10), Left(40, 10));
+        app.Update();
+
+        Assert.Equal(float.MaxValue, selected.DepthZ); // claimed above everything
+        selected.Clear();
+        Assert.Equal(bar, selected.Entity);
+    }
+
+    // Invariant the fix must preserve: a hit on the GameWindowUI viewport node
+    // itself is "over the world", NOT over UI — it must NOT claim, or world
+    // clicking breaks entirely. Identical to the test above except the node is
+    // tagged GameWindowUI, which is the only thing that flips claim -> no-claim.
+    [Fact]
+    public void Game_window_viewport_hit_does_not_claim_selection()
+    {
+        var app = MakeApp(out var mouse);
+        var w = app.GetWorld();
+        var viewport = SpawnPlainUi(w, left: 0, top: 0, width: 400, height: 400, isGameWindow: true);
+        var selected = app.GetResource<SelectedEntity>();
+
+        mouse.Frame(Idle(40, 10), Left(40, 10));
+        app.Update();
+
+        Assert.Equal(0f, selected.DepthZ);       // no claim landed
+        selected.Clear();
+        Assert.NotEqual(viewport, selected.Entity);
     }
 
     [Fact]

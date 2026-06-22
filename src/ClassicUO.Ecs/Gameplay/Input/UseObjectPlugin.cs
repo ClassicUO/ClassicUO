@@ -1,5 +1,6 @@
 using System.Runtime.CompilerServices;
 using ClassicUO.Network;
+using ClassicUO.Renderer;
 using TinyEcs;
 using TinyEcs.Bevy;
 
@@ -26,11 +27,23 @@ internal readonly struct UseObjectPlugin : IPlugin
         Res<MouseContext> mouseContext,
         Res<SelectedEntity> selectedEntity,
         Res<NetClient> network,
+        Res<Camera> camera,
+        Res<AssetsServer> assets,
+        UiGesturePick pick,
         ResMut<LastUsedObjectState> lastObj,
         Query<Data<NetworkSerial>> query,
-        Query<Data<ContainerItemUI>> uiItemQ
+        Query<Data<ContainerItemUI>> uiItemQ,
+        Query<Data<GameScreenPlugin.GameWindowUI>> gameWin
     )
     {
+        // Double-click-to-use is a WORLD gesture; items inside gumps are used by
+        // their own UiDoubleClick observers. SelectedEntity lags a frame behind the
+        // cursor (Clear in PostUpdate, claim in Last), so a double-click landing on
+        // a gump or the gutter can still read a stale world serial. Gate on the
+        // live cursor. See WorldClickGate.
+        if (!WorldClickGate.OverWorld(mouseContext.Value.Position, camera.Value, pick, assets.Value, gameWin))
+            return;
+
         var target = selectedEntity.Value.Entity;
 
         // Container slot UIs are owned by ContainerGumpPlugin's

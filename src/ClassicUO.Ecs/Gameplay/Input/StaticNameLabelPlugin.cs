@@ -59,6 +59,10 @@ internal readonly struct StaticNameLabelPlugin : IPlugin
         Res<UOFileManager> fileManager,
         Res<GrabbedItem> grabbed,
         Res<SelectedEntity> selected,
+        Res<Camera> camera,
+        Res<AssetsServer> assets,
+        UiGesturePick pick,
+        Query<Data<GameScreenPlugin.GameWindowUI>> gameWin,
         Local<ClickLatch> latch,
         Commands commands,
         Query<Data<Graphic>, Filter<With<IsStatic>, Without<NetworkSerial>>> statics)
@@ -89,6 +93,14 @@ internal readonly struct StaticNameLabelPlugin : IPlugin
         // A pick that came from overhead speech text resolves to its owner, not
         // the static under the cursor.
         if (selected.Value.IsText)
+            return;
+
+        // SelectedEntity is promoted a frame late (Clear in PostUpdate, the window
+        // claim in Stage.Last), so a fast move from a world static onto a gump or
+        // the gutter leaves the STALE static in Entity at release before the claim
+        // overwrites it. Gate on the LIVE cursor instead — only name when the
+        // cursor is over the world viewport right now. See WorldClickGate.
+        if (!WorldClickGate.OverWorld(mouse.Value.Position, camera.Value, pick, assets.Value, gameWin))
             return;
 
         if (!statics.TryGet(selected.Value.Entity, out var row))
