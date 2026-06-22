@@ -307,8 +307,12 @@ internal readonly struct TargetingPlugin : IPlugin
         TargetClickQueries q)
     {
         // The click belongs to targeting whether or not it lands on something —
-        // swallow it so a miss doesn't fall through to movement/pickup.
+        // swallow it so a miss doesn't fall through to movement/pickup. Mark the
+        // gesture so the matching left-release can't arm a context-menu popup
+        // (targeting resolves on the press and clears IsTargeting before the
+        // release-time popup gate sees it).
         mouse.Value.Consume(Input.MouseButtonType.Left);
+        targeting.Value.JustTargeted = true;
 
         var ent = selected.Value.Entity;
         if (ent == 0)
@@ -521,6 +525,12 @@ internal sealed class TargetingState
     public byte Mode { get; set; }        // 0 object, 1 position, 2 multi
     public uint CursorId { get; set; }
     public byte CursorType { get; set; }  // 0 neutral, 1 harmful, 2 beneficial
+
+    // Set when ResolveTargetClick consumes a target click on the PRESS; consumed
+    // by PopupMenuTrack on the matching left-release so that release can't arm a
+    // context-menu popup for the just-targeted object. NOT reset by Clear() —
+    // Clear runs on the press frame, the release it must suppress arrives later.
+    public bool JustTargeted { get; set; }
 
     // 0x99 multi-placement preview (legacy MultiTargetInfo). The deed's multi
     // graphic + drop offset; consumed by SyncMultiPreview while Mode==2 is live.

@@ -94,7 +94,7 @@ internal readonly struct PopupMenuPlugin : IPlugin
         Res<SelectedEntity> selected,
         Res<NetClient> net,
         Res<GrabbedItem> grabbed,
-        Res<TargetingState> targeting,
+        ResMut<TargetingState> targeting,
         Res<KeyboardContext> keyboard,
         Res<Profile> profile,
         Res<GameContext> gameCtx,
@@ -115,6 +115,15 @@ internal readonly struct PopupMenuPlugin : IPlugin
         }
 
         if (!mouse.Value.IsReleased(MouseButtonType.Left)) return;
+        // A target cursor resolves on the PRESS (TargetingPlugin, Stage.First) and
+        // clears IsTargeting before this release-time gate runs, so IsTargeting is
+        // already false here. Swallow the release that ended a targeting click so
+        // it can't arm a context-menu request for the just-targeted object.
+        if (targeting.Value.JustTargeted)
+        {
+            targeting.Value.JustTargeted = false;
+            return;
+        }
         if (targeting.Value.IsTargeting) return;
         if (grabbed.Value.IsActive || grabbed.Value.Serial != 0) return;
 
