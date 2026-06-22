@@ -46,8 +46,6 @@ internal readonly struct SingleClickNamePlugin : IPlugin
         app.AddSystem(fn)
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
-            // A target cursor click on an object belongs to targeting, not naming.
-            .RunIf((Res<TargetingState> targeting) => !targeting.Value.IsTargeting)
             .Build();
 
         // The sibling path for items that live inside a gump (a container slot,
@@ -60,7 +58,6 @@ internal readonly struct SingleClickNamePlugin : IPlugin
         app.AddSystem(gumpFn)
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> state) => state.Value.Current == GameState.GameScreen)
-            .RunIf((Res<TargetingState> targeting) => !targeting.Value.IsTargeting)
             .Build();
     }
 
@@ -71,9 +68,21 @@ internal readonly struct SingleClickNamePlugin : IPlugin
         Res<GameContext> gameCtx,
         Res<GrabbedItem> grabbed,
         Res<SelectedEntity> selected,
+        Res<TargetingState> targeting,
         Local<SingleClickNameLatch> latch,
         Query<Data<NetworkSerial>> entities)
     {
+        // A target cursor click on an object belongs to targeting, not naming.
+        // Clear the latch (don't just freeze it) so a pending request armed in
+        // the double-click window before the cursor came up can't fire after the
+        // target click clears IsTargeting.
+        if (targeting.Value.IsTargeting)
+        {
+            latch.Value.Pending = false;
+            latch.Value.Armed = false;
+            return;
+        }
+
         // Server-side tooltips on -> the hover OPL request owns naming.
         if (TooltipsEnabled(gameCtx.Value))
         {
@@ -146,6 +155,7 @@ internal readonly struct SingleClickNamePlugin : IPlugin
         Res<GameContext> gameCtx,
         Res<GrabbedItem> grabbed,
         Res<AssetsServer> assets,
+        Res<TargetingState> targeting,
         UiGesturePick pick,
         Local<SingleClickNameLatch> latch,
         ResMut<GumpNameClickPos> clickPos,
@@ -153,6 +163,13 @@ internal readonly struct SingleClickNamePlugin : IPlugin
         Query<Data<PaperdollEquipUI>> equipItems,
         Query<Data<PaperdollBackpackUI>> backpackUi)
     {
+        if (targeting.Value.IsTargeting)
+        {
+            latch.Value.Pending = false;
+            latch.Value.Armed = false;
+            return;
+        }
+
         if (TooltipsEnabled(gameCtx.Value))
         {
             latch.Value.Pending = false;

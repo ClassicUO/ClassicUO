@@ -165,7 +165,6 @@ internal readonly struct NameplatePlugin : IPlugin
             .AddSystem(singleClickFn)
                 .InStage(Stage.Update)
                 .RunIf((Res<State<GameState>> s) => s.Value.Current == GameState.GameScreen)
-                .RunIf((Res<TargetingState> t) => !t.Value.IsTargeting)
                 .Build()
             .AddSystem(disposeFn)
                 .OnExit(GameState.GameScreen)
@@ -815,11 +814,22 @@ internal readonly struct NameplatePlugin : IPlugin
         Res<NameplateState> state,
         Res<AssetsServer> assets,
         Res<GrabbedItem> grabbed,
+        Res<TargetingState> targeting,
         Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
         Query<Data<TinyEcs.Parent>> parents,
         Query<Data<NameplateUI>> platesQ)
     {
         var st = state.Value;
+
+        // A target cursor click belongs to targeting, not naming. Clear the
+        // pending request (don't just freeze it) so one armed before the cursor
+        // came up can't fire after the target click clears IsTargeting.
+        if (targeting.Value.IsTargeting)
+        {
+            st.PendingClickSerial = 0;
+            st.PressedPlate = 0;
+            return;
+        }
 
         // A second click landed -> the double-click path owns the gesture.
         if (st.PendingClickSerial != 0 && mouse.Value.IsPressedDouble(MouseButtonType.Left))
