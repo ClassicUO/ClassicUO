@@ -8,14 +8,25 @@ ClassicUO — open-source Ultima Online Classic Client. C# / .NET 9.0 / FNA-XNA.
 
 ## Build & Run
 
+The `Makefile` is the cross-platform task runner (Linux / macOS / Windows git-bash; needs dotnet, cargo + the `wasm32-wasip2` target, node/npm):
+
+```bash
+make build-mods    # build the WASM mods → ecs-mods/<mod>/{mod.wasm,mod.json}
+make test          # build mods, then run the test suite
+make run-debug     # build mods, then run cuo-ecs (Debug)
+make run-release   # build mods, then run cuo-ecs (Release)
+make publish       # AOT publish (Bootstrap + Client lib + cuo-ecs), per-OS RID
+```
+
+Raw dotnet still works for non-mod work:
+
 ```bash
 dotnet build                                      # dev build
 dotnet build -c Release
-./scripts/build-naot.sh                           # AOT release
-dotnet test
-dotnet run --project src/ClassicUO.Bootstrap     # run
-dotnet run --project src/ClassicUO.Bootstrap -- --renderer OpenGL
+./scripts/build-naot.sh                           # AOT release (Makefile `publish` mirrors this)
 ```
+
+**The modding tests load mods from `ecs-mods/<mod>/mod.wasm`** — run `make test` (or `make build-mods` once, then `dotnet test`). A bare `dotnet test` on a tree without built mods fails fast with a "run `make build-mods`" assert. `ecs-mods/` is gitignored; the mods are rebuilt from `src/Mods/ecs-*`.
 
 **You MUST build and run `ClassicUO.Ecs` (the ECS exe, `cuo-ecs`) after non-trivial changes** to confirm boot + golden-path behaviour. Type-check alone is not sufficient. `ClassicUO.Client` is the legacy OOP build target and is no longer the runtime path.
 

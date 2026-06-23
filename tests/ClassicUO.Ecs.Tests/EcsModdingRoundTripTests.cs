@@ -25,20 +25,22 @@ public class EcsModdingRoundTripTests
     // 14MB ui mod doesn't load in every test). Injected via ModdingConfig.ModFolder.
     private const string IsolatedModFolder = "iso-mods";
 
-    private static App BuildAppWith(string wasmFile)
+    // Resolve <repo>/ecs-mods/<modName>/mod.wasm (built by `make build-mods`), copy
+    // it into a fresh isolated folder so only this one mod loads, point cwd there,
+    // and return a bare App with the plugin (ModFolder injected for isolation).
+    private static App BuildAppWith(string modName)
     {
-        var baseDir = AppContext.BaseDirectory;
-        var src = Path.Combine(baseDir, wasmFile);
-        Assert.True(File.Exists(src), $"guest component missing: {src}");
+        var srcWasm = Path.Combine(RepoRoot(), "ecs-mods", modName, "mod.wasm");
+        Assert.True(File.Exists(srcWasm),
+            $"mod not built: {srcWasm} — run `make build-mods` (or `make test`)");
 
-        var modName = Path.GetFileNameWithoutExtension(wasmFile);
         var root = Path.Combine(Path.GetTempPath(), "cuo-ecsmod-" + modName);
         var modsDir = Path.Combine(root, IsolatedModFolder);
         if (Directory.Exists(modsDir))
             Directory.Delete(modsDir, recursive: true);
         var modDir = Path.Combine(modsDir, modName);
         Directory.CreateDirectory(modDir);
-        File.Copy(src, Path.Combine(modDir, "mod.wasm"), overwrite: true);
+        File.Copy(srcWasm, Path.Combine(modDir, "mod.wasm"), overwrite: true);
         File.WriteAllText(Path.Combine(modDir, "mod.json"),
             $"{{\"name\":\"{modName}\",\"version\":\"0.0.0\",\"wasm\":\"mod.wasm\",\"ruleset\":{{}}}}");
         Directory.SetCurrentDirectory(root);
@@ -49,10 +51,21 @@ public class EcsModdingRoundTripTests
         return app;
     }
 
+    // Walk up from the test assembly dir to the repo root (the dir holding .git).
+    private static string RepoRoot()
+    {
+        var dir = new DirectoryInfo(AppContext.BaseDirectory);
+        while (dir != null && !Directory.Exists(Path.Combine(dir.FullName, ".git"))
+                           && !File.Exists(Path.Combine(dir.FullName, ".git")))
+            dir = dir.Parent;
+        Assert.True(dir != null, "repo root (.git) not found above " + AppContext.BaseDirectory);
+        return dir!.FullName;
+    }
+
     [Fact]
     public void Mod_adds_button_to_topbar_and_reacts_to_click()
     {
-        var app = BuildAppWith("ecs_topbar.wasm");
+        var app = BuildAppWith("topbar");
 
         // One-shot click injector: once a mod-owned interactive entity exists,
         // emit UiClick on it (the host observer should tag it ModClicked).
@@ -112,7 +125,7 @@ public class EcsModdingRoundTripTests
     [Fact]
     public void Mod_finds_gump_by_traversal_and_injects_no_host_cooperation()
     {
-        var app = BuildAppWith("ecs_topbar.wasm");
+        var app = BuildAppWith("topbar");
         app.RunStartup();
 
         var world = app.GetWorld();
@@ -149,7 +162,7 @@ public class EcsModdingRoundTripTests
     [Fact]
     public void Mod_replaces_status_bar_reads_stats_and_sends_on_lock_click()
     {
-        var app = BuildAppWith("ecs_status.wasm");
+        var app = BuildAppWith("status");
         // net-send target — Send no-ops offline, but the bridge → NetClient path runs.
         app.AddResource(new ClassicUO.Network.NetClient());
 
@@ -292,7 +305,7 @@ public class EcsModdingRoundTripTests
     [Fact]
     public void Mod_observes_incoming_packets_via_custom_event()
     {
-        var app = BuildAppWith("ecs_topbar.wasm"); // any mod loaded → tap gate opens
+        var app = BuildAppWith("topbar"); // any mod loaded → tap gate opens
 
         var seen = new System.Collections.Generic.List<(byte id, string payload)>();
         app.AddObserver<On<ModIncomingPacket>>(t =>
@@ -322,7 +335,7 @@ public class EcsModdingRoundTripTests
     [Fact]
     public void Netlog_mod_live_lists_incoming_packets()
     {
-        var app = BuildAppWith("ecs_netlog.wasm");
+        var app = BuildAppWith("netlog");
         app.RunStartup();
         app.Update(); // mod-netlog-init spawns the window (one-shot guard)
 
@@ -359,7 +372,7 @@ public class EcsModdingRoundTripTests
     [Fact]
     public void Netlog_autoscroll_checkbox_toggles_when_mark_clicked()
     {
-        var app = BuildAppWith("ecs_netlog.wasm");
+        var app = BuildAppWith("netlog");
         app.RunStartup();
         app.Update(); // window + checkbox spawn
 
@@ -395,7 +408,7 @@ public class EcsModdingRoundTripTests
     [Fact]
     public void Jco_react_storybook_renders_and_tooltip_shows_on_hover()
     {
-        var app = BuildAppWith("ecs_ui.wasm");
+        var app = BuildAppWith("ui");
 
         // The bare modding app has no Clay pointer pipeline, so Interaction never
         // flips to Hovered on its own. Simulate the cursor resting on the icon

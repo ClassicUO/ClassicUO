@@ -6,7 +6,7 @@
   "scripts": {
     "types": "jco guest-types wit -o generated",
     "bundle": "node esbuild.mjs",
-    "componentize": "jco componentize dist/index.js --wit wit --world-name ecs-ui --disable http --disable fetch-event --out ../../../ecs-mods/ecs_ui.wasm",
+    "componentize": "jco componentize dist/index.js --wit wit --world-name ecs-ui --disable http --disable fetch-event --out dist/ecs_ui.wasm",
     "build": "npm run bundle && npm run componentize"
   },
   "dependencies": {
