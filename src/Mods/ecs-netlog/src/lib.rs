@@ -14,8 +14,9 @@ wit_bindgen::generate!({
 });
 
 use crate::tinyecs::modding::app::{
-    Color, Component, ComponentValue, Entity, EntityCommands, NameRec, NodeRec, ObserverEvent,
-    QueryFor, Schedule, System, TextFontRec, TextRec, UiRect, Val, ZRec,
+    AlignItems, Color, Component, ComponentValue, Display, Entity, EntityCommands, FlexDirection,
+    JustifyContent, NameRec, NodeRec, ObserverEvent, Overflow, PositionType, QueryFor, Schedule,
+    System, TextFontRec, TextRec, UiRect, Val, ZRec,
 };
 use base64::Engine as _;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering::Relaxed};
@@ -317,12 +318,12 @@ fn zero_rect() -> UiRect {
 }
 fn base_node() -> NodeRec {
     NodeRec {
-        display: 0,
-        position_type: 0,
-        overflow: 0,
-        flex_direction: 0,
-        justify_content: 0,
-        align_items: 0,
+        display: Display::Flex,
+        position_type: PositionType::Relative,
+        overflow: Overflow::Visible,
+        flex_direction: FlexDirection::Row,
+        justify_content: JustifyContent::Start,
+        align_items: AlignItems::Start,
         width: auto(),
         height: auto(),
         min_width: auto(),
@@ -340,15 +341,15 @@ fn base_node() -> NodeRec {
     }
 }
 fn abs_node(left: f32, top: f32, w: f32, h: f32) -> NodeRec {
-    NodeRec { position_type: 1, left: px(left), top: px(top), width: px(w), height: px(h), ..base_node() }
+    NodeRec { position_type: PositionType::Absolute, left: px(left), top: px(top), width: px(w), height: px(h), ..base_node() }
 }
-/// Absolute, scrollable flex column (Overflow.Scroll=2, FlexDirection.Column=1).
+/// Absolute, scrollable flex column.
 fn scroll_node(left: f32, top: f32, w: f32, h: f32) -> NodeRec {
     NodeRec {
-        position_type: 1,
-        display: 0,
-        flex_direction: 1,
-        overflow: 2,
+        position_type: PositionType::Absolute,
+        display: Display::Flex,
+        flex_direction: FlexDirection::Column,
+        overflow: Overflow::Scroll,
         left: px(left),
         top: px(top),
         width: px(w),
@@ -358,7 +359,7 @@ fn scroll_node(left: f32, top: f32, w: f32, h: f32) -> NodeRec {
 }
 /// In-flow row inside the scroll column.
 fn row_node() -> NodeRec {
-    NodeRec { position_type: 0, width: px(WIN_W - 30.0), height: px(ROW_H), ..base_node() }
+    NodeRec { position_type: PositionType::Relative, width: px(WIN_W - 30.0), height: px(ROW_H), ..base_node() }
 }
 fn color(r: f32, g: f32, b: f32, a: f32) -> Color {
     Color { r, g, b, a }

@@ -36,8 +36,9 @@ wit_bindgen::generate!({
 use crate::cuo::modding::net::Net;
 use crate::cuo::modding::ui::Ui;
 use crate::tinyecs::modding::app::{
-    Color, Component, ComponentValue, Entity, NameRec, NodeRec, QueryFor, Schedule, System,
-    TextFontRec, TextRec, UiRect, Val, ZRec,
+    AlignItems, Color, Component, ComponentValue, Display, Entity, FlexDirection, JustifyContent,
+    NameRec, NodeRec, Overflow, PositionType, QueryFor, Schedule, System, TextFontRec, TextRec,
+    UiRect, Val, ZRec,
 };
 
 // ── host constants (StatusBarPlugin.cs) ─────────────────────────────────────
@@ -463,12 +464,12 @@ fn zero_rect() -> UiRect {
 }
 fn base_node() -> NodeRec {
     NodeRec {
-        display: 0,
-        position_type: 0,
-        overflow: 0,
-        flex_direction: 0,
-        justify_content: 0,
-        align_items: 0,
+        display: Display::Flex,
+        position_type: PositionType::Relative,
+        overflow: Overflow::Visible,
+        flex_direction: FlexDirection::Row,
+        justify_content: JustifyContent::Start,
+        align_items: AlignItems::Start,
         width: auto(),
         height: auto(),
         min_width: auto(),
@@ -488,7 +489,7 @@ fn base_node() -> NodeRec {
 /// Absolutely-positioned, fixed-size node.
 fn abs_node(left: f32, top: f32, w: f32, h: f32) -> NodeRec {
     NodeRec {
-        position_type: 1,
+        position_type: PositionType::Absolute,
         left: px(left),
         top: px(top),
         width: px(w),

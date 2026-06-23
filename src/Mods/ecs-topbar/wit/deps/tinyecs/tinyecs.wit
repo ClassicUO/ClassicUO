@@ -31,6 +31,25 @@ interface app {
 			schedule: schedule,
 			systems: list<borrow<system>>,
 		);
+
+		/// Register an observer. `name` MUST match a guest export with signature
+		/// func(entity: u64, json: string) — json is the component value for
+		/// insert/remove, "" for spawn/despawn. Fired events are buffered and
+		/// dispatched at a safe point (end of frame), so the callback may mutate
+		/// the world through commands without re-entrancy hazards.
+		add-observer: func(name: string, evt: observer-event);
+	}
+
+	/// Lifecycle/component events a mod can observe. Insert/remove carry the
+	/// component type-path (must be a host-registered component).
+	variant observer-event {
+		spawn,
+		despawn,
+		insert(string),
+		remove(string),
+		// A host-registered custom event, by name. Fired via commands.emit-event
+		// (mod) or the host's own EmitTrigger — both reach this observer.
+		custom(string),
 	}
 
 	/// A system the mod defines. Name MUST match a guest export.
@@ -80,6 +99,11 @@ interface app {
 		/// button before gameplay reads it. (Keyboard consume needs library
 		/// support and is a follow-up.)
 		input-consume-mouse: func(button: u8);
+
+		/// Emit a host-registered custom event by name (entity 0 = global). The
+		/// host fires it as a typed trigger, so host systems and any mod observing
+		/// `custom(name)` both receive it. No-op if `name` is not registered.
+		emit-event: func(name: string, entity: u64, json: string);
 	}
 
 	/// Queued edits for a single entity.
@@ -96,7 +120,6 @@ interface app {
 		add-child: func(child: borrow<entity>, index: u32);
 
 		despawn: func();
-		try-despawn: func();
 	}
 
 	/// An entity identifier handle.
@@ -160,8 +183,9 @@ interface app {
 
 	// ── Typed component records (the no-JSON path) ────────────────────────────
 	// Each mirrors a host component's serializable shape. Enum fields cross as
-	// u8 (the host casts). Adding a component here = a new variant case + a host
-	// converter + regen (the cost of going typed vs the string registry).
+	// WIT enums (the host casts the discriminant). Adding a component here = a
+	// new variant case + a host converter + regen (the cost of going typed vs
+	// the string registry).
 
 	/// A length value. kind: 0=auto, 1=px, 2=percent (ValType).
 	record val { kind: u8, value: f32 }
@@ -172,16 +196,23 @@ interface app {
 	/// RGBA, 0-255 floats (Clay.Color).
 	record color { r: f32, g: f32, b: f32, a: f32 }
 
-	/// Bevy.UI Node (layout). Enum fields are u8: display(0=flex,1=none),
-	/// position-type(0=relative,1=absolute), overflow, flex-direction(0=row,
-	/// 1=column), justify-content / align-items (0=start,1=center,2=end).
+	/// Bevy.UI Node layout enums. Case order = host enum order (Val.cs) = the
+	/// former u8 values, so the host casts the discriminant straight across.
+	enum display          { flex, none }
+	enum position-type    { relative, absolute }
+	enum overflow         { visible, clip, scroll }
+	enum flex-direction   { row, column }
+	enum justify-content  { start, center, end }
+	enum align-items      { start, center, end }
+
+	/// Bevy.UI Node (layout).
 	record node-rec {
-		display: u8,
-		position-type: u8,
-		overflow: u8,
-		flex-direction: u8,
-		justify-content: u8,
-		align-items: u8,
+		display: display,
+		position-type: position-type,
+		overflow: overflow,
+		flex-direction: flex-direction,
+		justify-content: justify-content,
+		align-items: align-items,
 		width: val, height: val,
 		min-width: val, min-height: val,
 		max-width: val, max-height: val,

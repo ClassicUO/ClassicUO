@@ -35,10 +35,21 @@ const APPEND = 0xffffffff;
 // NodeProxy uses ValProxy {type,value} (type = ValType); node-rec uses {kind,value}.
 const val = (p: any) => ({ kind: p.type, value: p.value });
 const rect = (r: any) => ({ left: val(r.left), right: val(r.right), top: val(r.top), bottom: val(r.bottom) });
+
+// node-rec's enum fields are WIT enums now (not u8), which jco lowers to the
+// kebab-case case name. NodeProxy still carries the 0-based int the reconciler
+// builds, so index these by it. Order must match the WIT enum case order.
+const DISPLAY = ['flex', 'none'];
+const POSITION = ['relative', 'absolute'];
+const OVERFLOW = ['visible', 'clip', 'scroll'];
+const FLEX_DIR = ['row', 'column'];
+const JUSTIFY = ['start', 'center', 'end'];
+const ALIGN = ['start', 'center', 'end'];
+
 function nodeRec(n: NodeProxy) {
   return {
-    display: n.display, positionType: n.positionType, overflow: n.overflow,
-    flexDirection: n.flexDirection, justifyContent: n.justifyContent, alignItems: n.alignItems,
+    display: DISPLAY[n.display], positionType: POSITION[n.positionType], overflow: OVERFLOW[n.overflow],
+    flexDirection: FLEX_DIR[n.flexDirection], justifyContent: JUSTIFY[n.justifyContent], alignItems: ALIGN[n.alignItems],
     width: val(n.width), height: val(n.height),
     minWidth: val(n.minWidth), minHeight: val(n.minHeight), maxWidth: val(n.maxWidth), maxHeight: val(n.maxHeight),
     left: val(n.left), top: val(n.top), right: val(n.right), bottom: val(n.bottom),

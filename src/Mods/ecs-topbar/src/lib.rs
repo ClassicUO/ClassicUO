@@ -16,8 +16,8 @@ wit_bindgen::generate!({
 
 // App/Commands/Query are already in scope from the generated bindings.
 use crate::tinyecs::modding::app::{
-    Color, Component, ComponentValue, Entity, NodeRec, QueryFor, Schedule, System, TextFontRec,
-    TextRec, UiRect, Val,
+    AlignItems, Color, Component, ComponentValue, Display, Entity, FlexDirection, JustifyContent,
+    NodeRec, Overflow, PositionType, QueryFor, Schedule, System, TextFontRec, TextRec, UiRect, Val,
 };
 use std::sync::atomic::{AtomicBool, Ordering};
 
@@ -261,12 +261,12 @@ fn rect_auto() -> UiRect { UiRect { left: auto(), right: auto(), top: auto(), bo
 // omitted fields take the host's defaults.
 fn abs_node_cv(left: f64, top: f64, w: f64, h: f64) -> ComponentValue {
     ComponentValue::Node(NodeRec {
-        display: 0,
-        position_type: 1, // absolute
-        overflow: 0,
-        flex_direction: 0,
-        justify_content: 0,
-        align_items: 0,
+        display: Display::Flex,
+        position_type: PositionType::Absolute,
+        overflow: Overflow::Visible,
+        flex_direction: FlexDirection::Row,
+        justify_content: JustifyContent::Start,
+        align_items: AlignItems::Start,
         width: px(w),
         height: px(h),
         min_width: auto(),
