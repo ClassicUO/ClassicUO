@@ -1,339 +1,69 @@
+// ClassicUO's composition of the generic component-model modding runtime
+// (TinyEcs.Bevy.Modding). The reusable library owns mod loading + per-stage
+// dispatch + the click bridge; this plugin supplies the cuo-specific pieces:
+//   - the cuo component/resource registry (CuoModdingRegistry),
+//   - per-mod linker hooks (cuo:modding/net + /ui imports, input-consume wiring),
+//   - the UO network tap drain (cuo:net/incoming poll-entities).
+
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Text.Json.Serialization.Metadata;
-using ClassicUO.Assets;
-using ClassicUO.Configuration;
-using ClassicUO.Ecs.Modding;
-using ClassicUO.Ecs.Modding.Guest;
-using ClassicUO.Ecs.Modding.Host;
-using ClassicUO.Ecs.Modding.UI;
-using ClassicUO.Game.Data;
 using ClassicUO.Input;
-using ClassicUO.IO;
-using ClassicUO.Network;
-using ClassicUO.Utility;
-using Extism.Sdk;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Input;
 using TinyEcs;
 using TinyEcs.Bevy;
+using TinyEcs.Bevy.Modding;
+// Alias: this plugin is also named ModdingPlugin, so an unqualified ModdingPlugin
+// in this file resolves to itself; reference the generic component-model runtime
+// (TinyEcs.Bevy.Modding.ModdingPlugin) by an unambiguous alias.
+using ModdingRuntimePlugin = TinyEcs.Bevy.Modding.ModdingPlugin;
 
-namespace ClassicUO.Ecs;
-
-// https://github.com/bakcxoj/bevy_wasm
-// https://github.com/mhmd-azeez/extism-space-commander/blob/main/scripts/mod_manager.cs#L161
+namespace ClassicUO.Ecs.Modding;
 
 internal readonly struct ModdingPlugin : IPlugin
 {
     public void Build(App app)
     {
-        // Host functions reach resources + world through the App; register it
-        // as a resource so SetupMods can capture it for the Extism user-data.
-        app.AddResource(app);
-
-        var setupModsFn = SetupMods;
-        var modInitFn = ModInitialize;
-        var modUpdateFn = ModUpdate;
-        var modEventsFn = ModEvents;
-        var modReadEventsFn = ReadModEvents;
-
-        app
-            .AddSystem(Stage.Startup, setupModsFn)
-
-            .AddObserver(modInitFn)
-
-            // SingleThreaded: host functions invoked from inside Plugin.Call
-            // (on_update / on_event) mutate TinyEcs.World directly (Api.cs), so
-            // these systems must not share a parallel batch with any system
-            // touching the same data. on_init runs in the observer below, which
-            // already fires serially at a sync point.
-            .AddSystem(modUpdateFn)
-            .InStage(Stage.Update)
-            .SingleThreaded()
-            .Build()
-
-            .AddSystem(modEventsFn)
-            .InStage(Stage.Update)
-            .SingleThreaded()
-            .RunIf((EventReader<HostMessage> reader) => reader.HasEvents)
-            .Build()
-
-            .AddSystem(modReadEventsFn)
-            .InStage(Stage.Update)
-            .RunIf((EventReader<(Mod, PluginMessage)> reader) => reader.HasEvents)
-            .Build();
-
-        foreach (var state in Enum.GetValues<GameState>())
+        // cuo registry + per-mod hooks → the generic plugin's config. Reuse a
+        // pre-registered config if present (tests inject a ModFolder for true
+        // isolation); otherwise create the default. Either way supply the cuo
+        // registry + hooks before AddPlugin<ModdingPlugin> so the lib picks it up.
+        var hadConfig = app.HasResource<ModdingConfig>();
+        var config = hadConfig ? app.GetResource<ModdingConfig>() : new ModdingConfig();
+        config.Registry = CuoModdingRegistry.Build();
+        config.PerMod.Add((linker, ctx) =>
         {
-            app.AddSystem((EventWriter<HostMessage> hostMsgs, Res<State<GameState>> state)
-                              => hostMsgs.Send(new HostMessage.GameStateChanged(state.Value.Current)))
-                .OnEnter(state)
-                .Build();
-        }
+            // cuo-specific imports (UO networking + UI helpers). Defined
+            // unconditionally — harmless if a mod doesn't import cuo:modding,
+            // required if it does.
+            linker.Define(new CuoNetBridge(ctx));
+            // Route the generic input-consume capability to the cuo MouseContext.
+            CuoModBridge.WireInput(ctx);
+            // A mod is present → open the network tap so PacketReader emits the
+            // cuo:net/incoming event. No mods loaded ⇒ never set ⇒ zero per-packet cost.
+            ctx.App!.GetResource<ModNetTap>().Tapped = true;
+        });
+        if (!hadConfig)
+            app.AddResource(config);
 
+        // Network tap (observe/block). NetworkPlugin also registers it in the full
+        // app; guard so the bare modding app (tests) has it too.
+        if (!app.HasResource<ModNetTap>())
+            app.AddResource(new ModNetTap());
 
-        app.AddPlugin<InputPlugin>();
-        app.AddPlugin<TextPlugin>();
-        app.AddPlugin<UIEventsPlugin>();
+        // The generic modding runtime (loader + per-stage dispatch + click bridge).
+        // Added before the cuo systems below so their Before/After labels resolve.
+        app.AddPlugin<ModdingRuntimePlugin>();
     }
 
-
-    private static void SetupMods(
-        Commands commands,
-        Res<App> appRes,
-        Res<Settings> settings
-    )
-    {
-        var app = appRes.Value;
-
-        Extism.Sdk.Plugin.ConfigureFileLogging("stdout", LogLevel.Info);
-        Console.WriteLine("extism version: {0}", Extism.Sdk.Plugin.ExtismVersion());
-        var requiredFunctions = new[] { "on_init", "on_update", "on_event" };
-
-        foreach (var path in settings.Value.Plugins)
-        {
-            var isUrl = Uri.TryCreate(path, UriKind.Absolute, out var uri);
-
-            if (!isUrl && !File.Exists(path))
-            {
-                Console.WriteLine("{0} not found", path);
-                continue;
-            }
-
-            Mod mod = null;
-            var modRef = new WeakReference<Mod>(mod);
-
-            HostFunction[] functions = Api.Functions(modRef, app);
-
-            var manifest = new Manifest(uri?.IsFile ?? true ? new PathWasmSource(path) : new UrlWasmSource(uri));
-            using var compiled = new Extism.Sdk.CompiledPlugin(manifest, functions, true);
-            var plugin = compiled.Instantiate();
-
-            var ok = true;
-            foreach (var fnName in requiredFunctions)
-            {
-                if (!plugin.FunctionExists(fnName))
-                {
-                    ok = false;
-                    Console.WriteLine("{0} is not a valid wasm plugin. Missing {1} function", path, fnName);
-                    break;
-                }
-            }
-
-            if (!ok)
-            {
-                plugin.Dispose();
-                continue;
-            }
-
-            mod = new Mod(plugin);
-            commands.Spawn()
-                .Insert(new WasmMod() { Mod = mod });
-
-            modRef.SetTarget(mod);
-        }
-    }
-
-    private static void ModInitialize(OnAdd<WasmMod> trigger, Commands commands)
-    {
-        var pluginVersion = new WasmPluginVersion().ToJson();
-
-        commands.Entity(trigger.EntityId)
-            .Insert<WasmInitialized>();
-
-        var result = trigger.Component.Mod.Plugin.Call("on_init", pluginVersion);
-    }
-
-    private static void ModUpdate(Query<Data<WasmMod>> query, Res<Time> time)
-    {
-        var timeProxy = new TimeProxy(time.Value.Total, time.Value.Frame).ToJson();
-        foreach ((_, var mod) in query)
-        {
-            try
-            {
-                var result = mod.Ref.Mod.Plugin.Call("on_update", timeProxy);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("on_update failed: {0}", e);
-            }
-        }
-    }
-
-    private static void ModEvents(
-        Query<Data<WasmMod>> query,
-        EventReader<HostMessage> reader,
-        EventWriter<(Mod, PluginMessage)> writer,
-        Local<List<HostMessage>> messages
-    )
-    {
-        messages.Value.Clear();
-
-        foreach (var msg in reader.Read())
-            messages.Value.Add(msg);
-        var jsonEvents = new HostMessages(messages.Value).ToJson();
-
-        foreach ((_, var mod) in query)
-        {
-            var result = mod.Ref.Mod.Plugin.Call("on_event", jsonEvents);
-            // if (!string.IsNullOrEmpty(result))
-            // {
-            //     var eventsOut = JsonSerializer.Deserialize<PluginMessages>(result);
-            //     foreach (var ev in eventsOut.Messages)
-            //         writer.Enqueue((mod.Ref.Mod, ev));
-            // }
-        }
-    }
-
-    private static void ReadModEvents(
-        Res<PacketsMap> packetMap,
-        Res<AssetsServer> assets,
-        Res<NetClient> network,
-        Res<GameContext> gameCtx,
-        Res<Settings> settings,
-        EventReader<(Mod, PluginMessage)> reader
-    )
-    {
-        foreach ((var mod, var ev) in reader.Read())
-        {
-            switch (ev)
-            {
-                case PluginMessage.LoginRequest loginRequest:
-                    network.Value.Connect(settings.Value.IP, settings.Value.Port);
-
-                    if (!network.Value.IsConnected)
-                        continue;
-
-                    network.Value.Encryption?.Initialize(true, network.Value.LocalIP);
-
-                    if (gameCtx.Value.ClientVersion >= ClientVersion.CV_6040)
-                    {
-                        // NOTE: im forcing the use of latest client just for convenience rn
-                        var major = (byte)((uint)gameCtx.Value.ClientVersion >> 24);
-                        var minor = (byte)((uint)gameCtx.Value.ClientVersion >> 16);
-                        var build = (byte)((uint)gameCtx.Value.ClientVersion >> 8);
-                        var extra = (byte)gameCtx.Value.ClientVersion;
-
-                        network.Value.Send_Seed(network.Value.LocalIP, major, minor, build, extra);
-                    }
-                    else
-                    {
-                        network.Value.Send_Seed_Old(network.Value.LocalIP);
-                    }
-
-                    network.Value.Send_FirstLogin(loginRequest.Username, loginRequest.Password);
-
-                    break;
-
-                case PluginMessage.ServerLoginRequest serverLoginRequest:
-                    if (network.Value.IsConnected)
-                    {
-                        network.Value.Send_SelectServer(serverLoginRequest.Index);
-                    }
-
-                    break;
-
-                // Generic mod-driven intent. A real handler dispatches on Topic
-                // (e.g. "logout" -> disconnect, "skill.use" -> send packet). Here
-                // it logs to prove the mod->host round-trip closes.
-                case PluginMessage.CustomAction custom:
-                    Console.WriteLine("[mod-custom] topic={0} json={1}", custom.Topic, custom.Json);
-                    break;
-            }
-        }
-
-        // foreach ((var mod, var ev) in reader)
-        // {
-        //     switch (ev)
-        //     {
-        //         case PluginMessage.SetPacketHandler setHandler:
-        //             if (mod.Plugin.FunctionExists(setHandler.FuncName))
-        //             {
-        //                 packetMap.Value[setHandler.PacketId] = buffer =>
-        //                     mod.Plugin.Call(setHandler.FuncName, buffer);
-        //             }
-        //             else
-        //             {
-        //                 Console.WriteLine("trying to assing the handler {0:X2} but function name {1} doesn't exists in the following plugin {2}",
-        //                     setHandler.PacketId, setHandler.FuncName, mod.Plugin.Id);
-        //             }
-
-        //             break;
-
-
-        //         case PluginMessage.OverrideAsset overrideAsset:
-        //             if (overrideAsset.AssetType == AssetType.Gump)
-        //             {
-        //                 var data = MemoryMarshal.Cast<byte, uint>(Convert.FromBase64String(overrideAsset.DataBase64));
-        //                 assets.Value.Gumps.SetGump(overrideAsset.Idx, data, overrideAsset.Width, overrideAsset.Height);
-        //             }
-        //             break;
-
-        //         case PluginMessage.SetComponent<Graphic> setter:
-        //             setComponent(world, setter);
-        //             break;
-        //         case PluginMessage.SetComponent<Hue> setter:
-        //             setComponent(world, setter);
-        //             break;
-        //     }
-
-
-        //     static void setComponent<T>(World world, PluginMessage.SetComponent<T> setter) where T : struct
-        //     {
-        //         if (!world.Exists(setter.Entity))
-        //             return;
-
-        //         var cmpEnt = world.Entity<T>();
-        //         ref var cmp = ref cmpEnt.Get<ComponentInfo>();
-
-        //         if (cmp.Size > 0)
-        //             world.Set(setter.Entity, setter.Value);
-        //         else
-        //             world.Add<T>(setter.Entity);
-        //     }
-        // }
-    }
 }
 
-
-
-internal struct WasmMod
+// cuo host-capability wiring for one mod context. Shared by the plugin's per-mod
+// hook and the bridge tests so both exercise the same code (the lib owns no input
+// device of its own; the host routes the generic input-consume capability here).
+internal static class CuoModBridge
 {
-    public Mod Mod;
-}
-
-internal struct WasmInitialized;
-
-
-
-
-internal record struct WasmPluginVersion(uint Version = 1);
-internal record struct TimeProxy(float Total, float Frame);
-internal record struct PacketHandlerInfo(byte PacketId, string FuncName);
-internal record struct SpriteDescription(AssetType AssetType, uint Idx, int Width, int Height, string Base64Data, CompressionType Compression);
-
-enum CompressionType
-{
-    None,
-    Zlib
-}
-
-
-
-internal enum AssetType
-{
-    Gump,
-    Arts,
-    Animation,
-}
-
-
-internal readonly struct PluginEntity(Mod mod)
-{
-    public Mod Mod { get; } = mod;
+    public static void WireInput(ModHostContext ctx)
+        => ctx.ConsumeMouse = button =>
+        {
+            if (ctx.App != null && ctx.App.HasResource<MouseContext>())
+                ctx.App.GetResource<MouseContext>().Consume((MouseButtonType)button);
+        };
 }

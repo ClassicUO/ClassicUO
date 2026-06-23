@@ -84,26 +84,23 @@
     </Reference>
   </ItemGroup>
 
+  <!-- Component-model modding (tinyecs:modding WIT). The generic wasip2 runtime +
+       host bridge + registry mechanism live in TinyEcs.Bevy.Modding; Wasmtime flows
+       transitively from there. cuo adds ONLY its game-specific cuo:modding WIT here
+       (Wit.Cuo.Modding.* bindings), so it still needs the WIT source generator
+       (analyzers don't flow transitively) + its own cuo-modding.wit AdditionalFile. -->
   <ItemGroup>
-    <PackageReference Include="Extism.runtime.all" Version="1.12.0" />
-    <PackageReference Include="Extism.Sdk" Version="1.9.1" />
-  </ItemGroup>
-
-  <!-- NEW component-model modding API (tinyecs:modding WIT). Uses the local
-       wasmtime-dotnet fork (component-model host + WIT source generator). The
-       generator emits Wit.Tinyecs.Modding.* host bindings from the .wit AdditionalFile.
-       Independent of the Extism API above. -->
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\..\wasmtime-dotnet\src\Wasmtime\Wasmtime.csproj" />
-    <ProjectReference Include="..\..\..\..\wasmtime-dotnet\src\Wasmtime.SourceGenerator\Wasmtime.SourceGenerator.csproj"
+    <ProjectReference Include="..\..\external\TinyEcs\src\TinyEcs.Bevy.Modding\TinyEcs.Bevy.Modding.csproj" />
+    <ProjectReference Include="..\..\external\TinyEcs\external\wasmtime-dotnet\src\Wasmtime.SourceGenerator\Wasmtime.SourceGenerator.csproj"
                       OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <!-- One package per directory: the WIT source generator drops ALL packages
-         in a directory that holds more than one (WSGEN001), so each package's
-         .wit lives in its own folder. -->
-    <AdditionalFiles Include="EcsModding\wit\tinyecs\tinyecs.wit" />
-    <AdditionalFiles Include="EcsModding\wit\cuo\cuo-modding.wit" />
-    <!-- Deploy built mod components next to the exe (output/ecs-mods/). -->
-    <None Include="..\..\ecs-mods\*.wasm" Link="ecs-mods\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+         in a directory that holds more than one (WSGEN001), so the cuo package's
+         .wit lives in its own folder (the generic tinyecs.wit moved to the lib). -->
+    <AdditionalFiles Include="Modding\wit\cuo\cuo-modding.wit" />
+    <!-- Deploy built mod folders next to the exe (output/ecs-mods/<mod>/{mod.json,*.wasm}),
+         preserving the per-mod folder structure the loader scans. -->
+    <None Include="..\..\ecs-mods\**\*.wasm" Link="ecs-mods\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\ecs-mods\**\mod.json" Link="ecs-mods\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <!-- The native wasmtime.dll is a NuGet-style runtime asset of the fork; it
@@ -111,7 +108,7 @@
        from the fork's net9.0 output (the TFM cuo-ecs consumes) so new Engine()
        can P/Invoke it. Windows x64 only for now. -->
   <ItemGroup>
-    <_WasmtimeNative Include="..\..\..\..\wasmtime-dotnet\src\Wasmtime\bin\$(Configuration)\net9.0\wasmtime.dll" />
+    <_WasmtimeNative Include="..\..\external\TinyEcs\external\wasmtime-dotnet\src\Wasmtime\bin\$(Configuration)\net9.0\wasmtime.dll" />
   </ItemGroup>
   <Target Name="CopyWasmtimeNative_build" AfterTargets="Build" Condition="'$(_IsWindows)' == 'true'">
     <Copy SourceFiles="@(_WasmtimeNative)" DestinationFolder="$(OutputPath)" SkipUnchangedFiles="true" Condition="Exists('@(_WasmtimeNative)')" />

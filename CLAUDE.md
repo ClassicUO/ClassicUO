@@ -4,7 +4,7 @@ Guidance for Claude Code when working in this repo.
 
 ## Project Overview
 
-ClassicUO — open-source Ultima Online Classic Client. C# / .NET 9.0 / FNA-XNA. Architecture is ECS-first (TinyEcs + Bevy-style plugin layering). Game logic lives in `src/ClassicUO.Ecs/`. Mods are out-of-process WASM (Extism); the host C# code does NOT use the modding API.
+ClassicUO — open-source Ultima Online Classic Client. C# / .NET 9.0 / FNA-XNA. Architecture is ECS-first (TinyEcs + Bevy-style plugin layering). Game logic lives in `src/ClassicUO.Ecs/`. Mods are out-of-process WASM components (Component Model / WASI, `tinyecs:modding` + `cuo:modding` WIT); the host C# code does NOT use the modding API.
 
 ## Build & Run
 
@@ -39,7 +39,7 @@ src/
 ├── ClassicUO.IO/              low-level file I/O
 ├── ClassicUO.Renderer/        rendering primitives + effects + batcher
 ├── ClassicUO.Utility/         common helpers
-└── Mods/                      WASM plugin EXAMPLES — for mods only, not host code
+└── Mods/                      WASM component EXAMPLES — for mods only, not host code
 tools/agent-desktop/           JSON-RPC harness for driving the AGENT_BUILD client
 ```
 
@@ -63,7 +63,7 @@ Use:
 | Singleton state | `Res<T>` (read) / `ResMut<T>` (write) — see rule 3 |
 | Per-system scratch state | `Local<T>` — see rule 3 |
 
-If you need component access by entity id, ADD A QUERY that selects that component; let the query do the lookup. The only `World` reference that survives is in `Modding/Host/Api.cs` because Extism guest bindings need it — host gameplay code does not.
+If you need component access by entity id, ADD A QUERY that selects that component; let the query do the lookup. The only `World` references that survive are in the modding bridge (`Modding/CuoModdingRegistry.cs` `IModComponent` impls) because the WASM guest bindings need raw entity access — host gameplay code does not.
 
 ### 2. Always go through `Commands` for mutation
 
@@ -174,17 +174,19 @@ Packet handlers are individual `IncomingPacket` structs registered in `NetworkPl
 
 ## Modding (FOR MODS ONLY)
 
-Mods are out-of-process WASM, loaded by Extism. The host (`src/ClassicUO.Ecs/`) talks to mods through:
+Mods are out-of-process WASM components, loaded through the WebAssembly Component Model (WASI) by the wasmtime-dotnet fork. Two WIT interfaces define the boundary:
 
-- **Host → guest**: `HostMessage` (`src/ClassicUO.Ecs/Modding/Host/HostMessages.cs`).
-- **Guest → host**: `PluginMessage` (`src/ClassicUO.Ecs/Modding/Guest/PluginMessages.cs`) + `Api.Functions` bindings in `Modding/Host/Api.cs`.
-- **UI**: mods construct UI through `cuo_ui_node` (JSON UINode tree) — host deserializes into ECS entities and routes through `GuiPlugin` / `GuiRenderingPlugin`.
+- **`tinyecs:modding`** (generic) — lives in the reusable `TinyEcs.Bevy.Modding` library. Gives a guest the engine-level commands: spawn/despawn entities, component get/set, add-observer, resource get/set.
+- **`cuo:modding`** (game-specific) — `src/ClassicUO.Ecs/Modding/wit/cuo/cuo-modding.wit`. Adds UO imports: `cuo:modding/net` (send / block packets, via `CuoNetBridge`), `cuo:modding/ui` (gump size, measure-text, cliloc lookup), input-consume.
 
-The React reconciler (`src/Mods/user-interface/src/react/reconciler.ts`) is one mod example built on top of those bindings. It is NOT used by host C# code.
+Host composition lives in `src/ClassicUO.Ecs/Modding/`:
+- `ModdingPlugin` (`Modding/ModdingPlugin.cs`) composes the generic `TinyEcs.Bevy.Modding.ModdingPlugin` (loader + per-stage dispatch) and supplies the cuo registry + per-mod bridge hooks.
+- `CuoModdingRegistry.Build()` (`Modding/CuoModdingRegistry.cs`) is the whitelist: which host ECS components + resources a mod may read/write, keyed by WIT type-path (`cuo:ui/node` → `Node`, `cuo:player/hits` → `Hits`, `cuo:game/context`, …). A mod builds UI by spawning entities and setting the registered `cuo:ui/*` components — the host lays out + renders them like native gumps (tag with the movable-window markers for shared drag / right-click-close).
+- Incoming packets surface as the `cuo:net/incoming` event (gated by `ModNetTap`, written from `NetworkPlugin.PacketReader`).
 
-**Rule**: do not import or reach into `Modding/Guest/` or `Modding/Host/Api.cs` from host gameplay code. Host code uses Commands, Queries, Observers, Resources, Events — not the modding API. The modding API exists to expose host capabilities to WASM guests, full stop.
+Built components deploy one folder per mod to `ecs-mods/<mod>/{mod.json, mod.wasm}` (copied next to the exe; the host scans `<exe>/ecs-mods/*/mod.json`). The `mod.json` manifest names the mod (`name`, `version`), the `wasm` file to load, and a reserved `ruleset` object (`ModManifest` in `TinyEcs.Bevy.Modding`). Examples in `src/Mods/`, each with its own `wit/`: `ecs-topbar` / `ecs-status` / `ecs-netlog` (Rust), `ecs-ui` (TypeScript, jco/componentize-js React). Design notes: `Modding/DESIGN.md`.
 
-To write or modify a mod: `src/Mods/user-interface/` (TypeScript + React reconciler), `src/Mods/sandbox/` (Rust), `src/Mods/my-plugin/` (C#).
+**Rule**: do not reach into the modding layer (`Modding/`) from host gameplay code. Host code uses Commands, Queries, Observers, Resources, Events — not the modding API. The registry + bridges exist to expose host capabilities to WASM guests, full stop.
 
 ---
 

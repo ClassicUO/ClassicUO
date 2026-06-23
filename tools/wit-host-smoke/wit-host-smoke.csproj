@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Isolated de-risk: prove the wasmtime-dotnet fork source-generator can
+       parse + emit compilable host bindings for the resource-heavy cuo-ecs.wit.
+       NOT wired into the game build. Throwaway once the path is proven. -->
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <LangVersion>12</LangVersion>
+    <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\external\TinyEcs\external\wasmtime-dotnet\src\Wasmtime\Wasmtime.csproj" />
+    <ProjectReference Include="..\..\external\TinyEcs\external\wasmtime-dotnet\src\Wasmtime.SourceGenerator\Wasmtime.SourceGenerator.csproj"
+                      OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="..\..\src\ClassicUO.Ecs\Modding\wit\cuo\cuo-modding.wit" Link="wit\cuo-modding.wit" />
+  </ItemGroup>
+
+</Project>

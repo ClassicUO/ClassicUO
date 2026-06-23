@@ -1,20 +1,33 @@
 ## The idea
 
-The desire is to make ClassicUO as much moddable as possible for all platforms.
-That's the reason behind the choice of https://github.com/extism which compiles plugins to wasm.
-ClassicUO would be the main host. Plugins will be able to override core game behaviours like packet handlers, UI and whatever is possible to put behind an api.
+Make ClassicUO as moddable as possible across platforms. Mods are out-of-process
+WebAssembly components (the WebAssembly Component Model / WASI), loaded by the host
+through the `tinyecs:modding` + `cuo:modding` WIT interfaces. ClassicUO is the host;
+mods read and write host ECS components/resources, observe packets, and build UI —
+without forking the client.
 
-The objective is to allow users to customize things, focusing to their business and at the same time keeping ClassicUO as the central project.
-So forking the project would not be necessary anymore.
+## Examples
 
-Also extism allows to load plugins from urls which means it's possible to centralize all mods in a single repo (like Zed does).
+`src/Mods/` holds the WIT mod examples (each carries its own `wit/` directory):
 
-## How to build a plugin
+- `ecs-topbar/` — adds a button to the host top bar (Rust).
+- `ecs-status/` — replaces the host status gump with a mod-built one (Rust).
+- `ecs-netlog/` — live-lists incoming packets via the `cuo:net/incoming` event (Rust).
+- `ecs-ui/` — the full React/jco storybook UI mod (TypeScript, componentize-js).
 
-Chose one framework from the PDKs available here https://github.com/extism#compile-webassembly-to-run-in-extism-hosts
-In `src/Mods/` you will find a sandbox plugin example written in Rust, but you can choose what language you prefer.
-Atm ClassicUO provides a couple of examples.
+## Build & load
 
-## How to install a plugin
+Each mod compiles to a `.wasm` component and ships in its own folder with a
+`mod.json` manifest:
 
-Simply open the `settings.json` and put path of your wasm plugin into the `plugins` json section like any other assistant.
+```
+ecs-mods/<mod>/
+  mod.json   { "name": "...", "version": "...", "wasm": "mod.wasm", "ruleset": {} }
+  mod.wasm
+```
+
+The built folders live under `ecs-mods/` at the repo root and are copied next to
+the exe on build; the host scans `<exe>/ecs-mods/*/mod.json` at startup, reads the
+manifest, and loads the `wasm` it names. (`ruleset` is a reserved, empty object for
+now.) See each mod's own build steps and the host registry in
+`src/ClassicUO.Ecs/Modding/`.

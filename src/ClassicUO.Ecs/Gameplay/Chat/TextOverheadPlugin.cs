@@ -42,7 +42,6 @@ internal readonly struct TextOverheadPlugin : IPlugin
         Res<Time> time,
         Res<Profile> profile,
         EventReader<TextOverheadEvent> texts,
-        EventWriter<Modding.Host.HostMessage> hostMsgs,
         Res<TextOverHeadManager> textOverHeadManager
     )
     {
@@ -80,15 +79,6 @@ internal readonly struct TextOverheadPlugin : IPlugin
             copyText.Time = time.Value.Total + TimeToLive(profile.Value, in text);
 
             textOverHeadManager.Value.Append(copyText);
-
-            hostMsgs.Send(new Modding.Host.HostMessage.MessageReceived(
-                copyText.MessageType,
-                copyText.Text,
-                copyText.Name,
-                copyText.Serial,
-                copyText.Hue,
-                copyText.Font
-            ));
         }
     }
 

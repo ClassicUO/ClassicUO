@@ -18,7 +18,6 @@
 
 using System;
 using ClassicUO.Configuration;
-using ClassicUO.Ecs.Modding.Host;
 using ClassicUO.Input;
 using ClassicUO.Network;
 using Microsoft.Xna.Framework;
@@ -110,9 +109,9 @@ internal readonly struct WindowDragPlugin : IPlugin
     // button RELEASE over the window the press started on (drag-off cancels),
     // not on press-down. While the right button is held over a window the
     // press is consumed each frame so the player doesn't walk underneath it.
-    //   * Container windows route through ContainerClosedEvent +
-    //     HostMessage.ContainerClosed so the server / mods learn about it;
-    //     ContainerGumpPlugin.TearDownClosedUi does the actual despawn.
+    //   * Container windows route through ContainerClosedEvent so the rest of
+    //     the app learns about it; ContainerGumpPlugin.TearDownClosedUi does the
+    //     actual despawn.
     //   * Server-pushed gumps reply GumpResponse button 0 (OOP
     //     Gump.CloseWithRightClick → OnButtonClick(0)) and drop the registry
     //     entry, then despawn.
@@ -128,8 +127,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         Query<Data<ServerGump>> serverGumpQuery,
         Res<NetClient> net,
         ResMut<ServerGumpRegistry> serverGumpRegistry,
-        EventWriter<ContainerClosedEvent> closedWriter,
-        EventWriter<HostMessage> hostMsgs)
+        EventWriter<ContainerClosedEvent> closedWriter)
     {
         bool once = mouse.Value.IsPressedOnce(MouseButtonType.Right);
         bool held = mouse.Value.IsPressed(MouseButtonType.Right);
@@ -179,7 +177,6 @@ internal readonly struct WindowDragPlugin : IPlugin
             {
                 var (_, window) = containerRow;
                 closedWriter.Send(new ContainerClosedEvent(window.Ref.Serial, UserInitiated: true));
-                hostMsgs.Send(new HostMessage.ContainerClosed(window.Ref.Serial));
                 return;
             }
 

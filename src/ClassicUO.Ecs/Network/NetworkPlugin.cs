@@ -97,6 +97,9 @@ readonly struct NetworkPlugin : IPlugin
             .AddResource(new PacketsMap())
             .AddResource(new CircularBuffer())
             .AddResource(new NetworkDisconnectQueue())
+            // Mod network tap (observe-all / block-by-id). Neutral resource read
+            // by the tinyecs:modding modding layer; PacketReader writes it.
+            .AddResource(new ModNetTap())
             .AddSystem(Stage.Startup, setupSocketFn)
 
             .AddSystem(Stage.Startup, (
@@ -346,13 +349,13 @@ readonly struct NetworkPlugin : IPlugin
     }
 
     void PacketReader(
-        Query<Data<WasmMod>> queryMods,
         Res<NetClient> network,
         Res<PacketsMap> packetsMap,
         Res<GameContext> gameCtx,
         Res<CircularBuffer> buffer,
         Local<PacketBuffer> packetBuffer,
         EventWriter<IPacket> queuePackets,
+        ResMut<ModNetTap> netTap,
         Commands commands
     )
     {
@@ -406,23 +409,12 @@ readonly struct NetworkPlugin : IPlugin
 
             var sp = packetBuffer.Value.Buffer.AsSpan(0, packetLen + packetHeaderOffset);
 
-            foreach ((_, var mod) in queryMods)
-            {
-                if (mod.Ref.Mod.Plugin.FunctionExists("packet_recv"))
-                {
-                    var res = mod.Ref.Mod.Plugin.Call("packet_recv", sp);
-                    if (res.IsEmpty)
-                    {
-                        sp = [];
-                    }
-                    else
-                    {
-                        res.CopyTo(sp);
-                    }
-                }
-            }
-
-            if (sp.IsEmpty)
+            // Mod tap: observe every incoming packet (cuo:net/incoming), and let a
+            // mod drop one before host dispatch (tinyecs:modding commands.block-packet).
+            // Observe-then-block so a mod can both see it and suppress host parse.
+            if (netTap.Value.Tapped)
+                commands.EmitTrigger(new ModIncomingPacket { Id = packetId, Payload = sp.ToArray() });
+            if (netTap.Value.Blocked.Contains(packetId))
                 continue;
 
             var payload = sp.Slice(packetHeaderOffset, packetLen - packetHeaderOffset);

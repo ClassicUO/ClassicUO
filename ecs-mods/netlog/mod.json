@@ -1,0 +1,6 @@
+{
+  "name": "netlog",
+  "version": "0.1.0",
+  "wasm": "mod.wasm",
+  "ruleset": {}
+}

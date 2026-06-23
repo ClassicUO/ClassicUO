@@ -88,7 +88,7 @@ internal readonly struct CuoPlugin : IPlugin
         // UO art cursor now that the OS cursor is hidden.
         app.AddPlugin<GameCursorPlugin>();
 
-        app.AddPlugin<ModdingPlugin>();
+        app.AddPlugin<Modding.ModdingPlugin>();
 
 #if AGENT_BUILD
         // Dev-loop agent server: TCP+JSON-RPC listener on loopback,

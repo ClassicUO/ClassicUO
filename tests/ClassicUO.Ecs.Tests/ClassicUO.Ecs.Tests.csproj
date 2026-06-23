@@ -21,4 +21,14 @@
     <ProjectReference Include="..\..\src\ClassicUO.Ecs\ClassicUO.Ecs.csproj" />
   </ItemGroup>
 
+  <!-- Staged guest components for the tinyecs:modding modding tests. Sourced from
+       the per-mod folders; flattened to the output root, where BuildAppWith reads
+       them and synthesizes the <mod>/{mod.wasm,mod.json} layout the loader scans. -->
+  <ItemGroup>
+    <None Include="..\..\ecs-mods\topbar\mod.wasm" Link="ecs_topbar.wasm" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\ecs-mods\netlog\mod.wasm" Link="ecs_netlog.wasm" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\ecs-mods\status\mod.wasm" Link="ecs_status.wasm" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\ecs-mods\ui\mod.wasm" Link="ecs_ui.wasm" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

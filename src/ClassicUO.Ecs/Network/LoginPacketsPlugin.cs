@@ -1,6 +1,5 @@
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
-using ClassicUO.Ecs.Modding.Host;
 using ClassicUO.Game.Data;
 using ClassicUO.IO;
 using ClassicUO.Network;
@@ -36,18 +35,16 @@ internal readonly struct LoginPacketsPlugin : IPlugin
         app.AddObserver((
             On<PacketReceived<OnServerListPacket_0xA8>> trig,
             ResMut<NextState<GameState>> gameState,
-            EventWriter<ServerSelectionInfoEvent> serverWriter,
-            EventWriter<HostMessage> hostMsgsWriter)
-            => HandleServerListPacket(trig.Event.Packet, gameState, serverWriter, hostMsgsWriter));
+            EventWriter<ServerSelectionInfoEvent> serverWriter)
+            => HandleServerListPacket(trig.Event.Packet, gameState, serverWriter));
 
         app.AddObserver((
             On<PacketReceived<OnCharacterListPacket_0xA9>> trig,
             ResMut<GameContext> gameCtx,
             ResMut<NextState<GameState>> gameState,
             ResMut<CharacterListSnapshot> snapshot,
-            EventWriter<CharacterSelectionInfoEvent> characterWriter,
-            EventWriter<HostMessage> hostMsgsWriter)
-            => HandleCharacterListPacket(trig.Event.Packet, gameCtx, gameState, snapshot, characterWriter, hostMsgsWriter));
+            EventWriter<CharacterSelectionInfoEvent> characterWriter)
+            => HandleCharacterListPacket(trig.Event.Packet, gameCtx, gameState, snapshot, characterWriter));
 
         app.AddObserver((
             On<PacketReceived<OnServerRelayPacket_0x8C>> trig,
@@ -80,8 +77,7 @@ internal readonly struct LoginPacketsPlugin : IPlugin
     static void HandleServerListPacket(
         OnServerListPacket_0xA8 packet,
         ResMut<NextState<GameState>> gameState,
-        EventWriter<ServerSelectionInfoEvent> serverWriter,
-        EventWriter<HostMessage> hostMsgsWriter
+        EventWriter<ServerSelectionInfoEvent> serverWriter
     )
     {
         gameState.Value.Set(GameState.ServerSelection);
@@ -89,8 +85,6 @@ internal readonly struct LoginPacketsPlugin : IPlugin
         {
             Servers = packet.Servers
         });
-
-        hostMsgsWriter.Send(new HostMessage.ServerLoginResponse(packet.Flags, packet.Servers));
     }
 
     static void HandleCharacterListPacket(
@@ -98,8 +92,7 @@ internal readonly struct LoginPacketsPlugin : IPlugin
         ResMut<GameContext> gameCtx,
         ResMut<NextState<GameState>> gameState,
         ResMut<CharacterListSnapshot> snapshot,
-        EventWriter<CharacterSelectionInfoEvent> characterWriter,
-        EventWriter<HostMessage> hostMsgsWriter
+        EventWriter<CharacterSelectionInfoEvent> characterWriter
     )
     {
         var (towns, flags) = ParseTownsAndFlags(packet, gameCtx.Value.ClientVersion);
@@ -116,8 +109,6 @@ internal readonly struct LoginPacketsPlugin : IPlugin
             Characters = packet.Characters,
             Towns = towns
         });
-
-        hostMsgsWriter.Send(new HostMessage.LoginResponse(flags, packet.Characters, towns));
     }
 
     static void HandleServerRelayPacket(

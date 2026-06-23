@@ -11,7 +11,6 @@
 
 using System;
 using ClassicUO.Assets;
-using ClassicUO.Ecs.Modding.Host;
 using ClassicUO.Game.Data;
 using ClassicUO.Network;
 using TinyEcs;
@@ -34,12 +33,10 @@ internal readonly struct ContainersPlugin : IPlugin
         // Per-packet observers replace the boxed EventReader<IPacket> scan.
         app.AddObserver((
             On<PacketReceived<OnOpenContainerPacket_0x24>> trig,
-            EventWriter<ContainerOpenedEvent> openedWriter,
-            EventWriter<HostMessage> hostMsgs) =>
+            EventWriter<ContainerOpenedEvent> openedWriter) =>
         {
             var open = trig.Event.Packet;
             openedWriter.Send(new(open.Serial, open.Graphic));
-            hostMsgs.Send(new HostMessage.ContainerOpened(open.Serial, open.Graphic));
         });
 
         app.AddObserver((
@@ -47,40 +44,36 @@ internal readonly struct ContainersPlugin : IPlugin
             Commands commands,
             Res<NetworkEntitiesMap> entitiesMap,
             EventWriter<ContainerSlotEvent> writer,
-            EventWriter<HostMessage> hostMsgs,
             Query<Data<EquipmentSlots>> equipQ,
             Query<Data<NetworkSerial>> serialQ)
-            => HandleUpdateContainer(trig.Event.Packet, commands, entitiesMap, writer, hostMsgs, equipQ, serialQ));
+            => HandleUpdateContainer(trig.Event.Packet, commands, entitiesMap, writer, equipQ, serialQ));
 
         app.AddObserver((
             On<PacketReceived<OnUpdateContainerPacket_0x25_Post6017>> trig,
             Commands commands,
             Res<NetworkEntitiesMap> entitiesMap,
             EventWriter<ContainerSlotEvent> writer,
-            EventWriter<HostMessage> hostMsgs,
             Query<Data<EquipmentSlots>> equipQ,
             Query<Data<NetworkSerial>> serialQ)
-            => HandleUpdateContainer(trig.Event.Packet, commands, entitiesMap, writer, hostMsgs, equipQ, serialQ));
+            => HandleUpdateContainer(trig.Event.Packet, commands, entitiesMap, writer, equipQ, serialQ));
 
         app.AddObserver((
             On<PacketReceived<OnUpdateContainerItemsPacket_0x3C_Pre6017>> trig,
             Commands commands,
             Res<NetworkEntitiesMap> entitiesMap,
             EventWriter<ContainerSlotEvent> writer,
-            EventWriter<HostMessage> hostMsgs,
             Query<Data<EquipmentSlots>> equipQ,
             Query<Data<NetworkSerial>> serialQ)
-            => HandleUpdateContainerItems(trig.Event.Packet, commands, entitiesMap, writer, hostMsgs, equipQ, serialQ));
+            => HandleUpdateContainerItems(trig.Event.Packet, commands, entitiesMap, writer, equipQ, serialQ));
 
         app.AddObserver((
             On<PacketReceived<OnUpdateContainerItemsPacket_0x3C_Post6017>> trig,
             Commands commands,
             Res<NetworkEntitiesMap> entitiesMap,
             EventWriter<ContainerSlotEvent> writer,
-            EventWriter<HostMessage> hostMsgs,
             Query<Data<EquipmentSlots>> equipQ,
             Query<Data<NetworkSerial>> serialQ)
-            => HandleUpdateContainerItems(trig.Event.Packet, commands, entitiesMap, writer, hostMsgs, equipQ, serialQ));
+            => HandleUpdateContainerItems(trig.Event.Packet, commands, entitiesMap, writer, equipQ, serialQ));
 
         // Close a container window when its backing item leaves the world. The
         // server sends 0x1D once the container passes out of view range (or it
@@ -93,15 +86,13 @@ internal readonly struct ContainersPlugin : IPlugin
         app.AddObserver((
             OnRemove<NetworkSerial> trigger,
             Query<Data<ContainerWindow>> windowsQuery,
-            EventWriter<ContainerClosedEvent> closedWriter,
-            EventWriter<HostMessage> hostMsgs) =>
+            EventWriter<ContainerClosedEvent> closedWriter) =>
         {
             var serial = trigger.Component.Value;
             foreach (var (_, window) in windowsQuery)
             {
                 if (window.Ref.Serial != serial) continue;
                 closedWriter.Send(new ContainerClosedEvent(serial));
-                hostMsgs.Send(new HostMessage.ContainerClosed(serial));
                 break;
             }
         });
@@ -148,7 +139,6 @@ internal readonly struct ContainersPlugin : IPlugin
         Query<Data<WorldPosition>> worldPosQuery,
         Query<Data<TinyEcs.Parent>> parentQuery,
         Single<Data<WorldPosition>, With<Player>> queryPlayer,
-        EventWriter<HostMessage> hostMsgs,
         EventWriter<ContainerClosedEvent> closedWriter)
     {
         const int MAX_CONTAINER_DIST = 5;
@@ -172,7 +162,6 @@ internal readonly struct ContainersPlugin : IPlugin
                 Math.Abs(playerPos.Ref.Y - pos.Ref.Y) >= MAX_CONTAINER_DIST)
             {
                 closedWriter.Send(new ContainerClosedEvent(serial));
-                hostMsgs.Send(new HostMessage.ContainerClosed(serial));
             }
         }
     }
@@ -198,7 +187,6 @@ internal readonly struct ContainersPlugin : IPlugin
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
         EventWriter<ContainerSlotEvent> writer,
-        EventWriter<HostMessage> hostMsgs,
         Query<Data<EquipmentSlots>> equipQ,
         Query<Data<NetworkSerial>> serialQ)
     {
@@ -225,16 +213,6 @@ internal readonly struct ContainersPlugin : IPlugin
         ClearEquipReference(commands, packet.Serial, equipQ, serialQ);
         writer.Send(ContainerSlotEvent.Add(
             packet.ContainerSerial, packet.Serial, finalGraphic, packet.Hue, packet.X, packet.Y, amount));
-
-        hostMsgs.Send(new HostMessage.ContainerItemAdded(
-            packet.ContainerSerial,
-            packet.Serial,
-            finalGraphic,
-            amount,
-            packet.X,
-            packet.Y,
-            gridIdx,
-            packet.Hue));
     }
 
     private static void HandleUpdateContainerItems(
@@ -242,22 +220,11 @@ internal readonly struct ContainersPlugin : IPlugin
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
         EventWriter<ContainerSlotEvent> writer,
-        EventWriter<HostMessage> hostMsgs,
         Query<Data<EquipmentSlots>> equipQ,
         Query<Data<NetworkSerial>> serialQ)
     {
         foreach (var item in packet.Items)
         {
-            hostMsgs.Send(new HostMessage.ContainerItemAdded(
-                item.ContainerSerial,
-                item.Serial,
-                (ushort)(item.Graphic + item.GraphicInc),
-                item.Amount,
-                item.X,
-                item.Y,
-                item.GridIndex,
-                item.Hue));
-
             var parentEnt = entitiesMap.Value.GetOrCreate(commands, item.ContainerSerial)
                 .Insert<IsContainer>();
             var ent = entitiesMap.Value.GetOrCreate(commands, item.Serial);
