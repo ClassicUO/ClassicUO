@@ -58,8 +58,19 @@ internal struct NetImpl(ModHostContext ctx) : N.INet
     {
         // Raw, fully-framed send (mod owns the length field). ignorePlugin: a
         // legacy passthrough flag, a no-op in the ECS NetClient.
-        if (ctx.App != null && ctx.App.HasResource<NetClient>())
-            ctx.App.GetResource<NetClient>().Send(packet.ToArray(), ignorePlugin: true);
+        if (ctx.App == null || !ctx.App.HasResource<NetClient>())
+            return;
+
+        // NetClient.Send needs a mutable Span (encrypts in-place). The WIT
+        // binding already copied this list<u8> out of guest memory into a
+        // fresh throwaway managed byte[] (see generated InvokeNetSend), so the
+        // backing array is uniquely ours — alias it mutably, no extra copy.
+        // ponytail: assumes the component-model list binding hands a throwaway
+        // array (always true for list<u8> params); if the fork ever zero-copies
+        // straight from guest linear memory, restore an ArrayPool scratch copy.
+        var mutable = System.Runtime.InteropServices.MemoryMarshal.CreateSpan(
+            ref System.Runtime.InteropServices.MemoryMarshal.GetReference(packet), packet.Length);
+        ctx.App.GetResource<NetClient>().Send(mutable, ignorePlugin: true);
     }
 
     public void BlockPacket(byte id)
