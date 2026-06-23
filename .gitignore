@@ -277,3 +277,6 @@ Data
 # Tooling caches
 .codegraph/
 .playwright-mcp/
+
+# Built mod artifacts (rebuilt from src/Mods/ecs-*; not tracked)
+ecs-mods/
