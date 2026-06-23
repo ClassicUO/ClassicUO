@@ -1,0 +1,54 @@
+/// cuo:modding — ClassicUO-specific modding capabilities that are NOT TinyEcs /
+/// Bevy / Bevy.UI primitives. Networking (UO packets) lives here, separate from
+/// the generic tinyecs:modding ECS/UI contract (tinyecs.wit). A mod imports both
+/// packages: tinyecs:modding for ECS+UI, cuo:modding for game-specific access.
+package cuo:modding@0.1.0;
+
+/// What the WASM guest (mod) imports; the C# host implements it.
+world guest {
+	import net;
+	import ui;
+}
+
+interface net {
+	/// CUO networking from a mod. Construct once, then send/block. (A resource —
+	/// not free functions — so the guest ABI stays on the proven scalar path.)
+	resource net {
+		constructor();
+
+		/// Send a fully-framed packet to the server (raw passthrough, no-op when
+		/// not connected). The mod owns the bytes including the length field for
+		/// variable-length packets — the host does NOT reframe.
+		send: func(packet: list<u8>);
+
+		/// Suppress an incoming packet id before host dispatch (still observable
+		/// via the cuo:net/incoming poll-entities — observe runs before block).
+		block-packet: func(id: u8);
+		/// Stop suppressing a packet id.
+		unblock-packet: func(id: u8);
+	}
+}
+
+interface ui {
+	/// CUO UI/asset helpers a mod needs to faithfully reproduce a host gump:
+	/// asset metrics, font measurement, and cliloc strings. A resource (not
+	/// free functions) so the guest ABI
+	/// stays on the proven scalar path. Returns are primitives/strings only —
+	/// no record/variant RETURNS (those hit a fork native-ownership crash).
+	resource ui {
+		constructor();
+
+		/// Gump asset dimensions, packed (width << 16) | height. Lets a mod size
+		/// a `cuo:ui/custom` background node exactly like SpawnUOGump.
+		gump-size: func(id: u16) -> u32;
+
+		/// Rendered width in px of `text` for a TextFont id (font | 0x80 = the UO
+		/// ASCII set). Mirrors UoFontRuntime metrics so a mod can center a value
+		/// in a column the way the host StatusGump TS_CENTER labels do.
+		measure-text: func(font-id: u16, text: string) -> u32;
+
+		/// Resolve a cliloc id to its localized string ("" if missing). For gump
+		/// tooltips, which the host resolves lazily from the cliloc loader.
+		resolve-cliloc: func(id: u32) -> string;
+	}
+}

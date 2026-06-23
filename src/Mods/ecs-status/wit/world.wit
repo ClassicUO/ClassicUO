@@ -1,0 +1,39 @@
+package mod:status;
+
+/// Status-gump mod: a faithful, 100%-compatible reproduction of the host
+/// StatusGump, built entirely through the modding API (no host gump edits).
+///
+/// The panel is a real movable window tagged `cuo:ui/statusbar-window`, so the
+/// host's generic systems treat it like the native gump: HealthBarPlugin
+/// minimizes it to the player healthbar on a click, and bumps its z on reopen.
+/// Stat-lock buttons carry `cuo:ui/stat-lock-button` and the buff button
+/// `cuo:ui/button`, so both are minimize-latch-exempt and the host Refresh keeps
+/// the lock graphic in sync. Labels are generic Node+Text the mod fills + centers
+/// each frame; tooltips use cuo:modding/ui resolve-cliloc.
+world status-mod {
+    include tinyecs:modding/guest@0.1.0;
+    use tinyecs:modding/app@0.1.0.{commands, query};
+    // UO networking lives in the cuo:modding package (game-specific) — the
+    // stat-lock click sends 0xBF/0x1A through it.
+    use cuo:modding/net@0.1.0.{net};
+    // cuo:modding/ui: asset metrics, font measurement, cliloc strings, and the
+    // buff-bar open trigger — host facts a mod can't compute itself.
+    use cuo:modding/ui@0.1.0.{ui};
+
+    /// update: the paperdoll "Status" button opens the host StatusBarWindow —
+    /// despawn that (suppress) and open the MOD panel in its place unless already
+    /// open. Our own root also carries statusbar-window, so it is skipped here by
+    /// its UiName ("mod.status.root"); a closed panel reopens cleanly.
+    /// param order: commands, host-bar(with statusbar-window), player(with).
+    export mod-status-init: func(commands: commands, host-bar: query, player: query);
+
+    /// update: format the player's live stats into the labels + recenter the
+    /// centered columns (measure-text), exactly like the host Refresh.
+    /// param order: commands, player(with), labels(mut node, mut text, ref name).
+    export mod-status-refresh: func(commands: commands, player: query, labels: query);
+
+    /// update: a control was clicked — a stat-lock cycles the lock + sends
+    /// 0xBF/0x1A; the buff button opens the buff bar.
+    /// param order: commands, clicked(with clicked, ref name), player(with).
+    export mod-status-click: func(commands: commands, clicked: query, player: query);
+}

@@ -1,0 +1,30 @@
+package mod:topbar;
+
+/// Demo mod: adds a "[MOD]" button into the existing topbar gump and counts
+/// clicks on it — all through the tinyecs:modding API (find marker → spawn → add-child
+/// → poll cuo:ui/clicked).
+world topbar-mod {
+    include tinyecs:modding/guest@0.1.0;
+    use tinyecs:modding/app@0.1.0.{commands, query};
+
+    /// update: once the topbar exists, widen the bar (root + group + marble)
+    /// and append the button flush at the old right end.
+    /// param order = add order: commands, group, root, bg, sample-button.
+    export mod-ui-init: func(commands: commands, group: query, root: query, bg: query, sample: query);
+
+    /// update: when the button is clicked, bump the counter.
+    /// param order = query(with clicked), then query(mut counter).
+    export mod-ui-tick: func(clicked: query, counters: query);
+
+    /// update: pure-mod gump editing — find the options window (cuo:ui/options-window
+    /// marker, already on the gump), traverse to its scroll viewport, and inject a
+    /// section. No host gump cooperation. param = query(with cuo:ui/options-window).
+    export mod-options: func(commands: commands, windows: query);
+
+    /// update: drive the mod button's hover/press feedback like the host topbar
+    /// buttons — yellow the CAPTION text on hover, nudge it 1px down on press;
+    /// the marble stays put. Scoped to our button via its cuo:test/counter
+    /// marker; recolours/nudges the caption child via commands.
+    /// param order = commands, query(ref interaction, with counter).
+    export mod-button-feedback: func(commands: commands, buttons: query);
+}

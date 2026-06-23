@@ -1,0 +1,25 @@
+package mod:ecsui@0.1.0;
+
+/// Minimal proof world for the TS (jco/componentize-js) component-model port.
+/// One startup system that spawns a movable panel + a text label, to verify the
+/// wasmtime-dotnet fork can load + run a JS-engine (StarlingMonkey) component at
+/// all before the full user-interface mod is ported onto it.
+world ecs-ui {
+    include tinyecs:modding/guest@0.1.0;
+    use tinyecs:modding/app@0.1.0.{commands, query};
+    // cuo:modding/ui: asset metrics so the mod can size a gump node to its native
+    // art dimensions (gump-size) instead of stretching it to an arbitrary box.
+    use cuo:modding/ui@0.1.0.{ui};
+
+    /// mod-startup: spawn the proof panel.
+    export ui-startup: func(commands: commands);
+
+    /// update: pump React's scheduler timer + dispatch clicks + hover enter/leave.
+    /// `clicked` selects entities the host flagged cuo:ui/clicked; `hovered` reads
+    /// every interactive element's Interaction state so the mod can diff frame-to-
+    /// frame and synthesize OnMouseEnter/OnMouseLeave (tooltips). Both carry the
+    /// ui-name so the mod routes to the React handler registered under that name.
+    /// param order: commands, clicked(with cuo:ui/clicked, ref cuo:ui/name),
+    ///              hovered(ref cuo:ui/interaction, ref cuo:ui/name).
+    export ui-tick: func(commands: commands, clicked: query, hovered: query);
+}

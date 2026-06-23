@@ -1,0 +1,22 @@
+package mod:netlog;
+
+/// Network-log mod: a movable window that captures incoming packets (the
+/// cuo:net/incoming custom event) and lists them as ID + size + hex. Two
+/// buttons — STOP/RUN toggles capture (and repopulates the list), CLEAR empties
+/// the stored packets.
+world netlog-mod {
+    include tinyecs:modding/guest@0.1.0;
+    use tinyecs:modding/app@0.1.0.{commands, query};
+
+    /// update: spawn the log window once (idempotent via a guest-side guard).
+    export mod-netlog-init: func(commands: commands);
+
+    /// update: handle STOP/CLEAR clicks and rebuild the packet list on demand.
+    /// param order = add order: commands, clicked(with clicked, ref name),
+    /// named(ref name).
+    export mod-netlog-tick: func(commands: commands, clicked: query, named: query);
+
+    /// observer: host calls this per incoming packet (cuo:net/incoming custom
+    /// event). Stores it guest-side while capture is on. (entity unused.)
+    export on-packet: func(entity: u64, json: string);
+}

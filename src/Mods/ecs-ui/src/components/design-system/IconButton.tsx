@@ -1,0 +1,129 @@
+import React from 'react';
+import {
+  FloatingAttachToElement,
+  FloatingClipToElement,
+  HostWrapper,
+  Vector3,
+  type ClayColor,
+  type ClayFloatingElementConfig,
+  type ClaySize,
+} from '~/host';
+import { Art, Button, Gump, Hue } from '~/react';
+import { CommonLayout } from '~/ui';
+
+export interface IconButtonProps {
+  /**
+   * Icon to display - can be either a Gump ID or Art ID
+   */
+  icon: {
+    type: 'gump' | 'art';
+    id: number;
+  };
+
+  /**
+   * Size of the button. Omit to render the icon at its native art size
+   * (queried via cuo:modding/ui gump-size); pass a value to explicitly scale.
+   */
+  size?: ClaySize;
+
+  /**
+   * Position of the button
+   */
+  floating?: ClayFloatingElementConfig;
+
+  /**
+   * Color hue for the button
+   */
+  color?: Partial<Hue>;
+
+  /**
+   * Click handler
+   */
+  onClick?: () => void;
+
+  /**
+   * Disabled state
+   */
+  disabled?: boolean;
+
+  /**
+   * Icon offset from center
+   */
+  iconOffset?: { x: number; y: number };
+}
+
+/**
+ * IconButton - A button with an icon overlay
+ *
+ * Combines a UO button gump with an icon (either gump or art) centered on top.
+ * Supports all standard button interactions and customization.
+ *
+ * @example
+ * ```tsx
+ * // Basic icon button with gump icon
+ * <IconButton
+ *   icon={{ type: "gump", id: 0x15a4 }}
+ *   buttonGumpIds={{ normal: 0x05ca, pressed: 0x05c9, over: 0x05c8 }}
+ *   size={{ width: 44, height: 44 }}
+ *   onClick={() => console.log("Clicked!")}
+ * />
+ *
+ * // Icon button with art icon and custom positioning
+ * <IconButton
+ *   icon={{ type: "art", id: 0x1234 }}
+ *   buttonGumpIds={{ normal: 0x05ca, pressed: 0x05c9, over: 0x05c8 }}
+ *   size={{ width: 44, height: 44 }}
+ *   iconOffset={{ x: 2, y: -1 }}
+ *   floating={{ offset: { x: 100, y: 100 } }}
+ *   onClick={() => console.log("Art icon clicked!")}
+ * />
+ * ```
+ */
+export const IconButton: React.FC<IconButtonProps> = ({
+  icon,
+  size,
+  floating,
+  color: hue,
+  onClick,
+  disabled = false,
+  iconOffset = { x: 0, y: 0 },
+}) => {
+  const handleClick = React.useCallback(() => {
+    if (!disabled && onClick) {
+      onClick();
+    }
+  }, [disabled, onClick]);
+
+  // Only float when the caller explicitly positions the button; otherwise it
+  // flows (sized to `size`) in its container. Forcing floating made every icon
+  // absolute at its parent origin, so they overlapped / escaped their cells.
+  const iconFloating: ClayFloatingElementConfig | undefined = floating
+    ? {
+        ...floating,
+        offset: {
+          x: (floating.offset?.x ?? 0) + iconOffset.x,
+          y: (floating.offset?.y ?? 0) + iconOffset.y,
+        },
+        attachTo: floating.attachTo ?? FloatingAttachToElement.Parent,
+        clipTo: floating.clipTo ?? FloatingClipToElement.AttachedParent,
+      }
+    : undefined;
+
+  const Tag = icon.type === 'gump' ? Gump : Art;
+
+  // Default to the gump's native art size so the host renders it 1:1 instead of
+  // stretching the sprite to fill an arbitrary box. An explicit `size` overrides
+  // (intentional scaling). Native lookup is gump-only; art falls back to 44.
+  const native = icon.type === 'gump' ? HostWrapper.gumpSize(icon.id) : null;
+  const resolved = size ?? native ?? { width: 44, height: 44 };
+
+  return (
+    <Tag
+      id={icon.id}
+      onClick={handleClick}
+      size={resolved}
+      floating={iconFloating}
+      hue={disabled ? { ...hue, alpha: 0.5 } : hue}
+    />
+  );
+};

@@ -1,0 +1,235 @@
+/// tinyecs:modding — WIT interface for the TinyEcs component-model modding API.
+///
+/// Generic (not cuo-specific): mods register ECS systems + operate on the
+/// shared world. Ported from wasvy (wasvy:ecs), adapted to TinyEcs:
+///   - schedule variant uses cuo Stage names (no FixedUpdate)
+///   - everything else mirrors the wasvy resource graph 1:1.
+///
+/// The NEW, component-model modding API. It does NOT replace the existing
+/// Extism message-passing API (src/ClassicUO.Ecs/Modding/).
+package tinyecs:modding@0.1.0;
+
+/// The world the C# host implements to give ECS access to a WASM guest (mod).
+world host {
+	import app;
+}
+
+/// The world a WASM mod must implement to be driven by the host.
+world guest {
+	import app;
+	use app.{app};
+
+	/// Called once on load for each mod. Register systems via `app` here.
+	export setup: func(app: app);
+}
+
+interface app {
+	/// bevy::App equivalent — the mod's entry point to the ECS.
+	resource app {
+		/// Register systems into a schedule (cuo Stage).
+		add-systems: func(
+			schedule: schedule,
+			systems: list<borrow<system>>,
+		);
+	}
+
+	/// A system the mod defines. Name MUST match a guest export.
+	resource system {
+		constructor(name: string);
+
+		/// Request a `commands` param.
+		add-commands: func();
+
+		/// Request a `query` param.
+		add-query: func(query: list<query-for>);
+
+		/// Order this system after another.
+		after: func(other: borrow<system>);
+
+		/// Order this system before another.
+		before: func(other: borrow<system>);
+	}
+
+	/// Structural-change queue (spawn/despawn/insert/remove). Applied at the
+	/// next sync point on the host side (cuo Commands), never raw-world.
+	resource commands {
+		spawn-empty: func() -> entity-commands;
+		spawn: func(bundle: bundle) -> entity-commands;
+		entity: func(entity: borrow<entity>) -> entity-commands;
+
+		/// TYPED spawn: components cross as native records (no JSON), via the
+		/// component-value variant. The core UI set is migrating off the string
+		/// bundle to this. Coexists with `spawn` during the migration.
+		spawn-typed: func(bundle: list<component-value>) -> entity-commands;
+
+		/// Read a registered singleton resource as JSON ("null" if unregistered or
+		/// absent). `path` is a type-path the host registry maps to a Res<T> —
+		/// e.g. "cuo:engine/time", "cuo:game/context". The "change resource"
+		/// capability's read half. (`resource` is a WIT keyword → param is `path`.)
+		/// (Networking lives in the cuo:modding package — game-specific, not a
+		/// TinyEcs/Bevy primitive.)
+		resource-get: func(path: type-path) -> serialized-component;
+
+		/// Write a registered singleton resource from JSON (no-op if unregistered
+		/// or absent). Only whitelisted resources are writable.
+		resource-set: func(path: type-path, value: serialized-component);
+
+		/// Consume a mouse button this frame so host gameplay ignores it (input
+		/// behaviour override). Honored everywhere the host checks
+		/// MouseContext.IsConsumed. Call from a pre-update system to take the
+		/// button before gameplay reads it. (Keyboard consume needs library
+		/// support and is a follow-up.)
+		input-consume-mouse: func(button: u8);
+	}
+
+	/// Queued edits for a single entity.
+	resource entity-commands {
+		id: func() -> entity;
+		insert: func(bundle: bundle);
+		/// TYPED insert (native records, no JSON).
+		insert-typed: func(bundle: list<component-value>);
+		remove: func(bundle: bundle-types);
+
+		/// Add `child` under THIS entity at `index` (pass a large value to append).
+		/// Called on the parent's entity-commands. Used to attach mod UI into an
+		/// existing gump (e.g. add a button under the topbar group).
+		add-child: func(child: borrow<entity>, index: u32);
+
+		despawn: func();
+		try-despawn: func();
+	}
+
+	/// An entity identifier handle.
+	resource entity {
+		/// Parent in the UI/scene tree (none for a root). Lets mods navigate
+		/// any gump generically — no per-gump host cooperation.
+		parent: func() -> option<entity>;
+
+		/// Direct children in the UI/scene tree.
+		children: func() -> list<entity>;
+
+		/// Read a registered component off this entity by type-path; the JSON
+		/// string "null" if absent. Lets a mod inspect traversed nodes.
+		get: func(component: type-path) -> serialized-component;
+	}
+
+	/// A query system param — iterate matched entities.
+	resource query {
+		iter: func() -> option<query-result>;
+	}
+
+	/// One row of a query iteration.
+	resource query-result {
+		entity: func() -> entity;
+		/// Component at the declared index (filters do not count).
+		component: func(index: component-index) -> component;
+	}
+
+	/// A component view on a query row.
+	resource component {
+		get: func() -> serialized-component;
+		/// Traps if this component was not declared mutable.
+		set: func(value: serialized-component);
+
+		/// TYPED write (native record via component-value, no JSON). Typed READ
+		/// (a component-value RETURN) is NOT offered: the fork runtime mishandles
+		/// variant-return payload ownership (native crash) — codegen is fixed but
+		/// the runtime is not. Read via `get` (JSON) until that's resolved.
+		set-typed: func(value: component-value);
+	}
+
+	/// A fully-qualified type name (the host registry maps this to an EcsID).
+	type type-path = string;
+
+	/// JSON-serialized component payload crossing the boundary.
+	///
+	/// A JSON string (NOT list<u8>): the host (de)serializes via the type
+	/// registry. Kept as a string because the fork's source generator
+	/// mislowers a `list` element nested inside a `tuple` inside a `list`
+	/// (the `bundle` shape) — strings take the working scalar path.
+	type serialized-component = string;
+
+	/// (type-path, serialized) pairs.
+	type bundle = list<tuple<type-path, serialized-component>>;
+
+	/// type-paths only (for removal).
+	type bundle-types = list<type-path>;
+
+	/// Up to 255 components per query.
+	type component-index = u8;
+
+	// ── Typed component records (the no-JSON path) ────────────────────────────
+	// Each mirrors a host component's serializable shape. Enum fields cross as
+	// u8 (the host casts). Adding a component here = a new variant case + a host
+	// converter + regen (the cost of going typed vs the string registry).
+
+	/// A length value. kind: 0=auto, 1=px, 2=percent (ValType).
+	record val { kind: u8, value: f32 }
+
+	/// Edge insets (Node padding / border).
+	record ui-rect { left: val, right: val, top: val, bottom: val }
+
+	/// RGBA, 0-255 floats (Clay.Color).
+	record color { r: f32, g: f32, b: f32, a: f32 }
+
+	/// Bevy.UI Node (layout). Enum fields are u8: display(0=flex,1=none),
+	/// position-type(0=relative,1=absolute), overflow, flex-direction(0=row,
+	/// 1=column), justify-content / align-items (0=start,1=center,2=end).
+	record node-rec {
+		display: u8,
+		position-type: u8,
+		overflow: u8,
+		flex-direction: u8,
+		justify-content: u8,
+		align-items: u8,
+		width: val, height: val,
+		min-width: val, min-height: val,
+		max-width: val, max-height: val,
+		left: val, top: val, right: val, bottom: val,
+		padding: ui-rect,
+		border: ui-rect,
+		gap: val,
+		aspect-ratio: f32,
+	}
+
+	record text-rec { value: string }
+	record text-font-rec { font-id: u16, size: u16 }
+	record z-rec { value: s32 }
+	record name-rec { value: string }
+
+	/// Typed component payloads (core UI set). Markers carry no payload. The
+	/// variant case IS the component type (no type-path needed for spawn/insert).
+	variant component-value {
+		node(node-rec),
+		text(text-rec),
+		text-font(text-font-rec),
+		text-color(color),
+		bg-color(color),
+		interaction(u8),
+		global-z(z-rec),
+		ui-name(name-rec),
+		movable,
+		no-window-drag,
+		contains-by-bounds,
+	}
+
+	/// cuo Stage selection.
+	variant schedule {
+		/// Runs once when a mod is first loaded (not Stage.Startup).
+		mod-startup,
+		first,
+		pre-update,
+		update,
+		post-update,
+		last,
+		custom(string),
+	}
+
+	/// Query term — order defines component index for query-result::component.
+	variant query-for {
+		ref(type-path),
+		mut(type-path),
+		%with(type-path),
+		without(type-path),
+	}
+}

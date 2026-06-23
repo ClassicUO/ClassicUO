@@ -1,0 +1,18 @@
+# Standalone: not part of the repo-root Rust workspace.
+[workspace]
+
+[package]
+name = "ecs-status"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+wit-bindgen = "0.46"
+serde_json = "1"
+
+[lib]
+crate-type = ["cdylib"]
+
+[profile.release]
+opt-level = "s"
+strip = true
