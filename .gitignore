@@ -273,3 +273,7 @@ __pycache__/
 /.svn
 /target
 Data
+
+# Tooling caches
+.codegraph/
+.playwright-mcp/
