@@ -20,7 +20,13 @@ using ClayColor = Clay.Color;
 
 namespace ClassicUO.Ecs;
 
-internal struct StatusBarWindow;
+// MinimizeX/Y: the gump-local origin of the minimize region (legacy
+// StatusGumpBase._point). A left-click released between here and the gump's
+// bottom-right corner minimizes the bar into the player healthbar
+// (HealthBarPlugin.WindowInteractions); clicking elsewhere — stat-lock
+// togglers, the buff button, the body — does not. Stamped by both the host
+// gump and the ecs-status mod root so the shared host gesture gates on it.
+internal struct StatusBarWindow { public float MinimizeX, MinimizeY; }
 
 internal enum StatusField : byte
 {
@@ -159,8 +165,13 @@ internal readonly struct StatusBarPlugin : IPlugin
         // works over the bar's transparent cutouts and isn't stolen by other
         // centered interactive surfaces). UiContainsByBounds makes the whole
         // panel a hit target (legacy ContainsByBounds).
+        // Minimize-region origin (legacy StatusGumpBase._point): UOP modern at
+        // (540,180), classic at (244,112). The shared host gesture only minimizes
+        // when the click lands between here and the gump's bottom-right corner.
+        var minimize = modern ? new Vector2(540, 180) : new Vector2(244, 112);
+
         var root = builder.SpawnUOGump(commands, bg, Vector3.UnitZ, new Vector2(20, 150), zCounter)
-            .Insert<StatusBarWindow>()
+            .Insert(new StatusBarWindow { MinimizeX = minimize.X, MinimizeY = minimize.Y })
             .Insert<UiContainsByBounds>();
 
         foreach (var (x, y, field, cw) in layout)

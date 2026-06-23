@@ -230,12 +230,20 @@ internal readonly struct HealthBarPlugin : IPlugin
             if (p.TopmostMovable(pos, assets.Value) != target)
                 return; // released off the window
 
-            Vector2 spawn = new(20, 150);
-            if (p.Nodes.TryGet(target, out var nodeRow))
-            {
-                var (_, n) = nodeRow;
-                spawn = new Vector2(n.Ref.Left.Value, n.Ref.Top.Value);
-            }
+            if (!p.Nodes.TryGet(target, out var nodeRow)) return;
+            var (_, n) = nodeRow;
+            var spawn = new Vector2(n.Ref.Left.Value, n.Ref.Top.Value);
+
+            // Minimize only when the click lands in the bottom-right minimize
+            // region (legacy StatusGumpBase.OnMouseUp: x>=_point.X && y>=_point.Y
+            // within the gump). Window top-left + the gump-local _point gives the
+            // region origin; the topmost-on-window check above already bounds the
+            // far edge. Clicking elsewhere — stat-lock togglers, the buff button,
+            // the body — falls through so those controls get their own click.
+            var (_, win) = p.Status.Get(target);
+            if (pos.X < spawn.X + win.Ref.MinimizeX || pos.Y < spawn.Y + win.Ref.MinimizeY)
+                return;
+
             OpenForSerial(commands, builder.Value, assets.Value, gameCtx.Value, zCounter.Value,
                 net.Value, party.Value, gameCtx.Value.PlayerSerial, spawn, center: false, p.Hb);
             commands.Entity(target).Despawn();
