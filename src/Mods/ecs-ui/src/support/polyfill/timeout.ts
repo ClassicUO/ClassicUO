@@ -5,6 +5,7 @@ export type TimeoutManager = {
   setTimeout: (callback: () => void, delay: number) => number;
   clearTimeout: (timeoutId: number) => void;
   processTimeouts: (tick: number) => void;
+  hasPending: () => boolean;
   requestAnimationFrame: (callback: () => void) => number;
   cancelAnimationFrame: (requestId: number) => void;
 };
@@ -23,6 +24,8 @@ export const buildTimeoutManager = (): TimeoutManager => {
     clearTimeout: (timeoutId: number): void => {
       timeouts.delete(timeoutId);
     },
+
+    hasPending: (): boolean => timeouts.size > 0,
 
     processTimeouts: (tick: number): void => {
       lastTick = tick;

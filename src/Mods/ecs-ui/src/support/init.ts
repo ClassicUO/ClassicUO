@@ -18,3 +18,6 @@ const mgr = buildTimeoutManager();
 
 // Pump from the update system each frame so deferred React work runs.
 export const pumpTimers = (tick: number) => mgr.processTimeouts(tick);
+// True when React/tooltip work is queued. Idle frames skip the per-frame
+// cuo:engine/time marshal + pump entirely (the dominant idle-frame cost).
+export const hasTimers = () => mgr.hasPending();

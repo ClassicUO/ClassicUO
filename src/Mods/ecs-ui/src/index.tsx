@@ -4,7 +4,7 @@ import { EventType } from '~/host';
 import { StorybookScreen } from '~/components/storybook';
 import { HostWrapper, setCommands } from '~/host';
 import { ClayReactRenderer } from '~/react';
-import { pumpTimers } from './support/init';
+import { hasTimers, pumpTimers } from './support/init';
 
 let renderer: ClayReactRenderer | null = null;
 let hoveredPrev = new Set<number>();
@@ -24,9 +24,10 @@ export function setup(app: any) {
     { tag: 'with', val: 'cuo:ui/clicked' },
     { tag: 'ref', val: 'cuo:ui/name' },
   ]);
-  // hovered: every interactive element's Interaction state (0=None,1=Hovered,2=Pressed).
+  // hovered: only the topmost hovered element (host keeps cuo:ui/hovered on it).
+  // Sparse marker — NOT a per-frame scan of every interactive element's byte.
   onTick.addQuery([
-    { tag: 'ref', val: 'cuo:ui/interaction' },
+    { tag: 'with', val: 'cuo:ui/hovered' },
     { tag: 'ref', val: 'cuo:ui/name' },
   ]);
   app.addSystems({ tag: 'update' }, [onTick]);
@@ -66,14 +67,14 @@ export function uiTick(commands: any, clicked: any, hovered: any) {
   }
 
   // Hover: build the currently-hovered set, diff vs last frame -> enter/leave.
+  // The query now yields only the topmost hovered element (0 or 1 row), so the
+  // only component is its ui-name. Mark it AND its ancestors hovered so a listener
+  // on a wrapper around an interactive child (Tooltip over IconButton) fires —
+  // the host only marks the topmost element itself.
   const now = new Set<number>();
   for (let row = hovered.iter(); row; row = hovered.iter()) {
-    const state = parseInt(row.component(0).get(), 10); // Interaction value
-    const id = idOf(row.component(1).get());
-    // Hovered or Pressed = over. Mark the element AND its ancestors hovered so a
-    // listener on a wrapper around an interactive child (Tooltip over IconButton)
-    // fires — the host only flags the topmost interactive element itself.
-    if (!Number.isNaN(id) && state !== 0) HostWrapper.withAncestors(id, now);
+    const id = idOf(row.component(0).get());
+    if (!Number.isNaN(id)) HostWrapper.withAncestors(id, now);
   }
   for (const id of now) {
     if (!hoveredPrev.has(id)) {
@@ -90,12 +91,18 @@ export function uiTick(commands: any, clicked: any, hovered: any) {
   hoveredPrev = now;
 
   // Advance React's scheduler + the tooltip delay timers on the engine clock.
-  let ms = clockMs += 16;
-  try {
-    const t = JSON.parse(commands.resourceGet('cuo:engine/time'));
-    if (t && typeof t.Total === 'number') ms = t.Total;
-  } catch {
-    // no Time resource (bare app) -> keep the ~16ms/frame estimate
+  // Only when work is queued — an idle frame must not pay the cuo:engine/time
+  // marshal (serialize + cross the WASM boundary + JSON.parse) for nothing.
+  // A hover/click above schedules React work, so hasTimers() flips true the same
+  // frame and the pump runs until everything settles.
+  if (hasTimers()) {
+    let ms = clockMs += 16;
+    try {
+      const t = JSON.parse(commands.resourceGet('cuo:engine/time'));
+      if (t && typeof t.Total === 'number') ms = t.Total;
+    } catch {
+      // no Time resource (bare app) -> keep the ~16ms/frame estimate
+    }
+    pumpTimers(ms);
   }
-  pumpTimers(ms);
 }

@@ -46,6 +46,7 @@ internal struct ModCounter
 [JsonSerializable(typeof(OptionsWindow))]
 [JsonSerializable(typeof(ScrollPosition))]
 [JsonSerializable(typeof(ModClicked))]
+[JsonSerializable(typeof(ModHovered))]
 // Player stats + status-bar handle — let mods read the live player state and
 // replace the host status gump (despawn StatusBarWindow, render their own).
 [JsonSerializable(typeof(Hits))]
@@ -275,6 +276,9 @@ internal static class CuoModdingRegistry
         reg.Register("cuo:ui/topbar-bg", new ModComponent<TopBarDragHandle>(ModJsonContext.Default.TopBarDragHandle));
         reg.Register("cuo:ui/topbar-button", new ModComponent<TopBarButton>(ModJsonContext.Default.TopBarButton));
         reg.Register("cuo:ui/clicked", new ModComponent<ModClicked>(ModJsonContext.Default.ModClicked));
+        // Sparse hover marker (host hover bridge keeps it on the topmost hovered
+        // mod entity) — mods poll this instead of every element's Interaction byte.
+        reg.Register("cuo:ui/hovered", new ModComponent<ModHovered>(ModJsonContext.Default.ModHovered));
         // Player stats (packet-updated in place by the host) — a mod reads these
         // to render its own status gump. cuo:ui/statusbar-window is the host bar's
         // root marker, so a mod can despawn it and show its own instead.

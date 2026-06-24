@@ -398,7 +398,8 @@ public class EcsModdingRoundTripTests
     // reconciler.ts/createElement.ts/components/ui), bundled into a
     // jco/componentize-js component; only the host boundary (HostWrapper) is
     // reimplemented over `commands`. Exercises the HOVER round-trip: hover is read
-    // by polling cuo:ui/interaction (no host push), diffed frame-to-frame into
+    // delivered as the sparse cuo:ui/hovered marker (the host hover bridge sets it
+    // on the topmost hovered entity on UiOver/UiOut), diffed frame-to-frame into
     // OnMouseEnter/OnMouseLeave; a tooltip's delay timer (driven by the pumped
     // engine clock) then shows the floating tooltip gump + content text.
     //
@@ -410,18 +411,18 @@ public class EcsModdingRoundTripTests
     {
         var app = BuildAppWith("ui");
 
-        // The bare modding app has no Clay pointer pipeline, so Interaction never
-        // flips to Hovered on its own. Simulate the cursor resting on the icon
-        // gumps — the LEAF interactive elements (Interaction + UiCustom). Crucially
-        // we do NOT flag the Tooltip wrapper Views (Interaction, no UiCustom): the
-        // real Clay pipeline only flags the topmost interactive element, so the
-        // tooltip arms ONLY if the guest walks the hovered child's parent chain up
-        // to the wrapper that owns onMouseEnter. Flagging every interactive element
-        // (as before) hid that bug — the wrapper was hovered directly.
+        // The bare modding app has no Clay pointer pipeline, so UiOver never fires
+        // and the real hover bridge never sets cuo:ui/hovered. Simulate it the way
+        // the bridge does: tag the cursor's resting element with ModHovered — the
+        // LEAF interactive icon gumps (Interaction + UiCustom). Crucially we do NOT
+        // tag the Tooltip wrapper Views (Interaction, no UiCustom): the real bridge
+        // marks only the topmost hovered element, so the tooltip arms ONLY if the
+        // guest walks the hovered child's parent chain up to the wrapper that owns
+        // onMouseEnter. Tagging every interactive element would hide that bug.
         app.AddSystem((Commands c, Query<Data<ModEntity>, Filter<With<Interaction>, With<UiCustom>>> q) =>
         {
             foreach ((var e, var _) in q)
-                c.Entity(e.Ref).Insert(Interaction.Hovered);
+                c.Entity(e.Ref).Insert(new ModHovered());
         }).InStage(Stage.First).Build();
 
         app.RunStartup(); // ui-startup mounts <StorybookScreen/>
