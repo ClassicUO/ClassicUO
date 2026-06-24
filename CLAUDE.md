@@ -23,8 +23,9 @@ Raw dotnet still works for non-mod work:
 ```bash
 dotnet build                                      # dev build
 dotnet build -c Release
-./scripts/build-naot.sh                           # AOT release (Makefile `publish` mirrors this)
 ```
+
+For an AOT release use `make publish`.
 
 **The modding tests load mods from `ecs-mods/<mod>/mod.wasm`** — run `make test` (or `make build-mods` once, then `dotnet test`). A bare `dotnet test` on a tree without built mods fails fast with a "run `make build-mods`" assert. `ecs-mods/` is gitignored; the mods are rebuilt from `src/Mods/ecs-*`.
 

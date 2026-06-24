@@ -64,7 +64,7 @@ run-debug: build-mods
 run-release: build-mods
 	dotnet run --project $(ECS) -c Release
 
-# Mirrors scripts/build-naot.sh: Bootstrap + Client (shared native lib) to bin/dist,
+# AOT publish: Bootstrap + Client (shared native lib) to bin/dist,
 # the AOT cuo-ecs to bin/dist-ecs.
 publish: build-mods
 	dotnet publish $(BOOTSTRAP) -c Release -o bin/dist
