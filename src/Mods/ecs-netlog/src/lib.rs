@@ -210,12 +210,15 @@ fn build_window(commands: &Commands) {
     root.add_child(&title.id(), u32::MAX);
 
     let stop = button(commands, 10.0, 28.0, 150.0, "netlog.btn.stop");
-    // The label is an ABSOLUTE child → Clay-floating → it captures the pointer and
-    // hides the parent button from the hit list. So a click on the text never
-    // reaches the button. Give the label its own Interaction (+NoWindowDrag so the
-    // window drag doesn't steal the press) and route its name to the same action.
+    // The label is an ABSOLUTE child → Clay-floating → it CAPTURES the pointer and
+    // hides the parent button from the hit list, so the click lands on the label,
+    // not the button. A text-ONLY element doesn't reliably fire UiClick, so give the
+    // label a BgColor (same as the button → seamless) to make it a hittable rect
+    // that fires UiClick, plus its own Interaction (+NoWindowDrag so the window drag
+    // doesn't steal the press), and route its name to the same action.
     let stop_lbl = commands.spawn_typed(&[
         ComponentValue::Node(abs_node(10.0, 3.0, 140.0, 16.0)),
+        ComponentValue::BgColor(btn_color()),
         ComponentValue::Text(TextRec { value: "STOP".into() }),
         ComponentValue::TextFont(TextFontRec { font_id: UI_FONT, size: 13 }),
         ComponentValue::TextColor(text_color()),
@@ -229,6 +232,7 @@ fn build_window(commands: &Commands) {
     let clear = button(commands, 170.0, 28.0, 100.0, "netlog.btn.clear");
     let clear_lbl = commands.spawn_typed(&[
         ComponentValue::Node(abs_node(10.0, 3.0, 90.0, 16.0)),
+        ComponentValue::BgColor(btn_color()),
         ComponentValue::Text(TextRec { value: "CLEAR".into() }),
         ComponentValue::TextFont(TextFontRec { font_id: UI_FONT, size: 13 }),
         ComponentValue::TextColor(text_color()),
@@ -250,6 +254,10 @@ fn build_window(commands: &Commands) {
     ]);
     let mark = commands.spawn_typed(&[
         ComponentValue::Node(abs_node(4.0, 0.0, 12.0, 16.0)),
+        // Same bg as the checkbox box → seamless, and a hittable rect so the click
+        // on the "X" fires UiClick (a text-only floating overlay captures the
+        // pointer but doesn't reliably fire UiClick on its own).
+        ComponentValue::BgColor(color(40.0, 40.0, 58.0, 255.0)),
         ComponentValue::Text(TextRec { value: "X".into() }), // default on
         ComponentValue::TextFont(TextFontRec { font_id: UI_FONT, size: 13 }),
         ComponentValue::TextColor(text_color()),
@@ -280,7 +288,7 @@ fn build_window(commands: &Commands) {
 fn button(commands: &Commands, left: f32, top: f32, w: f32, name: &str) -> EntityCommands {
     commands.spawn_typed(&[
         ComponentValue::Node(abs_node(left, top, w, 22.0)),
-        ComponentValue::BgColor(color(58.0, 58.0, 92.0, 255.0)),
+        ComponentValue::BgColor(btn_color()),
         ComponentValue::Interaction(0),
         ComponentValue::NoWindowDrag,
         ComponentValue::UiName(NameRec { value: name.into() }),
@@ -367,6 +375,11 @@ fn color(r: f32, g: f32, b: f32, a: f32) -> Color {
 /// Unicode-font text is tinted by an RGB ClayColor (0-255). White = untinted.
 fn text_color() -> Color {
     color(235.0, 235.0, 245.0, 255.0)
+}
+/// Button face colour — also used on the button's label overlay so the overlay is
+/// a hittable rect (fires UiClick) while staying visually seamless with the button.
+fn btn_color() -> Color {
+    color(58.0, 58.0, 92.0, 255.0)
 }
 
 fn name_of(c: &Component) -> String {
