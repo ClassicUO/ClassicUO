@@ -317,6 +317,7 @@ internal readonly struct ChatPlugin : IPlugin
     }
 
     private static void SubmitChat(
+        Commands commands,
         Res<ChatField> field,
         Res<UOFileManager> fileManager,
         Res<NetClient> network,
@@ -332,6 +333,24 @@ internal readonly struct ChatPlugin : IPlugin
         var (_, t) = textRow;
         var text = t.Ref.Value ?? string.Empty;
         if (text.Length == 0) return;
+
+        // Client-side chat command: a line starting with '-' is intercepted (never
+        // sent to the server) and dispatched as a ChatCommandEvent. ChatCommandPlugin
+        // owns the command names (e.g. "-mods"); chat just records + routes it.
+        if (text[0] == '-')
+        {
+            history.Value.Items.Add(text);
+            history.Value.Index = history.Value.Items.Count;
+
+            var body = text.Substring(1);
+            var sp = body.IndexOf(' ');
+            var name = sp < 0 ? body : body.Substring(0, sp);
+            var args = sp < 0 ? string.Empty : body.Substring(sp + 1).Trim();
+            commands.EmitTrigger(new ChatCommandEvent { Name = name, Args = args });
+
+            t.Ref.Value = string.Empty;
+            return;
+        }
 
         // Record the sent line for the Ctrl+Q/W history-recall hotkeys; point the
         // cursor past the end so the first "prev" recalls this line.

@@ -77,6 +77,7 @@ internal readonly struct TopBarPlugin : IPlugin
         (0, "Info",       Buttons.Info),
         (0, "Debug",      Buttons.Debug),
         (1, "NetStats",   Buttons.NetStats),
+        (0, "Mods",       Buttons.Mods),
         (1, "UO Store",   Buttons.UOStore),
         (1, "Global Chat", Buttons.GlobalChat),
     };
@@ -84,7 +85,9 @@ internal readonly struct TopBarPlugin : IPlugin
     private enum Buttons : int
     {
         Map, Paperdoll, Inventory, Journal, Chat, Help,
-        WorldMap, Info, Debug, NetStats, UOStore, GlobalChat,
+        // Mods sits before UOStore so the UO-Store client-version gate
+        // (id >= UOStore) never hides it.
+        WorldMap, Info, Debug, NetStats, Mods, UOStore, GlobalChat,
     }
 
     // Spawn / despawn the bar to match the profile flag. `spawnQueued` covers
@@ -535,6 +538,12 @@ internal readonly struct TopBarPlugin : IPlugin
                              Query<Data<OptionsWindow>> existing) =>
                     OptionsGumpPlugin.OpenOrFocus(cmd, z.Value, surf.Value, st.Value, existing));
                 break;
+            case Buttons.Mods:
+                // Toggle the mods panel — same path as typing `-mods` in chat.
+                btn.Observe((On<UiClick> _, Commands cmd) =>
+                    cmd.EmitTrigger(new ChatCommandEvent { Name = "mods", Args = string.Empty }));
+                break;
+
             case Buttons.Chat:
             case Buttons.NetStats:
             case Buttons.UOStore:

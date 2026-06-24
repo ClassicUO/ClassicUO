@@ -8,6 +8,7 @@ internal readonly struct GameplayPlugin : IPlugin
     public void Build(App app)
     {
         app.AddPlugin<ChatPlugin>();
+        app.AddPlugin<ChatCommandPlugin>();
         app.AddPlugin<TextOverheadPlugin>();
         app.AddPlugin<PickupPlugin>();
         app.AddPlugin<UseObjectPlugin>();
