@@ -46,6 +46,14 @@ build-mods:
 	@mkdir -p ecs-mods/ui
 	@cp src/Mods/ecs-ui/dist/ecs_ui.wasm ecs-mods/ui/mod.wasm
 	@printf '{\n  "name": "ui",\n  "version": "0.1.0",\n  "wasm": "mod.wasm",\n  "ruleset": {}\n}\n' > ecs-mods/ui/mod.json
+	@# C# mod (wit-bindgen-dotnet from NuGet + NativeAOT-LLVM). NativeAOT emits the .wasm
+	@# only on `publish` (not `build`); ILCompiler.LLVM componentizes it. Needs the
+	@# NativeAOT-LLVM toolchain (wasi-sdk) like the rust mods need cargo.
+	@echo ">> mod csharp (c# / wit-bindgen-dotnet)"
+	@dotnet publish src/Mods/ecs-csharp/ecs-csharp.csproj -c Release
+	@mkdir -p ecs-mods/csharp
+	@cp src/Mods/ecs-csharp/bin/Release/net10.0/wasi-wasm/native/ecs_csharp.wasm ecs-mods/csharp/mod.wasm
+	@printf '{\n  "name": "csharp",\n  "version": "0.1.0",\n  "wasm": "mod.wasm",\n  "ruleset": {}\n}\n' > ecs-mods/csharp/mod.json
 
 test: build-mods
 	dotnet test $(TESTS)

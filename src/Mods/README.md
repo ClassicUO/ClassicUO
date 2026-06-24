@@ -14,6 +14,10 @@ without forking the client.
 - `ecs-status/` — replaces the host status gump with a mod-built one (Rust).
 - `ecs-netlog/` — live-lists incoming packets via the `cuo:net/incoming` event (Rust).
 - `ecs-ui/` — the full React/jco storybook UI mod (TypeScript, componentize-js).
+- `ecs-csharp/` — a movable window + click counter (C#, wit-bindgen-dotnet +
+  NativeAOT-LLVM). Guest bindings come from the `WitBindgen.SourceGenerator` /
+  `WitBindgen.Runtime` NuGet packages; `make build-mods` `dotnet publish`es it
+  (needs the NativeAOT-LLVM toolchain, like the Rust mods need cargo).
 
 ## Build & load
 

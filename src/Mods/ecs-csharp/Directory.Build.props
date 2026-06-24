@@ -1,0 +1,5 @@
+<Project>
+  <!-- Stops MSBuild walking up to src/Directory.Build.props, which injects a
+       FileEmbed ProjectReference + net4 baggage that don't apply to a
+       wasi-wasm component. This mod is self-contained. -->
+</Project>

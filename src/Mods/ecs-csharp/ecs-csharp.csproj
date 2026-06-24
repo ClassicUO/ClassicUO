@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Library</OutputType>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>preview</LangVersion>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <RuntimeIdentifier>wasi-wasm</RuntimeIdentifier>
+        <EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
+        <InvariantGlobalization>true</InvariantGlobalization>
+
+        <UseAppHost>false</UseAppHost>
+        <PublishTrimmed>true</PublishTrimmed>
+        <SelfContained>true</SelfContained>
+        <MSBuildEnableWorkloadResolver>false</MSBuildEnableWorkloadResolver>
+
+        <!-- cdylib-equivalent output name; the Makefile copies this .wasm. -->
+        <TargetName>ecs_csharp</TargetName>
+
+        <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.DotNet.ILCompiler.LLVM" Version="10.0.0-*" />
+        <PackageReference Include="runtime.$(NETCoreSdkPortableRuntimeIdentifier).Microsoft.DotNet.ILCompiler.LLVM" Version="10.0.0-*" />
+    </ItemGroup>
+
+    <!-- wit-bindgen-dotnet guest generator + runtime from NuGet, floating to the latest
+         (incl. prerelease) via *-*. The guest-generator fixes this mod's WIT needs
+         (interface/resource name-collision, dependency-world gating, variant f32->i32
+         bitcast, ref/value variant layout) first shipped in 0.3.0. -->
+    <ItemGroup>
+        <PackageReference Include="WitBindgen.SourceGenerator" Version="*-*">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="WitBindgen.Runtime" Version="*-*" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <!-- AdditionalFiles feeds the Roslyn guest generator; WasmComponentTypeWit feeds
+             ILCompiler.LLVM's component-embedding (the .wasm comes out a Component, not a
+             core module). Both point at the same wit dir. -->
+        <AdditionalFiles Include="wit\**\*.wit" />
+        <WasmComponentTypeWit Include="wit" World="csharp-mod" />
+    </ItemGroup>
+
+</Project>

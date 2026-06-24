@@ -1,0 +1,26 @@
+package mod:csharp;
+
+/// Proof-of-toolchain mod written in C# (wit-bindgen-dotnet + NativeAOT-LLVM).
+/// A movable window with a title and a button; clicking the button increments a
+/// counter shown as text. Exercises the typed spawn path, query iteration and
+/// insert-typed — the same guest surface the Rust/jco mods use.
+///
+/// The `setup` export + `app` import are spelled out explicitly rather than via
+/// `include tinyecs:modding/guest`: `use` already imports interface `app`, and a
+/// second import from `include` would shadow it at component-embed time. Listing
+/// `app` in `use` also gives the export params a fully-qualified C# type.
+world csharp-mod {
+    use tinyecs:modding/app@0.1.0.{app, commands, query};
+
+    /// guest entry point — register systems via `app` (same contract as
+    /// tinyecs:modding/guest's `setup`).
+    export setup: func(app: app);
+
+    /// update: spawn the window once (idempotent via a guest-side guard).
+    export mod-csharp-init: func(commands: commands);
+
+    /// update: handle the button click and update the counter label.
+    /// param order = add order: commands, clicked(with clicked, ref name),
+    /// named(ref name).
+    export mod-csharp-tick: func(commands: commands, clicked: query, named: query);
+}

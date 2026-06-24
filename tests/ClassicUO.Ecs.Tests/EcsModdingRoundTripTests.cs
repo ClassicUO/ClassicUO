@@ -489,6 +489,46 @@ public class EcsModdingRoundTripTests
         Assert.False(stillOnTooltipPage, "TooltipStory still rendered after swapping pages");
     }
 
+    // A C# guest (wit-bindgen-dotnet + NativeAOT-LLVM) driving the same surface as
+    // the Rust mods: setup + add-systems, typed spawn of a movable window, and the
+    // clicked/name query → insert-typed round-trip. Proves the .NET toolchain
+    // produces a component the real host + wasmtime fork load and tick.
+    [Fact]
+    public void Csharp_mod_spawns_window_and_counts_a_click()
+    {
+        var app = BuildAppWith("csharp");
+
+        // One-shot click injector on the mod's button (mod-owned + interactive).
+        app.AddSystem((Commands c, Query<Data<UiName>, Filter<With<ModEntity>, With<Interaction>>> q, Local<int> fired) =>
+        {
+            if (fired.Value > 0)
+                return;
+            foreach ((var e, var n) in q)
+                if (n.Ref.Value == "csharp.btn")
+                {
+                    c.Entity(e.Ref).EmitTrigger(new UiClick { Position = default }, propagate: false);
+                    fired.Value = 1;
+                }
+        }).InStage(Stage.First).Build();
+
+        app.RunStartup();
+        app.Update(); // mod-csharp-init spawns the window (one-shot guard)
+
+        var world = app.GetWorld();
+        Assert.True(FindByName(world, "csharp.root") != 0, "C# mod window not spawned");
+        Assert.Equal("clicks: 0", TextOf(world, "csharp.label"));
+
+        // Click round-trips: injector → host observer → cuo:ui/clicked → mod-tick
+        // bumps the counter and rewrites the label via insert-typed.
+        for (var i = 0; i < 6; i++)
+            app.Update();
+
+        var label = TextOf(world, "csharp.label");
+        Assert.StartsWith("clicks: ", label);
+        Assert.True(int.Parse(label.Substring("clicks: ".Length)) >= 1,
+            $"click did not round-trip to the C# mod: label={label}");
+    }
+
     private static ulong FindByName(World world, string name)
     {
         foreach ((var e, var n) in world.Query<Data<UiName>>())
