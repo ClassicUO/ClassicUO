@@ -3,10 +3,11 @@
 // dispatch + the click bridge; this plugin supplies the cuo-specific pieces:
 //   - the cuo component/resource registry (CuoModdingRegistry),
 //   - per-mod linker hooks (cuo:modding/net + /ui imports, input-consume wiring),
-//   - the UO network tap drain (cuo:net/incoming poll-entities).
+//   - the incoming-packet filter hook (ModNetTap.Filter → mods' on-incoming-packet).
 
 using System;
 using ClassicUO.Input;
+using Microsoft.Xna.Framework.Input;
 using TinyEcs;
 using TinyEcs.Bevy;
 using TinyEcs.Bevy.Modding;
@@ -36,9 +37,16 @@ internal readonly struct ModdingPlugin : IPlugin
             linker.Define(new CuoNetBridge(ctx));
             // Route the generic input-consume capability to the cuo MouseContext.
             CuoModBridge.WireInput(ctx);
-            // A mod is present → open the network tap so PacketReader emits the
-            // cuo:net/incoming event. No mods loaded ⇒ never set ⇒ zero per-packet cost.
-            ctx.App!.GetResource<ModNetTap>().Tapped = true;
+            // Install the incoming-packet filter (idempotent — every mod's hook sets
+            // the same delegate). PacketReader calls ModNetTap.Filter per packet; it
+            // routes to the loaded mods' `on-incoming-packet` export (OR of their
+            // bool returns), resolved live so it covers every mod loaded by then.
+            // Set here (Startup, after all Build()) so it lands on the final ModNetTap
+            // instance — NetworkPlugin re-adds the resource during its own Build.
+            var app = ctx.App!;
+            app.GetResource<ModNetTap>().Filter = (byte id, System.ReadOnlySpan<byte> data) =>
+                app.HasResource<ModRuntimes>()
+                && app.GetResource<ModRuntimes>().AnyReturnsTrue("on-incoming-packet", id, data);
         });
         if (!hadConfig)
             app.AddResource(config);
@@ -51,6 +59,21 @@ internal readonly struct ModdingPlugin : IPlugin
         // The generic modding runtime (loader + per-stage dispatch + click bridge).
         // Added before the cuo systems below so their Before/After labels resolve.
         app.AddPlugin<ModdingRuntimePlugin>();
+
+        // Scene info events (server/character/error lists) are EventWriter/EventReader,
+        // not triggers, so a mod's On<T> observer (cuo:scene/server-list etc., wired by
+        // ModEvent) wouldn't see them. Re-emit each as a trigger. The EventReader cursor
+        // here is independent of the scene plugins' own readers (multi-reader), so it
+        // doesn't consume their events. Cheap: these fire only during the login flow.
+        var fwdServer = (EventReader<ServerSelectionInfoEvent> r, Commands c)
+            => { foreach (var e in r.Read()) c.EmitTrigger(e); };
+        var fwdChar = (EventReader<CharacterSelectionInfoEvent> r, Commands c)
+            => { foreach (var e in r.Read()) c.EmitTrigger(e); };
+        var fwdError = (EventReader<LoginErrorsInfoEvent> r, Commands c)
+            => { foreach (var e in r.Read()) c.EmitTrigger(e); };
+        app.AddSystem(fwdServer).InStage(Stage.First).Build();
+        app.AddSystem(fwdChar).InStage(Stage.First).Build();
+        app.AddSystem(fwdError).InStage(Stage.First).Build();
     }
 
 }
@@ -61,9 +84,16 @@ internal readonly struct ModdingPlugin : IPlugin
 internal static class CuoModBridge
 {
     public static void WireInput(ModHostContext ctx)
-        => ctx.ConsumeMouse = button =>
+    {
+        ctx.ConsumeMouse = button =>
         {
             if (ctx.App != null && ctx.App.HasResource<MouseContext>())
                 ctx.App.GetResource<MouseContext>().Consume((MouseButtonType)button);
         };
+        ctx.ConsumeKeyboard = key =>
+        {
+            if (ctx.App?.HasResource<KeyboardContext>() == true)
+                ctx.App.GetResource<KeyboardContext>().Consume((Keys)key);
+        };
+    }
 }

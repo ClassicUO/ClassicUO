@@ -367,8 +367,6 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
         return label.Id;
     }
 
-    private struct CharacterSelectionScene;
-
     // Mutable closure box tracking which row is currently highlighted, so the
     // Next arrow logs in the selected character.
     private sealed class SelectedRowState
@@ -376,6 +374,10 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
         public uint Index;
     }
 }
+
+// Scene root marker — promoted to namespace-level internal so the modding
+// registry (same assembly) can key a WIT scene path to it.
+internal struct CharacterSelectionScene;
 
 internal struct CharacterSelectionInfoEvent
 {

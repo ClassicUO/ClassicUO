@@ -254,6 +254,12 @@ readonly struct NetworkPlugin : IPlugin
             .AddSystem(packetReaderFn)
             .InStage(Stage.Update)
             .RunIf((Res<NetClient> network) => network.Value!.IsConnected)
+            // SingleThreaded: PacketReader may call a mod's on-incoming-packet guest
+            // export (via ModNetTap.Filter). That access is hidden from the scheduler
+            // (captured in a delegate), so without this it could batch in parallel
+            // with the SingleThreaded mod stage runners and touch a wasm store
+            // concurrently. It also already mutates the World via EmitTrigger.
+            .SingleThreaded()
             .Build()
 
             .AddSystem(handleConnectionLostFn)
@@ -409,12 +415,11 @@ readonly struct NetworkPlugin : IPlugin
 
             var sp = packetBuffer.Value.Buffer.AsSpan(0, packetLen + packetHeaderOffset);
 
-            // Mod tap: observe every incoming packet (cuo:net/incoming), and let a
-            // mod drop one before host dispatch (tinyecs:modding commands.block-packet).
-            // Observe-then-block so a mod can both see it and suppress host parse.
-            if (netTap.Value.Tapped)
-                commands.EmitTrigger(new ModIncomingPacket { Id = packetId, Payload = sp.ToArray() });
-            if (netTap.Value.Blocked.Contains(packetId))
+            // Mod packet filter: a mod that exports `on-incoming-packet(id, data)
+            // -> bool` (installed as ModNetTap.Filter by the modding layer) decides
+            // per packet whether to BLOCK it (skip host dispatch). Synchronous, no
+            // World mutation in the guest. Null filter (no such mod) => zero cost.
+            if (netTap.Value.Filter is { } filter && filter(packetId, sp))
                 continue;
 
             var payload = sp.Slice(packetHeaderOffset, packetLen - packetHeaderOffset);

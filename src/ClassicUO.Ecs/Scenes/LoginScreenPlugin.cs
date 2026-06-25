@@ -430,7 +430,10 @@ internal readonly struct LoginScreenPlugin : IPlugin
         LoginRequested
     }
 
-    private struct LoginScene;
     private struct UsernameInput;
     private struct PasswordInput;
 }
+
+// Scene root marker — promoted to namespace-level internal so the modding
+// registry (same assembly) can key a WIT scene path to it.
+internal struct LoginScene;

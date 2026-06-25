@@ -660,7 +660,6 @@ internal readonly struct GameScreenPlugin : IPlugin
         Console.WriteLine("[GameScreen] cleanup done");
     }
 
-    private struct GameScene;
     // internal (not private): GameCursorPlugin queries it to tell "cursor is over
     // the game world" (a hit on this viewport node) from "over a gump".
     internal struct GameWindowUI;
@@ -676,6 +675,10 @@ internal readonly struct GameScreenPlugin : IPlugin
         OpenInventory,
     }
 }
+
+// Scene root marker — promoted to namespace-level internal so the modding
+// registry (same assembly) can key a WIT scene path to it.
+internal struct GameScene;
 
 internal struct InventoryButton;
 

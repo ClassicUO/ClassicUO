@@ -1669,7 +1669,6 @@ internal readonly struct CharacterCreationPlugin : IPlugin
 
     // Markers --------------------------------------------------------------
 
-    private struct CharCreationScene;
     private struct AppearanceUI;
     private struct AppearanceDynamic;
     private struct ProfessionUI;
@@ -1684,6 +1683,10 @@ internal readonly struct CharacterCreationPlugin : IPlugin
         public ulong Slider;
     }
 }
+
+// Scene root marker — promoted to namespace-level internal so the modding
+// registry (same assembly) can key a WIT scene path to it.
+internal struct CharCreationScene;
 
 internal enum CreationLayer : byte
 {

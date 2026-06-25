@@ -11,8 +11,13 @@ world guest {
 }
 
 interface net {
-	/// CUO networking from a mod. Construct once, then send/block. (A resource —
-	/// not free functions — so the guest ABI stays on the proven scalar path.)
+	/// CUO networking from a mod. Construct once, then send. (A resource — not free
+	/// functions — so the guest ABI stays on the proven scalar path.)
+	///
+	/// To FILTER incoming packets there is NO block-by-id import: a mod instead
+	/// EXPORTS `on-incoming-packet: func(id: u8, data: list<u8>) -> bool` in its own
+	/// world. The host calls it synchronously per incoming packet BEFORE dispatch —
+	/// return true to BLOCK (host handlers skip the packet), false to continue.
 	resource net {
 		constructor();
 
@@ -20,12 +25,6 @@ interface net {
 		/// not connected). The mod owns the bytes including the length field for
 		/// variable-length packets — the host does NOT reframe.
 		send: func(packet: list<u8>);
-
-		/// Suppress an incoming packet id before host dispatch (still observable
-		/// via the cuo:net/incoming poll-entities — observe runs before block).
-		block-packet: func(id: u8);
-		/// Stop suppressing a packet id.
-		unblock-packet: func(id: u8);
 	}
 }
 

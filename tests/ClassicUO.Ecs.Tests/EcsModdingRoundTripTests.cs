@@ -298,42 +298,71 @@ public class EcsModdingRoundTripTests
         cmds.ResourceSet("cuo:nope/missing", "{}");
     }
 
-    // Incoming packets surface as a cuo:net/incoming custom event a mod observes
-    // (here a host On<ModIncomingPacket> probe stands in for the mod's observer —
-    // the same path ModEvent.RegisterObserver wires for guests). No entity, no
-    // per-frame spawn/despawn.
+    // The Tier 0..4 registrations round-trip through the real registry + STJ (no
+    // wasm): a scene-state read + queued transition, world-entity component gets,
+    // and a scene marker presence. Catches serialize-time failures a compile won't.
     [Fact]
-    public void Mod_observes_incoming_packets_via_custom_event()
+    public void New_registry_entries_round_trip()
     {
-        var app = BuildAppWith("topbar"); // any mod loaded → tap gate opens
+        var app = new App(ThreadingMode.Single);
+        app.AddState(GameState.LoginScreen);
 
-        var seen = new System.Collections.Generic.List<(byte id, string payload)>();
-        app.AddObserver<On<ModIncomingPacket>>(t =>
-            seen.Add((t.Event.Id, Convert.ToBase64String(t.Event.Payload))));
-
-        app.RunStartup();
-        Assert.True(app.GetResource<ModNetTap>().Tapped, "tap gate did not open with a mod loaded");
-
-        // Emit one packet the way NetworkPlugin.PacketReader does (global trigger).
-        app.AddSystem((Commands c, Local<int> fired) =>
+        var ctx = new ModHostContext
         {
-            if (fired.Value++ > 0) return;
-            c.EmitTrigger(new ModIncomingPacket { Id = 0x11, Payload = new byte[] { 0x11, 0xAA, 0xBB } });
-        }).InStage(Stage.Update).Build();
+            World = app.GetWorld(),
+            Registry = CuoModdingRegistry.Build(),
+            App = app,
+        };
+        var cmds = new CommandsImpl(ctx);
 
+        // Tier 0: read the current scene, then QUEUE a transition (applied next Update).
+        Assert.Contains("\"Current\":1", cmds.ResourceGet("cuo:game/state")); // LoginScreen
+        cmds.ResourceSet("cuo:game/state", "{\"Current\":3}");                 // CharacterSelection
         app.Update();
+        Assert.Equal(GameState.CharacterSelection, app.GetState<GameState>());
 
-        Assert.Single(seen);
-        Assert.Equal(0x11, seen[0].id);
-        Assert.Equal(Convert.ToBase64String(new byte[] { 0x11, 0xAA, 0xBB }), seen[0].payload);
+        // Tier 3 component gets + Tier 1 marker presence, through the entity bridge.
+        var world = app.GetWorld();
+        var item = world.Entity();
+        item.Set(new NetworkSerial { Value = 0x1234 });
+        item.Set(new Hue { Value = 0x21 });
+        item.Set(new LoginScene()); // zero-size marker
+        var e = new EntityImpl(ctx, item.ID);
+        Assert.Contains("4660", e.Get("cuo:ent/serial")); // 0x1234
+        Assert.Contains("33", e.Get("cuo:ent/hue"));       // 0x21
+        // Zero-size markers are presence-only: mods find them via a `with` query
+        // (Has/CollectEntities), not entity.get (a tag has no data to read). Verify
+        // the registry detects the marker on the entity — the path mods use.
+        Assert.True(ctx.Registry.TryGet("cuo:scene/login", out var loginMarker) && loginMarker.Has(world, item.ID),
+            "cuo:scene/login marker not registered or not detected on the entity");
+
+        // ModPresence: a gump marker whose raw struct can't cross STJ (BookWindow
+        // holds a HashSet) is still queryable, and get() returns "{}" — no panic, no
+        // serialize of the uncrossable field.
+        item.Set(new BookWindow { Serial = 7 });
+        Assert.True(ctx.Registry.TryGet("cuo:gump/book", out var book) && book.Has(world, item.ID),
+            "cuo:gump/book presence marker not registered or not detected");
+        Assert.Equal("{}", book.GetJson(world, item.ID));
+
+        // Tier 3 InlineArray DTO: EquipmentSlots projects equipped entity ids to the
+        // items' UO serials (layer index → serial) via the custom ModEquipmentSlots.
+        var weapon = world.Entity();
+        weapon.Set(new NetworkSerial { Value = 0xDEAD });
+        var slots = new EquipmentSlots();
+        slots[(ClassicUO.Game.Data.Layer)1] = weapon.ID;
+        var wearer = world.Entity();
+        wearer.Set(slots);
+        Assert.Contains("57005", new EntityImpl(ctx, wearer.ID).Get("cuo:ent/equipment")); // 0xDEAD
     }
 
-    // Full guest round-trip: a real WASM mod (ecs-netlog) observes cuo:net/incoming
-    // via add_observer(Custom(..)) and LIVE-appends ID + size + hex rows as packets
-    // arrive — no button click needed. Proves the custom-event reaches the guest AND
-    // the guest spawns UI from it.
+    // Full guest round-trip of the NEW incoming hook: ecs-netlog exports
+    // on-incoming-packet(id, data) -> bool. The host calls it through ModNetTap.Filter
+    // (installed by the modding plugin) exactly as NetworkPlugin.PacketReader does;
+    // netlog stores each packet and returns false (observe, never block), then its
+    // tick LIVE-appends ID + size + hex rows. Proves the export is found + called +
+    // receives id+data + its bool return is read (false → continue).
     [Fact]
-    public void Netlog_mod_live_lists_incoming_packets()
+    public void Netlog_mod_lists_incoming_packets_via_hook()
     {
         var app = BuildAppWith("netlog");
         app.RunStartup();
@@ -342,16 +371,15 @@ public class EcsModdingRoundTripTests
         var world = app.GetWorld();
         Assert.True(FindByName(world, "netlog.root") != 0, "netlog window not spawned");
 
-        // Incoming packets via the custom event (host On<ModIncomingPacket> → guest
-        // on-packet). This is the leg no fixture covered before.
-        app.AddSystem((Commands c, Local<int> fired) =>
-        {
-            if (fired.Value++ > 0) return;
-            c.EmitTrigger(new ModIncomingPacket { Id = 0xB9, Payload = new byte[] { 0x10, 0x20, 0x30 } });
-            c.EmitTrigger(new ModIncomingPacket { Id = 0x1B, Payload = new byte[] { 0xAA } });
-        }).InStage(Stage.First).Build();
+        var tap = app.GetResource<ModNetTap>();
+        Assert.True(tap.Filter != null, "modding plugin did not install the incoming filter");
 
-        // Rows append live across the next few frames — no STOP click required.
+        // Drive the hook the way PacketReader does (full framed bytes incl id byte).
+        var blocked = tap.Filter!(0xB9, new byte[] { 0xB9, 0x10, 0x20, 0x30 });
+        Assert.False(blocked, "netlog only observes — it must not block");
+        tap.Filter!(0x1B, new byte[] { 0x1B, 0xAA });
+
+        // Rows append live across the next few frames.
         for (var i = 0; i < 4; i++)
             app.Update();
 
@@ -362,8 +390,8 @@ public class EcsModdingRoundTripTests
             if (t.Ref.Value.Contains("0xB9")) header = true;
             if (t.Ref.Value.Contains("10 20 30")) hex = true;
         }
-        Assert.True(header, "live append did not build the packet header row (0xB9 size=3)");
-        Assert.True(hex, "live append did not build the packet hex row (10 20 30)");
+        Assert.True(header, "hook did not deliver the packet (no 0xB9 header row)");
+        Assert.True(hex, "hook did not deliver the payload bytes (no hex row)");
     }
 
     // Clicking the LABEL/mark overlay (not just the control rect) must trigger:
@@ -530,6 +558,58 @@ public class EcsModdingRoundTripTests
             $"click did not round-trip to the C# mod: label={label}");
     }
 
+    // #13 forwarder: scene info events are EventWriter/EventReader; the ModdingPlugin
+    // re-emits them as triggers so a mod's On<T> observer (cuo:scene/server-list etc.)
+    // receives them. A host On<T> probe stands in for the mod observer (same path
+    // ModEvent wires). EventWriter.Send → forwarder (Stage.First) re-emits → observer.
+    [Fact]
+    public void Scene_info_event_forwards_eventwriter_to_trigger()
+    {
+        var app = BuildAppWith("topbar"); // installs the ModdingPlugin forwarders
+        var seen = -1;
+        app.AddObserver<On<ServerSelectionInfoEvent>>(t => seen = t.Event.Servers?.Count ?? -1);
+        app.RunStartup();
+
+        app.AddSystem((EventWriter<ServerSelectionInfoEvent> w, Local<int> fired) =>
+        {
+            if (fired.Value++ > 0) return;
+            w.Send(new ServerSelectionInfoEvent { Servers = new() { new ServerInfo(0, "Test", 50, 5, 0x7F000001) } });
+        }).InStage(Stage.Update).Build();
+
+        for (var i = 0; i < 6; i++)
+            app.Update();
+
+        Assert.Equal(1, seen);
+    }
+
+    // #13 character-list DTO: CharacterSelectionInfoEvent → flat DTO, flattening
+    // TownInfo's ValueTuple Position (raw STJ can't take it). Drives the custom mapper.
+    [Fact]
+    public void Character_list_event_maps_tuple_to_flat_dto()
+    {
+        var app = new App(ThreadingMode.Single);
+        Assert.True(CuoModdingRegistry.Build().TryGetEvent("cuo:scene/character-list", out var ev));
+        string captured = null;
+        ev.RegisterObserver(app, (_, json) => captured = json);
+
+        app.AddSystem((Commands c, Local<int> fired) =>
+        {
+            if (fired.Value++ > 0) return;
+            c.EmitTrigger(new CharacterSelectionInfoEvent
+            {
+                Characters = new() { new CharacterInfo("Hero", 0) },
+                Towns = new() { new TownInfo(1, "Britain", "Castle", (100, 200, 5), 0, 1234) },
+            });
+        }).InStage(Stage.Update).Build();
+        app.Update();
+
+        Assert.NotNull(captured);
+        Assert.Contains("Hero", captured);
+        Assert.Contains("\"X\":100", captured); // tuple flattened
+        Assert.Contains("\"Z\":5", captured);
+        Assert.Contains("1234", captured);       // cliloc
+    }
+
     private static ulong FindByName(World world, string name)
     {
         foreach ((var e, var n) in world.Query<Data<UiName>>())
@@ -571,28 +651,21 @@ public class EcsModdingRoundTripTests
         Assert.Contains("\"Right\":false", json);
     }
 
-    // Phase 4: a mod suppresses an incoming packet id (host PacketReader skips
-    // dispatch for blocked ids — the toggle the bridge drives).
+    // The BLOCK half of the incoming hook: a real WASM mod (ecs-blocktest) whose
+    // on-incoming-packet returns true for id 0x99 makes ModNetTap.Filter report
+    // "block" for that id (NetworkPlugin.PacketReader then skips host dispatch), and
+    // false for every other id. Proves the bool return drives the block decision.
     [Fact]
-    public void Packet_block_toggles_through_the_bridge()
+    public void Blocktest_mod_blocks_its_id_via_hook()
     {
-        var app = new App(ThreadingMode.Single);
-        app.AddResource(new ModNetTap());
-        var ctx = new ModHostContext
-        {
-            World = app.GetWorld(),
-            Registry = CuoModdingRegistry.Build(),
-            App = app,
-        };
-        // block/unblock live on the cuo:modding/net resource (game-specific),
-        // not the generic tinyecs `commands`.
-        var net = new NetImpl(ctx);
-        var tap = app.GetResource<ModNetTap>();
+        var app = BuildAppWith("blocktest");
+        app.RunStartup();
 
-        net.BlockPacket(0x11);
-        Assert.Contains((byte)0x11, tap.Blocked);
-        net.UnblockPacket(0x11);
-        Assert.DoesNotContain((byte)0x11, tap.Blocked);
+        var tap = app.GetResource<ModNetTap>();
+        Assert.True(tap.Filter != null, "modding plugin did not install the incoming filter");
+
+        Assert.True(tap.Filter!(0x99, new byte[] { 0x99, 0x01 }), "blocktest must block id 0x99");
+        Assert.False(tap.Filter!(0x11, new byte[] { 0x11, 0x01 }), "blocktest must pass other ids");
     }
 
     // Phase 4: a mod consumes a mouse button so host gameplay ignores it. Real

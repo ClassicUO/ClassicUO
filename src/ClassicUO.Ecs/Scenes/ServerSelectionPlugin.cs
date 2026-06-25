@@ -283,11 +283,13 @@ internal readonly struct ServerSelectionPlugin : IPlugin
         return label.Id;
     }
 
-    private struct ServerSelectionScene;
-
     // Links a server row to its name label so the hover system can recolour it.
     private struct ServerRowUI { public ulong NameLabel; }
 }
+
+// Scene root marker — promoted to namespace-level internal so the modding
+// registry (same assembly) can key a WIT scene path to it.
+internal struct ServerSelectionScene;
 
 // One-shot guard so a double-click on a server row (or Next/Earth) sends the
 // SelectServer packet once. Re-armed on entering the screen.

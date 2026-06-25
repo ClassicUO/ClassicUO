@@ -145,8 +145,11 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
         commands.AddChild(boxId, okButton.Id);
     }
 
-    private struct LoginErrorScene;
 }
+
+// Scene root marker — promoted to namespace-level internal so the modding
+// registry (same assembly) can key a WIT scene path to it.
+internal struct LoginErrorScene;
 
 internal struct LoginErrorsInfoEvent
 {

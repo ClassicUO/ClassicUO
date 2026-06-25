@@ -1,0 +1,12 @@
+package mod:blocktest;
+
+/// Minimal incoming-packet filter mod: blocks packet id 0x99 (returns true),
+/// passes everything else. Demonstrates the on-incoming-packet hook's BLOCK path
+/// (the host's NetworkPlugin.PacketReader skips dispatch when this returns true).
+world blocktest-mod {
+    include tinyecs:modding/guest@0.1.0;
+
+    /// Host calls this synchronously per incoming packet, BEFORE host dispatch.
+    /// return true -> BLOCK; false -> continue to host handlers.
+    export on-incoming-packet: func(id: u8, data: list<u8>) -> bool;
+}

@@ -21,7 +21,7 @@ ECS       := src/ClassicUO.Ecs/ClassicUO.Ecs.csproj
 TESTS     := tests/ClassicUO.Ecs.Tests/ClassicUO.Ecs.Tests.csproj
 BOOTSTRAP := src/ClassicUO.Bootstrap/src/ClassicUO.Bootstrap.csproj
 CLIENT    := src/ClassicUO.Client
-RUST_MODS := ecs-netlog ecs-status ecs-topbar
+RUST_MODS := ecs-netlog ecs-status ecs-topbar ecs-blocktest
 
 .DEFAULT_GOAL := help
 .PHONY: help build-mods test run-debug run-release publish

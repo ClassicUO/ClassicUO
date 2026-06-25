@@ -3,8 +3,9 @@
 // tinyecs:modding `app`). One concrete subclass per WIT resource, sharing the
 // per-mod ModHostContext — same pattern as GuestBridge.
 //
-// send → NetClient (raw passthrough, mod owns the framing). block/unblock →
-// ModNetTap.Blocked, which NetworkPlugin.PacketReader honors before dispatch.
+// send → NetClient (raw passthrough, mod owns the framing). Incoming-packet
+// filtering is NOT a net import — a mod exports `on-incoming-packet` (see
+// cuo-modding.wit) and NetworkPlugin.PacketReader calls it before dispatch.
 
 using System;
 using ClassicUO.Network;
@@ -73,17 +74,12 @@ internal struct NetImpl(ModHostContext ctx) : N.INet
         ctx.App.GetResource<NetClient>().Send(mutable, ignorePlugin: true);
     }
 
-    public void BlockPacket(byte id)
-    {
-        if (ctx.App != null && ctx.App.HasResource<ModNetTap>())
-            ctx.App.GetResource<ModNetTap>().Blocked.Add(id);
-    }
-
-    public void UnblockPacket(byte id)
-    {
-        if (ctx.App != null && ctx.App.HasResource<ModNetTap>())
-            ctx.App.GetResource<ModNetTap>().Blocked.Remove(id);
-    }
+    // UO serial → ECS entity id (0 if no entity tracks that serial). Lets a mod
+    // bridge from a packet's serial to the world entity (read via entity::get,
+    // edit via commands::entity-by-id).
+    public ulong ResolveSerial(uint serial)
+        => ctx.App != null && ctx.App.HasResource<NetworkEntitiesMap>()
+            && ctx.App.GetResource<NetworkEntitiesMap>().TryGet(serial, out var id) ? id : 0;
 
     public void Dispose() { }
 }

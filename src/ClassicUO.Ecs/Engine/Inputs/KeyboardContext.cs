@@ -12,6 +12,13 @@ internal class KeyboardContext
     protected readonly KeyboardInput Input = new();
     private readonly Microsoft.Xna.Framework.Game _game;
 
+    // Keys consumed this frame (Keys is the Win32 VK range, < 256). Mirrors
+    // MouseInput's _consumed: the lib KeyboardInput has no consume model, so it
+    // lives on the adapter. Cleared at the start of Update so a consume only
+    // suppresses reads for the remainder of the tick — lets a mod (or host)
+    // eat a key in a pre-update system before gameplay reads it.
+    private readonly bool[] _consumed = new bool[256];
+
 #if AGENT_BUILD
     // One synthetic key per Update: held down for exactly one snapshot so the
     // press edge (IsPressedOnce) fires, gone the next. Queue paced one-per-
@@ -28,11 +35,24 @@ internal class KeyboardContext
     // with no Game.
     protected virtual bool IsActiveWindow => _game?.IsActive ?? false;
 
-    public bool IsPressed(Keys input) => Input.IsPressed((KeyCode)input);
+    public bool IsPressed(Keys input) => !IsConsumed(input) && Input.IsPressed((KeyCode)input);
 
-    public bool IsPressedOnce(Keys input) => Input.IsPressedOnce((KeyCode)input);
+    public bool IsPressedOnce(Keys input) => !IsConsumed(input) && Input.IsPressedOnce((KeyCode)input);
 
-    public bool IsReleased(Keys input) => Input.IsReleased((KeyCode)input);
+    public bool IsReleased(Keys input) => !IsConsumed(input) && Input.IsReleased((KeyCode)input);
+
+    public void Consume(Keys key)
+    {
+        var idx = (int)key;
+        if (idx >= 0 && idx < _consumed.Length)
+            _consumed[idx] = true;
+    }
+
+    public bool IsConsumed(Keys key)
+    {
+        var idx = (int)key;
+        return idx >= 0 && idx < _consumed.Length && _consumed[idx];
+    }
 
     public Keys[] GetPressedKeys()
     {
@@ -45,6 +65,8 @@ internal class KeyboardContext
 
     public virtual void Update(float totalTimeMs)
     {
+        Array.Clear(_consumed);
+
         var state = Microsoft.Xna.Framework.Input.Keyboard.GetState();
 
         // IsKeyDown over the full VK range instead of GetPressedKeys() — the

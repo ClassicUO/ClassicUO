@@ -16,7 +16,8 @@ world netlog-mod {
     /// named(ref name).
     export mod-netlog-tick: func(commands: commands, clicked: query, named: query);
 
-    /// observer: host calls this per incoming packet (cuo:net/incoming custom
-    /// event). Stores it guest-side while capture is on. (entity unused.)
-    export on-packet: func(entity: u64, json: string);
+    /// Host calls this synchronously per incoming packet, BEFORE host dispatch.
+    /// Stores it guest-side while capture is on, then returns false (netlog only
+    /// observes — never blocks). data = full framed packet (id + length + body).
+    export on-incoming-packet: func(id: u8, data: list<u8>) -> bool;
 }

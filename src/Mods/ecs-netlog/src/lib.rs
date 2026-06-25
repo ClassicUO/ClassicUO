@@ -15,10 +15,9 @@ wit_bindgen::generate!({
 
 use crate::tinyecs::modding::app::{
     AlignItems, Color, Component, ComponentValue, Display, Entity, EntityCommands, FlexDirection,
-    JustifyContent, NameRec, NodeRec, ObserverEvent, Overflow, PositionType, QueryFor, Schedule,
+    JustifyContent, NameRec, NodeRec, Overflow, PositionType, QueryFor, Schedule,
     System, TextFontRec, TextRec, UiRect, Val, ZRec,
 };
-use base64::Engine as _;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering::Relaxed};
 use std::sync::Mutex;
 
@@ -68,7 +67,6 @@ impl Guest for NetlogMod {
         tick.add_query(&[QueryFor::Ref("cuo:ui/name".into())]);
         app.add_systems(&Schedule::Update, &[&tick]);
 
-        app.add_observer("on-packet", &ObserverEvent::Custom("cuo:net/incoming".into()));
         println!("[netlog] setup");
     }
 
@@ -174,19 +172,16 @@ impl Guest for NetlogMod {
         }
     }
 
-    fn on_packet(_entity: u64, json: String) {
-        if !CAPTURING.load(Relaxed) {
-            return;
+    // Host calls this synchronously per incoming packet (data = full framed bytes).
+    // Store while capturing; never block (return false) — netlog only observes.
+    fn on_incoming_packet(id: u8, data: Vec<u8>) -> bool {
+        if CAPTURING.load(Relaxed) {
+            let mut p = PACKETS.lock().unwrap();
+            if p.len() < MAX_PACKETS {
+                p.push(Packet { id, bytes: data });
+            }
         }
-        let v: serde_json::Value = serde_json::from_str(&json).unwrap_or(serde_json::Value::Null);
-        let id = v["Id"].as_u64().unwrap_or(0) as u8;
-        let bytes = base64::engine::general_purpose::STANDARD
-            .decode(v["Payload"].as_str().unwrap_or(""))
-            .unwrap_or_default();
-        let mut p = PACKETS.lock().unwrap();
-        if p.len() < MAX_PACKETS {
-            p.push(Packet { id, bytes });
-        }
+        false
     }
 }
 

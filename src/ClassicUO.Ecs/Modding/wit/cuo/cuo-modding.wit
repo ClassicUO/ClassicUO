@@ -11,8 +11,15 @@ world guest {
 }
 
 interface net {
-	/// CUO networking from a mod. Construct once, then send/block. (A resource —
-	/// not free functions — so the guest ABI stays on the proven scalar path.)
+	/// CUO networking from a mod. Construct once, then send. (A resource — not free
+	/// functions — so the guest ABI stays on the proven scalar path.)
+	///
+	/// To FILTER incoming packets there is NO block-by-id import: a mod instead
+	/// EXPORTS `on-incoming-packet: func(id: u8, data: list<u8>) -> bool` in its own
+	/// world. The host calls it synchronously per incoming packet BEFORE dispatch —
+	/// return true to BLOCK (host handlers skip the packet), false to continue. The
+	/// export is pure (no commands); a mod that wants to act stores state guest-side
+	/// and reacts in its own update system.
 	resource net {
 		constructor();
 
@@ -21,11 +28,11 @@ interface net {
 		/// variable-length packets — the host does NOT reframe.
 		send: func(packet: list<u8>);
 
-		/// Suppress an incoming packet id before host dispatch (still observable
-		/// via the cuo:net/incoming poll-entities — observe runs before block).
-		block-packet: func(id: u8);
-		/// Stop suppressing a packet id.
-		unblock-packet: func(id: u8);
+		/// Resolve a UO serial to the ECS entity id the host tracks it under, or 0
+		/// if no entity exists for that serial. Pair with tinyecs commands::
+		/// entity-by-id / entity::get to read or edit the world entity behind a
+		/// serial a mod learned from a packet.
+		resolve-serial: func(serial: u32) -> u64;
 	}
 }
 
