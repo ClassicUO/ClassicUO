@@ -22,6 +22,10 @@ use crate::tinyecs::modding::app::{
 use std::sync::atomic::{AtomicBool, Ordering};
 
 static ADDED: AtomicBool = AtomicBool::new(false);
+// Set once the options section is injected; re-armed when the window closes.
+// Without it, mod_options re-walks the whole options tree (a get()/JSON marshal
+// per node across the WASM boundary) every frame the window is open.
+static OPTIONS_INJECTED: AtomicBool = AtomicBool::new(false);
 
 const GAP: f64 = 2.0;
 
@@ -33,10 +37,17 @@ impl Guest for TopbarMod {
         init.add_commands();
         // Node handles to widen: group, root, marble bg. Plus a sample button
         // (ref) to copy its size so ours matches the others.
-        init.add_query(&[QueryFor::Mut("cuo:ui/node".into()), QueryFor::With("cuo:ui/topbar-full".into())]);
-        init.add_query(&[QueryFor::Mut("cuo:ui/node".into()), QueryFor::With("cuo:ui/topbar-root".into())]);
-        init.add_query(&[QueryFor::Mut("cuo:ui/node".into()), QueryFor::With("cuo:ui/topbar-bg".into())]);
-        init.add_query(&[QueryFor::Ref("cuo:ui/node".into()), QueryFor::With("cuo:ui/topbar-button".into())]);
+        // The sparse `With` marker is declared FIRST in each query so it drives
+        // the host's snapshot (CollectEntities runs on the first registered term).
+        // Mut/Ref node second: with node first the host would gather EVERY node in
+        // the world each frame (hundreds when the options gump is open) and then
+        // filter — the reorder makes it gather only the 1-few marked entities.
+        // `With` terms don't count toward the result component index, so node is
+        // still component(0).
+        init.add_query(&[QueryFor::With("cuo:ui/topbar-full".into()), QueryFor::Mut("cuo:ui/node".into())]);
+        init.add_query(&[QueryFor::With("cuo:ui/topbar-root".into()), QueryFor::Mut("cuo:ui/node".into())]);
+        init.add_query(&[QueryFor::With("cuo:ui/topbar-bg".into()), QueryFor::Mut("cuo:ui/node".into())]);
+        init.add_query(&[QueryFor::With("cuo:ui/topbar-button".into()), QueryFor::Ref("cuo:ui/node".into())]);
         app.add_systems(&Schedule::Update, &[&init]);
 
         let tick = System::new("mod-ui-tick");
@@ -54,9 +65,11 @@ impl Guest for TopbarMod {
         // Scoped to our button by its unique cuo:test/counter marker.
         let feedback = System::new("mod-button-feedback");
         feedback.add_commands();
+        // Marker first (drives the snapshot from the 1 mod button, not every
+        // interactive element in the world). interaction stays component(0).
         feedback.add_query(&[
-            QueryFor::Ref("cuo:ui/interaction".into()),
             QueryFor::With("cuo:test/counter".into()),
+            QueryFor::Ref("cuo:ui/interaction".into()),
         ]);
         app.add_systems(&Schedule::Update, &[&feedback]);
 
@@ -186,24 +199,27 @@ impl Guest for TopbarMod {
     fn mod_options(commands: Commands, windows: Query) {
         // Find the options window (its marker already exists on the gump root).
         let Some(wr) = windows.iter() else {
+            // Window closed — re-arm so reopening re-injects.
+            OPTIONS_INJECTED.store(false, Ordering::Relaxed);
             return; // options gump not open
         };
+        // Already injected for this open window: skip the tree walk. The section
+        // lives directly under the scroll viewport, which the host builds once on
+        // spawn and never rebuilds while open (tabs flip Display; search refills
+        // only its own container) — so one inject per open is enough.
+        if OPTIONS_INJECTED.load(Ordering::Relaxed) {
+            return;
+        }
         let root = wr.entity();
 
         // Walk the tree to the scroll viewport (a descendant with ScrollPosition) —
-        // pure traversal + component inspection, no host cooperation.
+        // pure traversal + component inspection, no host cooperation. Runs only
+        // until injection succeeds, not every frame.
         let Some(viewport) = find_descendant(&root, "cuo:ui/scroll") else {
             return;
         };
 
-        // Idempotent: bail if our section is already a child.
-        for child in viewport.children() {
-            if entity_name(&child) == "mod.options.section" {
-                return;
-            }
-        }
-
-        // Inject a section into the existing options list (additive → survives rebuilds).
+        // Inject a section into the existing options list.
         let sec = commands.spawn(&[
             ("cuo:ui/node".into(), "{\"PositionType\":0,\"Width\":{\"Type\":1,\"Value\":300},\"Height\":{\"Type\":1,\"Value\":40},\"JustifyContent\":1,\"AlignItems\":1}".into()),
             ("cuo:ui/name".into(), "{\"Value\":\"mod.options.section\"}".into()),
@@ -214,6 +230,7 @@ impl Guest for TopbarMod {
             ("cuo:ui/interaction".into(), "0".into()),
         ]);
         commands.entity(&viewport).add_child(&sec.id(), 0); // top of the list
+        OPTIONS_INJECTED.store(true, Ordering::Relaxed);
         println!("[topbar-mod] injected options section via traversal");
     }
 }
@@ -229,12 +246,6 @@ fn find_descendant(e: &Entity, type_path: &str) -> Option<Entity> {
         }
     }
     None
-}
-
-/// This entity's UiName Value, or "" if none.
-fn entity_name(e: &Entity) -> String {
-    let v: serde_json::Value = serde_json::from_str(&e.get("cuo:ui/name")).unwrap_or(serde_json::Value::Null);
-    v["Value"].as_str().unwrap_or("").to_string()
 }
 
 /// Read Node.<field>.Value (a Val) from the serialized Node JSON.
