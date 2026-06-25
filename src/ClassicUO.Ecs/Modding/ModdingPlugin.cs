@@ -28,6 +28,14 @@ internal readonly struct ModdingPlugin : IPlugin
         // registry + hooks before AddPlugin<ModdingPlugin> so the lib picks it up.
         var hadConfig = app.HasResource<ModdingConfig>();
         var config = hadConfig ? app.GetResource<ModdingConfig>() : new ModdingConfig();
+        // Mods folder from settings.json (tests inject their own ModFolder via a
+        // pre-registered config, so don't clobber that path).
+        if (!hadConfig)
+        {
+            var modsPath = ClassicUO.Configuration.Settings.GlobalSettings?.ModsPath;
+            if (!string.IsNullOrWhiteSpace(modsPath))
+                config.ModFolder = modsPath;
+        }
         config.Registry = CuoModdingRegistry.Build();
         config.PerMod.Add((linker, ctx) =>
         {

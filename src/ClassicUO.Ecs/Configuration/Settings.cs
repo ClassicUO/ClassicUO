@@ -93,6 +93,8 @@ namespace ClassicUO.Configuration
 
         [JsonPropertyName("plugins")] public string[] Plugins { get; set; } = { @"./Assistant/Razor.dll" };
 
+        [JsonPropertyName("mods_path")] public string ModsPath { get; set; } = "ecs-mods";
+
         public static string GetSettingsFilepath()
         {
             if (CustomSettingsFilepath != null)
