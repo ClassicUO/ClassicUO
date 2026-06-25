@@ -12,12 +12,13 @@
 // 10-line pages per spread (left x=38, right x=223, text at y=26), page number
 // labels at y=220.
 //
-// Legacy runs ONE text box flowing across every page; here each page is an
-// independent field, and NormalizeFlow recreates the flow: after every edit
-// the whole book is re-wrapped and re-sliced into MaxBookLines-line pages, so
-// typing past a page's last line pushes the overflow onto the next page (and
-// deleting pulls it back), with the caret/focus following the flowed text —
-// flipping the spread when it crosses to a page that isn't displayed.
+// Each page is an INDEPENDENT field (read-only WrappedText or an editable
+// multiline field). The server already paginates the text, so page k shows /
+// edits page k verbatim — there is NO cross-page reflow. (An earlier version
+// concatenated every page and re-sliced by line count to mimic legacy's single
+// flowing text box, but with no per-page blank padding a short page pulled the
+// next page's text up into it — page 1 showing page 1 + page 2. Independent
+// pages match the read-only path and the server's pagination.)
 //
 // Movable / right-click-close / topmost-on-click come from the shared
 // WindowDrag infra (UiMovable root, pixel-perfect via the 0x1FE sprite).
@@ -82,21 +83,26 @@ internal readonly struct BookGumpPlugin : IPlugin
     private const int PageWidth = 156, PageHeight = 166;
     private const byte Font = 1; // unicode font 1 (legacy DefaultFont for CV > 2.0)
     private const uint TextColorBlack = 0x010101FF; // RGBA, near-black like profile/tip text
+    // Legacy ModernBookGump renders the page body with this UO hue (StbPageTextBox
+    // ctor hue arg) — a dark book-ink, NOT pure black. Drawn as plain (non-HTML)
+    // hued unicode text, same as legacy RenderedText.Hue.
+    private const ushort InkHue = 0x01B5;
 
     public void Build(App app)
     {
+        app.AddResource(new PendingBookPages());
+
         app.AddObserver<On<PacketReceived<OnOpenBookPacket_0x93>>, Commands, BookParams>(OnOpenBookOld);
         app.AddObserver<On<PacketReceived<OnOpenBookAltPacket_0xD4>>, Commands, BookParams>(OnOpenBookNew);
-        app.AddObserver<On<PacketReceived<OnBookPagesPacket_0x66>>, BookContentParams>(OnBookPages);
+        app.AddObserver<On<PacketReceived<OnBookPagesPacket_0x66>>, ResMut<PendingBookPages>>(OnBookPages);
+
+        // Applies buffered 0x66 page content once BuildBook's deferred spawns
+        // have produced the window + page fields (see OnBookPages).
+        var drainPagesFn = DrainBookPages;
+        app.AddSystem(drainPagesFn).InStage(Stage.Update).Build();
 
         var visFn = UpdateVisibility;
         app.AddSystem(visFn).InStage(Stage.Update).Build();
-
-        // After TextEditPlugin's WriteBack (GuiPlugin registers first; order
-        // within a stage follows registration), so the just-typed text is in
-        // the field before the book re-flows it across pages.
-        var flowFn = NormalizeFlow;
-        app.AddSystem(flowFn).InStage(Stage.Update).Build();
 
         var flushFn = FlushClosed;
         app.AddSystem(flushFn).InStage(Stage.Update).Build();
@@ -247,7 +253,7 @@ internal readonly struct BookGumpPlugin : IPlugin
                     new TextFont { FontId = Font, Size = 16 }, new ClayColor(30, 30, 30, 255),
                     string.Empty, masked: false,
                     decorate: e => e.Insert(new BookPageText { Window = rootId, Page = capPage, Original = string.Empty }),
-                    multiline: true, wrapWidth: PageWidth);
+                    multiline: true, wrapWidth: PageWidth, html: false, textHue: InkHue);
             }
             else
             {
@@ -263,9 +269,9 @@ internal readonly struct BookGumpPlugin : IPlugin
                             Hue = Vector3.UnitZ,
                             Text = string.Empty,
                             TextFont = Font,
+                            TextHue = InkHue,
                             WrapWidth = PageWidth,
-                            IsHtml = true,
-                            HtmlStartColor = TextColorBlack,
+                            IsHtml = false, // plain hued text like legacy (hue InkHue), not HTML
                             HtmlBg = false,
                         },
                     })
@@ -309,19 +315,25 @@ internal readonly struct BookGumpPlugin : IPlugin
     {
         if (editable)
         {
+            // Multiline (wrapping) field, not single-line: a long title/author
+            // on a single-line field overran the page width and bled into the
+            // right-hand page. wrapWidth matches the read-only label + legacy's
+            // 150px box; the title gets two lines of click room (legacy Height
+            // 25*2), the author one.
             var frame = commands.Spawn()
                 .Insert(new Node
                 {
                     Display = Display.Flex,
                     PositionType = PositionType.Absolute,
                     Left = Val.Px(pos.X), Top = Val.Px(pos.Y),
-                    Width = Val.Px(155), Height = Val.Px(25),
+                    Width = Val.Px(155), Height = Val.Px(isAuthor ? 25 : 50),
                 })
                 .Insert(new BookPageVis { Window = rootId, Page = 0 });
             GuiPlugin.SpawnTextField(commands, frame, new Vector2(0, 2),
                 new TextFont { FontId = Font, Size = 16 }, new ClayColor(30, 30, 30, 255),
                 text, masked: false,
-                decorate: e => e.Insert(new BookHeaderText { Window = rootId, IsAuthor = isAuthor, Original = text }));
+                decorate: e => e.Insert(new BookHeaderText { Window = rootId, IsAuthor = isAuthor, Original = text }),
+                multiline: true, wrapWidth: 150);
             commands.AddChild(rootId, frame.Id);
         }
         else
@@ -367,199 +379,84 @@ internal readonly struct BookGumpPlugin : IPlugin
             }).Id;
     }
 
-    // 0x66 — apply streamed page lines to the matching window's page fields.
-    private static void OnBookPages(On<PacketReceived<OnBookPagesPacket_0x66>> trig, BookContentParams p)
+    // 0x66 — buffer streamed page lines; DrainBookPages applies them once the
+    // window's page fields exist. BuildBook spawns the window + fields through
+    // Commands (deferred to the next sync point), but a server that pushes book
+    // content UNSOLICITED sends 0xD4 + 0x66 in the same network burst, so this
+    // observer runs in the SAME PacketReader drain as the open — before those
+    // spawns apply. Applying here would find no window/fields and silently drop
+    // the text (blank book). Stash and drain after the sync point instead.
+    private static void OnBookPages(On<PacketReceived<OnBookPagesPacket_0x66>> trig, ResMut<PendingBookPages> pending)
     {
         var packet = trig.Event.Packet;
+        if (packet.Pages == null) return;
 
-        ulong rootId = 0;
-        bool editable = false;
-        ushort pageCount = 0;
-        foreach (var (ent, win) in p.WindowsQ)
-        {
-            if (win.Ref.Serial != packet.Serial) continue;
-            rootId = ent.Ref;
-            editable = win.Ref.Editable;
-            pageCount = win.Ref.PageCount;
-            foreach (var page in packet.Pages)
-                win.Ref.KnownPages.Add(page.Number);
-            break;
-        }
-        if (rootId == 0 || packet.Pages == null) return;
+        if (!pending.Value.BySerial.TryGetValue(packet.Serial, out var list))
+            pending.Value.BySerial[packet.Serial] = list = new List<(int, string)>();
 
+        // Server lines are the wrapped visual lines; joining with '\n'
+        // reproduces the breaks (the field re-wraps at the same width).
         foreach (var page in packet.Pages)
-        {
-            // Server lines are the wrapped visual lines; joining with '\n'
-            // reproduces the breaks (the field re-wraps at the same width).
-            string text = string.Join("\n", page.Lines);
+            list.Add((page.Number, string.Join("\n", page.Lines)));
+        pending.Value.Age[packet.Serial] = 0;
+    }
 
-            foreach (var (_, custom, pageText) in p.PagesQ)
+    // Apply buffered 0x66 content to the matching window's page fields, once
+    // BuildBook's deferred spawns have produced them. Retries each frame until
+    // the window appears (a short TTL drops content for a book that never opens
+    // so the buffer can't leak).
+    private static void DrainBookPages(ResMut<PendingBookPages> pending, BookContentParams p)
+    {
+        if (pending.Value.BySerial.Count == 0) return;
+
+        List<uint> done = null;
+        foreach (var (serial, list) in pending.Value.BySerial)
+        {
+            ulong rootId = 0;
+            foreach (var (ent, win) in p.WindowsQ)
             {
-                if (pageText.Ref.Window != rootId || pageText.Ref.Page != page.Number) continue;
-                custom.Ref.Render().Text = text;
-                pageText.Ref.Original = text;
+                if (win.Ref.Serial != serial) continue;
+                rootId = ent.Ref;
+                foreach (var (number, _) in list)
+                    win.Ref.KnownPages.Add(number);
                 break;
             }
-        }
 
-        // Editable books flow as one buffer (legacy ServerSetBookText joins all
-        // lines and re-wraps); re-slice now and re-baseline Original to the
-        // sliced layout so the server-driven shuffle never reads as a user edit.
-        if (editable)
-        {
-            var texts = CollectPageTexts(rootId, pageCount, p.PagesQ);
-            var slices = SliceBook(string.Concat(texts), pageCount, out _);
-            foreach (var (_, custom, pageText) in p.PagesQ)
+            if (rootId == 0)
             {
-                if (pageText.Ref.Window != rootId) continue;
-                int k = pageText.Ref.Page;
-                if (k < 1 || k > pageCount) continue;
-                custom.Ref.Render().Text = slices[k];
-                pageText.Ref.Original = slices[k];
-            }
-        }
-    }
-
-    private static string[] CollectPageTexts(ulong rootId, int pageCount, Query<Data<UiCustom, BookPageText>> pagesQ)
-    {
-        var texts = new string[pageCount + 1];
-        Array.Fill(texts, string.Empty);
-        foreach (var (_, custom, pageText) in pagesQ)
-        {
-            if (pageText.Ref.Window != rootId) continue;
-            int k = pageText.Ref.Page;
-            if (k < 1 || k > pageCount) continue;
-            texts[k] = custom.Ref.Render().Text ?? string.Empty;
-        }
-        texts[0] = string.Empty;
-        return texts;
-    }
-
-    // Wrap the whole book text and cut it into pages of MaxBookLines visual
-    // lines. The
-    // wrap MUST be the PLAIN wrap: its line Counts are raw-buffer indices that
-    // partition the string exactly. The HTML wrap (what the field renders for
-    // its near-black color) reflows/collapses, so its Counts don't add up to
-    // the text length and slicing through it EATS characters — same reason
-    // TextEditPlugin maps the caret through the plain wrap. Text past the last
-    // page is dropped (legacy caps the box at 53*8*pages chars); `consumed`
-    // reports how much fit.
-    private static string[] SliceBook(string concat, int pageCount, out int consumed)
-    {
-        var slices = new string[pageCount + 1];
-        Array.Fill(slices, string.Empty);
-        var lines = UoFontRenderer.WrapLines(concat, Font, PageWidth);
-        int li = 0, pos = 0;
-        for (int k = 1; k <= pageCount; k++)
-        {
-            int take = 0;
-            for (int j = 0; j < MaxBookLines && li < lines.Count; j++, li++)
-                take += lines[li].Count;
-            take = Math.Min(take, concat.Length - pos);
-            if (take > 0)
-            {
-                slices[k] = concat.Substring(pos, take);
-                pos += take;
-            }
-        }
-        consumed = pos;
-        return slices;
-    }
-
-    // Re-flow an editable book after a user edit: gather all page texts in
-    // order, re-wrap as one buffer, slice back into 8-line pages, and move the
-    // caret (and the displayed spread) with the text it sits in. The active
-    // editor buffer is resynced in place — SyncActiveEditor only reloads on a
-    // focus CHANGE, so a same-field trim would otherwise leave the stale long
-    // buffer to be written back next frame, undoing the flow.
-    private static void NormalizeFlow(
-        ResMut<ActiveTextEdit> edit,
-        ResMut<FocusedInput> focused,
-        Local<Dictionary<ulong, string>> lastNorm,
-        Query<Data<BookWindow>> windowsQ,
-        Query<Data<UiCustom, BookPageText>> pagesQ)
-    {
-        lastNorm.Value ??= new Dictionary<ulong, string>();
-
-        foreach (var (rootEnt, win) in windowsQ)
-        {
-            if (!win.Ref.Editable) continue;
-            ulong root = rootEnt.Ref;
-            int pc = win.Ref.PageCount;
-
-            var texts = CollectPageTexts(root, pc, pagesQ);
-            var ids = new ulong[pc + 1];
-            foreach (var (ent, _, pageText) in pagesQ)
-            {
-                if (pageText.Ref.Window != root) continue;
-                int k = pageText.Ref.Page;
-                if (k >= 1 && k <= pc) ids[k] = ent.Ref;
-            }
-
-            string concat = string.Concat(texts);
-            if (lastNorm.Value.TryGetValue(root, out var prev) && string.Equals(prev, concat, StringComparison.Ordinal))
+                int age = pending.Value.Age.GetValueOrDefault(serial) + 1;
+                pending.Value.Age[serial] = age;
+                if (age > 120) // ~2s at 60fps — the open packet was filtered / never arrived
+                    (done ??= new List<uint>()).Add(serial);
                 continue;
-
-            // Caret as an absolute offset into the whole book, BEFORE slicing.
-            int focusedK = 0, caretAbs = -1;
-            for (int k = 1; k <= pc; k++)
-                if (ids[k] != 0 && ids[k] == focused.Value.Entity) { focusedK = k; break; }
-            if (focusedK != 0)
-            {
-                caretAbs = Math.Clamp(edit.Value.State.Cursor, 0, texts[focusedK].Length);
-                for (int k = 1; k < focusedK; k++) caretAbs += texts[k].Length;
             }
 
-            var slices = SliceBook(concat, pc, out int consumed);
-            if (caretAbs > consumed) caretAbs = consumed;
-
-            foreach (var (_, custom, pageText) in pagesQ)
+            // Apply each wire page to its own field, verbatim. Pages are
+            // independent (read-only AND editable): the server already paginated
+            // the text, so page k shows page k — no cross-page reflow (that
+            // crammed a short page's successor up into it).
+            foreach (var (number, text) in list)
             {
-                if (pageText.Ref.Window != root) continue;
-                int k = pageText.Ref.Page;
-                if (k < 1 || k > pc) continue;
-                if (!string.Equals(texts[k], slices[k], StringComparison.Ordinal))
-                    custom.Ref.Render().Text = slices[k];
+                foreach (var (_, custom, pageText) in p.PagesQ)
+                {
+                    if (pageText.Ref.Window != rootId || pageText.Ref.Page != number) continue;
+                    custom.Ref.Render().Text = text;
+                    pageText.Ref.Original = text;
+                    break;
+                }
             }
-            lastNorm.Value[root] = string.Concat(slices);
 
-            if (focusedK == 0 || caretAbs < 0) continue;
-
-            // Land the caret on the page that now holds its text (a boundary
-            // caret stays on the earlier page; a char that flowed forward has
-            // caretAbs past the boundary and lands on the next page).
-            int newK = pc, cumStart = 0;
-            for (int k = 1; k <= pc; k++)
-            {
-                if (caretAbs <= cumStart + slices[k].Length) { newK = k; break; }
-                cumStart += slices[k].Length;
-            }
-            int rel = Math.Clamp(caretAbs - cumStart, 0, slices[newK].Length);
-
-            if (ids[newK] != 0 && focused.Value.Entity != ids[newK])
-                focused.Value.Entity = ids[newK];
-
-            var a = edit.Value;
-            a.Entity = ids[newK];
-            a.Multiline = true;
-            a.Masked = false;
-            a.WrapWidth = PageWidth;
-            a.IsHtml = true;
-            a.HtmlStartColor = TextColorBlack;
-            a.HtmlBg = false;
-            a.FontId = Font;
-            a.Buffer.Clear();
-            a.Buffer.Append(slices[newK]);
-            a.State.Cursor = rel;
-            a.State.SelectStart = rel;
-            a.State.SelectEnd = rel;
-
-            // Follow the caret across spreads like legacy RealignCaretAndActivePage.
-            int spread = (newK >> 1) + 1;
-            if (win.Ref.ActivePage != spread)
-                win.Ref.ActivePage = spread;
+            (done ??= new List<uint>()).Add(serial);
         }
+
+        if (done != null)
+            foreach (var s in done)
+            {
+                pending.Value.BySerial.Remove(s);
+                pending.Value.Age.Remove(s);
+            }
     }
+
 
     // Page flip from the arrows. Editable books flush changed pages + header
     // first (legacy SetActivePage); read-only books request the pages of the
@@ -595,17 +492,17 @@ internal readonly struct BookGumpPlugin : IPlugin
         ref BookWindow win,
         NetClient net,
         Query<Data<UiCustom, BookPageText>> pagesQ,
-        Query<Data<Text, BookHeaderText>> headersQ,
+        Query<Data<UiCustom, BookHeaderText>> headersQ,
         bool updateOriginals)
     {
         if (!net.IsConnected) return;
 
         string title = null, author = null;
         bool headerDirty = false;
-        foreach (var (_, text, header) in headersQ)
+        foreach (var (_, custom, header) in headersQ)
         {
             if (header.Ref.Window != rootId) continue;
-            var value = text.Ref.Value ?? string.Empty;
+            var value = custom.Ref.Render().Text ?? string.Empty;
             if (header.Ref.IsAuthor) author = value; else title = value;
             if (!string.Equals(value, header.Ref.Original, StringComparison.Ordinal))
             {
@@ -708,7 +605,7 @@ internal readonly struct BookGumpPlugin : IPlugin
         Local<Dictionary<ulong, BookSnapshot>> snaps,
         Query<Data<BookWindow>> windowsQ,
         Query<Data<UiCustom, BookPageText>> pagesQ,
-        Query<Data<Text, BookHeaderText>> headersQ)
+        Query<Data<UiCustom, BookHeaderText>> headersQ)
     {
         snaps.Value ??= new Dictionary<ulong, BookSnapshot>();
 
@@ -746,11 +643,12 @@ internal readonly struct BookGumpPlugin : IPlugin
             snap.Window = win.Ref;
             snap.Pages.Clear();
 
-            foreach (var (_, text, header) in headersQ)
+            foreach (var (_, custom, header) in headersQ)
             {
                 if (header.Ref.Window != ent.Ref) continue;
-                if (header.Ref.IsAuthor) { snap.Author = text.Ref.Value; snap.AuthorOriginal = header.Ref.Original; }
-                else { snap.Title = text.Ref.Value; snap.TitleOriginal = header.Ref.Original; }
+                var value = custom.Ref.Render().Text;
+                if (header.Ref.IsAuthor) { snap.Author = value; snap.AuthorOriginal = header.Ref.Original; }
+                else { snap.Title = value; snap.TitleOriginal = header.Ref.Original; }
             }
             foreach (var (_, custom, pageText) in pagesQ)
             {
@@ -770,30 +668,26 @@ internal readonly struct BookGumpPlugin : IPlugin
 
 
 #if AGENT_BUILD
-    // Drains debug.openBook by replaying the same triggers the network path
-    // fires: an 0xD4 open on the first frame, then a 0x66 with sample page
-    // lines on the next (the window's entities exist only after the open's
-    // commands apply).
+    // Drains debug.openBook by replaying the network triggers — the 0xD4 open
+    // AND the 0x66 page content in the SAME frame, mirroring a server that
+    // pushes book content unsolicited in one network burst. The window's
+    // entities don't exist yet when the 0x66 fires (BuildBook spawns via
+    // deferred Commands), so this exercises the OnBookPages buffer / DrainBookPages
+    // path that the blank-book race fix added.
     private static void DrainDebugBook(Commands commands, ResMut<DebugBookQueue> q)
     {
-        if (q.Value.PendingPages)
-        {
-            q.Value.PendingPages = false;
-            if (q.Value.PageLines != null)
-                commands.EmitTrigger(new PacketReceived<OnBookPagesPacket_0x66>
-                {
-                    Packet = BuildDebugPagesPacket(q.Value.Serial, q.Value.PageLines)
-                });
-            return;
-        }
-
         if (!q.Value.PendingOpen) return;
         q.Value.PendingOpen = false;
-        q.Value.PendingPages = true;
+
         commands.EmitTrigger(new PacketReceived<OnOpenBookAltPacket_0xD4>
         {
             Packet = BuildDebugOpenPacket(q.Value.Serial, q.Value.Editable, q.Value.PageCount, q.Value.Title, q.Value.Author)
         });
+        if (q.Value.PageLines != null)
+            commands.EmitTrigger(new PacketReceived<OnBookPagesPacket_0x66>
+            {
+                Packet = BuildDebugPagesPacket(q.Value.Serial, q.Value.PageLines)
+            });
     }
 
     private static OnOpenBookAltPacket_0xD4 BuildDebugOpenPacket(uint serial, bool editable, ushort pages, string title, string author)
@@ -856,6 +750,15 @@ internal sealed class BookParams : CompositeSystemParam
     }
 }
 
+// Buffers 0x66 page content that arrived before BuildBook's deferred window
+// spawn applied (unsolicited content in the same drain as the 0xD4/0x93 open).
+// DrainBookPages applies it and clears the entry once the window exists.
+internal sealed class PendingBookPages
+{
+    public readonly Dictionary<uint, List<(int Number, string Text)>> BySerial = new();
+    public readonly Dictionary<uint, int> Age = new();
+}
+
 internal sealed class BookContentParams : CompositeSystemParam
 {
     public readonly Query<Data<BookWindow>> WindowsQ;
@@ -872,13 +775,13 @@ internal sealed class BookFlipParams : CompositeSystemParam
 {
     public readonly Query<Data<BookWindow>> WindowsQ;
     public readonly Query<Data<UiCustom, BookPageText>> PagesQ;
-    public readonly Query<Data<Text, BookHeaderText>> HeadersQ;
+    public readonly Query<Data<UiCustom, BookHeaderText>> HeadersQ;
 
     public BookFlipParams()
     {
         WindowsQ = Add(new Query<Data<BookWindow>>());
         PagesQ = Add(new Query<Data<UiCustom, BookPageText>>());
-        HeadersQ = Add(new Query<Data<Text, BookHeaderText>>());
+        HeadersQ = Add(new Query<Data<UiCustom, BookHeaderText>>());
     }
 }
 
@@ -886,7 +789,6 @@ internal sealed class BookFlipParams : CompositeSystemParam
 internal sealed class DebugBookQueue
 {
     public bool PendingOpen;
-    public bool PendingPages;
     public uint Serial;
     public bool Editable;
     public ushort PageCount;

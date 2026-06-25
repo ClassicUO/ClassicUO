@@ -19,7 +19,8 @@ internal struct OnOpenBookAltPacket_0xD4 : IPacket
         FirstFlag = reader.ReadBool();
         IsEditable = reader.ReadBool();
         PageCount = reader.ReadUInt16BE();
-        Title = reader.ReadASCII(reader.ReadUInt16BE(), true);
-        Author = reader.ReadASCII(reader.ReadUInt16BE(), true);
+        // UTF8 to match legacy OpenBook (ReadUTF8 for new books).
+        Title = reader.ReadUTF8(reader.ReadUInt16BE(), true);
+        Author = reader.ReadUTF8(reader.ReadUInt16BE(), true);
     }
 }

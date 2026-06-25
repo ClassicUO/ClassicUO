@@ -473,7 +473,14 @@ internal readonly struct GuiPlugin : IPlugin
         char maskChar = '*',
         bool multiline = false,
         int wrapWidth = 0,
-        bool flowRow = false)
+        bool flowRow = false,
+        // Multiline only: render the value as plain hued unicode text (html:false +
+        // textHue) instead of the default near-black HTML. The book page wants the
+        // legacy book-ink hue; HTML mode ignores textHue (colour comes from
+        // HtmlStartColor). TextEditPlugin reads IsHtml off the field, so the caret /
+        // wrap mapping stays consistent with the chosen mode.
+        bool html = true,
+        ushort textHue = 0)
     {
         // `color` semantics follow the font kind (see UoFontRuntime): an ASCII
         // font (FontId | AsciiFlag) wants a PACKED hue (UoFontRuntime.AsciiHue);
@@ -502,9 +509,10 @@ internal readonly struct GuiPlugin : IPlugin
                         Hue = Vector3.UnitZ,
                         Text = initial ?? string.Empty,
                         TextFont = (byte)font.FontId,
+                        TextHue = textHue,
                         WrapWidth = wrapWidth,
-                        IsHtml = true,
-                        HtmlStartColor = 0x010101FF, // near-black, opaque (RGBA)
+                        IsHtml = html,
+                        HtmlStartColor = 0x010101FF, // near-black, opaque (RGBA) — used when html
                         HtmlBg = false,
                     },
                 })

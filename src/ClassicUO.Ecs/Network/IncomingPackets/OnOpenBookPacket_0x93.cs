@@ -20,7 +20,8 @@ internal struct OnOpenBookPacket_0x93 : IPacket
         reader.Skip(1);
         IsEditable = FirstFlag;
         PageCount = reader.ReadUInt16BE();
-        Title = reader.ReadASCII(60, true);
-        Author = reader.ReadASCII(30, true);
+        // UTF8 to match legacy OpenBook (ReadUTF8 for new books).
+        Title = reader.ReadUTF8(60, true);
+        Author = reader.ReadUTF8(30, true);
     }
 }

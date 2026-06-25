@@ -37,7 +37,10 @@ internal struct OnBookPagesPacket_0x66 : IPacket
             page.Lines.Capacity = linesCount;
             for (var line = 0; line < linesCount; ++line)
             {
-                page.Lines.Add(reader.ReadASCII());
+                // New books (CV > 2.0, the only versions ECS targets) stream
+                // page lines as UTF8 — legacy BookData reads ReadUTF8 and the
+                // ECS outgoing 0x66 writes UTF8. ReadASCII garbled any non-ASCII.
+                page.Lines.Add(reader.ReadUTF8(true));
             }
 
             Pages.Add(page);
