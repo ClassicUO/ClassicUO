@@ -54,6 +54,7 @@ internal sealed class SplitPrompt
     }
 }
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct SplitMenuWindow
 {
     public uint Serial;

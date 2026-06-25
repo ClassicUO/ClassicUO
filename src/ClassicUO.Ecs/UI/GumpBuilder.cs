@@ -47,40 +47,6 @@ internal sealed class GumpBuilder
             .Insert(new Button());
     }
 
-    /// Spawn a draggable, stackable, right-click-closable, click-capturing
-    /// gump window root. Mirrors main's Game/UI/Controls/Gump.cs defaults
-    /// (CanMove + CanCloseWithRightClick on every gump). Caller is responsible
-    /// for AddChild'ing controls onto the returned entity. zCounter.Bump()
-    /// sets the initial focus z so the new window draws on top.
-    public EntityCommands AddGumpRoot(Commands commands, ushort id, Vector3 hue, Vector2 position, UiZCounter zCounter)
-    {
-        ref readonly var gumpInfo = ref _assets.Gumps.GetGump(id);
-        var size = new Vector2(gumpInfo.UV.Width, gumpInfo.UV.Height);
-
-        return commands.Spawn()
-            .Insert(new Node
-            {
-                Display = Display.Flex,
-                PositionType = PositionType.Absolute,
-                Left = Val.Px(position.X),
-                Top = Val.Px(position.Y),
-                Width = Val.Px(size.X),
-                Height = Val.Px(size.Y),
-            })
-            .Insert(new UiCustom
-            {
-                Data = new UOCustomRender
-                {
-                    Kind = UOCustomKind.Gump,
-                    AssetId = id,
-                    Hue = hue,
-                }
-            })
-            .Insert(Interaction.None)
-            .Insert<UiMovable>()
-            .Insert(new GlobalZIndex(zCounter.Bump()));
-    }
-
     /// Spawn a UO gump window via UOGumpBundle. Resolves the background sprite
     /// size from assets and stamps the focus z on the root only — children
     /// added under it inherit that z at layout time (no propagation). Movable +
@@ -359,6 +325,22 @@ internal sealed class GumpBuilder
 
         commands.AddChild(track.Id, knob.Id);
         return track;
+    }
+
+    /// Focus-or-spawn helper for single-instance gump windows. If a window
+    /// tagged with TMarker already exists, bump it to the front (re-stamp its
+    /// GlobalZIndex from the shared UiZCounter) and return true so the caller
+    /// returns early instead of spawning a duplicate. Returns false when none
+    /// exists. This is the canonical first line of an OpenOrFocus handler.
+    public bool TryFocusExisting<TMarker>(Commands commands, Query<Data<TMarker>> existing, UiZCounter zCounter)
+        where TMarker : struct
+    {
+        foreach (var (ent, _) in existing)
+        {
+            commands.Entity(ent.Ref).Insert(new GlobalZIndex(zCounter.Bump()));
+            return true;
+        }
+        return false;
     }
 
     private static Node MakeFloatingNode(Vector2? position, Vector2? size, bool autoFit = false)

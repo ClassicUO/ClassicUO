@@ -104,49 +104,14 @@ internal readonly struct LoginScreenPlugin : IPlugin
         Res<Settings> settings,
         ResMut<FocusedInput> focused)
     {
-        // Root: full-screen, top-left anchored. Main's LoginGump places the
-        // chest at (0,0); mirror that by NOT centering with Flex.
-        var root = commands.Spawn()
-            .Insert<LoginScene>()
-            .Insert(new Node
-            {
-                Display = Display.Flex,
-                PositionType = PositionType.Relative,
-                FlexDirection = FlexDirection.Column,
-                JustifyContent = JustifyContent.Start,
-                AlignItems = AlignItems.Start,
-                Width = Val.Percent(100),
-                Height = Val.Percent(100),
-            });
-
-        // MainMenu: fixed 640x480 (the chest gump's natural size). All child
-        // positions are absolute UO logical pixels measured from (0,0) —
-        // same coord space as main's LoginGump. Explicit size so absolute
-        // children get a non-zero parent box for hit-testing.
-        var mainMenu = commands.Spawn()
-            .Insert<LoginScene>()
-            .Insert(new Node
-            {
-                Display = Display.Flex,
-                PositionType = PositionType.Relative,
-                FlexDirection = FlexDirection.Column,
-                JustifyContent = JustifyContent.Start,
-                AlignItems = AlignItems.Start,
-                Width = Val.Px(640),
-                Height = Val.Px(480),
-            });
-
-        root.AddChild(mainMenu);
+        // Root + fixed 640x480 menu canvas (the chest gump's natural size). All
+        // child positions are absolute UO logical pixels measured from (0,0) —
+        // same coord space as main's LoginGump.
+        var mainMenu = LoginSceneHelpers.SpawnCanvas<LoginScene>(commands);
 
         // Tiled wallpaper 0x0150 + UO flag 0x0151 — mirrors main's
         // LoginBackground (CV>=706400 branch).
-        mainMenu.AddChild(gumpBuilder.Value.AddGumpTiled(
-            commands, 0x0150, XnaVector3.UnitZ,
-            new XnaVector2(0, 0), new XnaVector2(640, 480))
-            .Insert<LoginScene>());
-        mainMenu.AddChild(gumpBuilder.Value.AddGump(
-            commands, 0x0151, XnaVector3.UnitZ, new XnaVector2(0, 4))
-            .Insert<LoginScene>());
+        LoginSceneHelpers.AddWallpaper<LoginScene>(commands, gumpBuilder.Value, mainMenu, new XnaVector2(640, 480));
 
         // Chest gump on top of wallpaper.
         mainMenu.AddChild(gumpBuilder.Value.AddGump(
@@ -388,12 +353,7 @@ internal readonly struct LoginScreenPlugin : IPlugin
     private static void DeleteMenu(
         Commands commands,
         Query<Data<Node>, Filter<With<LoginScene>>> query)
-    {
-        foreach (var (ent, _) in query)
-        {
-            commands.Entity(ent.Ref).Despawn();
-        }
-    }
+        => LoginSceneHelpers.DespawnAll<LoginScene>(commands, query);
 
     private static void Login(Commands commands, Settings settings, string username, string password)
     {
@@ -436,4 +396,5 @@ internal readonly struct LoginScreenPlugin : IPlugin
 
 // Scene root marker — promoted to namespace-level internal so the modding
 // registry (same assembly) can key a WIT scene path to it.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct LoginScene;

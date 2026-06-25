@@ -71,6 +71,7 @@ internal sealed class PartyState
 }
 
 // Root marker for the party-invite popup.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct PartyInviteWindow
 {
     public uint Inviter;

@@ -43,6 +43,18 @@ internal static class MobileHpOverheads
     private const ushort FillGump = 0x1069;
     private const ushort AsciiFont3 = 3 | UoFontRuntime.AsciiFlag;
 
+    // pct is always 0..100 (Math.Clamp below), so the "[NN%]" head label is one
+    // of 101 fixed strings — built once instead of interpolated each frame.
+    private static readonly string[] PercentLabels = BuildPercentLabels();
+
+    private static string[] BuildPercentLabels()
+    {
+        var labels = new string[101];
+        for (int i = 0; i <= 100; i++)
+            labels[i] = $"[{i}%]";
+        return labels;
+    }
+
     public static void Render(
         UltimaBatcher2D batch,
         AssetsServer assets,
@@ -111,7 +123,7 @@ internal static class MobileHpOverheads
 
                 p1 = camera.WorldToScreen(p1) + panelOrigin;
 
-                var text = $"[{pct}%]";
+                var text = PercentLabels[pct];
                 var (tw, th) = UoFontRenderer.MeasureFont(text, AsciiFont3, 200, allowHtml: false);
                 p1.X -= tw / 2f + 5f;
                 p1.Y -= th;
@@ -144,7 +156,7 @@ internal static class MobileHpOverheads
                 // Legacy dims everything but the player (and the active
                 // target, which ECS doesn't track yet).
                 float alpha = serial.Ref.Value == gameCtx.PlayerSerial ? 1f : 0.5f;
-                ushort notoHue = NotorietyHue(profile,
+                ushort notoHue = NotorietyHelper.NotorietyHue(profile,
                     noto.IsValid() ? noto.Ref.Value : NotorietyFlag.Unknown);
 
                 int x = (int)p.X, y = (int)p.Y;
@@ -204,19 +216,6 @@ internal static class MobileHpOverheads
          : pct < 50 ? (ushort)0x0030
          : pct < 80 ? (ushort)0x0058
          : (ushort)0x0044;
-
-    // Legacy Notoriety.GetHue — profile-driven, invulnerable fixed yellow.
-    private static ushort NotorietyHue(Profile profile, NotorietyFlag flag) => flag switch
-    {
-        NotorietyFlag.Innocent => profile.InnocentHue,
-        NotorietyFlag.Ally => profile.FriendHue,
-        NotorietyFlag.Criminal => profile.CriminalHue,
-        NotorietyFlag.Gray => profile.CanAttackHue,
-        NotorietyFlag.Enemy => profile.EnemyHue,
-        NotorietyFlag.Murderer => profile.MurdererHue,
-        NotorietyFlag.Invulnerable => 0x0034,
-        _ => 0,
-    };
 
     // Legacy Mobile.IsDead ghost bodies (same set as WorldRenderingPlugin).
     private static bool IsDeadBody(ushort graphic)

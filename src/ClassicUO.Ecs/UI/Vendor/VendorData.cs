@@ -44,6 +44,7 @@ internal record struct VendorOpenedEvent(uint Vendor, bool IsBuy);
 
 // Window root. Items/Txn are per-window mutable maps (managed refs in the
 // component are fine — this is per-entity state, not closure-captured).
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct VendorWindow
 {
     public uint Vendor;

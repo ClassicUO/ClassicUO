@@ -28,6 +28,7 @@ using TinyEcs.Bevy.UI;
 namespace ClassicUO.Ecs;
 
 // Marks the palette window root; Content is the child everything is rebuilt under.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct HouseDesignWindow { public ulong Content; public uint Serial; }
 
 // Client-generated floor placeholder tile (legacy 0x0496 grid). It is the

@@ -598,10 +598,14 @@ internal readonly struct TopBarPlugin : IPlugin
     }
 }
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct IsTopBar;
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct TopBarFull;       // wraps the expanded bar; hidden when minimized
 internal struct TopBarArrow;      // minimized expand-arrow; hidden when expanded
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct TopBarButton;     // clickable buttons (skipped as drag latch targets)
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct TopBarDragHandle; // bg + arrow: press here to drag the bar
 internal struct TopBarCaption     // button caption; nudges down +1px while pressed
 {

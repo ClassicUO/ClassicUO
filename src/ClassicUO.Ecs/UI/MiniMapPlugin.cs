@@ -28,6 +28,7 @@ namespace ClassicUO.Ecs;
 // Tag on the top-bar Map button. MiniMapPlugin's global On<UiClick> observer
 // Marker on the window root. Carries the current size toggle so double-click
 // can flip it and the bake system can rebuild caches when it changes.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct MiniMapWindow { public bool UseLargeMap; }
 
 internal sealed class MiniMapState
@@ -52,6 +53,13 @@ internal sealed class MiniMapState
     public uint[] Radar;   // blank + baked radar terrain
     public uint[] Work;    // radar + dots, uploaded to the texture
     public Texture2D Texture;
+
+    // Reusable per-block scratch for the radar bake (topmost static per cell).
+    // Bake runs single-threaded and fully resets these 64 cells each block.
+    public readonly MiniMapCell[] StaticsZ = new MiniMapCell[64];
+
+    // Topmost static per cell while baking a block (legacy ColorInfo).
+    public struct MiniMapCell { public ushort Color; public sbyte Z; public bool IsLand; }
 
     public void DisposeTexture()
     {
@@ -98,11 +106,7 @@ internal readonly struct MiniMapPlugin : IPlugin
     // the top-bar Map button's UiClick observer.
     public static void OpenOrFocus(Commands commands, GumpBuilder builder, UiZCounter zCounter, Query<Data<MiniMapWindow>> existingQ)
     {
-        foreach (var (ent, _) in existingQ)
-        {
-            commands.Entity(ent.Ref).Insert(new GlobalZIndex(zCounter.Bump()));
-            return;
-        }
+        if (builder.TryFocusExisting<MiniMapWindow>(commands, existingQ, zCounter)) return;
 
         var spawnPos = new Vector2(550, 30);
         builder.SpawnUOGump(commands, MiniMapState.SmallGraphic, Vector3.UnitZ, spawnPos, zCounter)
@@ -208,8 +212,6 @@ internal readonly struct MiniMapPlugin : IPlugin
         payload.Dynamic = state.Texture;
     }
 
-    // Topmost static per cell while baking a block (legacy ColorInfo).
-    private struct MiniMapCell { public ushort Color; public sbyte Z; public bool IsLand; }
 
     // Radar bake (land + statics). Mirrors MiniMapGump.CreateMiniMapTexture: walk
     // the map blocks around the player, take the topmost static over each land
@@ -238,7 +240,7 @@ internal readonly struct MiniMapPlugin : IPlugin
         int mapBlockHeight = maps.MapBlocksSize[map, 1];
         int maxBlockIndex = maps.MapBlocksSize[map, 0] * mapBlockHeight;
 
-        var staticsZ = new MiniMapCell[64];
+        var staticsZ = state.StaticsZ;
 
         for (int i = minBlockX; i <= maxBlockX; i++)
         {
@@ -252,14 +254,14 @@ internal readonly struct MiniMapPlugin : IPlugin
                 if (!im.IsValid()) break;
 
                 for (int k = 0; k < 64; k++)
-                    staticsZ[k] = new MiniMapCell { Z = sbyte.MinValue };
+                    staticsZ[k] = new MiniMapState.MiniMapCell { Z = sbyte.MinValue };
 
                 // Collect the topmost drawable static over each cell of the block.
                 im.StaticFile.Seek((long)im.StaticAddress, System.IO.SeekOrigin.Begin);
                 for (int c = 0; c < im.StaticCount; c++)
                 {
                     var sb = im.StaticFile.Read<StaticsBlock>();
-                    if (sb.Color == 0 || sb.Color == 0xFFFF || !CanBeDrawn(tileData, sb.Color))
+                    if (sb.Color == 0 || sb.Color == 0xFFFF || !MapDrawHelpers.CanBeDrawnRadar(tileData, sb.Color))
                         continue;
                     ref var st = ref staticsZ[sb.Y * 8 + sb.X];
                     if (st.Z < sb.Z)
@@ -312,49 +314,6 @@ internal readonly struct MiniMapPlugin : IPlugin
                 }
             }
         }
-    }
-
-    // Minimap subset of GameObject.CanBeDrawn — filters no-draw / decorative
-    // statics so they don't speckle the radar. (Drops the gargoyle-animated and
-    // client-version easel edge cases; not worth the race/version plumbing here.)
-    private static bool CanBeDrawn(TileDataLoader tileData, ushort g)
-    {
-        switch (g)
-        {
-            case 0x0001:
-            case 0x21BC:
-            case 0xA1FE:
-            case 0xA1FF:
-            case 0xA200:
-            case 0xA201:
-                return false;
-
-            case 0x9E4C:
-            case 0x9E64:
-            case 0x9E65:
-            case 0x9E7D:
-            {
-                ref var d = ref tileData.StaticData[g];
-                return !d.IsBackground && !d.IsSurface;
-            }
-        }
-
-        if (g == 0x63D3)
-            return false;
-        if (g >= 0x2198 && g <= 0x21A4)
-            return false;
-
-        if (g < tileData.StaticData.Length)
-        {
-            ref var data = ref tileData.StaticData[g];
-            if (!string.IsNullOrEmpty(data.Name) &&
-                data.Name.StartsWith("nodraw", System.StringComparison.OrdinalIgnoreCase))
-                return false;
-            if (!data.IsNoDiagonal)
-                return true;
-        }
-
-        return false;
     }
 
     // Radar pixel: only paints over the blank sentinel (matches legacy

@@ -13,6 +13,7 @@ using TinyEcs.Bevy;
 namespace ClassicUO.Ecs;
 
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 struct OnLoginRequest
 {
     public string Username;
@@ -38,21 +39,11 @@ internal sealed class PacketsMap
 {
     private delegate void TypedDispatch(Commands commands, ReadOnlySpan<byte> payload);
 
-    private readonly Dictionary<byte, Func<IPacket>> _map = new();
     private readonly Dictionary<byte, TypedDispatch> _typedMap = new();
 
-    public void Add<T>(byte id) where T : struct, IPacket
-    {
-        var fn = () => (IPacket)default(T);
-        _map[id] = fn;
-    }
-
-    public void Add<T>() where T : struct, IPacket
-    {
-        Add<T>(default(T).Id);
-    }
-
-    public void AddTyped<T>() where T : struct, IPacket
+    // Host gameplay reads packets exclusively via On<PacketReceived<T>> observers,
+    // fired by the typed dispatch below.
+    public void Register<T>() where T : struct, IPacket
     {
         var id = default(T).Id;
         _typedMap[id] = (commands, payload) =>
@@ -63,17 +54,6 @@ internal sealed class PacketsMap
             commands.EmitTrigger(new PacketReceived<T> { Packet = p });
         };
     }
-
-    // Register both boxed (Add) and typed (AddTyped) dispatch. Host gameplay
-    // code reads via On<PacketReceived<T>> observers; the boxed IPacket queue
-    // exists for mods and aggregate bridges.
-    public void Register<T>() where T : struct, IPacket
-    {
-        Add<T>();
-        AddTyped<T>();
-    }
-
-    public bool TryGetValue(byte id, out Func<IPacket> fn) => _map.TryGetValue(id, out fn);
 
     public bool TryDispatch(byte id, Commands commands, ReadOnlySpan<byte> payload)
     {
@@ -360,7 +340,6 @@ readonly struct NetworkPlugin : IPlugin
         Res<GameContext> gameCtx,
         Res<CircularBuffer> buffer,
         Local<PacketBuffer> packetBuffer,
-        EventWriter<IPacket> queuePackets,
         ResMut<ModNetTap> netTap,
         Commands commands
     )
@@ -396,7 +375,7 @@ readonly struct NetworkPlugin : IPlugin
             // invalid in PacketHandlers.GetPacketInfo.
             if (packetLen < packetHeaderOffset)
             {
-                Console.WriteLine($"[Net] malformed packet 0x{packetId:X2}: len {packetLen} < header {packetHeaderOffset}; stopping parse (stream desync)");
+                Console.WriteLine("[Net] malformed packet 0x{0:X2}: len {1} < header {2}; stopping parse (stream desync)", packetId, packetLen, packetHeaderOffset);
                 break;
             }
 
@@ -424,19 +403,9 @@ readonly struct NetworkPlugin : IPlugin
 
             var payload = sp.Slice(packetHeaderOffset, packetLen - packetHeaderOffset);
 
-            // Dispatch both typed (observer trigger) and boxed (EventWriter<IPacket>)
-            // when both are registered for the same id. Host gameplay code now uses
-            // observers exclusively; the boxed queue is kept around for mods and
-            // future bridges that want a single IPacket stream.
+            // Typed dispatch: fires the On<PacketReceived<T>> observers. Host
+            // gameplay reads packets exclusively through these.
             packetsMap.Value.TryDispatch(packetId, commands, payload);
-
-            if (packetsMap.Value.TryGetValue(packetId, out var fn))
-            {
-                var reader = new StackDataReader(payload);
-                var packet = fn();
-                packet.Fill(reader);
-                queuePackets.Send(packet);
-            }
         }
 
         network.Value.Flush();

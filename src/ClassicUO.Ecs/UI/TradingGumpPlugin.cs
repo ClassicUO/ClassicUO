@@ -37,6 +37,7 @@ namespace ClassicUO.Ecs;
 // accept flags. On despawn (right-click close OR server type-1) the OnRemove
 // observer sends Send_TradeResponse(Id1, 1, false) — legacy Dispose() →
 // CancelTrade.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct TradeWindow
 {
     public uint Serial;

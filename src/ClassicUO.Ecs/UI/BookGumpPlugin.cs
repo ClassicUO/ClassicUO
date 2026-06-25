@@ -36,10 +36,12 @@ using TinyEcs;
 using TinyEcs.Bevy;
 using TinyEcs.Bevy.UI;
 using ClayColor = Clay.Color;
+using static ClassicUO.Ecs.UiGumpHelpers;
 
 namespace ClassicUO.Ecs;
 
 // Book window root, keyed by the item serial it shows.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct BookWindow
 {
     public uint Serial;
@@ -766,8 +768,6 @@ internal readonly struct BookGumpPlugin : IPlugin
             commands.Entity(ent.Ref).Despawn();
     }
 
-    private static int GumpW(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Width; }
-    private static int GumpH(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Height; }
 
 #if AGENT_BUILD
     // Drains debug.openBook by replaying the same triggers the network path

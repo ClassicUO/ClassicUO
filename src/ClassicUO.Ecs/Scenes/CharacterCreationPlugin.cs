@@ -154,36 +154,10 @@ internal readonly struct CharacterCreationPlugin : IPlugin
         Res<CharCreationContext> ctx,
         ResMut<NextState<CharCreationStep>> step)
     {
-        var root = commands.Spawn()
-            .Insert<CharCreationScene>()
-            .Insert(new Node
-            {
-                Display = Display.Flex,
-                PositionType = PositionType.Relative,
-                FlexDirection = FlexDirection.Column,
-                Width = Val.Percent(100),
-                Height = Val.Percent(100),
-            });
-
-        var mainMenu = commands.Spawn()
-            .Insert<CharCreationScene>()
-            .Insert(new Node
-            {
-                Display = Display.Flex,
-                PositionType = PositionType.Relative,
-                FlexDirection = FlexDirection.Column,
-                Width = Val.Px(640),
-                Height = Val.Px(480),
-            });
-        root.AddChild(mainMenu);
+        var mainMenu = LoginSceneHelpers.SpawnCanvas<CharCreationScene>(commands);
 
         // Tiled wallpaper + UO flag, same as the other login-scene screens.
-        mainMenu.AddChild(builder.Value.AddGumpTiled(
-            commands, 0x0150, Vector3.UnitZ, new Vector2(0, 0), new Vector2(640, 480))
-            .Insert<CharCreationScene>());
-        mainMenu.AddChild(builder.Value.AddGump(
-            commands, 0x0151, Vector3.UnitZ, new Vector2(0, 4))
-            .Insert<CharCreationScene>());
+        LoginSceneHelpers.AddWallpaper<CharCreationScene>(commands, builder.Value, mainMenu, new Vector2(640, 480));
 
         ctx.Value.Reset(gameCtx.Value.ClientVersion);
         ctx.Value.MenuEntity = mainMenu.Id;
@@ -196,7 +170,7 @@ internal readonly struct CharacterCreationPlugin : IPlugin
         Query<Data<Node>, Filter<With<CharCreationScene>>> q,
         ResMut<NextState<CharCreationStep>> step)
     {
-        foreach (var (ent, _) in q) commands.Entity(ent.Ref).Despawn();
+        DespawnAll(commands, q);
         step.Value.Set(CharCreationStep.Inactive);
     }
 
@@ -1686,6 +1660,7 @@ internal readonly struct CharacterCreationPlugin : IPlugin
 
 // Scene root marker — promoted to namespace-level internal so the modding
 // registry (same assembly) can key a WIT scene path to it.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct CharCreationScene;
 
 internal enum CreationLayer : byte

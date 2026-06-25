@@ -28,11 +28,13 @@ using TinyEcs;
 using TinyEcs.Bevy;
 using TinyEcs.Bevy.UI;
 using ClayColor = Clay.Color;
+using static ClassicUO.Ecs.UiGumpHelpers;
 
 namespace ClassicUO.Ecs;
 
 // Profile window root, keyed by the character serial it shows. Carries the
 // resizable scroll height + the bg/expander entity ids LayoutWindow repositions.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct ProfileWindow
 {
     public uint Serial;
@@ -434,8 +436,6 @@ internal readonly struct ProfileGumpPlugin : IPlugin
             commands.Entity(ent.Ref).Despawn();
     }
 
-    private static int GumpW(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Width; }
-    private static int GumpH(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Height; }
 
 #if AGENT_BUILD
     // Drains debug.openProfile by emitting the same PacketReceived trigger the

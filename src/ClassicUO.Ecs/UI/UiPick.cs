@@ -122,6 +122,30 @@ internal static class UiPick
         return false;
     }
 
+    // Walk the Parent chain from `entity` (inclusive) up to the nearest ancestor
+    // carrying marker component T; returns that entity (0 if none). The shared
+    // primitive behind every "the hit is a child — find the window/subtree it
+    // belongs to" walk: pass ChatUi to find the chat subtree, GameWindowUI the
+    // viewport, etc. MovableRoot is the same shape specialised to UiMovable (it
+    // also needs the root's Node/GlobalZIndex, so it keeps its own query).
+    // Depth-capped against a cyclic or malformed parent link.
+    public static ulong AncestorWith<T>(
+        ulong entity,
+        Query<Data<T>> markerQ,
+        Query<Data<TinyEcs.Parent>> parents,
+        int maxDepth = 64) where T : struct
+    {
+        ulong cur = entity;
+        for (int i = 0; i < maxDepth && cur != 0; i++)
+        {
+            if (markerQ.Contains(cur)) return cur;
+            if (!parents.TryGet(cur, out var parentRow)) return 0;
+            var (_, p) = parentRow;
+            cur = (ulong)p.Ref.Id;
+        }
+        return 0;
+    }
+
     // Walk the Parent chain from `entity` up to the nearest UiMovable window root
     // (0 if none). The topmost hit is usually a child — an item, body, button —
     // of the window the gesture actually targets. Depth-capped against a cyclic

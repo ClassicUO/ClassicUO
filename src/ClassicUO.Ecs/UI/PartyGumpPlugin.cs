@@ -12,6 +12,7 @@ using TinyEcs.Bevy.UI.Widgets;
 
 namespace ClassicUO.Ecs;
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct PartyManifestWindow
 {
     public bool CanLoot;
@@ -98,11 +99,7 @@ internal readonly struct PartyGumpPlugin : IPlugin
         Query<Data<EntityName>> nameQ,
         Query<Data<PartyManifestWindow>> existingQ)
     {
-        foreach (var (ent, _) in existingQ)
-        {
-            commands.Entity(ent.Ref).Insert(new GlobalZIndex(zCounter.Bump()));
-            return;
-        }
+        if (builder.TryFocusExisting<PartyManifestWindow>(commands, existingQ, zCounter)) return;
 
         Build(commands, builder, assets, zCounter, party, playerSerial, entities, nameQ, party.CanLoot);
     }
@@ -341,19 +338,11 @@ internal readonly struct PartyGumpPlugin : IPlugin
 
     private static void Despawn(
         Commands commands,
-        Query<Data<PartyManifestWindow>> windowsQ,
-        Query<Data<TinyEcs.Children>> childrenQ)
+        Query<Data<PartyManifestWindow>> windowsQ)
     {
+        // Despawning the window root cascades to its children (same as the
+        // canonical WindowDragPlugin right-click close), so no manual child loop.
         foreach (var (ent, _) in windowsQ)
-        {
-            ulong root = ent.Ref;
-            if (childrenQ.TryGet(root, out var rootKidsRow))
-            {
-                var (_, kids) = rootKidsRow;
-                foreach (var cid in kids.Ref)
-                    commands.Entity(cid).Despawn();
-            }
-            commands.Entity(root).Despawn();
-        }
+            commands.Entity(ent.Ref).Despawn();
     }
 }

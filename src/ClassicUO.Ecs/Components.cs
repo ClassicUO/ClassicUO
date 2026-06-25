@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Ecs;
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct WorldPosition
 {
     public ushort X, Y;
@@ -21,38 +22,46 @@ internal struct WorldPosition
     public readonly Vector2 WorldToScreen() => Isometric.IsoToScreen(X, Y, Z);
 }
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct Graphic
 {
     public ushort Value;
 }
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 struct Hue
 {
     public ushort Value;
 }
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 struct Facing
 {
     public ClassicUO.Game.Data.Direction Value;
 }
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 struct NetworkSerial
 {
     public uint Value;
 }
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 struct Amount
 {
     public int Value;
 }
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 struct ContainedInto;
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 struct IsContainer;
 
 // Position inside a parent container. Mutually exclusive with WorldPosition:
 // items on the ground/in the world carry WorldPosition, items nested in a
 // container carry ContainerSlotPosition. Keeping the two as separate types
 // stops distance / hit-test code from confusing slot coords with map coords.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 struct ContainerSlotPosition
 {
     public ushort X;
@@ -60,25 +69,30 @@ struct ContainerSlotPosition
     public byte GridIndex;
 }
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 struct Hits
 {
     public ushort Value, MaxValue;
 }
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 struct Mana
 {
     public ushort Value, MaxValue;
 }
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 struct Stamina
 {
     public ushort Value, MaxValue;
 }
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 struct Player;
 
 // Mobile notoriety (innocent/criminal/enemy/...) from the world-object packets.
 // Drives healthbar name/background hue. Items never carry it.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 struct Notoriety
 {
     public NotorietyFlag Value;
@@ -87,6 +101,7 @@ struct Notoriety
 // Display name for a network entity. Player name is also cached in
 // GameContext.PlayerName; this component carries names for any mobile whose
 // status (0x11) has been requested (e.g. on opening its healthbar).
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 struct EntityName
 {
     public string Value;
@@ -95,11 +110,13 @@ struct EntityName
 // Str/Dex/Int stat locks (0=up, 1=down, 2=locked). Client-side state toggled by
 // the status gump's lock buttons; persisted on the player so it survives the
 // gump reopening. The server doesn't push it in the status packet.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 struct StatLocks
 {
     public byte Str, Dex, Int;
 }
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 struct PlayerData
 {
     public ushort Str, StrMax;
@@ -141,6 +158,7 @@ struct EquipmentArray
     private ulong _a;
 }
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 struct EquipmentSlots
 {
     public const int LayerCount = 54;
@@ -183,8 +201,11 @@ internal struct AlphaFade
 
 internal struct IsStatic;
 internal struct IsTile;
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct Items;
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct Mobiles;
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct IsMulti;
 
 internal struct HouseRevision

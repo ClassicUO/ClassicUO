@@ -15,9 +15,11 @@ using TinyEcs;
 using TinyEcs.Bevy;
 using TinyEcs.Bevy.UI;
 using ClayColor = Clay.Color;
+using static ClassicUO.Ecs.UiGumpHelpers;
 
 namespace ClassicUO.Ecs;
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct SpellbookWindow
 {
     public uint Serial;
@@ -97,8 +99,6 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
             audio.Value.PlaySound(assets.Value, profile.Value, time.Value.Total, 0x0055));
     }
 
-    private static int GumpW(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Width; }
-    private static int GumpH(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Height; }
 
     // Open (or focus) a spellbook when the server pushes a 0xFFFF "container".
     private static void OpenFromContainer(
@@ -417,7 +417,7 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
             var pos = mouse.Value.Position;
             foreach (var (_, bb, c) in cornersQ)
             {
-                if (!Contains(bb.Ref, pos)) continue;
+                if (!UiHitTest.Contains(bb.Ref, pos)) continue;
                 if (windowsQ.TryGet(c.Ref.Window, out var windowRow))
                 {
                     var (_, w) = windowRow;
@@ -437,10 +437,6 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
             }
         }
     }
-
-    private static bool Contains(in ComputedNode bb, Vector2 p)
-        => p.X >= bb.Position.X && p.Y >= bb.Position.Y
-        && p.X < bb.Position.X + bb.Size.X && p.Y < bb.Position.Y + bb.Size.Y;
 
     private struct IconDragAnchor { public bool Active, Claimed, Spawned; public int CastId; public ushort Icon; public int Cliloc; public string Name; public Vector2 Start; }
 
@@ -477,7 +473,7 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
             var pos = mouse.Value.Position;
             foreach (var (_, bb, ic) in iconsQ)
             {
-                if (!Contains(bb.Ref, pos)) continue;
+                if (!UiHitTest.Contains(bb.Ref, pos)) continue;
                 anchor.Value.Active = true;
                 anchor.Value.Claimed = true;
                 anchor.Value.CastId = ic.Ref.CastId;

@@ -533,7 +533,7 @@ internal readonly struct ServerGumpPlugin : IPlugin
                 if (ServerGumpCommand.TryText(gparams, out var a))
                 {
                     var text = SafeLine(lines, a.LineId);
-                    var color = HueToClayColor(p.Files.Value.Hues, a.Hue);
+                    var color = UiColorHelper.HueToClayColor(p.Files.Value.Hues, a.Hue);
                     childId = SpawnText(commands, new Vector2(a.X, a.Y), text, color);
                     cx0 = a.X; cy0 = a.Y; cw0 = 0; ch0 = 16;
                 }
@@ -1087,23 +1087,6 @@ internal readonly struct ServerGumpPlugin : IPlugin
     //     hue palette ColorTable[8] (the primary fill cell)
     // GetUnicodeFontColor already does the (color - 1) shift internally, so
     // we pass (hue + 1) here.
-    private static ClayColor HueToClayColor(HuesLoader hues, ushort hue)
-    {
-        if (hue == 0) return ClayColor.Black;
-        // OOP RenderedText defaults cell=30 (RenderedText.Create cell=30 arg →
-        // GenerateUnicode), the brightest end of the hue gradient. The tinted
-        // ClayColor multiplies a white glyph drawn from the shared atlas
-        // (UoFontRenderer.Draw → SHADER_RGB_TINT), so it keeps per-glyph alpha
-        // exactly like OOP — a bright gold hue reads as bright gold, not the
-        // muted olive cell=4 produced. Mirrors HueToTint (wrapped-text path),
-        // which already uses 30. parts[3] + 1 mirrors OOP's Label ctor "+1".
-        var packed = hues.GetPolygoneColor(30, (ushort)(hue + 1));
-        if (packed == 0 || packed == 0xFF010101) return ClayColor.Black;
-        byte r = (byte)(packed & 0xFF);
-        byte g = (byte)((packed >> 8) & 0xFF);
-        byte b = (byte)((packed >> 16) & 0xFF);
-        return new ClayColor(r, g, b, 255);
-    }
 
 
     internal static bool Eq(string a, string b)

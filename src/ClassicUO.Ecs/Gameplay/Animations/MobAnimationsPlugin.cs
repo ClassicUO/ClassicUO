@@ -17,6 +17,7 @@ using static TinyEcs.Defaults;
 namespace ClassicUO.Ecs;
 
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 struct MobAnimation
 {
     public int Index;
@@ -40,6 +41,7 @@ struct MobAnimation
     }
 }
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 struct ServerFlags
 {
     public Flags Value;
@@ -51,6 +53,7 @@ struct MobileStepArray
     private Game.GameObjects.Mobile.Step _a;
 }
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 struct MobileSteps
 {
     public const int COUNT = 10;

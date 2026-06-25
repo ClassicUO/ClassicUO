@@ -112,6 +112,7 @@ internal struct TooltipRoot { }
 // the cursor hovers the element or one of its descendants. This is the
 // non-serial path: no OPL request, no network — just a fixed string the gump
 // set when it spawned the control. MaxWidth 0 = default wrap width.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct UiTooltip { public string Text; public int MaxWidth; }
 
 // Queries for TrackAndRender, bundled to stay under the system-parameter cap

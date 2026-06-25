@@ -127,9 +127,7 @@ internal readonly struct GuiPlugin : IPlugin
             ResMut<UiClayContext>,
             Res<AssetsServer>,
             Query<Data<ScrollPosition>>,
-            Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>>,
-            Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>>,
-            Query<Data<TinyEcs.Parent>>,
+            UiGesturePick,
             Query<Data<GlobalZIndex>>,
             Query<Empty, With<GameScreenPlugin.GameWindowUI>>> routeWheelFn = RouteWheelToScrollable;
         // Labeled so gumps with their own wheel gesture (world map zoom) can
@@ -277,9 +275,7 @@ internal readonly struct GuiPlugin : IPlugin
         ResMut<UiClayContext> ctx,
         Res<AssetsServer> assets,
         Query<Data<ScrollPosition>> scrollPosQ,
-        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
-        Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>> movableQ,
-        Query<Data<TinyEcs.Parent>> parentQ,
+        UiGesturePick pick,
         Query<Data<GlobalZIndex>> zQ,
         Query<Empty, With<GameScreenPlugin.GameWindowUI>> gameWindowQ)
     {
@@ -311,7 +307,7 @@ internal readonly struct GuiPlugin : IPlugin
             if (!ctx.Value.TryGetElementBoundingBox(ent.Ref, out var bb)) continue;
             if (pos.X < bb.X || pos.X > bb.X + bb.Width) continue;
             if (pos.Y < bb.Y || pos.Y > bb.Y + bb.Height) continue;
-            var z = ResolveWindowZ(ent.Ref, parentQ, zQ);
+            var z = ResolveWindowZ(ent.Ref, pick.Parents, zQ);
             if (z < topZ) continue;
             topZ = z;
             topScroll = ent.Ref;
@@ -332,14 +328,18 @@ internal readonly struct GuiPlugin : IPlugin
         // It's drawn first (lowest PaintOrder), so any real gump over it wins
         // Topmost; a hit ON it means the cursor is over bare game world.
         int topGumpZ = int.MinValue;
-        var uiHit = UiPick.Topmost(mouseCtx.Value.Position, assets.Value, rendered, parentQ);
+        // Bounds intentionally null here (UiPick.Topmost 4-arg overload): this
+        // "is the cursor over any UI?" test stays pixel-perfect, matching the
+        // pre-bundle behaviour — ContainsByBounds windows are NOT treated as
+        // solid boxes for wheel routing.
+        var uiHit = UiPick.Topmost(mouseCtx.Value.Position, assets.Value, pick.Rendered, pick.Parents);
         bool overUi = uiHit.Found && !gameWindowQ.Contains(uiHit.Entity);
         if (overUi)
         {
-            var root = UiPick.MovableRoot(uiHit.Entity, movableQ, parentQ);
+            var root = UiPick.MovableRoot(uiHit.Entity, pick.Movables, pick.Parents);
             if (root != 0)
             {
-                var (_, _, z) = movableQ.Get(root);
+                var (_, _, z) = pick.Movables.Get(root);
                 topGumpZ = z.Ref.Value;
             }
         }
@@ -832,6 +832,7 @@ internal static class UiCustomRenderExtensions
 
 // Marker for the UO button widget. UpdateUOButtonsState rewrites the visible
 // asset id on the entity's UOCustomRender based on Interaction state.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct UOButton
 {
     public ushort Normal, Pressed, Over;
@@ -849,12 +850,14 @@ internal struct UOCheckbox
 // and "a field is focused, chat back off" both key off this. Present on ALL
 // fields including ones with bespoke editors (split-stack number box, skills
 // group rename).
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct TextInput;
 // Opt-in: the shared global editor (GuiPlugin.EditFocusedTextField) appends /
 // backspaces typed chars into THIS entity's Text (or MaskedText) when it holds
 // keyboard focus. Login, chat and server-gump text entries carry it; fields
 // with their own char readers (split number box, skills rename) deliberately
 // do NOT, so the global editor leaves them to their bespoke filtering.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct EditableText;
 
 // Opt-in on an editable glyph: it's a MULTILINE field — the value renders through
@@ -880,12 +883,14 @@ internal sealed class DebugLayoutDump
 // the sibling `Text` component populated with `MaskChar` repeated for the
 // length of `Value`. Editors and consumers (e.g. login) read/write Value;
 // the renderer only ever sees the masked Text.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct MaskedText
 {
     public string Value;
     public char MaskChar;
 }
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal sealed class FocusedInput
 {
     public ulong Entity { get; set; }

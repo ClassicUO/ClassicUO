@@ -1169,6 +1169,7 @@ internal readonly struct ContainerGumpPlugin : IPlugin
 
 // Marker on the UI window root. Carries the UO serial so drop systems and
 // close systems can find the right game-side container.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct ContainerWindow
 {
     public uint Serial;

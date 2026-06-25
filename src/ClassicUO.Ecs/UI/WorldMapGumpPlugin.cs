@@ -46,6 +46,7 @@ using XnaColor = Microsoft.Xna.Framework.Color;
 namespace ClassicUO.Ecs;
 
 // Window root marker.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct WorldMapWindow;
 
 // The map canvas child (carries the custom render + the pan/zoom gestures).
@@ -174,6 +175,26 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
 
     private static readonly string[] s_facetNames =
         { "Felucca", "Trammel", "Ilshenar", "Malas", "Tokuno", "TerMur" };
+
+    // Context-menu toggle rows — constant (fixed labels + capture-free Profile
+    // accessors), so built once instead of per SpawnMenu call.
+    private static readonly (string Label, Func<Profile, bool> Get, Action<Profile, bool> Set)[] s_menuToggles =
+    {
+        ("Flip Map", pr => pr.WorldMapFlipMap, (pr, v) => pr.WorldMapFlipMap = v),
+        ("Free View", pr => pr.WorldMapFreeView, (pr, v) => pr.WorldMapFreeView = v),
+        ("Show Party Members", pr => pr.WorldMapShowParty, (pr, v) => pr.WorldMapShowParty = v),
+        ("Show Mobiles", pr => pr.WorldMapShowMobiles, (pr, v) => pr.WorldMapShowMobiles = v),
+        ("Show Markers", pr => pr.WorldMapShowMarkers, (pr, v) => pr.WorldMapShowMarkers = v),
+        ("Show Marker Names", pr => pr.WorldMapShowMarkersNames, (pr, v) => pr.WorldMapShowMarkersNames = v),
+        ("Show Your Name", pr => pr.WorldMapShowPlayerName, (pr, v) => pr.WorldMapShowPlayerName = v),
+        ("Show Your Healthbar", pr => pr.WorldMapShowPlayerBar, (pr, v) => pr.WorldMapShowPlayerBar = v),
+        ("Show Group Name", pr => pr.WorldMapShowGroupName, (pr, v) => pr.WorldMapShowGroupName = v),
+        ("Show Group Healthbar", pr => pr.WorldMapShowGroupBar, (pr, v) => pr.WorldMapShowGroupBar = v),
+        ("Show Coordinates", pr => pr.WorldMapShowCoordinates, (pr, v) => pr.WorldMapShowCoordinates = v),
+        ("Sextant Coordinates", pr => pr.WorldMapShowSextantCoordinates, (pr, v) => pr.WorldMapShowSextantCoordinates = v),
+        ("Mouse Coordinates", pr => pr.WorldMapShowMouseCoordinates, (pr, v) => pr.WorldMapShowMouseCoordinates = v),
+        ("Grid If Zoomed", pr => pr.WorldMapShowGridIfZoomed, (pr, v) => pr.WorldMapShowGridIfZoomed = v),
+    };
 
     private static readonly string s_markersPath =
         Path.Combine(AppContext.BaseDirectory, "Data", "Client");
@@ -539,7 +560,7 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
 
                     foreach (ref var sb in span)
                     {
-                        if (sb.Color == 0 || sb.Color == 0xFFFF || !CanBeDrawn(tileData, sb.Color))
+                        if (sb.Color == 0 || sb.Color == 0xFFFF || !MapDrawHelpers.CanBeDrawnRadar(tileData, sb.Color))
                             continue;
 
                         int block = (mapY + sb.Y + OFFSET_PIX_HALF) * stride + mapX + sb.X + OFFSET_PIX_HALF;
@@ -598,48 +619,6 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
         }
 
         return buffer;
-    }
-
-    // MiniMapPlugin's radar subset of GameObject.CanBeDrawn — keeps no-draw /
-    // decorative statics from speckling the bake.
-    private static bool CanBeDrawn(TileDataLoader tileData, ushort g)
-    {
-        switch (g)
-        {
-            case 0x0001:
-            case 0x21BC:
-            case 0xA1FE:
-            case 0xA1FF:
-            case 0xA200:
-            case 0xA201:
-                return false;
-
-            case 0x9E4C:
-            case 0x9E64:
-            case 0x9E65:
-            case 0x9E7D:
-            {
-                ref var d = ref tileData.StaticData[g];
-                return !d.IsBackground && !d.IsSurface;
-            }
-        }
-
-        if (g == 0x63D3)
-            return false;
-        if (g >= 0x2198 && g <= 0x21A4)
-            return false;
-
-        if (g < tileData.StaticData.Length)
-        {
-            ref var data = ref tileData.StaticData[g];
-            if (!string.IsNullOrEmpty(data.Name) &&
-                data.Name.StartsWith("nodraw", StringComparison.OrdinalIgnoreCase))
-                return false;
-            if (!data.IsNoDiagonal)
-                return true;
-        }
-
-        return false;
     }
 
     // ── Input: pan + zoom ─────────────────────────────────────────────────
@@ -1068,10 +1047,7 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
         Res<GameContext> gameCtx,
         ResMut<WorldMapState> stateRes,
         Local<ulong> pressTarget,
-        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> renderedQ,
-        Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>> movablesQ,
-        Query<Data<TinyEcs.Parent>> parentsQ,
-        Query<Data<UiContainsByBounds>> boundsQ,
+        UiGesturePick pick,
         Query<Data<WorldMapWindow>> windowsQ,
         Query<Data<ComputedNode>, Filter<With<WorldMapMenu>>> menuQ)
     {
@@ -1102,7 +1078,7 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
         // (UiClick semantics — drag off cancels).
         if (mouse.Value.IsPressedOnce(MouseButtonType.Right))
         {
-            pressTarget.Value = TopmostWorldMap(pos, assets.Value, renderedQ, movablesQ, parentsQ, boundsQ, windowsQ);
+            pressTarget.Value = TopmostWorldMap(pos, assets.Value, pick, windowsQ);
             return;
         }
 
@@ -1111,12 +1087,12 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
 
         var target = pressTarget.Value;
         pressTarget.Value = 0;
-        if (TopmostWorldMap(pos, assets.Value, renderedQ, movablesQ, parentsQ, boundsQ, windowsQ) != target)
+        if (TopmostWorldMap(pos, assets.Value, pick, windowsQ) != target)
             return;
 
         // Window-relative spawn position (the menu is a child so it rides the
         // window's z and drags with it).
-        var (_, winNode, _) = movablesQ.Get(target);
+        var (_, winNode, _) = pick.Movables.Get(target);
         float wx = winNode.Ref.Left.Type == ValType.Px ? winNode.Ref.Left.Value : 0f;
         float wy = winNode.Ref.Top.Type == ValType.Px ? winNode.Ref.Top.Value : 0f;
         state.MenuPos = new Vector2(pos.X - wx, pos.Y - wy);
@@ -1128,15 +1104,12 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
     private static ulong TopmostWorldMap(
         Vector2 pos,
         AssetsServer assets,
-        Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> renderedQ,
-        Query<Data<Node, GlobalZIndex>, Filter<With<UiMovable>>> movablesQ,
-        Query<Data<TinyEcs.Parent>> parentsQ,
-        Query<Data<UiContainsByBounds>> boundsQ,
+        UiGesturePick pick,
         Query<Data<WorldMapWindow>> windowsQ)
     {
-        var hit = UiPick.Topmost(pos, assets, renderedQ, parentsQ, boundsQ);
+        var hit = pick.Topmost(pos, assets);
         if (!hit.Found) return 0;
-        var owner = UiPick.MovableRoot(hit.Entity, movablesQ, parentsQ);
+        var owner = pick.MovableRoot(hit.Entity);
         return owner != 0 && windowsQ.Contains(owner) ? owner : 0;
     }
 
@@ -1186,23 +1159,7 @@ internal readonly struct WorldMapGumpPlugin : IPlugin
         const int TrackH = 22;
         const int KnobSz = 16;
 
-        var toggles = new (string Label, Func<Profile, bool> Get, Action<Profile, bool> Set)[]
-        {
-            ("Flip Map", pr => pr.WorldMapFlipMap, (pr, v) => pr.WorldMapFlipMap = v),
-            ("Free View", pr => pr.WorldMapFreeView, (pr, v) => pr.WorldMapFreeView = v),
-            ("Show Party Members", pr => pr.WorldMapShowParty, (pr, v) => pr.WorldMapShowParty = v),
-            ("Show Mobiles", pr => pr.WorldMapShowMobiles, (pr, v) => pr.WorldMapShowMobiles = v),
-            ("Show Markers", pr => pr.WorldMapShowMarkers, (pr, v) => pr.WorldMapShowMarkers = v),
-            ("Show Marker Names", pr => pr.WorldMapShowMarkersNames, (pr, v) => pr.WorldMapShowMarkersNames = v),
-            ("Show Your Name", pr => pr.WorldMapShowPlayerName, (pr, v) => pr.WorldMapShowPlayerName = v),
-            ("Show Your Healthbar", pr => pr.WorldMapShowPlayerBar, (pr, v) => pr.WorldMapShowPlayerBar = v),
-            ("Show Group Name", pr => pr.WorldMapShowGroupName, (pr, v) => pr.WorldMapShowGroupName = v),
-            ("Show Group Healthbar", pr => pr.WorldMapShowGroupBar, (pr, v) => pr.WorldMapShowGroupBar = v),
-            ("Show Coordinates", pr => pr.WorldMapShowCoordinates, (pr, v) => pr.WorldMapShowCoordinates = v),
-            ("Sextant Coordinates", pr => pr.WorldMapShowSextantCoordinates, (pr, v) => pr.WorldMapShowSextantCoordinates = v),
-            ("Mouse Coordinates", pr => pr.WorldMapShowMouseCoordinates, (pr, v) => pr.WorldMapShowMouseCoordinates = v),
-            ("Grid If Zoomed", pr => pr.WorldMapShowGridIfZoomed, (pr, v) => pr.WorldMapShowGridIfZoomed = v),
-        };
+        var toggles = s_menuToggles;
 
         int viewedMap = state.ViewMap >= 0 ? state.ViewMap : gameCtx.Map;
         int actionRows = 5;

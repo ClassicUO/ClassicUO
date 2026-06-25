@@ -519,6 +519,7 @@ internal readonly struct TargetingPlugin : IPlugin
 // Singleton mirroring the live state of legacy TargetManager: whether a target
 // cursor is up and the server-echoed cursor id/type/mode needed to build the
 // 0x6C response.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal sealed class TargetingState
 {
     public bool IsTargeting { get; set; }

@@ -18,6 +18,7 @@ using TinyEcs.Bevy.UI.Widgets;
 
 namespace ClassicUO.Ecs;
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct LogoutGumpWindow;
 
 // Mirrors GameScene.DisconnectionRequested: set when OK is pressed under the
@@ -58,11 +59,7 @@ internal readonly struct LogoutGumpPlugin : IPlugin
         UiSurface surface,
         Query<Data<LogoutGumpWindow>> existingQ)
     {
-        foreach (var (ent, _) in existingQ)
-        {
-            commands.Entity(ent.Ref).Insert(new GlobalZIndex(zCounter.Bump()));
-            return;
-        }
+        if (builder.TryFocusExisting<LogoutGumpWindow>(commands, existingQ, zCounter)) return;
 
         ref readonly var bg = ref assets.Gumps.GetGump(BackgroundGump);
         var size = new Vector2(bg.UV.Width, bg.UV.Height);

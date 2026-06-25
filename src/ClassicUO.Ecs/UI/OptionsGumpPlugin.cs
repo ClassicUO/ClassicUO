@@ -527,6 +527,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
         var hoverFn = ApplyHover;
         app.AddSystem(hoverFn)
             .InStage(Stage.Last)
+            .RunIf((Res<OptionsUiState> s) => s.Value.Window != 0)
             .Build();
 
 #if AGENT_BUILD
@@ -2306,6 +2307,7 @@ internal readonly struct OptionsGumpPlugin : IPlugin
     }
 }
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct OptionsWindow;
 
 // Marker on the search field's editable Text entity.

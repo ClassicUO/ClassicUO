@@ -37,6 +37,33 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
         // carries (the proven UiDoubleClick pattern; entity-scoped .Observe is
         // only used for UiClick). Bevy.UI synthesizes UiDoubleClick from two
         // UiClicks within its DoubleClickWindow.
+        // Selection lives in a resource, not a closure box: the 0xA9 list can be
+        // re-pushed (e.g. after a character delete) while still in
+        // CharacterSelection, which re-runs the setup system and rebuilds the
+        // rows — a closure-captured selectedRef/rows would then be stale (rule 4).
+        app.AddResource(new CharacterSelectionState());
+
+        // Single click selects/highlights a row. Global observer keyed on the
+        // CharacterInfo every row + label carries (same proven pattern as the
+        // double-click observer below); recolours all name labels by querying
+        // them, instead of capturing a per-build `rows` list.
+        app.AddObserver((
+            On<UiClick> trig,
+            Commands commands,
+            ResMut<CharacterSelectionState> sel,
+            Query<Data<CharacterInfo>> charQ,
+            Query<Data<CharacterInfo, TextColor>> labelQ) =>
+        {
+            if (!charQ.TryGet(trig.EntityId, out var charRow)) return;
+            var (_, ch) = charRow;
+            sel.Value.SelectedIndex = ch.Ref.Index;
+
+            var normal = UoFontRuntime.AsciiHue(0x034F);
+            var highlight = UoFontRuntime.AsciiHue(0x0021);
+            foreach (var (lbl, info, _) in labelQ)
+                commands.Entity(lbl.Ref).Insert(new TextColor(info.Ref.Index == ch.Ref.Index ? highlight : normal));
+        });
+
         app.AddObserver((
             On<UiDoubleClick> trig,
             Res<NetClient> net,
@@ -52,12 +79,7 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
     private static void Cleanup(
         Commands commands,
         Query<Data<Node>, Filter<With<CharacterSelectionScene>>> query)
-    {
-        foreach ((var ent, _) in query)
-        {
-            commands.Entity(ent.Ref).Despawn();
-        }
-    }
+        => LoginSceneHelpers.DespawnAll<CharacterSelectionScene>(commands, query);
 
     // Mirrors main's CharacterSelectionGump (Game/UI/Gumps/Login/CharacterSelectionGump.cs):
     // chest background, ResizePic 0x0A28 panel, "Character Selection" header,
@@ -67,8 +89,18 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
         Res<GumpBuilder> gumpBuilder,
         Res<NetClient> network,
         Res<GameContext> gameCtx,
+        ResMut<CharacterSelectionState> selState,
+        Query<Data<Node>, Filter<With<CharacterSelectionScene>>> existing,
         EventReader<CharacterSelectionInfoEvent> reader)
     {
+        // A re-pushed 0xA9 (e.g. after a character delete) re-runs this system
+        // while still in CharacterSelection — despawn the previous panel first so
+        // rows don't stack. Selection state is the resource, not a closure, so
+        // there is nothing stale to carry across rebuilds.
+        foreach ((var ent, _) in existing)
+            commands.Entity(ent.Ref).Despawn();
+        selState.Value.SelectedIndex = uint.MaxValue;
+
         // Drain the list up front so the panel can size to the char count before
         // spawning (legacy reads loginScene.Characters first). Empty slots are
         // already stripped by the 0xA9 parser.
@@ -94,43 +126,12 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
         var maxChars = MaxCharacterSlots(gameCtx.Value.ClientFeatures);
         var locked = gameCtx.Value.LockedFeatures;
 
-        var root = commands.Spawn()
-            .Insert<CharacterSelectionScene>()
-            .Insert(new Node
-            {
-                Display = Display.Flex,
-                PositionType = PositionType.Relative,
-                FlexDirection = FlexDirection.Column,
-                JustifyContent = JustifyContent.Start,
-                AlignItems = AlignItems.Start,
-                Width = Val.Percent(100),
-                Height = Val.Percent(100),
-            });
-
-        var mainMenu = commands.Spawn()
-            .Insert<CharacterSelectionScene>()
-            .Insert(new Node
-            {
-                Display = Display.Flex,
-                PositionType = PositionType.Relative,
-                FlexDirection = FlexDirection.Column,
-                JustifyContent = JustifyContent.Start,
-                AlignItems = AlignItems.Start,
-                Width = Val.Px(640),
-                Height = Val.Px(480),
-            });
-        root.AddChild(mainMenu);
+        var mainMenu = LoginSceneHelpers.SpawnCanvas<CharacterSelectionScene>(commands);
 
         // Tiled wallpaper + UO flag (LoginBackground parity). Main's
         // CharacterSelectionGump does NOT add the chest 0x014E — wallpaper
         // shows through behind the 0x0A28 panel.
-        mainMenu.AddChild(gumpBuilder.Value.AddGumpTiled(
-            commands, 0x0150, XnaVector3.UnitZ,
-            new XnaVector2(0, 0), new XnaVector2(640, 480))
-            .Insert<CharacterSelectionScene>());
-        mainMenu.AddChild(gumpBuilder.Value.AddGump(
-            commands, 0x0151, XnaVector3.UnitZ, new XnaVector2(0, 4))
-            .Insert<CharacterSelectionScene>());
+        LoginSceneHelpers.AddWallpaper<CharacterSelectionScene>(commands, gumpBuilder.Value, mainMenu, new XnaVector2(640, 480));
 
         // Inner panel 0x0A28 — sized per main (408 x 343, +yBonus for 6–7 slots).
         mainMenu.AddChild(gumpBuilder.Value.AddGumpNinePatch(
@@ -151,12 +152,12 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
         // Bevy.UI emits UiDoubleClick (two UiClicks within its
         // DoubleClickWindow on the same entity), so route login through an
         // On<UiDoubleClick> observer — no hand-rolled timestamp gap.
-        var selectedRef = new SelectedRowState { Index = uint.MaxValue };
-        var rows = new List<(uint Index, ulong LabelEnt, string Name)>();
         // OOP CharacterEntryGump: ASCII font 5, NORMAL_COLOR 0x034F,
         // SELECTED_COLOR 0x0021 (red). TextColor carries the hue.
         var normalColor = UoFontRuntime.AsciiHue(0x034F);
         var highlightColor = UoFontRuntime.AsciiHue(0x0021);
+        ulong firstLabelEnt = 0;
+        uint firstIndex = uint.MaxValue;
 
         // Character rows.
         var posInList = 0;
@@ -172,19 +173,6 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
                 break;
 
             var idx = character.Index;
-
-            // Single-click selects/highlights the row. Attached to both row
-            // and label so a click on the name text behaves like a click on
-            // the tan border (Clay routes to whichever entity is topmost).
-            Action<Commands> handleRowSelect = innerCmd =>
-            {
-                selectedRef.Index = idx;
-                foreach (var (rowIdx, lbl, _) in rows)
-                {
-                    var color = rowIdx == idx ? highlightColor : normalColor;
-                    innerCmd.Entity(lbl).Insert(new TextColor(color));
-                }
-            };
 
             // Tan ResizePic bg (0x0BB8) — same frame main draws around
             // each character row (CharacterEntryGump.ctor in main). Carries
@@ -212,18 +200,20 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
                 })
                 .Insert<CharacterSelectionScene>()
                 .Insert(character)
-                .Insert(Interaction.None)
-                .Observe((On<UiClick> _, Commands innerCmd) => handleRowSelect(innerCmd));
+                .Insert(Interaction.None);
 
             var labelEnt = SpawnRowLabel(commands, rowEnt, character.Name, normalColor);
-            // Clicking the name (not just the tan border) selects too, and
-            // the label carries CharacterInfo so a double-click on the text
-            // logs in via the same global observer.
+            // Clicking the name (not just the tan border) selects too, and the
+            // label carries CharacterInfo so single/double clicks on the text
+            // route through the same global observers as the tan border.
             commands.Entity(labelEnt)
                 .Insert(Interaction.None)
-                .Insert(character)
-                .Observe((On<UiClick> _, Commands innerCmd) => handleRowSelect(innerCmd));
-            rows.Add((idx, labelEnt, character.Name));
+                .Insert(character);
+            if (firstLabelEnt == 0)
+            {
+                firstLabelEnt = labelEnt;
+                firstIndex = idx;
+            }
             mainMenu.AddChild(rowEnt);
             posInList++;
         }
@@ -231,10 +221,10 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
         // Default highlight: main's CharacterSelectionGump starts with the
         // first character pre-selected (_selectedCharacter = 0). Mirror that
         // so Next/Enter acts on a sensible default without a prior click.
-        if (rows.Count > 0)
+        if (firstLabelEnt != 0)
         {
-            selectedRef.Index = rows[0].Index;
-            commands.Entity(rows[0].LabelEnt).Insert(new TextColor(highlightColor));
+            selState.Value.SelectedIndex = firstIndex;
+            commands.Entity(firstLabelEnt).Insert(new TextColor(highlightColor));
         }
 
         // New character button (Buttons.New = 0x159D/0x159F/0x159E) —
@@ -272,23 +262,22 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
         mainMenu.AddChild(gumpBuilder.Value.AddButton(
             commands, (0x15A4, 0x15A6, 0x15A5), XnaVector3.UnitZ, new XnaVector2(610, 445))
             .Insert<CharacterSelectionScene>()
-            .Observe((On<UiClick> _) =>
+            .Observe((On<UiClick> _,
+                      Res<CharacterSelectionState> sel,
+                      Res<NetClient> net,
+                      Res<GameContext> ctx,
+                      Query<Data<CharacterInfo>> charQ) =>
             {
-                if (rows.Count == 0) return;
-                var idx = selectedRef.Index;
-                (uint Index, ulong LabelEnt, string Name) entry = default;
-                if (idx != uint.MaxValue)
+                var idx = sel.Value.SelectedIndex;
+                if (idx == uint.MaxValue) return;
+                foreach (var (_, ci) in charQ)
                 {
-                    foreach (var r in rows)
-                    {
-                        if (r.Index == idx) { entry = r; break; }
-                    }
+                    if (ci.Ref.Index != idx) continue;
+                    net.Value.Send_SelectCharacter(
+                        ci.Ref.Index, ci.Ref.Name,
+                        net.Value.LocalIP, ctx.Value.Protocol);
+                    return;
                 }
-                if (entry.Name == null) entry = rows[0];
-                network.Value.Send_SelectCharacter(
-                    entry.Index, entry.Name,
-                    network.Value.LocalIP,
-                    gameCtx.Value.Protocol);
             }));
     }
 
@@ -312,12 +301,6 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
         parent.AddChild(label);
     }
 
-    private static void AddLabelChild(
-        Commands commands, EntityCommands parent,
-        string text, int x, int y, ClayColor color)
-    {
-        SpawnLabelChild(commands, parent, text, x, y, color);
-    }
 
     // Row name label: a flow (non-absolute) child so the row's
     // JustifyContent/AlignItems = Center centers it in both axes. Auto size lets
@@ -344,39 +327,18 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
         return 5;
     }
 
-    // Spawn label and return its entity id so the caller can mutate
-    // TextColor on selection events.
-    private static ulong SpawnLabelChild(
-        Commands commands, EntityCommands parent,
-        string text, int x, int y, ClayColor color)
+    // Which character row is currently highlighted. A resource (not a closure
+    // box) so it survives a 0xA9 re-push that rebuilds the rows; the global
+    // click/Next observers read it without capturing per-build state.
+    internal sealed class CharacterSelectionState
     {
-        var label = commands.Spawn()
-            .Insert<CharacterSelectionScene>()
-            .Insert(new Node
-            {
-                PositionType = PositionType.Absolute,
-                Left = Val.Px(x),
-                Top = Val.Px(y),
-                Width = Val.Auto,
-                Height = Val.Auto,
-            })
-            .Insert(new Text(text))
-            .Insert(new TextFont { FontId = (ushort)(5 | UoFontRuntime.AsciiFlag), Size = 14 })
-            .Insert(new TextColor(color));
-        parent.AddChild(label);
-        return label.Id;
-    }
-
-    // Mutable closure box tracking which row is currently highlighted, so the
-    // Next arrow logs in the selected character.
-    private sealed class SelectedRowState
-    {
-        public uint Index;
+        public uint SelectedIndex = uint.MaxValue;
     }
 }
 
 // Scene root marker — promoted to namespace-level internal so the modding
 // registry (same assembly) can key a WIT scene path to it.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct CharacterSelectionScene;
 
 internal struct CharacterSelectionInfoEvent

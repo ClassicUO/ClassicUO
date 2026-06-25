@@ -1001,6 +1001,7 @@ internal sealed class LeftPressLatch
     public bool Consumed { get; set; }
 }
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal sealed class GrabbedItem
 {
     public bool IsActive { get; set; }

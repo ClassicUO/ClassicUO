@@ -22,9 +22,11 @@ using TinyEcs.Bevy.Input;
 using TinyEcs.Bevy.UI;
 using TinyEcs.Bevy.UI.Widgets;
 using ClayColor = Clay.Color;
+using static ClassicUO.Ecs.UiGumpHelpers;
 
 namespace ClassicUO.Ecs;
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct SkillsWindow
 {
     public int SpecialHeight;
@@ -38,6 +40,7 @@ internal struct SkillsWindow
     public ulong ListEntity, TopEntity, MidEntity, BottomEntity;
     public ulong TitleEntity, MinimizeEntity, ExpanderEntity;
     public ulong SumLabelEntity, FlagEntity;
+    public float LastSum;       // last skill total RefreshSum formatted (gate re-format/set)
 }
 
 // Row marker carrying which group it toggles (collapse arrow click).
@@ -131,8 +134,6 @@ internal readonly struct SkillsGumpPlugin : IPlugin
             });
     }
 
-    private static int GumpW(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Width; }
-    private static int GumpH(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Height; }
 
     public static void OpenOrFocus(
         Commands commands,
@@ -142,11 +143,7 @@ internal readonly struct SkillsGumpPlugin : IPlugin
         PlayerSkills skills,
         Query<Data<SkillsWindow>> existingQ)
     {
-        foreach (var (ent, _) in existingQ)
-        {
-            commands.Entity(ent.Ref).Insert(new GlobalZIndex(zCounter.Bump()));
-            return;
-        }
+        if (builder.TryFocusExisting<SkillsWindow>(commands, existingQ, zCounter)) return;
 
         if (skills.Groups.Count == 0)
             SkillsGroupDefaults.Build(skills.Groups, assets.Skills.SkillsCount);
@@ -301,6 +298,7 @@ internal readonly struct SkillsGumpPlugin : IPlugin
             ListEntity = list.Id, TopEntity = top.Id, MidEntity = mid.Id, BottomEntity = bottom.Id,
             TitleEntity = title.Id, MinimizeEntity = minimize.Id, ExpanderEntity = expander.Id,
             SumLabelEntity = sumLabel.Id, FlagEntity = flag.Id,
+            LastSum = float.NaN, // sentinel: force RefreshSum to format the first frame
         });
 
         // Stash the chrome label/checkbox/button entities for LayoutWindow to
@@ -621,9 +619,9 @@ internal readonly struct SkillsGumpPlugin : IPlugin
     private static int DropTarget(Vector2 pos, Query<Data<ComputedNode, SkillNameEdit>> groupNameQ, Query<Data<ComputedNode, SkillRowDrag>> dragQ)
     {
         foreach (var (_, bb, g) in groupNameQ)
-            if (Contains(bb.Ref, pos)) return g.Ref.GroupIndex;
+            if (UiHitTest.Contains(bb.Ref, pos)) return g.Ref.GroupIndex;
         foreach (var (_, bb, d) in dragQ)
-            if (Contains(bb.Ref, pos)) return d.Ref.GroupIndex;
+            if (UiHitTest.Contains(bb.Ref, pos)) return d.Ref.GroupIndex;
         return -1;
     }
 
@@ -680,7 +678,7 @@ internal readonly struct SkillsGumpPlugin : IPlugin
             var pos = mouse.Value.Position;
             foreach (var (_, bb, d) in dragQ)
             {
-                if (!Contains(bb.Ref, pos)) continue;
+                if (!UiHitTest.Contains(bb.Ref, pos)) continue;
                 anchor.Value.Active = true;
                 anchor.Value.Claimed = true;
                 anchor.Value.Window = d.Ref.Window;
@@ -737,9 +735,16 @@ internal readonly struct SkillsGumpPlugin : IPlugin
     {
         foreach (var (_, win) in windowsQ)
         {
-            if (!textQ.TryGet(win.Ref.SumLabelEntity, out var sumRow)) continue;
+            // The total ticks only when a skill value (or the ShowReal toggle)
+            // changes; gate the per-frame string format on the raw sum so a stable
+            // total costs nothing. NaN sentinel forces the first format.
+            float sum = skills.Value.SumValues(win.Ref.ShowReal);
+            if (sum == win.Ref.LastSum) continue;
+
+            if (!textQ.TryGet(win.Ref.SumLabelEntity, out var sumRow)) continue; // retry next frame
+            win.Ref.LastSum = sum;
             var (_, t) = sumRow;
-            t.Ref.Value = $"{skills.Value.SumValues(win.Ref.ShowReal):F1}";
+            t.Ref.Value = $"{sum:F1}";
         }
     }
 
@@ -808,7 +813,7 @@ internal readonly struct SkillsGumpPlugin : IPlugin
             var pos = mouse.Value.Position;
             foreach (var (_, bb, r) in resetQ)
             {
-                if (!Contains(bb.Ref, pos)) continue;
+                if (!UiHitTest.Contains(bb.Ref, pos)) continue;
                 st.Value.Armed = true;
                 st.Value.Window = r.Ref.Window;
                 gate.Value.Mode = ActiveDrag.UIWindow;
@@ -825,7 +830,7 @@ internal readonly struct SkillsGumpPlugin : IPlugin
             var pos = mouse.Value.Position;
             foreach (var (_, bb, r) in resetQ)
             {
-                if (r.Ref.Window != win || !Contains(bb.Ref, pos)) continue;
+                if (r.Ref.Window != win || !UiHitTest.Contains(bb.Ref, pos)) continue;
                 SkillsGroupDefaults.Build(skills.Value.Groups, assets.Value.Skills.SkillsCount);
                 if (windowsQ.TryGet(win, out var winRow)) { var (_, w) = winRow; w.Ref.Dirty = true; }
                 break;
@@ -834,10 +839,6 @@ internal readonly struct SkillsGumpPlugin : IPlugin
     }
 
     private struct ResetState { public bool Armed; public ulong Window; }
-
-    private static bool Contains(in ComputedNode bb, Vector2 p)
-        => p.X >= bb.Position.X && p.Y >= bb.Position.Y
-        && p.X < bb.Position.X + bb.Size.X && p.Y < bb.Position.Y + bb.Size.Y;
 
     // Slide the flag along the list track to reflect scroll position (mirrors
     // JournalPlugin.PositionFlag).
@@ -898,7 +899,7 @@ internal readonly struct SkillsGumpPlugin : IPlugin
             {
                 if (win.Ref.Minimized || !compQ.TryGet(win.Ref.FlagEntity, out var flagBbRow)) continue;
                 var (_, bb) = flagBbRow;
-                if (!Contains(bb.Ref, pos)) continue;
+                if (!UiHitTest.Contains(bb.Ref, pos)) continue;
 
                 float listH = 0f;
                 if (nodeQ.TryGet(win.Ref.ListEntity, out var listNodeRow)) { var (_, ln) = listNodeRow; listH = ln.Ref.Height.Value; }

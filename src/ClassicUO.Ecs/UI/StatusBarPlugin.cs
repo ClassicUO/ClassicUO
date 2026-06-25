@@ -26,6 +26,7 @@ namespace ClassicUO.Ecs;
 // (HealthBarPlugin.WindowInteractions); clicking elsewhere — stat-lock
 // togglers, the buff button, the body — does not. Stamped by both the host
 // gump and the ecs-status mod root so the shared host gesture gates on it.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct StatusBarWindow { public float MinimizeX, MinimizeY; }
 
 internal enum StatusField : byte
@@ -51,6 +52,7 @@ internal struct StatusTooltipPending { public int Cliloc; }
 
 // A stat-lock toggle (Str/Dex/Int). Stat 0/1/2. The lock STATE lives on the
 // player (StatLocks) so it survives reopening; the button just identifies which.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct StatLockButton { public byte Stat; }
 
 internal readonly struct StatusBarPlugin : IPlugin
@@ -143,11 +145,7 @@ internal readonly struct StatusBarPlugin : IPlugin
         UiZCounter zCounter,
         Query<Data<StatusBarWindow>> existingQ)
     {
-        foreach (var (ent, _) in existingQ)
-        {
-            commands.Entity(ent.Ref).Insert(new GlobalZIndex(zCounter.Bump()));
-            return;
-        }
+        if (builder.TryFocusExisting<StatusBarWindow>(commands, existingQ, zCounter)) return;
 
         // UseOldStatusGump forces the classic 0x0802 layout on modern clients
         // (legacy StatusGumpBase.GetStatusGump). Takes effect on next open.

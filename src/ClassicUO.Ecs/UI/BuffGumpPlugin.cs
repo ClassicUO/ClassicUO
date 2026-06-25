@@ -53,6 +53,7 @@ internal sealed class PlayerBuffs
 }
 
 // Window root marker + the bar's current direction graphic (0x757F..0x7582).
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct BuffGumpUI;
 internal struct BuffBarLayout { public ushort Graphic; }
 
@@ -63,7 +64,11 @@ internal struct BuffBarToggle;
 
 // Countdown label child of a buff icon (Profile.BuffBarTime). Carries the
 // buff's expiry so the per-frame text refresh needs no dictionary lookup.
-internal struct BuffIconTime { public float ExpiresAt; }
+// LastShownKey caches the display state the label last formatted for (the whole
+// second remaining, or a sentinel for "blank") so UpdateTimers skips the
+// per-frame string alloc when the visible countdown wouldn't change — the text
+// only ticks once per second. -2 = never formatted yet (forces first refresh).
+internal struct BuffIconTime { public float ExpiresAt; public int LastShownKey; }
 
 internal readonly struct BuffGumpPlugin : IPlugin
 {
@@ -289,7 +294,7 @@ internal readonly struct BuffGumpPlugin : IPlugin
                         TextCenter = true,
                     }
                 })
-                .Insert(new BuffIconTime { ExpiresAt = kv.Value.ExpiresAt });
+                .Insert(new BuffIconTime { ExpiresAt = kv.Value.ExpiresAt, LastShownKey = -2 });
             commands.AddChild(icon.Id, label.Id);
             i++;
         }
@@ -303,24 +308,32 @@ internal readonly struct BuffGumpPlugin : IPlugin
         Res<Time> time,
         Query<Data<BuffIconTime, UiCustom>> labelsQ)
     {
+        bool showTime = profile.Value.BuffBarTime;
+        float now = time.Value.Total;
         foreach (var (_, t, custom) in labelsQ)
         {
+            // The countdown text only ticks once per second; gate the per-frame
+            // string format on the whole-second-remaining key so a stable label
+            // costs nothing (key -1 = blank: timer off, no countdown, or expired).
+            bool counting = showTime && t.Ref.ExpiresAt != float.MaxValue;
+            float delta = counting ? t.Ref.ExpiresAt - now : 0f;
+            int key = counting && delta > 0 ? (int)(delta / 1000f) : -1;
+            if (key == t.Ref.LastShownKey)
+                continue;
+
             var r = custom.Ref.Render();
-            if (r == null) continue;
+            if (r == null) continue; // retry next frame (don't commit the key yet)
+            t.Ref.LastShownKey = key;
 
             string text = string.Empty;
-            if (profile.Value.BuffBarTime && t.Ref.ExpiresAt != float.MaxValue)
+            if (key >= 0)
             {
-                float delta = t.Ref.ExpiresAt - time.Value.Total;
-                if (delta > 0)
-                {
-                    var span = TimeSpan.FromMilliseconds(delta);
-                    text = span.Hours > 0
-                        ? $"+{span.Hours}hr"
-                        : span.Minutes > 0
-                            ? $"{span.Minutes}:{span.Seconds:00}"
-                            : $"{span.Seconds:00}s";
-                }
+                var span = TimeSpan.FromMilliseconds(delta);
+                text = span.Hours > 0
+                    ? $"+{span.Hours}hr"
+                    : span.Minutes > 0
+                        ? $"{span.Minutes}:{span.Seconds:00}"
+                        : $"{span.Seconds:00}s";
             }
 
             if (r.Text != text)

@@ -25,6 +25,7 @@ using Microsoft.Xna.Framework.Input;
 using TinyEcs;
 using TinyEcs.Bevy;
 using TinyEcs.Bevy.UI;
+using static ClassicUO.Ecs.UiGumpHelpers;
 
 namespace ClassicUO.Ecs;
 
@@ -243,8 +244,6 @@ internal readonly struct VendorGumpPlugin : IPlugin
         return string.IsNullOrEmpty(name) ? "Item" : name;
     }
 
-    private static int GumpW(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Width; }
-    private static int GumpH(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Height; }
 
     // Order a shop container's item entities the way legacy BuyList/OpenContainer
     // do: graphic 0x2AF8 sorts by slot X ascending; every other container is read
@@ -740,7 +739,7 @@ internal readonly struct VendorGumpPlugin : IPlugin
             foreach (var (_, bb, b) in txnQ)
             {
                 if (b.Ref.Window != repeat.Value.Window || b.Ref.Serial != repeat.Value.Serial || b.Ref.Dir != repeat.Value.Dir) continue;
-                if (Contains(bb.Ref, p)) over = true;
+                if (UiHitTest.Contains(bb.Ref, p)) over = true;
                 break;
             }
             if (over && time.Value.Total > repeat.Value.NextTime)
@@ -763,14 +762,14 @@ internal readonly struct VendorGumpPlugin : IPlugin
 
         foreach (var (_, bb, a) in actQ)
         {
-            if (!Contains(bb.Ref, p)) continue;
+            if (!UiHitTest.Contains(bb.Ref, p)) continue;
             if (a.Ref.Action == 0) DoAccept(a.Ref.Window, windowsQ, net.Value, ctx.Value, commands);
             else ClearTxn(a.Ref.Window, windowsQ);
             gate.Value.Mode = ActiveDrag.UIWindow; claimed.Value = true; return;
         }
         foreach (var (_, bb, b) in txnQ)
         {
-            if (!Contains(bb.Ref, p)) continue;
+            if (!UiHitTest.Contains(bb.Ref, p)) continue;
             AdjustTxn(b.Ref.Window, b.Ref.Serial, b.Ref.Dir, shift, windowsQ);
             repeat.Value = new TxnRepeat
             {
@@ -781,7 +780,7 @@ internal readonly struct VendorGumpPlugin : IPlugin
         }
         foreach (var (_, bb, r) in rowQ)
         {
-            if (!Contains(bb.Ref, p)) continue;
+            if (!UiHitTest.Contains(bb.Ref, p)) continue;
             if (dbl) AdjustTxn(r.Ref.Window, r.Ref.Serial, +1, shift, windowsQ);
             gate.Value.Mode = ActiveDrag.UIWindow; claimed.Value = true; return;
         }
@@ -818,7 +817,7 @@ internal readonly struct VendorGumpPlugin : IPlugin
         var p = mouse.Value.Position;
         foreach (var (_, bb, a) in arrowsQ)
         {
-            if (!Contains(bb.Ref, p)) continue;
+            if (!UiHitTest.Contains(bb.Ref, p)) continue;
             if (scrollQ.TryGet(a.Ref.List, out var scrollRow))
             {
                 var (_, sp) = scrollRow;
@@ -907,7 +906,7 @@ internal readonly struct VendorGumpPlugin : IPlugin
             var p = mouse.Value.Position;
             foreach (var (_, bb, h) in handlesQ)
             {
-                if (!Contains(bb.Ref, p)) continue;
+                if (!UiHitTest.Contains(bb.Ref, p)) continue;
                 if (!windowsQ.TryGet(h.Ref.Window, out var winRow)) continue;
                 var (_, w) = winRow;
                 anchor.Value.Active = true; anchor.Value.Claimed = true;
@@ -970,9 +969,6 @@ internal readonly struct VendorGumpPlugin : IPlugin
     }
 
     private struct ResizeAnchor { public bool Active, Claimed; public ulong Window; public float StartY, InitialBody; }
-
-    private static bool Contains(in ComputedNode bb, Vector2 p)
-        => p.X >= bb.Position.X && p.Y >= bb.Position.Y && p.X < bb.Position.X + bb.Size.X && p.Y < bb.Position.Y + bb.Size.Y;
 
     private static bool ShiftDown(KeyboardContext kb)
         => kb.IsPressed(Keys.LeftShift) || kb.IsPressed(Keys.RightShift)

@@ -202,7 +202,17 @@ internal static class UoFontRenderer
         public bool HitMaskBorder;
     }
 
+    // Bounded so dynamic strings (HP "[57%]", buff timers, coords, skill totals)
+    // can't grow the cache without limit over a session. Insertion-order eviction
+    // via _layoutOrder (deterministic — agent-harness replays must stay
+    // pixel-stable, so NO time/random/GC-based policy): on a miss at capacity the
+    // oldest-inserted key is evicted (recomputed on next use). A Layout owns no
+    // GPU/disposable resource (the atlas page persists), so eviction just drops
+    // the managed entry. The HOT path is a cache HIT (TryGetValue) — it never
+    // touches _layoutOrder, so it stays alloc-free.
+    private const int LayoutCacheCap = 512;
     private static readonly Dictionary<LayoutKey, Layout> _layouts = new();
+    private static readonly Queue<LayoutKey> _layoutOrder = new();
 
     // Shared by DrawGlyphs + BuildHitMask — the hit mask must place glyphs
     // exactly where the draw does, so the per-line walk math lives here once.
@@ -268,7 +278,16 @@ internal static class UoFontRenderer
             }
 
             var layout = new Layout { Info = info, Width = w, Height = h, MaxWidth = maxWidth };
+            // Evict the oldest-inserted entry once full (deterministic insertion
+            // order). Skip any order-key already gone from the dict (defensive —
+            // Clear empties both together, so this loop normally runs once).
+            while (_layouts.Count >= LayoutCacheCap && _layoutOrder.Count > 0)
+            {
+                var oldest = _layoutOrder.Dequeue();
+                _layouts.Remove(oldest);
+            }
             _layouts[key] = layout;
+            _layoutOrder.Enqueue(key);
             return layout;
         }
         finally
@@ -776,5 +795,5 @@ internal static class UoFontRenderer
 
     // Released on full UI rebuild (e.g. logout). The atlas itself persists
     // (glyphs are reusable); only the per-string layout cache is cleared.
-    public static void Clear() { _layouts.Clear(); _caretMetrics.Clear(); }
+    public static void Clear() { _layouts.Clear(); _layoutOrder.Clear(); _caretMetrics.Clear(); }
 }

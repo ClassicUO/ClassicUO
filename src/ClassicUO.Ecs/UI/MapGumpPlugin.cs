@@ -26,10 +26,12 @@ using Microsoft.Xna.Framework.Graphics;
 using TinyEcs;
 using TinyEcs.Bevy;
 using TinyEcs.Bevy.UI;
+using static ClassicUO.Ecs.UiGumpHelpers;
 
 namespace ClassicUO.Ecs;
 
 // Map window root, keyed by the map item serial.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct MapWindow
 {
     public uint Serial;
@@ -380,8 +382,6 @@ internal readonly struct MapGumpPlugin : IPlugin
             commands.Entity(ent.Ref).Despawn();
     }
 
-    private static int GumpW(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Width; }
-    private static int GumpH(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Height; }
 
 #if AGENT_BUILD
     // Drains debug.openMap by emitting the registered 0x90 Post308Z trigger so

@@ -45,12 +45,7 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
     private static void Cleanup(
         Commands commands,
         Query<Data<Node>, Filter<With<LoginErrorScene>>> query)
-    {
-        foreach ((var ent, _) in query)
-        {
-            commands.Entity(ent.Ref).Despawn();
-        }
-    }
+        => LoginSceneHelpers.DespawnAll<LoginErrorScene>(commands, query);
 
     private static void LoginErrorInfoSetup(
         Commands commands,
@@ -80,14 +75,8 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
             });
         var backdropId = backdrop.Id;
 
-        var wallpaper = builder.Value.AddGumpTiled(commands, 0x0150, Vector3.UnitZ,
-            new Vector2(0, 0), new Vector2(size.X, size.Y))
-            .Insert<LoginErrorScene>();
-        commands.AddChild(backdropId, wallpaper.Id);
-
-        var flag = builder.Value.AddGump(commands, 0x0151, Vector3.UnitZ, new Vector2(0, 4))
-            .Insert<LoginErrorScene>();
-        commands.AddChild(backdropId, flag.Id);
+        LoginSceneHelpers.AddWallpaper<LoginErrorScene>(
+            commands, builder.Value, backdrop, new Vector2(size.X, size.Y));
 
         // ResizePic panel.
         var box = commands.Spawn()
@@ -149,8 +138,10 @@ internal readonly struct LoginErrorScreenPlugin : IPlugin
 
 // Scene root marker — promoted to namespace-level internal so the modding
 // registry (same assembly) can key a WIT scene path to it.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct LoginErrorScene;
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct LoginErrorsInfoEvent
 {
     public LoginErrorInfo Error;

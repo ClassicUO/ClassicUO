@@ -105,14 +105,14 @@ internal readonly struct TextEntryDialogPlugin : IPlugin
         // pixel-perfect hit surface (clicks on it walk up to the UiMovable root).
         ref readonly var bg = ref p.Assets.Value.Gumps.GetGump(0x0474);
         int bgW = bg.UV.Width, bgH = bg.UV.Height;
-        Attach(commands, rootId, p.Builder.Value.AddGump(commands, 0x0474, Vector3.UnitZ, new Vector2(0, 0)).Id);
+        commands.AddChild(rootId, p.Builder.Value.AddGump(commands, 0x0474, Vector3.UnitZ, new Vector2(0, 0)).Id);
 
-        var labelColor = HueToClayColor(p.Files.Value.Hues, LabelHue);
-        Attach(commands, rootId, SpawnLabel(commands, new Vector2(60, 50), pkt.Text, labelColor));
-        Attach(commands, rootId, SpawnLabel(commands, new Vector2(60, 108), pkt.Description, labelColor));
+        var labelColor = UiColorHelper.HueToClayColor(p.Files.Value.Hues, LabelHue);
+        commands.AddChild(rootId, SpawnLabel(commands, new Vector2(60, 50), pkt.Text, labelColor));
+        commands.AddChild(rootId, SpawnLabel(commands, new Vector2(60, 108), pkt.Description, labelColor));
 
         // Text field frame (input box backdrop 0x0477 + the editable glyph).
-        Attach(commands, rootId, p.Builder.Value.AddGump(commands, 0x0477, Vector3.UnitZ, new Vector2(60, 130)).Id);
+        commands.AddChild(rootId, p.Builder.Value.AddGump(commands, 0x0477, Vector3.UnitZ, new Vector2(60, 130)).Id);
 
         var capRoot = rootId;
         var frame = commands.Spawn()
@@ -129,7 +129,7 @@ internal readonly struct TextEntryDialogPlugin : IPlugin
         var glyphId = GuiPlugin.SpawnTextField(
             commands, frame, new Vector2(2, 2), entryFont, new ClayColor(255, 255, 255, 255), pkt.Text, masked: false,
             decorate: e => e.Insert(new TextEntryDialogField { RootEntity = capRoot }));
-        Attach(commands, rootId, frame.Id);
+        commands.AddChild(rootId, frame.Id);
 
         // Open with the field focused (OOP SetKeyboardFocus on construct) so the
         // user can type immediately without clicking it first.
@@ -149,7 +149,7 @@ internal readonly struct TextEntryDialogPlugin : IPlugin
             net.Value.Send_TextEntryDialogResponse(serial, parentId, buttonId, Sanitize(CollectText(capRoot, fieldsQ), maxLen, numbersOnly), true);
             cmd.Entity(capRoot).Despawn();
         });
-        Attach(commands, rootId, ok.Id);
+        commands.AddChild(rootId, ok.Id);
 
         var cancel = p.Builder.Value.AddButton(commands, (0x0478, 0x0478, 0x047A), Vector3.UnitZ, new Vector2(204, 190));
         cancel.Observe((On<UiClick> _, Res<NetClient> net, Commands cmd, Query<Data<TextEntryDialogField, Text>> fieldsQ) =>
@@ -157,7 +157,7 @@ internal readonly struct TextEntryDialogPlugin : IPlugin
             net.Value.Send_TextEntryDialogResponse(serial, parentId, buttonId, Sanitize(CollectText(capRoot, fieldsQ), maxLen, numbersOnly), false);
             cmd.Entity(capRoot).Despawn();
         });
-        Attach(commands, rootId, cancel.Id);
+        commands.AddChild(rootId, cancel.Id);
 
         // Root: absolute window anchor at the gump origin sized to the bg panel.
         // UiMovable makes it a window (right-click-close, click-capture-to-world,
@@ -175,9 +175,6 @@ internal readonly struct TextEntryDialogPlugin : IPlugin
             .Insert<UiMovableNoDrag>()
             .Insert(new GlobalZIndex(z));
     }
-
-    private static void Attach(Commands commands, ulong rootId, ulong childId)
-        => commands.AddChild(rootId, childId);
 
     // First text-field value belonging to the dialog rooted at rootId.
     private static string CollectText(ulong rootId, Query<Data<TextEntryDialogField, Text>> fieldsQ)
@@ -225,18 +222,6 @@ internal readonly struct TextEntryDialogPlugin : IPlugin
             .Id;
     }
 
-    // UO hue → ClayColor for tinting a white unicode glyph. Mirrors
-    // ServerGumpPlugin.HueToClayColor (cell 30, +1 wire convention).
-    private static ClayColor HueToClayColor(HuesLoader hues, ushort hue)
-    {
-        if (hue == 0) return ClayColor.Black;
-        var packed = hues.GetPolygoneColor(30, (ushort)(hue + 1));
-        if (packed == 0 || packed == 0xFF010101) return ClayColor.Black;
-        byte r = (byte)(packed & 0xFF);
-        byte g = (byte)((packed >> 8) & 0xFF);
-        byte b = (byte)((packed >> 16) & 0xFF);
-        return new ClayColor(r, g, b, 255);
-    }
 }
 
 // Marker on the dialog root — used for logout teardown and (via the field tag)

@@ -9,7 +9,7 @@
 // Movability / right-click close / topmost-on-click / click-capture come
 // from the shared UiMovable infra in WindowDragPlugin — paperdoll does NOT
 // reimplement any of those (rule 4). The bg root carries the UiMovable
-// marker via GumpBuilder.AddGumpRoot; everything else falls out.
+// marker via GumpBuilder.SpawnUOGump (UOGumpBundle); everything else falls out.
 //
 // Body + equipment overlays mirror PaperDollInteractable.UpdateUI: pick a
 // body graphic from mobile.Graphic, then layer equipped item gumps using
@@ -1028,6 +1028,7 @@ internal readonly struct PaperdollPlugin : IPlugin
 
 // Marker carried by the paperdoll bg root. Lets DisposeOnLogout walk all
 // open windows and lets duplicate-open detection deduplicate by serial.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct PaperdollWindow
 {
     public uint Serial;

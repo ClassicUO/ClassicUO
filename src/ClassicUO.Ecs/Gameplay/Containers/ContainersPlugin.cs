@@ -256,10 +256,12 @@ internal struct FloatingWindowState
     public float InitialHeight;
 }
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal record struct ContainerOpenedEvent(uint Serial, ushort Graphic);
 // UserInitiated = the player right-clicked the window closed; only then does
 // the close sound play (legacy ContainerGump.CloseWithRightClick). Server- and
 // distance-driven closes leave it false and stay silent (legacy Dispose).
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal record struct ContainerClosedEvent(uint Serial, bool UserInitiated = false);
 
 internal enum ContainerSlotAction : byte { Add, Remove }

@@ -32,6 +32,7 @@ namespace ClassicUO.Ecs;
 
 // Marker on the healthbar window root (the bg gump). Carries the tracked
 // serial so refresh can resolve the mobile + dedupe duplicate opens.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct HealthBarWindow
 {
     public uint Serial;

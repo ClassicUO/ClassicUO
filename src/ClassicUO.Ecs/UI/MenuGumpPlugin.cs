@@ -26,6 +26,7 @@ using ClayColor = Clay.Color;
 namespace ClassicUO.Ecs;
 
 // Window root marker. ServerMenuId is the 0x7C gump id echoed back in the reply.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct MenuGumpWindow
 {
     public uint Serial;

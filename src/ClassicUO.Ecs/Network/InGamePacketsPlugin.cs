@@ -1212,7 +1212,6 @@ readonly struct InGamePacketsPlugin : IPlugin
             return;
 
         var packet = trig.Event.Packet;
-        Console.WriteLine("delete obj from packet: 0x{0:X8}", packet.Serial);
 
         // Drop the container UI slot if this item was sitting in a gump.
         itemRemoved.Send(ContainerSlotEvent.Remove(packet.Serial));

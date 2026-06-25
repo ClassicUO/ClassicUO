@@ -150,7 +150,7 @@ internal readonly struct PopupMenuPlugin : IPlugin
         // Ignore clicks that landed on a gump window, not the world.
         var pos = mouse.Value.Position;
         foreach (var (_, bb) in movableQ)
-            if (Contains(bb.Ref, pos)) return;
+            if (UiHitTest.Contains(bb.Ref, pos)) return;
 
         state.Value.ClickPending = true;
         state.Value.ClickSerial = ser.Ref.Value;
@@ -359,7 +359,7 @@ internal readonly struct PopupMenuPlugin : IPlugin
         foreach (var (_, bb) in popupQ)
         {
             any = true;
-            if (Contains(bb.Ref, pos)) over = true;
+            if (UiHitTest.Contains(bb.Ref, pos)) over = true;
         }
         if (!any) return;
 
@@ -382,7 +382,7 @@ internal readonly struct PopupMenuPlugin : IPlugin
         // Left release: select the row under the cursor (if any), then close.
         foreach (var (_, bb, row) in rowsQ)
         {
-            if (!Contains(bb.Ref, pos)) continue;
+            if (!UiHitTest.Contains(bb.Ref, pos)) continue;
             net.Value.Send_PopupMenuSelection(row.Ref.Serial, row.Ref.Index);
             break;
         }
@@ -411,7 +411,7 @@ internal readonly struct PopupMenuPlugin : IPlugin
         {
             if (!barsQ.TryGet(row.Ref.Bar, out var barRow)) continue;
             var (_, bar) = barRow;
-            bar.Ref.Value = Contains(bb.Ref, pos) ? Highlight : Transparent;
+            bar.Ref.Value = UiHitTest.Contains(bb.Ref, pos) ? Highlight : Transparent;
         }
     }
 
@@ -422,10 +422,6 @@ internal readonly struct PopupMenuPlugin : IPlugin
         foreach (var (ent, _) in popupQ)
             commands.Entity(ent.Ref).Despawn();
     }
-
-    private static bool Contains(in ComputedNode bb, Vector2 p)
-        => p.X >= bb.Position.X && p.Y >= bb.Position.Y
-        && p.X < bb.Position.X + bb.Size.X && p.Y < bb.Position.Y + bb.Size.Y;
 
     private struct RowLayout
     {

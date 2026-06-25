@@ -47,7 +47,7 @@ internal static class AuraOverlay
 
     // Feet-aura hue: party hue for party members (when enabled), else notoriety.
     public static ushort FeetHue(Profile profile, NotorietyFlag noto, bool inParty)
-        => profile.PartyAura && inParty ? profile.PartyAuraHue : NotorietyHue(profile, noto);
+        => profile.PartyAura && inParty ? profile.PartyAuraHue : NotorietyHelper.NotorietyHue(profile, noto);
 
     // Draw the circle centred on (x, y). Depth is irrelevant: the feet pass runs
     // with the depth buffer OFF (it's a ground decal painted after statics, before
@@ -99,16 +99,4 @@ internal static class AuraOverlay
         _texture.SetData(data);
     }
 
-    // Mirror of MobileHpOverheads.NotorietyHue (profile-driven).
-    private static ushort NotorietyHue(Profile profile, NotorietyFlag flag) => flag switch
-    {
-        NotorietyFlag.Innocent => profile.InnocentHue,
-        NotorietyFlag.Ally => profile.FriendHue,
-        NotorietyFlag.Criminal => profile.CriminalHue,
-        NotorietyFlag.Gray => profile.CanAttackHue,
-        NotorietyFlag.Enemy => profile.EnemyHue,
-        NotorietyFlag.Murderer => profile.MurdererHue,
-        NotorietyFlag.Invulnerable => 0x0034,
-        _ => 0,
-    };
 }

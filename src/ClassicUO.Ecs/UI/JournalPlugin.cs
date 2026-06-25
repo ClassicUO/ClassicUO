@@ -37,6 +37,7 @@ using TinyEcs.Bevy;
 using TinyEcs.Bevy.UI;
 using TinyEcs.Bevy.UI.Widgets;
 using ClayColor = Clay.Color;
+using static ClassicUO.Ecs.UiGumpHelpers;
 
 namespace ClassicUO.Ecs;
 
@@ -130,6 +131,7 @@ internal sealed class JournalFileLog
 
 // Marker + full UI state on the window root. Geometry (LayoutWindow) and content
 // (RebuildContent) are derived from these fields; observers flip them.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct JournalWindow
 {
     public int SpecialHeight;   // scroll body height (legacy 274..800, default 300)
@@ -196,7 +198,8 @@ internal readonly struct JournalPlugin : IPlugin
             .RunIf((EventReader<SystemMessageEvent> msgs) => msgs.HasEvents).Build();
         var syncProfileFn = SyncProfile;
         app.AddSystem(syncProfileFn).InStage(Stage.Update).Build();
-        app.AddSystem(rebuildFn).InStage(Stage.Update).Build();
+        app.AddSystem(rebuildFn).InStage(Stage.Update)
+            .RunIf((Res<State<GameState>> s) => s.Value.Current == GameState.GameScreen).Build();
         app.AddSystem(layoutFn).InStage(Stage.Update).Build();
         app.AddSystem(flagFn).InStage(Stage.PostUpdate).Build();
         app.AddSystem(despawnFn).OnExit(GameState.GameScreen).Build();
@@ -378,11 +381,7 @@ internal readonly struct JournalPlugin : IPlugin
         UiZCounter zCounter,
         Query<Data<JournalWindow>> existingQ)
     {
-        foreach (var (ent, _) in existingQ)
-        {
-            commands.Entity(ent.Ref).Insert(new GlobalZIndex(zCounter.Bump()));
-            return;
-        }
+        if (builder.TryFocusExisting<JournalWindow>(commands, existingQ, zCounter)) return;
 
         int topW = GumpW(assets, ScrollGraphic), topH = GumpH(assets, ScrollGraphic);
         int midW = GumpW(assets, (ushort)(ScrollGraphic + 2));
@@ -841,8 +840,6 @@ internal readonly struct JournalPlugin : IPlugin
 
     // --- helpers ---------------------------------------------------------
 
-    private static int GumpW(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Width; }
-    private static int GumpH(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Height; }
 
     private static Vector3 HueVector(ushort hue) => hue == 0 ? Vector3.UnitZ : new Vector3(hue, 1f, 1f); // matches ServerGumpPlugin.ToShaderHue
 

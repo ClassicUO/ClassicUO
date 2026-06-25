@@ -26,7 +26,6 @@ internal struct OnUpdateObjectPacket_0xD3 : IPacket
     public ushort Hue { get; private set; }
     public Flags Flags { get; private set; }
     public NotorietyFlag Notoriety { get; private set; }
-    public ushort[] Reserved { get; private set; }
     public List<EquipmentEntry> Equipment { get; private set; }
 
     public void Fill(StackDataReader reader)
@@ -41,11 +40,9 @@ internal struct OnUpdateObjectPacket_0xD3 : IPacket
         Flags = (Flags)reader.ReadUInt8();
         Notoriety = (NotorietyFlag)reader.ReadUInt8();
 
-        Reserved = new ushort[3];
-        for (var i = 0; i < Reserved.Length; ++i)
-        {
-            Reserved[i] = reader.ReadUInt16BE();
-        }
+        // Three reserved ushorts the client never consumes — advance past them
+        // (was: read into a never-read ushort[3]).
+        reader.Skip(6);
 
         Equipment ??= new List<EquipmentEntry>();
         Equipment.Clear();

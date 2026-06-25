@@ -25,9 +25,11 @@ using TinyEcs;
 using TinyEcs.Bevy;
 using TinyEcs.Bevy.UI;
 using ClayColor = Clay.Color;
+using static ClassicUO.Ecs.UiGumpHelpers;
 
 namespace ClassicUO.Ecs;
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct TipNoticeWindow
 {
     public ushort TipSerial;
@@ -310,8 +312,6 @@ internal readonly struct TipNoticeGumpPlugin : IPlugin
             commands.Entity(ent.Ref).Despawn();
     }
 
-    private static int GumpW(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Width; }
-    private static int GumpH(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Height; }
 
 #if AGENT_BUILD
     private static void DrainDebugTip(Commands commands, ResMut<DebugTipQueue> q)

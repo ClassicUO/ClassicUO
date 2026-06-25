@@ -27,9 +27,11 @@ using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
 using TinyEcs.Bevy.UI;
+using static ClassicUO.Ecs.UiGumpHelpers;
 
 namespace ClassicUO.Ecs;
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct RacialBookWindow
 {
     public int Page;        // 1-based active page (legacy ActivePage)
@@ -135,11 +137,7 @@ internal readonly struct RacialBookGumpPlugin : IPlugin
         Commands commands, GumpBuilder builder, AssetsServer assets, UiZCounter zCounter, RaceType race,
         Query<Data<RacialBookWindow>> existingQ)
     {
-        foreach (var (ent, _) in existingQ)
-        {
-            commands.Entity(ent.Ref).Insert(new GlobalZIndex(zCounter.Bump()));
-            return;
-        }
+        if (builder.TryFocusExisting<RacialBookWindow>(commands, existingQ, zCounter)) return;
 
         if (race == 0) race = RaceType.HUMAN;
         int abilityCount = AbilityCountFor(race);
@@ -172,8 +170,6 @@ internal readonly struct RacialBookGumpPlugin : IPlugin
         });
     }
 
-    private static int GumpW(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Width; }
-    private static int GumpH(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Height; }
 
     private static void PlayPageFlipSound(
         Query<Data<RacialBookWindow>> windowsQ,
@@ -389,7 +385,7 @@ internal readonly struct RacialBookGumpPlugin : IPlugin
         var pos = mouse.Value.Position;
         foreach (var (_, bb, c) in cornersQ)
         {
-            if (!Contains(bb.Ref, pos)) continue;
+            if (!UiHitTest.Contains(bb.Ref, pos)) continue;
             if (windowsQ.TryGet(c.Ref.Window, out var windowRow))
             {
                 var (_, w) = windowRow;
@@ -440,7 +436,7 @@ internal readonly struct RacialBookGumpPlugin : IPlugin
             var pos = mouse.Value.Position;
             foreach (var (_, bb, ic) in iconsQ)
             {
-                if (ic.Ref.Floating || !Contains(bb.Ref, pos)) continue;
+                if (ic.Ref.Floating || !UiHitTest.Contains(bb.Ref, pos)) continue;
                 anchor.Value.Active = true;
                 anchor.Value.Claimed = true;
                 anchor.Value.Start = pos;
@@ -468,10 +464,6 @@ internal readonly struct RacialBookGumpPlugin : IPlugin
             anchor.Value.Spawned = true;
         }
     }
-
-    private static bool Contains(in ComputedNode bb, Vector2 p)
-        => p.X >= bb.Position.X && p.Y >= bb.Position.Y
-        && p.X < bb.Position.X + bb.Size.X && p.Y < bb.Position.Y + bb.Size.Y;
 
     private static void Despawn(
         Commands commands,

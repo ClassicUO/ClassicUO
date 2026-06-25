@@ -15,6 +15,7 @@ namespace ClassicUO.Ecs;
 
 // Grid-loot window root. Holds the corpse it mirrors + a signature of the
 // last-rendered contents so slots only rebuild when the corpse's items change.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct GridLootWindow
 {
     public uint CorpseSerial;
@@ -30,6 +31,10 @@ internal struct GridLootSlot
     public uint Serial;
     public ushort Amount;
 }
+
+// Last grid-loot window position so a new corpse opens where the last one was
+// (legacy GridLootGump._lastX/_lastY).
+internal sealed class GridLootLastPos { public int X = 100, Y = 100; }
 
 // Profile.GridLootType: 0 = normal container only, 1 = grid only, 2 = both.
 // Ports the legacy GridLootGump trigger (PacketHandlers): a corpse container
@@ -52,6 +57,8 @@ internal readonly struct GridLootGumpPlugin : IPlugin
         var closeFn = CloseGoneGrids;
 
         app
+            .AddResource(new GridLootLastPos())
+
             .AddSystem(openFn)
             .InStage(Stage.Update)
             .RunIf((Res<State<GameState>> s) => s.Value.Current == GameState.GameScreen)
@@ -73,6 +80,7 @@ internal readonly struct GridLootGumpPlugin : IPlugin
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
         ResMut<UiZCounter> zCounter,
+        Res<GridLootLastPos> lastPos,
         EventReader<ContainerOpenedEvent> reader,
         Query<Data<GridLootWindow>> existingQ)
     {
@@ -91,7 +99,7 @@ internal readonly struct GridLootGumpPlugin : IPlugin
 
             commands.SpawnBundle(new UOGumpBundle
             {
-                Position = new Vector2(GridX, GridY),
+                Position = new Vector2(lastPos.Value.X, lastPos.Value.Y),
                 Size = new Vector2(Cols * (CellSize + Pad) + Pad, 120),
                 BackgroundId = BackgroundGump,
                 Hue = Vector3.UnitZ,
@@ -107,14 +115,11 @@ internal readonly struct GridLootGumpPlugin : IPlugin
         }
     }
 
-    // Remember the last window position so a new corpse opens where the last
-    // one was (legacy GridLootGump._lastX/_lastY).
-    private static int GridX = 100, GridY = 100;
-
     private static void RebuildSlots(
         Commands commands,
         Res<Profile> profile,
         Res<UOFileManager> fileManager,
+        Local<List<(uint serial, ushort graphic, ushort hue, ushort amount)>> itemsScratch,
         Query<Data<GridLootWindow, Node>> windowsQ,
         Query<Data<GridLootSlot>> slotsQ,
         Query<Data<TinyEcs.Parent, Graphic, Hue, Amount, NetworkSerial>,
@@ -126,7 +131,8 @@ internal readonly struct GridLootGumpPlugin : IPlugin
         foreach (var (winEnt, win, node) in windowsQ)
         {
             // Collect this corpse's lootable items.
-            var items = new List<(uint serial, ushort graphic, ushort hue, ushort amount)>();
+            var items = itemsScratch.Value ??= new();
+            items.Clear();
             int sig = 17;
             foreach (var (parent, graphic, hue, amount, serial) in itemsQ)
             {
@@ -238,6 +244,7 @@ internal readonly struct GridLootGumpPlugin : IPlugin
     private static void CloseGoneGrids(
         Commands commands,
         Res<NetworkEntitiesMap> entitiesMap,
+        ResMut<GridLootLastPos> lastPos,
         Query<Data<GridLootWindow, Node>> windowsQ,
         Single<Data<WorldPosition>, With<Player>> playerQ,
         Query<Data<WorldPosition>> worldPosQ)
@@ -248,8 +255,8 @@ internal readonly struct GridLootGumpPlugin : IPlugin
         foreach (var (winEnt, win, node) in windowsQ)
         {
             // Remember position for the next corpse.
-            if (node.Ref.Left.Value > 0) GridX = (int)node.Ref.Left.Value;
-            if (node.Ref.Top.Value > 0) GridY = (int)node.Ref.Top.Value;
+            if (node.Ref.Left.Value > 0) lastPos.Value.X = (int)node.Ref.Left.Value;
+            if (node.Ref.Top.Value > 0) lastPos.Value.Y = (int)node.Ref.Top.Value;
 
             bool gone = !entitiesMap.Value.TryGet(win.Ref.CorpseSerial, out var corpseEnt);
             if (!gone && worldPosQ.TryGet(corpseEnt, out var posRow))

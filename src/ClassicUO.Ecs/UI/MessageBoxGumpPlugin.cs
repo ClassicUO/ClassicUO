@@ -20,11 +20,13 @@ using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
 using TinyEcs.Bevy.UI;
+using static ClassicUO.Ecs.UiGumpHelpers;
 
 namespace ClassicUO.Ecs;
 
 internal enum MessageButtonType : byte { OK, OkCancel }
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct MessageBoxWindow;
 
 // Fired when a message box button is pressed. Kind is the caller-chosen id
@@ -159,7 +161,6 @@ internal readonly struct MessageBoxGumpPlugin : IPlugin
             commands.Entity(ent.Ref).Despawn();
     }
 
-    private static int GumpW(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Width; }
 
 #if AGENT_BUILD
     private static void DrainDebug(

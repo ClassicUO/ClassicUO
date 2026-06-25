@@ -27,6 +27,7 @@ using TinyEcs.Bevy;
 using TinyEcs.Bevy.UI;
 using ClayColor = Clay.Color;
 using GameLayer = ClassicUO.Game.Data.Layer;
+using static ClassicUO.Ecs.UiGumpHelpers;
 
 namespace ClassicUO.Ecs;
 
@@ -39,6 +40,7 @@ internal sealed class PlayerAbilities
     public byte Secondary;
 }
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct CombatBookWindow
 {
     public int Page;        // 1-based active page (legacy ActivePage)
@@ -187,11 +189,7 @@ internal readonly struct CombatBookGumpPlugin : IPlugin
         Commands commands, GumpBuilder builder, AssetsServer assets, UiZCounter zCounter, GameContext gameCtx,
         Query<Data<CombatBookWindow>> existingQ)
     {
-        foreach (var (ent, _) in existingQ)
-        {
-            commands.Entity(ent.Ref).Insert(new GlobalZIndex(zCounter.Bump()));
-            return;
-        }
+        if (builder.TryFocusExisting<CombatBookWindow>(commands, existingQ, zCounter)) return;
 
         int abilityCount = 32, dictPages = 3;
         if (gameCtx.ClientVersion < ClientVersion.CV_7000)
@@ -227,8 +225,6 @@ internal readonly struct CombatBookGumpPlugin : IPlugin
         });
     }
 
-    private static int GumpW(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Width; }
-    private static int GumpH(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Height; }
 
     private static void PlayPageFlipSound(
         Query<Data<CombatBookWindow>> windowsQ,
@@ -482,7 +478,7 @@ internal readonly struct CombatBookGumpPlugin : IPlugin
         var pos = mouse.Value.Position;
         foreach (var (_, bb, c) in cornersQ)
         {
-            if (!Contains(bb.Ref, pos)) continue;
+            if (!UiHitTest.Contains(bb.Ref, pos)) continue;
             if (windowsQ.TryGet(c.Ref.Window, out var windowRow))
             {
                 var (_, w) = windowRow;
@@ -532,7 +528,7 @@ internal readonly struct CombatBookGumpPlugin : IPlugin
             var pos = mouse.Value.Position;
             foreach (var (_, bb, ic) in iconsQ)
             {
-                if (ic.Ref.Floating || !Contains(bb.Ref, pos)) continue;
+                if (ic.Ref.Floating || !UiHitTest.Contains(bb.Ref, pos)) continue;
                 anchor.Value.Active = true;
                 anchor.Value.Claimed = true;
                 anchor.Value.Primary = ic.Ref.Primary;
@@ -567,10 +563,6 @@ internal readonly struct CombatBookGumpPlugin : IPlugin
         }
     }
 
-    private static bool Contains(in ComputedNode bb, Vector2 p)
-        => p.X >= bb.Position.X && p.Y >= bb.Position.Y
-        && p.X < bb.Position.X + bb.Size.X && p.Y < bb.Position.Y + bb.Size.Y;
-
     private static void Despawn(
         Commands commands,
         Query<Data<CombatBookWindow>> windowsQ,
@@ -583,39 +575,45 @@ internal readonly struct CombatBookGumpPlugin : IPlugin
     private static string CapWords(string s) => StringHelper.CapitalizeAllWords(s);
 
     // Weapon item graphics that grant ability `index` (legacy GetItemsList).
-    private static ushort[] GetItemsList(byte index) => index switch
+    // The lists are constant; cached once and read-only at the call site, so
+    // the switch returns the shared instance instead of allocating per call.
+    private static readonly ushort[][] _itemsByAbility =
     {
-        0 => new ushort[] { 3908, 5048, 3935, 5119, 9927, 5181, 5040, 5121, 3939, 9932, 11554, 16497, 16502, 16494, 16491 },
-        1 => new ushort[] { 3779, 5115, 3912, 3910, 5185, 9924, 5127, 5040, 3720, 5125, 11552, 16499, 16498 },
-        2 => new ushort[] { 5048, 3912, 5183, 5179, 3933, 5113, 3722, 9930, 3920, 11556, 16487, 16500 },
-        3 => new ushort[] { 5050, 3914, 3935, 3714, 5092, 5179, 5127, 5177, 9926, 4021, 10146, 11556, 11560, 5109, 16500, 16495 },
-        4 => new ushort[] { 5111, 3718, 3781, 3908, 3573, 3714, 3933, 5125, 11558, 11560, 5109, 9934, 16493, 16494 },
-        5 => new ushort[] { 3918, 3914, 9927, 3573, 5044, 3720, 9930, 5117, 16501, 16495 },
-        6 => new ushort[] { 3718, 5187, 3916, 5046, 5119, 9931, 3722, 9929, 9933, 10148, 10153, 16488, 16493, 16496 },
-        7 => new ushort[] { 5111, 3779, 3922, 9928, 5121, 9929, 11553, 16490, 16488 },
-        8 => new ushort[] { 3910, 9925, 9931, 5181, 9926, 5123, 3920, 5042, 16499, 16502, 16496, 16491 },
-        9 => new ushort[] { 5117, 9932, 9933, 16492 },
-        10 => new ushort[] { 5050, 3918, 5046, 9924, 9925, 5113, 3569, 9928, 3939, 5042, 16497, 16498 },
-        11 => new ushort[] { 3781, 5187, 5185, 5092, 5044, 3922, 5123, 4021, 11553, 16490 },
-        12 => new ushort[] { 5115, 5183, 3916, 5177, 3569, 10157, 11559, 9934, 16501 },
-        13 => new ushort[] { 10146 },
-        14 => new ushort[] { 10148, 10150, 10151 },
-        15 => new ushort[] { 10147, 10158, 10159, 11557 },
-        16 => new ushort[] { 10151, 10157, 11561 },
-        17 => new ushort[] { 10152 },
-        18 or 20 => new ushort[] { 10155 },
-        19 => new ushort[] { 10152, 10153, 10158, 11554 },
-        21 => new ushort[] { 10149 },
-        22 => new ushort[] { 10149, 10159 },
-        23 => new ushort[] { 11555, 11558, 11559, 11561 },
-        24 or 27 => new ushort[] { 11550 },
-        25 => new ushort[] { 11551 },
-        26 => new ushort[] { 11551, 11552 },
-        28 => new ushort[] { 11557 },
-        29 => new ushort[] { 16492 },
-        30 => new ushort[] { 16487 },
-        _ => Array.Empty<ushort>(),
+        /* 0 */ new ushort[] { 3908, 5048, 3935, 5119, 9927, 5181, 5040, 5121, 3939, 9932, 11554, 16497, 16502, 16494, 16491 },
+        /* 1 */ new ushort[] { 3779, 5115, 3912, 3910, 5185, 9924, 5127, 5040, 3720, 5125, 11552, 16499, 16498 },
+        /* 2 */ new ushort[] { 5048, 3912, 5183, 5179, 3933, 5113, 3722, 9930, 3920, 11556, 16487, 16500 },
+        /* 3 */ new ushort[] { 5050, 3914, 3935, 3714, 5092, 5179, 5127, 5177, 9926, 4021, 10146, 11556, 11560, 5109, 16500, 16495 },
+        /* 4 */ new ushort[] { 5111, 3718, 3781, 3908, 3573, 3714, 3933, 5125, 11558, 11560, 5109, 9934, 16493, 16494 },
+        /* 5 */ new ushort[] { 3918, 3914, 9927, 3573, 5044, 3720, 9930, 5117, 16501, 16495 },
+        /* 6 */ new ushort[] { 3718, 5187, 3916, 5046, 5119, 9931, 3722, 9929, 9933, 10148, 10153, 16488, 16493, 16496 },
+        /* 7 */ new ushort[] { 5111, 3779, 3922, 9928, 5121, 9929, 11553, 16490, 16488 },
+        /* 8 */ new ushort[] { 3910, 9925, 9931, 5181, 9926, 5123, 3920, 5042, 16499, 16502, 16496, 16491 },
+        /* 9 */ new ushort[] { 5117, 9932, 9933, 16492 },
+        /* 10 */ new ushort[] { 5050, 3918, 5046, 9924, 9925, 5113, 3569, 9928, 3939, 5042, 16497, 16498 },
+        /* 11 */ new ushort[] { 3781, 5187, 5185, 5092, 5044, 3922, 5123, 4021, 11553, 16490 },
+        /* 12 */ new ushort[] { 5115, 5183, 3916, 5177, 3569, 10157, 11559, 9934, 16501 },
+        /* 13 */ new ushort[] { 10146 },
+        /* 14 */ new ushort[] { 10148, 10150, 10151 },
+        /* 15 */ new ushort[] { 10147, 10158, 10159, 11557 },
+        /* 16 */ new ushort[] { 10151, 10157, 11561 },
+        /* 17 */ new ushort[] { 10152 },
+        /* 18 */ new ushort[] { 10155 },
+        /* 19 */ new ushort[] { 10152, 10153, 10158, 11554 },
+        /* 20 */ new ushort[] { 10155 },
+        /* 21 */ new ushort[] { 10149 },
+        /* 22 */ new ushort[] { 10149, 10159 },
+        /* 23 */ new ushort[] { 11555, 11558, 11559, 11561 },
+        /* 24 */ new ushort[] { 11550 },
+        /* 25 */ new ushort[] { 11551 },
+        /* 26 */ new ushort[] { 11551, 11552 },
+        /* 27 */ new ushort[] { 11550 },
+        /* 28 */ new ushort[] { 11557 },
+        /* 29 */ new ushort[] { 16492 },
+        /* 30 */ new ushort[] { 16487 },
     };
+
+    private static ushort[] GetItemsList(byte index)
+        => index < _itemsByAbility.Length ? _itemsByAbility[index] : Array.Empty<ushort>();
 
 #if AGENT_BUILD
     private static void DrainDebug(

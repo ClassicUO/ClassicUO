@@ -1930,8 +1930,8 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             {
                 ref var data = ref tileData.StaticData[g];
 
-                // Hacky way to do not render "nodraw"
-                if (!string.IsNullOrEmpty(data.Name) && data.Name.StartsWith("nodraw", StringComparison.OrdinalIgnoreCase))
+                // Hacky way to do not render "nodraw" (frozen lookup — see MapDrawHelpers)
+                if (MapDrawHelpers.IsNoDraw(tileData, g))
                     return false;
 
                 if (

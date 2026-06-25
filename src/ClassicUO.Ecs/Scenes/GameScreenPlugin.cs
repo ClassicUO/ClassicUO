@@ -678,6 +678,7 @@ internal readonly struct GameScreenPlugin : IPlugin
 
 // Scene root marker — promoted to namespace-level internal so the modding
 // registry (same assembly) can key a WIT scene path to it.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct GameScene;
 
 internal struct InventoryButton;

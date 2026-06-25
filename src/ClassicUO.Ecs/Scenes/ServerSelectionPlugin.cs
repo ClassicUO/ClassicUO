@@ -50,12 +50,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
     private static void Cleanup(
         Commands commands,
         Query<Data<Node>, Filter<With<ServerSelectionScene>>> query)
-    {
-        foreach ((var ent, _) in query)
-        {
-            commands.Entity(ent.Ref).Despawn();
-        }
-    }
+        => LoginSceneHelpers.DespawnAll<ServerSelectionScene>(commands, query);
 
     // Mirrors main's ServerSelectionGump (Game/UI/Gumps/Login/ServerSelectionGump.cs):
     // chest background, header labels, sort buttons, ResizePic 0x0DAC scroll area,
@@ -65,44 +60,13 @@ internal readonly struct ServerSelectionPlugin : IPlugin
         Res<GumpBuilder> gumpBuilder,
         EventReader<ServerSelectionInfoEvent> reader)
     {
-        // Root: full window, top-left anchored. mainMenu = chest's 640x480 canvas.
-        var root = commands.Spawn()
-            .Insert<ServerSelectionScene>()
-            .Insert(new Node
-            {
-                Display = Display.Flex,
-                PositionType = PositionType.Relative,
-                FlexDirection = FlexDirection.Column,
-                JustifyContent = JustifyContent.Start,
-                AlignItems = AlignItems.Start,
-                Width = Val.Percent(100),
-                Height = Val.Percent(100),
-            });
-
-        var mainMenu = commands.Spawn()
-            .Insert<ServerSelectionScene>()
-            .Insert(new Node
-            {
-                Display = Display.Flex,
-                PositionType = PositionType.Relative,
-                FlexDirection = FlexDirection.Column,
-                JustifyContent = JustifyContent.Start,
-                AlignItems = AlignItems.Start,
-                Width = Val.Px(640),
-                Height = Val.Px(480),
-            });
-        root.AddChild(mainMenu);
+        // Root + chest's 640x480 canvas.
+        var mainMenu = LoginSceneHelpers.SpawnCanvas<ServerSelectionScene>(commands);
 
         // Tiled wallpaper + UO flag (LoginBackground parity). Main's
         // ServerSelectionGump does NOT add the chest 0x014E — only wallpaper
         // shows through behind the scroll panel.
-        mainMenu.AddChild(gumpBuilder.Value.AddGumpTiled(
-            commands, 0x0150, XnaVector3.UnitZ,
-            new XnaVector2(0, 0), new XnaVector2(640, 480))
-            .Insert<ServerSelectionScene>());
-        mainMenu.AddChild(gumpBuilder.Value.AddGump(
-            commands, 0x0151, XnaVector3.UnitZ, new XnaVector2(0, 4))
-            .Insert<ServerSelectionScene>());
+        LoginSceneHelpers.AddWallpaper<ServerSelectionScene>(commands, gumpBuilder.Value, mainMenu, new XnaVector2(640, 480));
 
         // Prev arrow (back to login).
         mainMenu.AddChild(gumpBuilder.Value.AddButton(
@@ -289,12 +253,14 @@ internal readonly struct ServerSelectionPlugin : IPlugin
 
 // Scene root marker — promoted to namespace-level internal so the modding
 // registry (same assembly) can key a WIT scene path to it.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct ServerSelectionScene;
 
 // One-shot guard so a double-click on a server row (or Next/Earth) sends the
 // SelectServer packet once. Re-armed on entering the screen.
 internal sealed class ServerSelectLatch { public bool Sent; }
 
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct ServerSelectionInfoEvent
 {
     public List<ServerInfo> Servers;

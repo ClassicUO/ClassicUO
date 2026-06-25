@@ -26,10 +26,12 @@ using TinyEcs;
 using TinyEcs.Bevy;
 using TinyEcs.Bevy.UI;
 using ClayColor = Clay.Color;
+using static ClassicUO.Ecs.UiGumpHelpers;
 
 namespace ClassicUO.Ecs;
 
 // Board window root, keyed by the board item serial.
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct BulletinBoardWindow
 {
     public uint Serial;
@@ -463,8 +465,6 @@ internal readonly struct BulletinBoardGumpPlugin : IPlugin
             commands.Entity(ent.Ref).Despawn();
     }
 
-    private static int GumpW(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Width; }
-    private static int GumpH(AssetsServer a, ushort id) { ref readonly var g = ref a.Gumps.GetGump(id); return g.UV.Height; }
 
 #if AGENT_BUILD
     // Drains debug.openBulletinBoard: emits the real 0x71 triggers — a type 0

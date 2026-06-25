@@ -20,6 +20,7 @@ namespace ClassicUO.Ecs;
 // (Clay clips flowing children — absolute ones escape), each cell a fixed slot
 // whose art fits-and-centres. Rebuilt only when the item set / search / sort /
 // column-count changes (and never mid-drag).
+// cuo:modding contract type — do not merge/rename (queried by WIT path).
 internal struct GridContainerWindow { public uint Serial; }
 internal struct GridContainerContent { public uint Serial; }
 internal struct GridContainerRow { public ulong Window; }
@@ -30,6 +31,10 @@ internal struct GridContainerCell { public uint Serial; public ushort Graphic; }
 internal struct GridContainerTitle { public uint Serial; }
 
 internal enum GridSort : byte { None, Name, Graphic }
+
+// Last grid-container window size so a new container opens at the size the last
+// one was resized to.
+internal sealed class GridContainerLastSize { public int W = 320, H = 300; }
 
 // In-memory (this-session) per-container view: the item set, eager UI entity
 // ids (valid the frame the window opens — mirrors ContainerUiMap), search
@@ -65,8 +70,6 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
     private const int HeaderGap = 4;
     private const int MinWin = 160, MaxWin = 900;
 
-    private static int LastW = 320, LastH = 300;
-
     private static readonly ClayColor s_panelBg = new(26, 28, 34, 245);
     private static readonly ClayColor s_fieldBg = new(216, 218, 224, 255);
     private static readonly ClayColor s_btnBg = new(90, 96, 110, 255);
@@ -82,6 +85,7 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
 
         app
             .AddResource(new GridContainerState())
+            .AddResource(new GridContainerLastSize())
 
             .AddSystem(resizeFn).InStage(Stage.PreUpdate).SingleThreaded()
             .RunIf((Res<State<GameState>> s) => s.Value.Current == GameState.GameScreen)
@@ -110,6 +114,7 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
         ResMut<GridContainerState> state,
         ResMut<UiZCounter> zCounter,
         ResMut<ContainerPositionMemory> memory,
+        Res<GridContainerLastSize> lastSize,
         EventReader<ContainerOpenedEvent> reader)
     {
         foreach (var ev in reader.Read())
@@ -119,7 +124,7 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
             if (state.Value.Get(ev.Serial) != null)
                 continue;
 
-            int w = LastW, h = LastH;
+            int w = lastSize.Value.W, h = lastSize.Value.H;
 
             // A backend switch (or setting-3 "remember position") stashes the
             // window's last spot here; consume it once, else default.
@@ -281,7 +286,9 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
         Res<GrabbedItem> grabbed,
         Res<UOFileManager> fileManager,
         Res<ObjectPropertyLists> opl,
+        Res<GridContainerLastSize> lastSize,
         EventReader<ContainerSlotEvent> slotEvents,
+        Local<List<(uint serial, ushort graphic, ushort hue, ushort amount, string name)>> listScratch,
         Query<Data<Text>> textQ,
         Query<Data<Graphic>> graphicQ,
         Query<Data<GridContainerWindow, Node, GlobalZIndex>> windowsQ,
@@ -334,7 +341,7 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
                     titleTxt.Ref.Value = title;
             }
 
-            int w = winNode.Ref.Width.Type == ValType.Px ? (int)winNode.Ref.Width.Value : LastW;
+            int w = winNode.Ref.Width.Type == ValType.Px ? (int)winNode.Ref.Width.Value : lastSize.Value.W;
             int cols = Math.Max(1, (w - Inset * 2) / Cell);
 
             string query = "";
@@ -347,7 +354,8 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
             // Build the filtered + sorted display list from the container's
             // direct child items.
             var tiles = fileManager.Value.TileData.StaticData;
-            var list = new List<(uint serial, ushort graphic, ushort hue, ushort amount, string name)>();
+            var list = listScratch.Value ??= new();
+            list.Clear();
             foreach (var (parent, graphic, hue, amount, serial) in itemsQ)
             {
                 if ((ulong)parent.Ref.Id != containerEnt)
@@ -482,6 +490,7 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
     private static void ResizeDrag(
         Res<MouseContext> mouse,
         ResMut<DragGate> gate,
+        ResMut<GridContainerLastSize> lastSize,
         Local<ResizeAnchor> anchor,
         Query<Data<Node, ComputedNode, GridContainerResizeHandle>> gripQ,
         Query<Data<Node, GridContainerWindow>> windowsQ,
@@ -517,8 +526,8 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
                     Window = grip.Ref.Window,
                     Serial = winTag.Ref.Serial,
                     Mouse0 = pos,
-                    OriginW = winNode.Ref.Width.Type == ValType.Px ? winNode.Ref.Width.Value : LastW,
-                    OriginH = winNode.Ref.Height.Type == ValType.Px ? winNode.Ref.Height.Value : LastH,
+                    OriginW = winNode.Ref.Width.Type == ValType.Px ? winNode.Ref.Width.Value : lastSize.Value.W,
+                    OriginH = winNode.Ref.Height.Type == ValType.Px ? winNode.Ref.Height.Value : lastSize.Value.H,
                 };
                 break;
             }
@@ -530,7 +539,7 @@ internal readonly struct GridContainerGumpPlugin : IPlugin
         var delta = mouse.Value.Position - anchor.Value.Mouse0;
         int w = (int)Math.Clamp(anchor.Value.OriginW + delta.X, MinWin, MaxWin);
         int h = (int)Math.Clamp(anchor.Value.OriginH + delta.Y, MinWin, MaxWin);
-        LastW = w; LastH = h;
+        lastSize.Value.W = w; lastSize.Value.H = h;
 
         var (_, root, _) = anchorRow;
         root.Ref.Width = Val.Px(w);

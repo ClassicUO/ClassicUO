@@ -315,6 +315,7 @@ internal readonly struct NameplatePlugin : IPlugin
         Res<NameplateState> state,
         Res<Profile> profile,
         Res<NetClient> net,
+        Local<HashSet<uint>> eligibleScratch,
         Query<Data<NetworkSerial, WorldPosition, Graphic, Notoriety>,
             Filter<Without<ContainedInto>, Without<IsMulti>, Optional<Notoriety>>> worldQ,
         Query<Data<NameplateUI>> platesQ)
@@ -347,7 +348,8 @@ internal readonly struct NameplatePlugin : IPlugin
         }
 
         // Eligible world entities this frame.
-        var eligible = new HashSet<uint>();
+        var eligible = eligibleScratch.Value ??= new();
+        eligible.Clear();
         foreach (var (ent, serial, _, graphic, notoriety) in worldQ)
         {
             var s = serial.Ref.Value;

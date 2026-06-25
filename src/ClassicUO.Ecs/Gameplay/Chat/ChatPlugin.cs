@@ -203,18 +203,8 @@ internal readonly struct ChatPlugin : IPlugin
         var hit = UiPick.Topmost(mouse.Value.Position, assets.Value, rendered, parents);
         if (!hit.Found) return;
 
-        ulong cur = hit.Entity;
-        for (int i = 0; i < 16 && cur != 0; i++)
-        {
-            if (chatUiQ.Contains(cur))
-            {
-                selected.Value.Set(field.Value.Bar, float.MaxValue, bypassViewport: true);
-                return;
-            }
-            if (!parents.TryGet(cur, out var parentRow)) return;
-            var (_, p) = parentRow;
-            cur = (ulong)p.Ref.Id;
-        }
+        if (UiPick.AncestorWith<ChatUi>(hit.Entity, chatUiQ, parents, maxDepth: 16) != 0)
+            selected.Value.Set(field.Value.Bar, float.MaxValue, bypassViewport: true);
     }
 
     // Stretch the bar to the viewport width (camera.Bounds is logical px, the
@@ -289,14 +279,8 @@ internal readonly struct ChatPlugin : IPlugin
         // Over the world when nothing is hit, or the topmost hit is the game
         // viewport (or a descendant of it — the chat bar lives inside the
         // viewport, but a press there is handled by the field/bar's own claim).
-        bool overWorld = !hit.Found;
-        for (ulong cur = hit.Entity; !overWorld && cur != 0;)
-        {
-            if (gameWindowQ.Contains(cur)) { overWorld = true; break; }
-            if (!parents.TryGet(cur, out var parentRow)) break;
-            var (_, p) = parentRow;
-            cur = (ulong)p.Ref.Id;
-        }
+        bool overWorld = !hit.Found
+            || UiPick.AncestorWith<GameScreenPlugin.GameWindowUI>(hit.Entity, gameWindowQ, parents) != 0;
 
         if (overWorld)
             focused.Value.Entity = glyph;
