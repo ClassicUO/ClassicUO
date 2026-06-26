@@ -76,12 +76,12 @@ internal readonly struct GameCursorPlugin : IPlugin
         Query<Data<GameScreenPlugin.GameWindowUI>> gameWindowQ,
         Query<Data<TextInput>> textInputQ,
         // Without<UiMovable>: a window root carries Interaction (so it captures
-        // clicks) and Clay flags its whole bbox Hovered, but IsTextInput walks
-        // the WHOLE subtree — a gump that embeds a text field (trade gold entry)
-        // would then show the I-beam over the entire window, not just the field.
-        // The genuine field frame is a non-movable child that gets flagged
-        // Hovered when the cursor is actually over it, so excluding roots fixes
-        // the false positive without missing the real case.
+        // clicks) and Clay flags its whole bbox Hovered; excluding roots keeps a
+        // gump that merely embeds a text field from being read as the hovered
+        // field. The genuine field frame is a non-movable child flagged Hovered
+        // when the cursor is actually over it. interactiveQ is also passed to
+        // IsTextInput as the "don't descend into a nested interactive element"
+        // gate (see there).
         Query<Data<Interaction>, Filter<Without<UiMovable>>> interactiveQ,
         Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>,
             Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
@@ -164,7 +164,7 @@ internal readonly struct GameCursorPlugin : IPlugin
         int index = PickCursorIndex(
             targeting: targeting.Value.IsTargeting || cursorState.Value.DesignReticle,
             dragging: gateDragging && cursorState.Value.DragHandLatched,
-            textInput: hovered != 0 && IsTextInput(hovered, textInputQ, children),
+            textInput: hovered != 0 && IsTextInput(hovered, textInputQ, interactiveQ, children),
             overWorld: overWorld,
             worldDirectionIndex: worldDirection);
 
@@ -191,15 +191,23 @@ internal readonly struct GameCursorPlugin : IPlugin
         => s_cursorData[warMode ? 1 : 0, index];
 
     // `hovered` is the interactive element Clay flagged this frame — the editable
-    // field's hittable frame (the nine-patch input box / split-menu value row that
-    // carries UiContainsByBounds). The TextInput marker, though, sits on the
-    // text-glyph entity nested under that frame (field -> content row -> glyph),
-    // so a field is "text input" when the hovered frame, or anything in its
-    // subtree, carries TextInput. Subtrees here are tiny (row + glyph + caret);
-    // depth-capped against a malformed child link.
-    private static bool IsTextInput(
+    // field's hittable frame (the input box / split-menu value row, which carries
+    // TextInput directly) or a nested part of it. The glyph that carries the
+    // TextInput marker for focus may sit below a non-interactive content row
+    // (field frame -> content row -> glyph), so we still walk down to find it.
+    //
+    // BUT we never descend into a child that is ITSELF an interactive element: it
+    // has its own hover hit-test and lights the I-beam on its own when actually
+    // hovered. Descending into such a child from an interactive ANCESTOR — e.g. an
+    // options row that carries Interaction only for a hover tint and merely
+    // CONTAINS a hue field — is what spread the I-beam across the whole row. The
+    // field's own box carries TextInput (caught at depth 0), and its
+    // non-interactive content (the glyph) is still reached, so both cases work.
+    // Subtrees here are tiny; depth-capped against a malformed child link.
+    internal static bool IsTextInput(
         ulong entity,
         Query<Data<TextInput>> textInputQ,
+        Query<Data<Interaction>, Filter<Without<UiMovable>>> interactiveQ,
         Query<Data<TinyEcs.Children>> children,
         int depth = 0)
     {
@@ -207,7 +215,10 @@ internal readonly struct GameCursorPlugin : IPlugin
         if (depth >= 8 || !children.TryGet(entity, out var childrenRow)) return false;
         var (_, kids) = childrenRow;
         foreach (var cid in kids.Ref)
-            if (IsTextInput(cid, textInputQ, children, depth + 1)) return true;
+        {
+            if (interactiveQ.Contains(cid)) continue;
+            if (IsTextInput(cid, textInputQ, interactiveQ, children, depth + 1)) return true;
+        }
         return false;
     }
 

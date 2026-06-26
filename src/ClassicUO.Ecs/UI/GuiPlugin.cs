@@ -490,7 +490,11 @@ internal readonly struct GuiPlugin : IPlugin
         // latches a window move — that frees the press+drag gesture for caret
         // placement / text selection (a field inside a UiMovable gump would
         // otherwise drag the gump instead of selecting).
-        frame.Insert(Interaction.None).Insert<UiContainsByBounds>().Insert<UiNoWindowDrag>();
+        // TextInput on the frame itself (not just the glyph below) so the cursor's
+        // I-beam test lights the WHOLE field box, not only the area the short text
+        // covers. The glyph row is narrow (Width=Auto), so most of the box is the
+        // frame — without this the I-beam only showed directly over the digits.
+        frame.Insert(Interaction.None).Insert<UiContainsByBounds>().Insert<UiNoWindowDrag>().Insert<TextInput>();
 
         EntityCommands glyph;
         if (multiline)
