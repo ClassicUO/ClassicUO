@@ -247,6 +247,10 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         if (alphaChanged)
             scratch.Value.AlphaTime = time.Value.Total + Constants.ALPHA_TIME;
 
+        // Advance animated-static frame offsets (legacy AnimatedStaticsManager).
+        scratch.Value.AnimStatics ??= new AnimatedStatics();
+        scratch.Value.AnimStatics.Tick(fileManager.Value, time.Value.Total, profile.Value.FieldsType);
+
         var fx = new WorldFx
         {
             AlphaChanged = alphaChanged,
@@ -362,7 +366,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             selectedEntity, gameCtx, batch, assetsServer, fileManager,
             camera, profile.Value, in fx, calculateZ, ref workingZInfo, playerX, playerY, playerZ14,
             backupZInfo, maxZ, center, mousePos, cameraBounds, auraInputs.NormalMultis, queryStatics,
-            lightOccluders, pendingLights);
+            lightOccluders, pendingLights, scratch.Value.AnimStatics);
 
         // Feet-aura gating (legacy AuraManager.IsEnabled): mode 1 needs the
         // player's warmode flag, mode 2 needs Ctrl+Shift held.
@@ -455,6 +459,7 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         // light it blocks).
         public Dictionary<long, int> LightOccluders;
         public List<PendingLight> PendingLights;
+        public AnimatedStatics AnimStatics;
     }
 
     private struct PendingLight
@@ -463,6 +468,92 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         public byte Id;
         public float DrawX, DrawY;
         public int TileX, TileY, Z;
+    }
+
+    // Static art flagged IsAnimated (animdata.mul) cycles through frame deltas.
+    // Legacy AnimatedStaticsManager mutates Arts.Entries[gfx+0x4000].AnimOffset
+    // each tick; we keep an offset-by-graphic table instead and add it to the
+    // displayed graphic at render. Ticked from the world render system (it owns
+    // Res<Time>/files/profile and stays under the 16-param system cap).
+    internal sealed class AnimatedStatics
+    {
+        private struct Entry { public ushort Index; public float Time; public byte AnimIndex; public bool IsField; }
+
+        private Entry[] _entries = Array.Empty<Entry>();
+        private sbyte[] _offsets = Array.Empty<sbyte>();
+        private float _processTime;
+        private bool _init;
+
+        public sbyte Offset(ushort graphic) => graphic < _offsets.Length ? _offsets[graphic] : (sbyte)0;
+
+        public void Tick(UOFileManager files, float total, int fieldsType)
+        {
+            var animData = files.AnimData;
+            if (animData.AnimDataFile == null)
+                return;
+
+            if (!_init)
+            {
+                _init = true;
+                var staticData = files.TileData.StaticData;
+                _offsets = new sbyte[staticData.Length];
+                var list = new List<Entry>();
+                for (int i = 0; i < staticData.Length; i++)
+                {
+                    if (!staticData[i].IsAnimated)
+                        continue;
+                    var g = (ushort)i;
+                    list.Add(new Entry
+                    {
+                        Index = g,
+                        IsField = StaticFilters.IsFireField(g) || StaticFilters.IsParalyzeField(g)
+                            || StaticFilters.IsEnergyField(g) || StaticFilters.IsPoisonField(g),
+                    });
+                }
+                _entries = list.ToArray();
+            }
+
+            if (_entries.Length == 0 || _processTime >= total)
+                return;
+
+            // legacy AnimatedStaticsManager: ITEM_EFFECT_ANIMATION_DELAY * 2.
+            float delay = Constants.ITEM_EFFECT_ANIMATION_DELAY * 2;
+            float nextTime = total + 250;
+            bool noAnimatedField = fieldsType != 0;
+
+            for (int i = 0; i < _entries.Length; i++)
+            {
+                ref var o = ref _entries[i];
+
+                if (noAnimatedField && o.IsField)
+                {
+                    o.AnimIndex = 0;
+                    _offsets[o.Index] = 0;
+                    continue;
+                }
+
+                if (o.Time < total)
+                {
+                    var info = animData.CalculateCurrentGraphic(o.Index);
+                    byte offset = o.AnimIndex;
+
+                    o.Time = info.FrameInterval > 0 ? total + info.FrameInterval * delay + 1 : total + delay;
+
+                    if (offset < info.FrameCount)
+                        _offsets[o.Index] = info.FrameAt(offset++);
+
+                    if (offset >= info.FrameCount)
+                        offset = 0;
+
+                    o.AnimIndex = offset;
+                }
+
+                if (o.Time < nextTime)
+                    nextTime = o.Time;
+            }
+
+            _processTime = nextTime;
+        }
     }
 
     // Semi-transparent foliage can't draw in the statics pass: it would write
@@ -969,7 +1060,8 @@ internal readonly struct WorldRenderingPlugin : IPlugin
         Query<Empty, With<NormalMulti>> qNormalMultis,
         Query<Data<WorldPosition, ScreenPosition, Graphic, Hue, Amount, NetworkSerial, Facing, AlphaFade, HouseVisionFade>, Filter<Without<IsTile>, Without<MobAnimation>, Without<ContainedInto>, Optional<Amount>, Optional<NetworkSerial>, Optional<Facing>, Optional<HouseVisionFade>>> queryStatics,
         Dictionary<long, int> lightOccluders,
-        List<PendingLight> pendingLights)
+        List<PendingLight> pendingLights,
+        AnimatedStatics animStatics)
     {
         // Cache frequently accessed resources
         var tileDataCache = fileManager.Value.TileData;
@@ -1007,6 +1099,11 @@ internal readonly struct WorldRenderingPlugin : IPlugin
             {
                 drawGraphic = fieldGraphic;
                 hueValue = fieldHue;
+            }
+            else if (tileData.IsAnimated)
+            {
+                // animdata.mul frame delta added to the displayed graphic.
+                drawGraphic = (ushort)(drawGraphic + animStatics.Offset(graphic.Ref.Value));
             }
 
             var hide = tileData.IsRoof && (!backupZInfo.DrawRoof || !profile.DrawRoofs);
