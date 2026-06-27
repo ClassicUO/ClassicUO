@@ -264,9 +264,13 @@ internal readonly struct GumpPersistencePlugin : IPlugin
             foreach (var (_, node) in statusQ)
                 WriteGump(xml, LegacyGumpType.StatusGump, node, 0);
 
+            // direction is graphic - 0x757F (LeftVertical..RightHorizontal = 0..3,
+            // identical to legacy GumpDirection) — legacy reads BOTH attrs and a
+            // mismatched pair renders broken there, so write the real value.
             foreach (var (_, node, buff) in buffQ)
                 WriteGump(xml, LegacyGumpType.Buff, node, 0,
-                    ("graphic", buff.Ref.Graphic.ToString()), ("direction", "0"));
+                    ("graphic", buff.Ref.Graphic.ToString()),
+                    ("direction", (buff.Ref.Graphic - 0x757F).ToString()));
 
             foreach (var (_, node, mini) in miniQ)
                 WriteGump(xml, LegacyGumpType.MiniMap, node, 0,
@@ -469,7 +473,7 @@ internal readonly struct GumpPersistencePlugin : IPlugin
         Commands commands,
         Res<GumpBuilder> builder,
         ResMut<UiZCounter> z,
-        Res<PlayerBuffs> buffs,
+        ResMut<PlayerBuffs> buffs,
         Query<Data<Node>, Filter<With<BuffGumpUI>>> rootQ,
         Query<Data<Node, BuffBarLayout>, Filter<With<BuffGumpUI>>> layoutQ)
     {
@@ -479,7 +483,19 @@ internal readonly struct GumpPersistencePlugin : IPlugin
         {
             Place(node, g);
             var graphic = AttrUShort(g, "graphic");
+            // Legacy-written files (and older ECS ones) may carry only direction;
+            // derive the graphic from it (0x757F + dir).
+            if (graphic == 0)
+            {
+                int dir = AttrInt(g, "direction");
+                if (dir >= 0 && dir <= 3) graphic = (ushort)(0x757F + dir);
+            }
             if (graphic != 0) lay.Ref.Graphic = graphic;
+            // Force Sync to rebuild the bg / icon row / toggle for the restored
+            // direction. Without this the open-time Dirty was already consumed
+            // (with the default graphic) before this system ran, so the saved
+            // direction never took visual effect.
+            buffs.Value.Dirty = true;
             g.Handled = true;
             return;
         }
