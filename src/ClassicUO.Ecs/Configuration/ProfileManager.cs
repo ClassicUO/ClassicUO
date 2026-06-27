@@ -2,6 +2,7 @@
 
 using System.IO;
 using ClassicUO.Utility;
+using Microsoft.Extensions.Logging;
 
 namespace ClassicUO.Configuration
 {
@@ -20,17 +21,17 @@ namespace ClassicUO.Configuration
                 : Settings.GlobalSettings.ProfilesPath;
 
         public static (Profile profile, GlobalProfile global, string path) Load(
-            string servername, string username, string charactername)
+            string servername, string username, string charactername, ILogger logger)
         {
             var global = ConfigurationResolver.Load<GlobalProfile>(
                 Path.Combine(RootPath, "globalprofile.json"),
-                ProfileJsonContext.DefaultToUse.GlobalProfile) ?? new GlobalProfile();
+                ProfileJsonContext.DefaultToUse.GlobalProfile, logger) ?? new GlobalProfile();
 
             var path = FileSystemHelper.CreateFolderIfNotExists(RootPath, username, servername, charactername);
 
             var profile = ConfigurationResolver.Load<Profile>(
                 Path.Combine(path, "profile.json"),
-                ProfileJsonContext.DefaultToUse.Profile) ?? new Profile();
+                ProfileJsonContext.DefaultToUse.Profile, logger) ?? new Profile();
 
             profile.Username = username;
             profile.ServerName = servername;
@@ -39,12 +40,12 @@ namespace ClassicUO.Configuration
             return (profile, global, path);
         }
 
-        public static void Save(Profile profile, GlobalProfile global, string path)
+        public static void Save(Profile profile, GlobalProfile global, string path, ILogger logger)
         {
-            ConfigurationResolver.Save(profile, Path.Combine(path, "profile.json"), ProfileJsonContext.DefaultToUse.Profile);
+            ConfigurationResolver.Save(profile, Path.Combine(path, "profile.json"), ProfileJsonContext.DefaultToUse.Profile, logger);
 
             if (global != null)
-                ConfigurationResolver.Save(global, Path.Combine(RootPath, "globalprofile.json"), ProfileJsonContext.DefaultToUse.GlobalProfile);
+                ConfigurationResolver.Save(global, Path.Combine(RootPath, "globalprofile.json"), ProfileJsonContext.DefaultToUse.GlobalProfile, logger);
         }
     }
 }

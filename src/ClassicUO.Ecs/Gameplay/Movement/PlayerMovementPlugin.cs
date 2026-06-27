@@ -2,10 +2,12 @@ using System;
 using System.Runtime.CompilerServices;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.Ecs.Logging;
 using ClassicUO.Game;
 using ClassicUO.Game.Data;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
@@ -562,7 +564,8 @@ readonly struct PlayerMovementPlugin : IPlugin
     static void ParseAcceptedSteps(
         EventReader<AcceptedStep> acceptedSteps,
         ResMut<PlayerStepsContext> playerRequestedSteps,
-        Res<NetClient> network
+        Res<NetClient> network,
+        Res<ILogger> logger
     )
     {
         foreach (var response in acceptedSteps.Read())
@@ -606,10 +609,10 @@ readonly struct PlayerMovementPlugin : IPlugin
 
             if (isBadStep)
             {
-                Console.WriteLine("bad step found");
+                logger.Value.LogWarning("bad step found");
                 if (!playerRequestedSteps.Value.ResyncSent)
                 {
-                    Console.WriteLine("sending resync");
+                    logger.Value.LogTrace("sending resync");
                     network.Value.Send_Resync();
                     playerRequestedSteps.Value.ResyncSent = true;
                 }
@@ -626,10 +629,11 @@ readonly struct PlayerMovementPlugin : IPlugin
         EventReader<RejectedStep> rejectedSteps,
         ResMut<PlayerStepsContext> playerRequestedSteps,
         ResMut<PathfindState> pathfindState,
-        Single<Data<WorldPosition, Facing, MobileSteps>, With<Player>> playerQuery
+        Single<Data<WorldPosition, Facing, MobileSteps>, With<Player>> playerQuery,
+        Res<ILogger> logger
     )
     {
-        Console.WriteLine("step denied");
+        logger.Value.LogWarning("step denied");
 
         (var pos, var dir, var steps) = playerQuery.Get();
         foreach (var response in rejectedSteps.Read())

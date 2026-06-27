@@ -2,6 +2,7 @@
 
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace ClassicUO.Network
 {
@@ -266,9 +267,9 @@ namespace ClassicUO.Network
             -1      // ff
         };
 
-        public PacketsTable(ClientVersion version)
+        public PacketsTable(ClientVersion version, ILogger logger)
         {
-            Log.Trace("Network calibration...");
+            logger.LogTrace("Network calibration...");
 
             if (version >= ClientVersion.CV_500A)
             {

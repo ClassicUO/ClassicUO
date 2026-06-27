@@ -2,6 +2,7 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.Network;
 using ClassicUO.Utility;
+using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
@@ -15,7 +16,7 @@ internal readonly struct CuoPlugin : IPlugin
         app.AddState(GameState.Loading);
         app.AddResource(new GameContext() { Map = -1, MaxObjectsDistance = 32 });
         app.AddResource(Settings.GlobalSettings);
-        app.AddResource(new NetClient());
+        app.AddResource(new NetClient { Logger = app.GetResource<ILogger>() });
 
         app.AddSystem(Stage.Startup, (ResMut<GameContext> gameCtx, Res<Settings> settings) =>
         {

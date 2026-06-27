@@ -3,6 +3,8 @@
 using ClassicUO.Network.Encryption;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System;
 using System.Net;
 using System.Net.Sockets;
@@ -25,6 +27,10 @@ namespace ClassicUO.Network
         private SocketWrapper _socket = null;
         private SocketWrapperType? _socketType;
 
+        // Injected at boot (CuoPlugin.Build) from the ILogger resource; defaults
+        // to no-op so the static NetClient.Socket initializer still works.
+        public ILogger Logger { get; set; } = NullLogger.Instance;
+
 
         public NetClient()
         {
@@ -36,17 +42,17 @@ namespace ClassicUO.Network
 
         public EncryptionType Load(ClientVersion clientVersion, EncryptionType encryption)
         {
-            PacketsTable = new PacketsTable(clientVersion);
+            PacketsTable = new PacketsTable(clientVersion, Logger);
 
             if (encryption != 0)
             {
                 Encryption = new EncryptionHelper(clientVersion);
-                Log.Trace("Calculating encryption by client version...");
-                Log.Trace($"encryption: {Encryption.EncryptionType}");
+                Logger.LogTrace("Calculating encryption by client version...");
+                Logger.LogTrace("encryption: {EncryptionType}", Encryption.EncryptionType);
 
                 if (Encryption.EncryptionType != encryption)
                 {
-                    Log.Warn($"Encryption found: {Encryption.EncryptionType}");
+                    Logger.LogWarning("Encryption found: {EncryptionType}", Encryption.EncryptionType);
                     encryption = Encryption.EncryptionType;
                 }
             }
@@ -82,7 +88,7 @@ namespace ClassicUO.Network
                     }
                     catch (Exception ex)
                     {
-                        Log.Error($"error while retriving local endpoint address: \n{ex}");
+                        Logger.LogError(ex, "error while retrieving local endpoint address");
 
                         _localIP = 0x100007f;
                     }
@@ -106,6 +112,8 @@ namespace ClassicUO.Network
                 SocketWrapperType.WebSocket => new WebSocketWrapper(),
                 _ => throw new ArgumentOutOfRangeException(nameof(wrapperType), wrapperType, null)
             };
+
+            _socket.Logger = Logger;
 
             _socket.OnConnected += (o, e) =>
             {
@@ -132,7 +140,7 @@ namespace ClassicUO.Network
             if (!Uri.TryCreate(addr, UriKind.RelativeOrAbsolute, out var uri))
                 throw new UriFormatException($"NetClient::Connect() invalid Uri {addr}");
 
-            Log.Trace($"Connecting to {uri}");
+            Logger.LogTrace("Connecting to {Uri}", uri);
 
             // First connected socket sets the type for any future sockets.
             // This prevents the client from swapping from WS -> TCP on game server login
@@ -182,7 +190,7 @@ namespace ClassicUO.Network
             }
             catch (SocketException ex)
             {
-                Log.Error("socket error when receving:\n" + ex);
+                Logger.LogError(ex, "socket error when receiving");
 
                 Disconnect();
                 Disconnected?.Invoke(this, ex.SocketErrorCode);
@@ -191,15 +199,15 @@ namespace ClassicUO.Network
             {
                 if (ex.InnerException is SocketException socketEx)
                 {
-                    Log.Error("main exception:\n" + ex);
-                    Log.Error("socket error when receving:\n" + socketEx);
+                    Logger.LogError(ex, "main exception");
+                    Logger.LogError(socketEx, "socket error when receiving");
 
                     Disconnect();
                     Disconnected?.Invoke(this, socketEx.SocketErrorCode);
                 }
                 else
                 {
-                    Log.Error("fatal error when receving:\n" + ex);
+                    Logger.LogError(ex, "fatal error when receiving");
 
                     Disconnect();
                     Disconnected?.Invoke(this, SocketError.SocketError);
@@ -276,7 +284,7 @@ namespace ClassicUO.Network
             }
             catch (SocketException ex)
             {
-                Log.Error("socket error when sending:\n" + ex);
+                Logger.LogError(ex, "socket error when sending");
 
                 Disconnect();
                 Disconnected?.Invoke(this, ex.SocketErrorCode);
@@ -285,15 +293,15 @@ namespace ClassicUO.Network
             {
                 if (ex.InnerException is SocketException socketEx)
                 {
-                    Log.Error("main exception:\n" + ex);
-                    Log.Error("socket error when sending:\n" + socketEx);
+                    Logger.LogError(ex, "main exception");
+                    Logger.LogError(socketEx, "socket error when sending");
 
                     Disconnect();
                     Disconnected?.Invoke(this, socketEx.SocketErrorCode);
                 }
                 else
                 {
-                    Log.Error("fatal error when sending:\n" + ex);
+                    Logger.LogError(ex, "fatal error when sending");
 
                     Disconnect();
                     Disconnected?.Invoke(this, SocketError.SocketError);

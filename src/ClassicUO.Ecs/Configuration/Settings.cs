@@ -5,6 +5,7 @@ using System.IO;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using ClassicUO.Configuration.Json;
+using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 
 namespace ClassicUO.Configuration
@@ -111,7 +112,7 @@ namespace ClassicUO.Configuration
         }
 
 
-        public void Save()
+        public void Save(ILogger logger)
         {
             // Make a copy of the settings object that we will use in the saving process
             var json = JsonSerializer.Serialize(this, SettingsJsonContext.RealDefault.Settings);
@@ -129,7 +130,7 @@ namespace ClassicUO.Configuration
 
             // NOTE: We can do any other settings clean-ups here before we save them
 
-            ConfigurationResolver.Save(settingsToSave, GetSettingsFilepath(), SettingsJsonContext.RealDefault.Settings);
+            ConfigurationResolver.Save(settingsToSave, GetSettingsFilepath(), SettingsJsonContext.RealDefault.Settings, logger);
         }
     }
 }

@@ -9,6 +9,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
+using Microsoft.Extensions.Logging;
 
 namespace ClassicUO
 {
@@ -16,7 +17,7 @@ namespace ClassicUO
     {
         static readonly Dictionary<string, string> mapDictionary = new Dictionary<string, string>();
 
-        internal static void Init()
+        internal static void Init(ILogger logger)
         {
             if (!CUOEnviroment.IsUnix)
                 return;
@@ -46,7 +47,7 @@ namespace ClassicUO
             if (xmlDoc.GetElementsByTagName("dllentry").Count > 0)
             {
                 string msg = "Function remapping is not supported by .NET Core. Ignoring dllentry elements...";
-                Console.WriteLine(msg);
+                logger.LogTrace("{Message}", msg);
 
                 // Log it in the debugger for non-console apps.
                 if (Debugger.IsAttached)

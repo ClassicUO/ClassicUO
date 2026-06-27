@@ -1,5 +1,7 @@
 ﻿using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System;
 
 namespace ClassicUO.Network
@@ -13,6 +15,9 @@ namespace ClassicUO.Network
         private LogFile _logFile;
 
         public bool Enabled { get; set; }
+
+        // Injected at boot (Main) from the ILogger resource; defaults to no-op.
+        public ILogger Logger { get; set; } = NullLogger.Instance;
 
 
 
@@ -101,7 +106,7 @@ namespace ClassicUO.Network
                 }
                 else
                 {
-                    Console.WriteLine(s);
+                    Logger.LogTrace("{Packet}", s);
                 }
 
                 output.Dispose();

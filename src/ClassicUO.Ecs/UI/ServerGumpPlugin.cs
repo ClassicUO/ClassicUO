@@ -24,10 +24,12 @@
 using System;
 using System.Collections.Generic;
 using ClassicUO.Assets;
+using ClassicUO.Ecs.Logging;
 using ClassicUO.Input;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Utility;
+using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
@@ -42,8 +44,8 @@ internal readonly struct ServerGumpPlugin : IPlugin
     {
         app.AddResource(new ServerGumpPositions());
         app.AddResource(new ServerGumpRegistry());
-        app.AddObserver<On<PacketReceived<OnOpenGumpPacket_0xB0>>, Commands, ServerGumpParams>(SpawnOnB0);
-        app.AddObserver<On<PacketReceived<OnOpenCompressedGumpPacket_0xDD>>, Commands, ServerGumpParams>(SpawnOnDD);
+        app.AddObserver<On<PacketReceived<OnOpenGumpPacket_0xB0>>, Commands, ServerGumpParams, Res<ILogger>>(SpawnOnB0);
+        app.AddObserver<On<PacketReceived<OnOpenCompressedGumpPacket_0xDD>>, Commands, ServerGumpParams, Res<ILogger>>(SpawnOnDD);
 
         // Per-frame page-visibility sync. Each ServerGumpChild reads its
         // root's CurrentPage and flips its own Node.Display in-place. Cheap:
@@ -284,20 +286,22 @@ internal readonly struct ServerGumpPlugin : IPlugin
     private static void SpawnOnB0(
         On<PacketReceived<OnOpenGumpPacket_0xB0>> trig,
         Commands commands,
-        ServerGumpParams p)
+        ServerGumpParams p,
+        Res<ILogger> logger)
     {
         var pkt = trig.Event.Packet;
         var lines = new string[pkt.Lines.Count];
         for (var i = 0; i < pkt.Lines.Count; i++)
             lines[i] = pkt.Lines[i].Text ?? string.Empty;
 
-        BuildGump(commands, p, pkt.Sender, pkt.GumpId, pkt.X, pkt.Y, pkt.Command ?? string.Empty, lines);
+        BuildGump(commands, p, pkt.Sender, pkt.GumpId, pkt.X, pkt.Y, pkt.Command ?? string.Empty, lines, logger.Value);
     }
 
     private static void SpawnOnDD(
         On<PacketReceived<OnOpenCompressedGumpPacket_0xDD>> trig,
         Commands commands,
-        ServerGumpParams p)
+        ServerGumpParams p,
+        Res<ILogger> logger)
     {
         var pkt = trig.Event.Packet;
 
@@ -339,7 +343,7 @@ internal readonly struct ServerGumpPlugin : IPlugin
             finally { System.Buffers.ArrayPool<byte>.Shared.Return(buf); }
         }
 
-        BuildGump(commands, p, pkt.Sender, pkt.GumpId, pkt.X, pkt.Y, layout, lines);
+        BuildGump(commands, p, pkt.Sender, pkt.GumpId, pkt.X, pkt.Y, layout, lines, logger.Value);
     }
 
     private static void BuildGump(
@@ -350,7 +354,8 @@ internal readonly struct ServerGumpPlugin : IPlugin
         int x,
         int y,
         string layout,
-        string[] lines)
+        string[] lines,
+        ILogger logger)
     {
         // Tokenize the outer layout into command groups (one per {...} block).
         var outerParser = new TextFileParser(string.Empty, new[] { ' ' }, Array.Empty<char>(), new[] { '{', '}' });
@@ -719,7 +724,7 @@ internal readonly struct ServerGumpPlugin : IPlugin
             }
             else
             {
-                Console.WriteLine($"[ServerGump] unhandled command: \"{entry}\" (cmd={cmdList[cnt]})");
+                logger.LogTrace("[ServerGump] unhandled command: \"{Entry}\" (cmd={Cmd})", entry, cmdList[cnt]);
             }
 
             if (childId != 0)

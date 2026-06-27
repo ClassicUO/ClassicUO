@@ -16,6 +16,8 @@
 
 using System;
 using ClassicUO.Assets;
+using ClassicUO.Ecs.Logging;
+using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
@@ -52,7 +54,8 @@ internal readonly struct MessageBoxGumpPlugin : IPlugin
         app.AddResource(new DebugMessageBoxQueue());
         Action<Commands, ResMut<DebugMessageBoxQueue>, Res<GumpBuilder>, Res<AssetsServer>, Res<UiSurface>, Res<UiZCounter>> drainFn = DrainDebug;
         app.AddSystem(Stage.First, drainFn);
-        app.AddObserver((On<MessageBoxResult> t) => Console.WriteLine($"[MessageBox] kind={t.Event.Kind} ok={t.Event.Ok}"));
+        var log = app.GetResource<ILogger>();
+        app.AddObserver((On<MessageBoxResult> t) => log.LogTrace("[MessageBox] kind={Kind} ok={Ok}", t.Event.Kind, t.Event.Ok));
 #endif
     }
 

@@ -8,8 +8,10 @@
 
 using System;
 using ClassicUO.Assets;
+using ClassicUO.Ecs.Logging;
 using ClassicUO.Game.Data;
 using ClassicUO.Network;
+using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
@@ -46,7 +48,8 @@ internal readonly struct LogoutGumpPlugin : IPlugin
             Res<NetClient>,
             Res<GameContext>,
             ResMut<LogoutState>,
-            ResMut<NextState<GameState>>>(OnLogoutReply);
+            ResMut<NextState<GameState>>,
+            Res<ILogger>>(OnLogoutReply);
     }
 
     // Open the confirmation gump (or refocus the existing one). Called from the
@@ -120,7 +123,8 @@ internal readonly struct LogoutGumpPlugin : IPlugin
         Res<NetClient> net,
         Res<GameContext> ctx,
         ResMut<LogoutState> logout,
-        ResMut<NextState<GameState>> state)
+        ResMut<NextState<GameState>> state,
+        Res<ILogger> logger)
     {
         if (!logout.Value.DisconnectionRequested
             || (ctx.Value.ClientFeatures & CharacterListFlags.CLF_OWERWRITE_CONFIGURATION_BUTTON) == 0)
@@ -135,7 +139,7 @@ internal readonly struct LogoutGumpPlugin : IPlugin
         }
         else
         {
-            Console.WriteLine("0xD1 - client asked to disconnect but server answered 'NO!'");
+            logger.Value.LogWarning("0xD1 - client asked to disconnect but server answered 'NO!'");
         }
     }
 

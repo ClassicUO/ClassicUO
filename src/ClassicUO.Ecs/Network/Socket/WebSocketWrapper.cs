@@ -6,6 +6,7 @@ using System.Net.WebSockets;
 using System.Threading;
 using System.Threading.Tasks;
 using ClassicUO.Utility.Logging;
+using Microsoft.Extensions.Logging;
 using TcpSocket = System.Net.Sockets.Socket;
 using static System.Buffers.ArrayPool<byte>;
 
@@ -68,12 +69,12 @@ sealed class WebSocketWrapper : SocketWrapper
                 _ => SocketError.SocketError
             };
 
-            Log.Error($"Error {ex.GetType().Name} {error} while connecting to {uri} {ex}");
+            Logger.LogError(ex, "Error {Error} while connecting to {Uri}", error, uri);
             InvokeOnError(error);
         }
         catch (Exception ex)
         {
-            Log.Error($"Unknown Error {ex.GetType().Name} while connecting to {uri} {ex}");
+            Logger.LogError(ex, "Unknown error while connecting to {Uri}", uri);
             InvokeOnError(SocketError.SocketError);
         }
     }
@@ -118,7 +119,7 @@ sealed class WebSocketWrapper : SocketWrapper
 
         await _webSocket.ConnectAsync(uri, httpClient, _tokenSource.Token);
 
-        Log.Trace($"Connected WebSocket: {uri}");
+        Logger.LogTrace("Connected WebSocket: {Uri}", uri);
 
         // Kicks off the async receiving loop 
         StartReceiveAsync().ConfigureAwait(false);
@@ -157,11 +158,11 @@ sealed class WebSocketWrapper : SocketWrapper
         }
         catch (OperationCanceledException)
         {
-            Log.Trace("WebSocket OperationCanceledException on websocket " + (IsCanceled ? "(was requested)" : "(remote cancelled)"));
+            Logger.LogTrace("WebSocket OperationCanceledException on websocket " + (IsCanceled ? "(was requested)" : "(remote cancelled)"));
         }
         catch (Exception e)
         {
-            Log.Trace($"WebSocket error in StartReceiveAsync {e}");
+            Logger.LogTrace(e, "WebSocket error in StartReceiveAsync");
             InvokeOnError(SocketError.SocketError);
         }
         finally
@@ -183,7 +184,7 @@ sealed class WebSocketWrapper : SocketWrapper
         if (_rawSocket.Available > MAX_RECEIVE_BUFFER_SIZE)
             throw new SocketException((int)SocketError.MessageSize, $"WebSocket message frame too large: {_rawSocket.Available} > {MAX_RECEIVE_BUFFER_SIZE}");
 
-        Log.Trace($"WebSocket growing receive buffer {buffer.Length} bytes to {_rawSocket.Available} bytes");
+        Logger.LogTrace("WebSocket growing receive buffer {BufferLength} bytes to {Available} bytes", buffer.Length, _rawSocket.Available);
 
         Shared.Return(buffer);
         buffer = Shared.Rent(_rawSocket.Available);

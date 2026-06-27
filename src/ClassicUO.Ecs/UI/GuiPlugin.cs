@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using ClassicUO.Ecs.Logging;
 using ClassicUO.Input;
 using ClassicUO.Renderer;
 using Clay;
+using Microsoft.Extensions.Logging;
 using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -166,7 +168,8 @@ internal readonly struct GuiPlugin : IPlugin
             Res<MouseContext>,
             Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>>,
             Query<Data<TinyEcs.Parent>>,
-            Query<Data<UiMovable>>> dumpFn = DumpLayoutOnClick;
+            Query<Data<UiMovable>>,
+            Res<ILogger>> dumpFn = DumpLayoutOnClick;
         app.AddSystem(Stage.Last, dumpFn);
 #endif
     }
@@ -177,7 +180,8 @@ internal readonly struct GuiPlugin : IPlugin
         Res<MouseContext> mouse,
         Query<Data<ComputedNode, Node, UiCustom, BackgroundColor, Text>, Filter<Optional<UiCustom>, Optional<BackgroundColor>, Optional<Text>>> rendered,
         Query<Data<TinyEcs.Parent>> parents,
-        Query<Data<UiMovable>> movables)
+        Query<Data<UiMovable>> movables,
+        Res<ILogger> logger)
     {
         if (!dump.Value.DumpOnClick || !mouse.Value.IsPressedOnce(MouseButtonType.Left))
             return;
@@ -200,8 +204,8 @@ internal readonly struct GuiPlugin : IPlugin
                 $"kind={kind} text={text.IsValid()} bg={bg.IsValid()} mov={movables.Contains(ent.Ref)} parent={par}"));
         }
         rows.Sort((a, b) => b.paint.CompareTo(a.paint)); // topmost (highest paint order) first
-        Console.WriteLine($"[Layout] {rows.Count} element(s) under ({pt.X:0},{pt.Y:0}) — topmost first:");
-        foreach (var r in rows) Console.WriteLine(r.line);
+        logger.Value.LogTrace("[Layout] {Count} element(s) under ({X:0},{Y:0}) — topmost first:", rows.Count, pt.X, pt.Y);
+        foreach (var r in rows) logger.Value.LogTrace("{Line}", r.line);
     }
 #endif
 

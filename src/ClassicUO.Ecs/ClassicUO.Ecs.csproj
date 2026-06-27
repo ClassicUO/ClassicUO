@@ -12,6 +12,12 @@
     <InternalsVisibleTo Include="ClassicUO.Ecs.Tests" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- ILogger abstraction only. No LoggerFactory/DI/config stack: CuoLog uses
+         a single ILogger with a baked-in level (NativeAOT-safe, reflection-free). -->
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
+  </ItemGroup>
+
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <OutputPath>$(ProjectDir)..\..\bin\Release\</OutputPath>
     <PublishDir>$(ProjectDir)..\..\bin\dist\</PublishDir>

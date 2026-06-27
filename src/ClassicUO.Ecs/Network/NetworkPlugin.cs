@@ -3,11 +3,13 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net.Sockets;
 using ClassicUO.Configuration;
+using ClassicUO.Ecs.Logging;
 using ClassicUO.Network;
 using ClassicUO.Utility;
 using ClassicUO.Network.Encryption;
 using ClassicUO.Assets;
 using ClassicUO.IO;
+using Microsoft.Extensions.Logging;
 using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
@@ -298,11 +300,12 @@ readonly struct NetworkPlugin : IPlugin
         On<OnLoginRequest> trigger,
         Res<NetClient> network,
         Res<GameContext> gameCtx,
-        Res<Settings> settings
+        Res<Settings> settings,
+        Res<ILogger> logger
     )
     {
         network.Value.Connect(trigger.Event.Address, trigger.Event.Port);
-        Console.WriteLine("Socket is connected ? {0}", network.Value.IsConnected);
+        logger.Value.LogInformation("Socket is connected ? {Connected}", network.Value.IsConnected);
 
         if (!network.Value.IsConnected)
             return;
@@ -341,7 +344,8 @@ readonly struct NetworkPlugin : IPlugin
         Res<CircularBuffer> buffer,
         Local<PacketBuffer> packetBuffer,
         ResMut<ModNetTap> netTap,
-        Commands commands
+        Commands commands,
+        Res<ILogger> logger
     )
     {
         var availableData = network.Value.CollectAvailableData();
@@ -375,13 +379,13 @@ readonly struct NetworkPlugin : IPlugin
             // invalid in PacketHandlers.GetPacketInfo.
             if (packetLen < packetHeaderOffset)
             {
-                Console.WriteLine("[Net] malformed packet 0x{0:X2}: len {1} < header {2}; stopping parse (stream desync)", packetId, packetLen, packetHeaderOffset);
+                logger.Value.LogWarning("[Net] malformed packet 0x{PacketId:X2}: len {Len} < header {Header}; stopping parse (stream desync)", packetId, packetLen, packetHeaderOffset);
                 break;
             }
 
             if (buffer.Value.Length < packetLen)
             {
-                Console.WriteLine("needs more data for packet 0x{0:X2}", packetId);
+                logger.Value.LogTrace("needs more data for packet 0x{PacketId:X2}", packetId);
                 break;
             }
 

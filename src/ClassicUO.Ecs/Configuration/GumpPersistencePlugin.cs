@@ -8,8 +8,10 @@ using System.Xml;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
 using ClassicUO.Network;
+using ClassicUO.Ecs.Logging;
 using ClassicUO.Renderer;
 using ClassicUO.Utility.Logging;
+using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
@@ -183,10 +185,11 @@ internal readonly struct GumpPersistencePlugin : IPlugin
         ResMut<Profile> profile,
         Res<GlobalProfile> global,
         Res<Settings> settings,
-        Res<Camera> camera)
+        Res<Camera> camera,
+        Res<ILogger> logger)
     {
         // Settings persist on every save (last server, account, etc.).
-        settings.Value.Save();
+        settings.Value.Save(logger.Value);
 
         if (!ctx.Value.Loaded || string.IsNullOrEmpty(ctx.Value.ProfilePath))
             return;
@@ -205,7 +208,7 @@ internal readonly struct GumpPersistencePlugin : IPlugin
             }
         }
 
-        ProfileManager.Save(profile.Value, global.Value, ctx.Value.ProfilePath);
+        ProfileManager.Save(profile.Value, global.Value, ctx.Value.ProfilePath, logger.Value);
     }
 
     // Runs AFTER SaveProfile (see Build): both gate on Loaded; this one clears it
@@ -222,7 +225,8 @@ internal readonly struct GumpPersistencePlugin : IPlugin
         Query<Data<Node, ContainerWindow, ContainerGumpTag>> containerQ,
         Query<Data<Node, GridContainerWindow, ContainerGumpTag>> gridQ,
         Query<Data<Node, SpellbookWindow>> spellbookQ,
-        AnchorSaveQueries anchorSave)
+        AnchorSaveQueries anchorSave,
+        Res<ILogger> logger)
     {
         // Append the entity's anchor group id (if any) so the restored windows
         // re-form their group. GroupId is a runtime counter — its absolute value
@@ -352,7 +356,7 @@ internal readonly struct GumpPersistencePlugin : IPlugin
         }
         catch (Exception e)
         {
-            Log.Error(e.ToString());
+            logger.Value.LogError(e, "failed to save gumps.xml");
         }
     }
 
@@ -370,7 +374,7 @@ internal readonly struct GumpPersistencePlugin : IPlugin
 
     // ---- restore ------------------------------------------------------------
 
-    private static void ParseGumps(Res<ProfileContext> ctx, ResMut<GumpRestoreQueue> queue)
+    private static void ParseGumps(Res<ProfileContext> ctx, ResMut<GumpRestoreQueue> queue, Res<ILogger> logger)
     {
         queue.Value.Gumps.Clear();
         queue.Value.RemainingMs = 0f;
@@ -384,7 +388,7 @@ internal readonly struct GumpPersistencePlugin : IPlugin
 
         var doc = new XmlDocument();
         try { doc.Load(path); }
-        catch (Exception e) { Log.Error(e.ToString()); return; }
+        catch (Exception e) { logger.Value.LogError(e, "failed to load gumps.xml"); return; }
 
         var root = doc["gumps"];
         if (root == null)
@@ -408,7 +412,7 @@ internal readonly struct GumpPersistencePlugin : IPlugin
                     g.Attrs[a.Name] = a.Value;
                 queue.Value.Gumps.Add(g);
             }
-            catch (Exception e) { Log.Error(e.ToString()); }
+            catch (Exception e) { logger.Value.LogError(e, "failed to parse a saved gump entry"); }
         }
 
         // 5s wall-clock: enough for player-global windows to spawn + the server

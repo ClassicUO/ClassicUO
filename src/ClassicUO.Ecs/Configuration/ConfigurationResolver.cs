@@ -6,16 +6,17 @@ using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Metadata;
 using System.Text.RegularExpressions;
 using ClassicUO.Utility.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace ClassicUO.Configuration
 {
     internal static class ConfigurationResolver
     {
-        public static T Load<T>(string file, JsonTypeInfo<T> ctx) where T : class
+        public static T Load<T>(string file, JsonTypeInfo<T> ctx, ILogger logger) where T : class
         {
             if (!File.Exists(file))
             {
-                Log.Warn(file + " not found.");
+                logger.LogWarning("{File} not found.", file);
 
                 return null;
             }
@@ -35,7 +36,7 @@ namespace ClassicUO.Configuration
             return JsonSerializer.Deserialize(text, ctx);
         }
 
-        public static void Save<T>(T obj, string file, JsonTypeInfo<T> ctx) where T : class
+        public static void Save<T>(T obj, string file, JsonTypeInfo<T> ctx, ILogger logger) where T : class
         {
             // this try catch is necessary when multiples cuo instances points to this file.
             try
@@ -52,7 +53,7 @@ namespace ClassicUO.Configuration
             }
             catch (IOException e)
             {
-                Log.Error(e.ToString());
+                logger.LogError(e, "failed to save configuration file {File}", file);
             }
         }
     }

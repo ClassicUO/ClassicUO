@@ -16,9 +16,11 @@
 using System;
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
+using ClassicUO.Ecs.Logging;
 using ClassicUO.Game;
 using ClassicUO.Input;
 using ClassicUO.Network;
+using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
@@ -550,7 +552,7 @@ internal readonly struct TopBarPlugin : IPlugin
             case Buttons.GlobalChat:
                 // `id` is an immutable enum value — safe to capture in the
                 // stored observer lambda.
-                btn.Observe((On<UiClick> _) => Console.WriteLine($"[TopBar] {id} — no ECS gump yet"));
+                btn.Observe((On<UiClick> _, Res<ILogger> logger) => logger.Value.LogTrace("[TopBar] {Id} — no ECS gump yet", id));
                 break;
 
             case Buttons.Info:

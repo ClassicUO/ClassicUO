@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using ClassicUO.Configuration;
 using ClassicUO.Network;
+using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
@@ -83,8 +84,8 @@ internal readonly struct ServerSelectionPlugin : IPlugin
         // highlight; just confirm the first server.
         mainMenu.AddChild(gumpBuilder.Value.AddButton(
             commands, (0x15A4, 0x15A6, 0x15A5), XnaVector3.UnitZ, new XnaVector2(610, 445))
-            .Observe((On<UiClick> _, ResMut<ServerSelectLatch> latch, Res<NetClient> net, ResMut<ProfileContext> ctx, Res<Settings> settings) =>
-                SelectServer(latch.Value, net.Value, ctx.Value, settings.Value, 0))
+            .Observe((On<UiClick> _, ResMut<ServerSelectLatch> latch, Res<NetClient> net, ResMut<ProfileContext> ctx, Res<Settings> settings, Res<ILogger> logger) =>
+                SelectServer(latch.Value, net.Value, ctx.Value, settings.Value, logger.Value, 0))
             .Insert<ServerSelectionScene>());
 
         // Header labels: OOP (CV>=500A) draws these unicode, font 1, hue
@@ -116,8 +117,8 @@ internal readonly struct ServerSelectionPlugin : IPlugin
             .Insert<ServerSelectionScene>());
         mainMenu.AddChild(gumpBuilder.Value.AddButton(
             commands, (0x15E8, 0x15EA, 0x15E9), XnaVector3.UnitZ, new XnaVector2(160, 400))
-            .Observe((On<UiClick> _, ResMut<ServerSelectLatch> latch, Res<NetClient> net, ResMut<ProfileContext> ctx, Res<Settings> settings) =>
-                SelectServer(latch.Value, net.Value, ctx.Value, settings.Value, 0))
+            .Observe((On<UiClick> _, ResMut<ServerSelectLatch> latch, Res<NetClient> net, ResMut<ProfileContext> ctx, Res<Settings> settings, Res<ILogger> logger) =>
+                SelectServer(latch.Value, net.Value, ctx.Value, settings.Value, logger.Value, 0))
             .Insert<ServerSelectionScene>());
 
         // Scroll-area background — ResizePic 0x0DAC sized to match main (393-14 x 271).
@@ -156,14 +157,14 @@ internal readonly struct ServerSelectionPlugin : IPlugin
                         Height = Val.Px(25),
                     })
                     .Insert(Interaction.None)
-                    .Observe((On<UiClick> _, ResMut<ServerSelectLatch> latch, Res<NetClient> net, ResMut<ProfileContext> ctx, Res<Settings> settings) =>
-                        SelectServer(latch.Value, net.Value, ctx.Value, settings.Value, serverIndex));
+                    .Observe((On<UiClick> _, ResMut<ServerSelectLatch> latch, Res<NetClient> net, ResMut<ProfileContext> ctx, Res<Settings> settings, Res<ILogger> logger) =>
+                        SelectServer(latch.Value, net.Value, ctx.Value, settings.Value, logger.Value, serverIndex));
 
                 var nameLabel = AddLabelChild(commands, rowEnt, server.Name, 74, 4, rowColor);
                 commands.Entity(nameLabel)
                     .Insert(Interaction.None)
-                    .Observe((On<UiClick> _, ResMut<ServerSelectLatch> latch, Res<NetClient> net, ResMut<ProfileContext> ctx, Res<Settings> settings) =>
-                        SelectServer(latch.Value, net.Value, ctx.Value, settings.Value, serverIndex));
+                    .Observe((On<UiClick> _, ResMut<ServerSelectLatch> latch, Res<NetClient> net, ResMut<ProfileContext> ctx, Res<Settings> settings, Res<ILogger> logger) =>
+                        SelectServer(latch.Value, net.Value, ctx.Value, settings.Value, logger.Value, serverIndex));
                 AddLabelChild(commands, rowEnt, "-", 250, 4, rowColor);
                 AddLabelChild(commands, rowEnt, "-", 320, 4, rowColor);
                 commands.Entity(rowEnt.Id).Insert(new ServerRowUI { NameLabel = nameLabel });
@@ -178,7 +179,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
     // LoginScene.SelectServer guards on the login step; ECS uses a latch). Also
     // captures the chosen server's name for the profile folder and persists it
     // as Settings.LastServerName/Num, mirroring legacy LoginScene.SelectServer.
-    private static void SelectServer(ServerSelectLatch latch, NetClient net, ProfileContext ctx, Settings settings, byte index)
+    private static void SelectServer(ServerSelectLatch latch, NetClient net, ProfileContext ctx, Settings settings, ILogger logger, byte index)
     {
         if (latch.Sent) return;
         latch.Sent = true;
@@ -186,7 +187,7 @@ internal readonly struct ServerSelectionPlugin : IPlugin
         ctx.ServerName = ctx.ServerNames.TryGetValue(index, out var name) ? name : string.Empty;
         settings.LastServerNum = (ushort)(index + 1);
         settings.LastServerName = ctx.ServerName;
-        settings.Save();
+        settings.Save(logger);
 
         net.Send_SelectServer(index);
     }

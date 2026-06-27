@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Configuration;
+using ClassicUO.Ecs.Logging;
 using ClassicUO.Utility.Logging;
+using Microsoft.Extensions.Logging;
 using TinyEcs.Bevy;
 
 namespace ClassicUO.Ecs;
@@ -44,7 +46,8 @@ internal readonly struct PersistencePlugin : IPlugin
     private static void LoadProfile(
         Commands commands,
         Res<Settings> settings,
-        ResMut<ProfileContext> ctx)
+        ResMut<ProfileContext> ctx,
+        Res<ILogger> logger)
     {
         var user = settings.Value.Username;
         var server = ctx.Value.ServerName;
@@ -52,11 +55,11 @@ internal readonly struct PersistencePlugin : IPlugin
 
         if (string.IsNullOrEmpty(user) || string.IsNullOrEmpty(server) || string.IsNullOrEmpty(ch))
         {
-            Log.Warn($"profile load skipped — missing identity (user='{user}' server='{server}' char='{ch}')");
+            logger.Value.LogWarning($"profile load skipped — missing identity (user='{user}' server='{server}' char='{ch}')");
             return;
         }
 
-        var (profile, global, path) = ProfileManager.Load(server, user, ch);
+        var (profile, global, path) = ProfileManager.Load(server, user, ch, logger.Value);
         ctx.Value.ProfilePath = path;
         ctx.Value.Loaded = true;
 
@@ -66,6 +69,6 @@ internal readonly struct PersistencePlugin : IPlugin
         commands.InsertResource(profile);
         commands.InsertResource(global);
 
-        Log.Trace($"profile loaded: {path}");
+        logger.Value.LogTrace($"profile loaded: {path}");
     }
 }

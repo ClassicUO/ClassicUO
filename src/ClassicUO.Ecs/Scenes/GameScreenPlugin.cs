@@ -1,8 +1,10 @@
 using System;
+using ClassicUO.Ecs.Logging;
 using ClassicUO.Game.Data;
 using ClassicUO.Input;
 using ClassicUO.Network;
 using ClassicUO.Renderer;
+using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TinyEcs;
@@ -261,9 +263,9 @@ internal readonly struct GameScreenPlugin : IPlugin
             .Insert(new BackgroundColor(bgButton))
             .Insert(Interaction.None)
             .Insert(new Button())
-            .Observe((On<UiClick> _, ResMut<NextState<GameState>> state) =>
+            .Observe((On<UiClick> _, ResMut<NextState<GameState>> state, Res<ILogger> logger) =>
             {
-                Console.WriteLine("Logout button pressed");
+                logger.Value.LogInformation("Logout button pressed");
                 state.Value.Set(GameState.LoginScreen);
             });
 
@@ -652,12 +654,13 @@ internal readonly struct GameScreenPlugin : IPlugin
 
     private static void Cleanup(
         Commands commands,
-        Query<Data<Node>, Filter<With<GameScene>>> query)
+        Query<Data<Node>, Filter<With<GameScene>>> query,
+        Res<ILogger> logger)
     {
-        Console.WriteLine("[GameScreen] cleanup start");
+        logger.Value.LogTrace("[GameScreen] cleanup start");
         foreach (var (ent, _) in query)
             commands.Entity(ent.Ref).Despawn();
-        Console.WriteLine("[GameScreen] cleanup done");
+        logger.Value.LogTrace("[GameScreen] cleanup done");
     }
 
     // internal (not private): GameCursorPlugin queries it to tell "cursor is over

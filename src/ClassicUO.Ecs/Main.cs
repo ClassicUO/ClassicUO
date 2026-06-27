@@ -6,9 +6,11 @@ using ClassicUO.Game.Data;
 using ClassicUO.IO;
 using ClassicUO.Network;
 using ClassicUO.Resources;
+using ClassicUO.Ecs.Logging;
 using ClassicUO.Utility;
 using ClassicUO.Utility.Logging;
 using ClassicUO.Utility.Platforms;
+using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -38,9 +40,10 @@ namespace ClassicUO
         {
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
-            Log.Start(LogTypes.All);
+            var logger = CuoLog.Create();
+            PacketLogger.Default.Logger = logger;
 
-            DllMap.Init();
+            DllMap.Init(logger);
 
             CUOEnviroment.GameThread = Thread.CurrentThread;
             CUOEnviroment.GameThread.Name = "CUO_MAIN_THREAD";
@@ -74,7 +77,7 @@ namespace ClassicUO
                 sb.AppendLine();
                 sb.AppendLine();
 
-                Log.Panic(e.ExceptionObject.ToString());
+                logger.LogCritical("unhandled exception: {Exception}", e.ExceptionObject);
                 string path = Path.Combine(CUOEnviroment.ExecutablePath, "Logs");
 
                 if (!Directory.Exists(path))
@@ -86,7 +89,7 @@ namespace ClassicUO
                 }
             };
 #endif
-            ReadSettingsFromArgs(args);
+            ReadSettingsFromArgs(args, logger);
 
             if (CUOEnviroment.IsHighDPI)
             {
@@ -107,40 +110,40 @@ namespace ClassicUO
                 // settings specified in path does not exists, make new one
                 {
                     // TODO:
-                    Settings.GlobalSettings.Save();
+                    Settings.GlobalSettings.Save(logger);
                 }
             }
 
-            Settings.GlobalSettings = ConfigurationResolver.Load(globalSettingsPath, SettingsJsonContext.RealDefault.Settings);
+            Settings.GlobalSettings = ConfigurationResolver.Load(globalSettingsPath, SettingsJsonContext.RealDefault.Settings, logger);
 
-            ReadSettingsFromArgs(args);
+            ReadSettingsFromArgs(args, logger);
 
             // still invalid, cannot load settings
             if (Settings.GlobalSettings == null)
             {
                 Settings.GlobalSettings = new Settings();
-                Settings.GlobalSettings.Save();
+                Settings.GlobalSettings.Save(logger);
             }
 
             if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.Language))
             {
-                Log.Trace("language is not set. Trying to get the OS language.");
+                logger.LogTrace("language is not set. Trying to get the OS language.");
                 try
                 {
                     Settings.GlobalSettings.Language = CultureInfo.InstalledUICulture.ThreeLetterWindowsLanguageName;
 
                     if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.Language))
                     {
-                        Log.Warn("cannot read the OS language. Rolled back to ENU");
+                        logger.LogWarning("cannot read the OS language. Rolled back to ENU");
 
                         Settings.GlobalSettings.Language = "ENU";
                     }
 
-                    Log.Trace($"language set: '{Settings.GlobalSettings.Language}'");
+                    logger.LogTrace("language set: '{Language}'", Settings.GlobalSettings.Language);
                 }
                 catch
                 {
-                    Log.Warn("cannot read the OS language. Rolled back to ENU");
+                    logger.LogWarning("cannot read the OS language. Rolled back to ENU");
 
                     Settings.GlobalSettings.Language = "ENU";
                 }
@@ -165,18 +168,18 @@ namespace ClassicUO
 
             if (!ClientVersionHelper.IsClientVersionValid(Settings.GlobalSettings.ClientVersion, out ClientVersion clientVersion))
             {
-                Log.Warn($"Client version [{clientVersionText}] is invalid, let's try to read the client.exe");
+                logger.LogWarning("Client version [{Version}] is invalid, let's try to read the client.exe", clientVersionText);
 
                 // mmm something bad happened, try to load from client.exe [windows only]
                 if (!ClientVersionHelper.TryParseFromFile(Path.Combine(Settings.GlobalSettings.UltimaOnlineDirectory, "client.exe"), out clientVersionText) || !ClientVersionHelper.IsClientVersionValid(clientVersionText, out clientVersion))
                 {
-                    Log.Error("Invalid client version: " + clientVersionText);
+                    logger.LogError("Invalid client version: {Version}", clientVersionText);
 
                     flags |= INVALID_UO_VERSION;
                 }
                 else
                 {
-                    Log.Trace($"Found a valid client.exe [{clientVersionText} - {clientVersion}]");
+                    logger.LogTrace($"Found a valid client.exe [{clientVersionText} - {clientVersion}]");
 
                     // update the wrong/missing client version in settings.json
                     Settings.GlobalSettings.ClientVersion = clientVersionText;
@@ -187,11 +190,11 @@ namespace ClassicUO
             {
                 if ((flags & INVALID_UO_DIRECTORY) != 0)
                 {
-                    Log.Error(ResGeneral.YourUODirectoryIsInvalid);
+                    logger.LogError(ResGeneral.YourUODirectoryIsInvalid);
                 }
                 else if ((flags & INVALID_UO_VERSION) != 0)
                 {
-                    Log.Error(ResGeneral.YourUOClientVersionIsInvalid);
+                    logger.LogError(ResGeneral.YourUOClientVersionIsInvalid);
                 }
 
                 PlatformHelper.LaunchBrowser(ResGeneral.ClassicUOLink);
@@ -211,11 +214,12 @@ namespace ClassicUO
                         break;
                 }
 
-                Console.WriteLine("FNA3D_FORCE_DRIVER: " + Environment.GetEnvironmentVariable("FNA3D_FORCE_DRIVER"));
+                logger.LogTrace("FNA3D_FORCE_DRIVER: {Value}", Environment.GetEnvironmentVariable("FNA3D_FORCE_DRIVER"));
 
                 using var ecs = new TinyEcs.World();
                 var app = new App(ecs, ThreadingMode.Auto);
 
+                app.AddResource<ILogger>(logger);
                 app.AddPlugin<Ecs.CuoPlugin>();
 
                 while (true)
@@ -226,10 +230,10 @@ namespace ClassicUO
                 // Client.Run(pluginHost);
             }
 
-            Log.Trace("Closing...");
+            logger.LogTrace("Closing...");
         }
 
-        private static void ReadSettingsFromArgs(string[] args)
+        private static void ReadSettingsFromArgs(string[] args, ILogger logger)
         {
             for (int i = 0; i <= args.Length - 1; i++)
             {
@@ -252,7 +256,7 @@ namespace ClassicUO
                     }
                 }
 
-                Log.Trace($"ARG: {cmd}, VALUE: {value}");
+                logger.LogTrace("ARG: {Cmd}, VALUE: {Value}", cmd, value);
 
                 switch (cmd)
                 {

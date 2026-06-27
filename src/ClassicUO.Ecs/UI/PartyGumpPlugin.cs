@@ -3,7 +3,9 @@
 // controls and the bottom action row (send message, loot toggle, leave/disband,
 // add member, OK, Cancel). Single instance; the loot toggle rebuilds it.
 
+using ClassicUO.Ecs.Logging;
 using ClassicUO.Network;
+using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using TinyEcs;
 using TinyEcs.Bevy;
@@ -160,8 +162,8 @@ internal readonly struct PartyGumpPlugin : IPlugin
 
             var tell = builder.AddButton(commands, (0x0FAB, 0x0FAD, 0x0FAC), Vector3.UnitZ, new Vector2(40, yPtr + 2));
             int slot = i;
-            tell.Observe((On<UiClick> _) =>
-                System.Console.WriteLine($"[Party] tell slot {slot + 1} — chat input not wired"));
+            tell.Observe((On<UiClick> _, Res<ILogger> logger) =>
+                logger.Value.LogTrace("[Party] tell slot {Slot} — chat input not wired", slot + 1));
             commands.AddChild(rootId, tell.Id);
 
             if (isLeader)
@@ -201,8 +203,8 @@ internal readonly struct PartyGumpPlugin : IPlugin
 
         // Send-message row.
         var sendBtn = builder.AddButton(commands, (0x0FAB, 0x0FAD, 0x0FAC), Vector3.UnitZ, new Vector2(70, 307));
-        sendBtn.Observe((On<UiClick> _) =>
-            System.Console.WriteLine("[Party] send message — chat input not wired"));
+        sendBtn.Observe((On<UiClick> _, Res<ILogger> logger) =>
+            logger.Value.LogTrace("[Party] send message — chat input not wired"));
         commands.AddChild(rootId, sendBtn.Id);
         AddLabel(commands, rootId, "Send the party a message", 2, new Vector2(110, 307));
 

@@ -2,6 +2,7 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using ClassicUO.Utility.Logging;
+using Microsoft.Extensions.Logging;
 
 namespace ClassicUO.Network.Socket;
 
@@ -37,12 +38,12 @@ sealed class TcpSocketWrapper : SocketWrapper
         }
         catch (SocketException socketEx)
         {
-            Log.Error($"error while connecting {socketEx}");
+            Logger.LogError(socketEx, "error while connecting");
             InvokeOnError(socketEx.SocketErrorCode);
         }
         catch (Exception ex)
         {
-            Log.Error($"error while connecting {ex}");
+            Logger.LogError(ex, "error while connecting");
             InvokeOnError(SocketError.SocketError);
         }
     }

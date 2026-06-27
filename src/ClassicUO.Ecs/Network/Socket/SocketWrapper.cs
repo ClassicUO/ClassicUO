@@ -2,6 +2,8 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using ClassicUO.Utility.Logging;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using System.Net.WebSockets;
 
 namespace ClassicUO.Network.Socket;
@@ -14,6 +16,10 @@ public enum SocketWrapperType
 
 abstract class SocketWrapper : IDisposable
 {
+    // Injected by NetClient at creation; defaults to no-op so a wrapper built
+    // outside the wired path still works.
+    public ILogger Logger { get; set; } = NullLogger.Instance;
+
     public abstract bool IsConnected { get; }
 
     public abstract EndPoint LocalEndPoint { get; }

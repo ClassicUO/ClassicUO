@@ -1,7 +1,9 @@
 using System;
 using System.Numerics;
 using ClassicUO.Configuration;
+using ClassicUO.Ecs.Logging;
 using ClassicUO.Utility;
+using Microsoft.Extensions.Logging;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using TinyEcs;
@@ -130,10 +132,10 @@ internal readonly struct LoginScreenPlugin : IPlugin
         )
         .Insert(ButtonAction.Quit)
         .Insert<LoginScene>()
-        .Observe((On<UiClick> trigger) =>
+        .Observe((On<UiClick> trigger, Res<ILogger> logger) =>
         {
             // TODO: route to a real quit handler.
-            Console.WriteLine("[LoginScreen] Quit clicked");
+            logger.Value.LogInformation("[LoginScreen] Quit clicked");
         }));
 
         // Credits button.
@@ -145,8 +147,8 @@ internal readonly struct LoginScreenPlugin : IPlugin
         )
         .Insert(ButtonAction.Credits)
         .Insert<LoginScene>()
-        .Observe((On<UiPointerDown> _) => Console.WriteLine("pressed credits"))
-        .Observe((On<UiPointerUp> _)   => Console.WriteLine("released credits")));
+        .Observe((On<UiPointerDown> _, Res<ILogger> logger) => logger.Value.LogTrace("pressed credits"))
+        .Observe((On<UiPointerUp> _, Res<ILogger> logger)   => logger.Value.LogTrace("released credits")));
 
         // Arrow login button.
         var arrowButton = gumpBuilder.Value.AddButton(
@@ -162,13 +164,14 @@ internal readonly struct LoginScreenPlugin : IPlugin
             Commands innerCommands,
             Res<Settings> innerSettings,
             ResMut<NextState<LoginInteraction>> state,
+            Res<ILogger> logger,
             Single<Data<Text>, Filter<With<UsernameInput>, With<LoginScene>, With<TextInput>>> queryUsername,
             Single<Data<MaskedText>, Filter<With<PasswordInput>, With<LoginScene>, With<TextInput>>> queryPassword
         ) =>
         {
             (_, var username) = queryUsername.Get();
             (_, var password) = queryPassword.Get();
-            Login(innerCommands, innerSettings.Value, username.Ref.Value, password.Ref.Value ?? string.Empty);
+            Login(innerCommands, innerSettings.Value, username.Ref.Value, password.Ref.Value ?? string.Empty, logger.Value);
             state.Value.Set(LoginInteraction.LoginRequested);
         });
 
@@ -341,12 +344,13 @@ internal readonly struct LoginScreenPlugin : IPlugin
         Commands commands,
         Res<Settings> settings,
         ResMut<NextState<LoginInteraction>> state,
+        Res<ILogger> logger,
         Single<Data<Text>, Filter<With<UsernameInput>, With<LoginScene>, With<TextInput>>> queryUsername,
         Single<Data<MaskedText>, Filter<With<PasswordInput>, With<LoginScene>, With<TextInput>>> queryPassword)
     {
         (_, var username) = queryUsername.Get();
         (_, var password) = queryPassword.Get();
-        Login(commands, settings.Value, username.Ref.Value, password.Ref.Value ?? string.Empty);
+        Login(commands, settings.Value, username.Ref.Value, password.Ref.Value ?? string.Empty, logger.Value);
         state.Value.Set(LoginInteraction.LoginRequested);
     }
 
@@ -355,11 +359,11 @@ internal readonly struct LoginScreenPlugin : IPlugin
         Query<Data<Node>, Filter<With<LoginScene>>> query)
         => LoginSceneHelpers.DespawnAll<LoginScene>(commands, query);
 
-    private static void Login(Commands commands, Settings settings, string username, string password)
+    private static void Login(Commands commands, Settings settings, string username, string password, ILogger logger)
     {
         if (string.IsNullOrWhiteSpace(username) || string.IsNullOrWhiteSpace(password))
         {
-            Console.WriteLine("username or password is empty");
+            logger.LogWarning("username or password is empty");
             return;
         }
 
@@ -367,9 +371,9 @@ internal readonly struct LoginScreenPlugin : IPlugin
         settings.Password = Crypter.Encrypt(password);
         // Persist account/ip/port like legacy LoginScene (Save() blanks the
         // username/password itself when SaveAccount is off).
-        settings.Save();
+        settings.Save(logger);
 
-        Console.WriteLine("doing login");
+        logger.LogInformation("doing login");
 
         commands.EmitTrigger(new OnLoginRequest
         {
