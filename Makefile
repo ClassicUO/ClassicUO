@@ -23,6 +23,12 @@ BOOTSTRAP := src/ClassicUO.Bootstrap/src/ClassicUO.Bootstrap.csproj
 CLIENT    := src/ClassicUO.Client
 RUST_MODS := ecs-netlog ecs-status ecs-topbar ecs-blocktest
 
+# cuo-ecs output dirs (TFM net10.0). Mods are deployed here by the make
+# targets — the csproj no longer copies them on build.
+OUT_DEBUG   := bin/Debug/net10.0
+OUT_RELEASE := bin/Release/net10.0
+OUT_PUBLISH := bin/dist-ecs
+
 .DEFAULT_GOAL := help
 .PHONY: help build-mods test run-debug run-release publish
 
@@ -59,10 +65,14 @@ test: build-mods
 	dotnet test $(TESTS)
 
 run-debug: build-mods
-	dotnet run --project $(ECS) -c Debug
+	dotnet build $(ECS) -c Debug
+	rm -rf $(OUT_DEBUG)/ecs-mods && cp -r ecs-mods $(OUT_DEBUG)/ecs-mods
+	dotnet run --project $(ECS) -c Debug --no-build
 
 run-release: build-mods
-	dotnet run --project $(ECS) -c Release
+	dotnet build $(ECS) -c Release
+	rm -rf $(OUT_RELEASE)/ecs-mods && cp -r ecs-mods $(OUT_RELEASE)/ecs-mods
+	dotnet run --project $(ECS) -c Release --no-build
 
 # AOT publish: Bootstrap + Client (shared native lib) to bin/dist,
 # the AOT cuo-ecs to bin/dist-ecs.
@@ -70,3 +80,4 @@ publish: build-mods
 	dotnet publish $(BOOTSTRAP) -c Release -o bin/dist
 	dotnet publish $(CLIENT) -c Release -p:NativeLib=Shared -p:OutputType=Library -r $(RID) -o bin/dist
 	dotnet publish $(ECS) -c Release -r $(RID) -o bin/dist-ecs
+	rm -rf $(OUT_PUBLISH)/ecs-mods && cp -r ecs-mods $(OUT_PUBLISH)/ecs-mods

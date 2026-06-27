@@ -68,10 +68,12 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
             On<UiDoubleClick> trig,
             Res<NetClient> net,
             Res<GameContext> ctx,
+            ResMut<ProfileContext> profileCtx,
             Query<Data<CharacterInfo>> charQ) =>
         {
             if (!charQ.TryGet(trig.EntityId, out var charRow)) return;
             var (_, ch) = charRow;
+            profileCtx.Value.CharacterName = ch.Ref.Name;
             net.Value.Send_SelectCharacter(ch.Ref.Index, ch.Ref.Name, net.Value.LocalIP, ctx.Value.Protocol);
         });
     }
@@ -266,6 +268,7 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
                       Res<CharacterSelectionState> sel,
                       Res<NetClient> net,
                       Res<GameContext> ctx,
+                      ResMut<ProfileContext> profileCtx,
                       Query<Data<CharacterInfo>> charQ) =>
             {
                 var idx = sel.Value.SelectedIndex;
@@ -273,6 +276,7 @@ internal readonly struct CharacterSelectionPlugin : IPlugin
                 foreach (var (_, ci) in charQ)
                 {
                     if (ci.Ref.Index != idx) continue;
+                    profileCtx.Value.CharacterName = ci.Ref.Name;
                     net.Value.Send_SelectCharacter(
                         ci.Ref.Index, ci.Ref.Name,
                         net.Value.LocalIP, ctx.Value.Protocol);

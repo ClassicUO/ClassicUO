@@ -37,7 +37,7 @@ internal struct SpellEntryClick { public int SpellId; }
 internal struct SpellLabel;
 internal struct SpellbookCorner { public ulong Window; public int Dir; }
 internal struct SpellIconDrag { public int CastId; public ushort Icon; public int Cliloc; public string Name; }
-internal struct SpellCastButton { public int CastId; }
+internal struct SpellCastButton { public int CastId; public ushort Icon; }
 
 internal readonly struct SpellbookGumpPlugin : IPlugin
 {
@@ -500,21 +500,8 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
             foreach (var (ent, b) in existingButtonsQ)
                 if (b.Ref.CastId == castId) commands.Entity(ent.Ref).Despawn();
 
-            // Hover tooltip on the dragged button (legacy UseSpellButtonGump.
-            // SetTooltip): pre-seed an OPL entry under a synthetic serial keyed by
-            // cast id (spell-name cliloc, falling back to the table name when the
-            // dataset lacks it) and stamp that serial on the button's render so the
-            // shared tooltip path picks it up — no network request, no real serial.
-            uint tipSerial = SpellTooltipSerial(castId);
-            string tip = anchor.Value.Cliloc != 0 ? fileManager.Value.Clilocs.GetString(anchor.Value.Cliloc) : null;
-            if (string.IsNullOrEmpty(tip)) tip = anchor.Value.Name;
-            opl.Value.Add(tipSerial, 1, tip ?? string.Empty, string.Empty);
-
-            var fb = builder.Value.SpawnUOGump(commands, iconGfx, Vector3.UnitZ, new Vector2(pos.X - 22, pos.Y - 22), z.Value)
-                .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.Gump, AssetId = iconGfx, Hue = Vector3.UnitZ, TooltipSerial = tipSerial } })
-                .Insert(new SpellCastButton { CastId = castId });
-            fb.Observe((On<UiDoubleClick> _, Res<NetClient> net, Res<GameContext> ctx) =>
-                net.Value.Send_CastSpell(castId, ctx.Value.ClientVersion));
+            var fb = SpawnFloatingSpellButton(commands, builder.Value, z.Value, fileManager.Value,
+                opl.Value, castId, iconGfx, anchor.Value.Name, new Vector2(pos.X - 22, pos.Y - 22));
 
             forced.Value.Owner = fb.Id;          // WindowDrag latches it onto the cursor
             gate.Value.Mode = ActiveDrag.None;   // release ours so the forced drag can take over
@@ -541,6 +528,30 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
         if (id >= 701 && id <= 745)
             return id <= 706 ? 1115612 + (id - 701) : 1155896 + (id - 707); // Mastery
         return 0;
+    }
+
+    // Spawn a standalone floating spell cast-button — the icon dragged off the
+    // spellbook page (legacy UseSpellButtonGump). Shared by the drag-out path and
+    // gumps.xml restore so both build an identical button: same OPL tooltip seed +
+    // double-click-to-cast. The handler captures only the value-type castId (safe —
+    // no entity id, per the ECS no-captured-entity rule).
+    internal static EntityCommands SpawnFloatingSpellButton(
+        Commands commands, GumpBuilder builder, UiZCounter z,
+        UOFileManager fileManager, ObjectPropertyLists opl,
+        int castId, ushort iconGfx, string name, Vector2 topLeft)
+    {
+        uint tipSerial = SpellTooltipSerial(castId);
+        int cliloc = SpellTooltipCliloc(castId);
+        string tip = cliloc != 0 ? fileManager.Clilocs.GetString(cliloc) : null;
+        if (string.IsNullOrEmpty(tip)) tip = name;
+        opl.Add(tipSerial, 1, tip ?? string.Empty, string.Empty);
+
+        var fb = builder.SpawnUOGump(commands, iconGfx, Vector3.UnitZ, topLeft, z)
+            .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.Gump, AssetId = iconGfx, Hue = Vector3.UnitZ, TooltipSerial = tipSerial } })
+            .Insert(new SpellCastButton { CastId = castId, Icon = iconGfx });
+        fb.Observe((On<UiDoubleClick> _, Res<NetClient> net, Res<GameContext> ctx) =>
+            net.Value.Send_CastSpell(castId, ctx.Value.ClientVersion));
+        return fb;
     }
 
     // Recolour spell labels to hue 0x33 while hovered (legacy HoveredLabel

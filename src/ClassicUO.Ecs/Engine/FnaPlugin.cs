@@ -68,6 +68,7 @@ internal readonly struct FnaPlugin : IPlugin
 
             .AddSystem(_ => Environment.Exit(0))
             .InStage(Stage.PostUpdate)
+            .Label("cuo:app_exit")
             .SingleThreaded()
             .RunIf(static (Res<UoGame> game) => !UnsafeFNAAccessor.GetSetRunApplication(game.Value))
             .Build()
@@ -81,6 +82,11 @@ internal readonly struct FnaPlugin : IPlugin
             .SingleThreaded()
             .Build();
     }
+
+    // True once FNA has cleared its RunApplication flag (window close / quit) and
+    // the process is about to call Environment.Exit(0). Lets the persistence layer
+    // flush to disk on the same frame, before "cuo:app_exit" runs.
+    public static bool IsAppExiting(UoGame game) => !UnsafeFNAAccessor.GetSetRunApplication(game);
 
     private sealed class UnsafeFNAAccessor
     {

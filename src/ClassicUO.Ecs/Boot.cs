@@ -25,6 +25,16 @@ internal readonly struct CuoPlugin : IPlugin
             );
         });
 
+        // BEFORE FnaPlugin (which owns CameraPlugin): LoadProfile (OnEnter
+        // GameScreen) must run before any OnEnter consumer of Res<Profile>.
+        // OnEnter systems run in registration order (no topo sort), so if the
+        // camera's InitCamera ran first it would read the DEFAULT profile and
+        // the restored game-window bounds / zoom would be lost. Registering the
+        // load here makes it the first OnEnter(GameScreen) system. Only the LOAD
+        // lives here — the save/gump-restore (GumpPersistencePlugin) stays late
+        // because it needs FnaPlugin's "cuo:app_exit" label + the loaded path.
+        app.AddPlugin<PersistencePlugin>();
+
         app.AddPlugin(new FnaPlugin()
         {
             WindowResizable = true,
@@ -88,6 +98,18 @@ internal readonly struct CuoPlugin : IPlugin
         // UO art cursor now that the OS cursor is hidden.
         app.AddPlugin<GameCursorPlugin>();
 
+        // After FnaPlugin (needs the "cuo:app_exit" label) — saves profile.json +
+        // globalprofile.json + settings.json + gumps.xml on logout / app exit and
+        // restores open gump windows. PersistencePlugin (the LOAD) is registered
+        // earlier (before FnaPlugin) so its LoadProfile sets the ProfilePath +
+        // swaps Res<Profile> before this plugin's OnEnter gumps.xml parse and
+        // before the camera's OnEnter init reads the profile.
+        app.AddPlugin<GumpPersistencePlugin>();
+
+        // ModdingPlugin still registers its resources (ModControl etc. are read
+        // by the chat -mods command + topbar), but mod *discovery* is skipped in
+        // agent-harness builds so screenshots/RPC scenarios carry no mod windows
+        // or per-mod noise. See ModdingPlugin's AGENT_BUILD guard.
         app.AddPlugin<Modding.ModdingPlugin>();
 
 #if AGENT_BUILD

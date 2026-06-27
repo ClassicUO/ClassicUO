@@ -32,9 +32,18 @@ internal readonly struct ModdingPlugin : IPlugin
         // pre-registered config, so don't clobber that path).
         if (!hadConfig)
         {
+#if AGENT_BUILD
+            // Agent-harness builds load no mods: deterministic screenshots / RPC
+            // scenarios shouldn't carry mod-spawned windows or per-mod noise. The
+            // modding infra still registers (ModControl is read by the chat -mods
+            // command + topbar); just point discovery at a folder that does not
+            // exist so the loader finds nothing.
+            config.ModFolder = "ecs-mods-agent-disabled";
+#else
             var modsPath = ClassicUO.Configuration.Settings.GlobalSettings?.ModsPath;
             if (!string.IsNullOrWhiteSpace(modsPath))
                 config.ModFolder = modsPath;
+#endif
         }
         config.Registry = CuoModdingRegistry.Build();
         config.PerMod.Add((linker, ctx) =>

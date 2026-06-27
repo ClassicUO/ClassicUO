@@ -365,6 +365,9 @@ internal readonly struct LoginScreenPlugin : IPlugin
 
         settings.Username = username;
         settings.Password = Crypter.Encrypt(password);
+        // Persist account/ip/port like legacy LoginScene (Save() blanks the
+        // username/password itself when SaveAccount is off).
+        settings.Save();
 
         Console.WriteLine("doing login");
 

@@ -406,6 +406,21 @@ internal readonly struct RacialBookGumpPlugin : IPlugin
 
     private struct DragAnchor { public bool Active, Claimed, Spawned; public Vector2 Start; }
 
+    // Spawn the standalone floating Gargoyle-flight toggle button (the icon dragged
+    // off the book, legacy RacialAbilityButton). Shared by the drag-out path and
+    // gumps.xml restore. Fixed graphic; double-click toggles flight.
+    internal static EntityCommands SpawnFloatingRacialButton(
+        Commands commands, GumpBuilder builder, UiZCounter z,
+        UOFileManager files, ObjectPropertyLists opl, Vector2 topLeft)
+    {
+        uint tip = SeedTooltip(files, opl, GargoyleFlyingGraphic, 200);
+        var fb = builder.SpawnUOGump(commands, GargoyleFlyingGraphic, Vector3.UnitZ, topLeft, z)
+            .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.Gump, AssetId = GargoyleFlyingGraphic, Hue = Vector3.UnitZ, TooltipSerial = tip } })
+            .Insert(new RacialFlyingIcon { Floating = true });
+        fb.Observe((On<UiDoubleClick> _, Res<NetClient> net) => net.Value.Send_ToggleGargoyleFlying());
+        return fb;
+    }
+
     // Drag the Gargoyle flying icon off the book to spawn a floating button that
     // rides the cursor; double-click it to toggle flight (legacy RacialAbility
     // Button). One button at a time.
@@ -452,11 +467,7 @@ internal readonly struct RacialBookGumpPlugin : IPlugin
                 if (b.Ref.Floating) commands.Entity(ent.Ref).Despawn();
 
             var pos = mouse.Value.Position;
-            uint tip = SeedTooltip(files.Value, opl.Value, GargoyleFlyingGraphic, 200);
-            var fb = builder.Value.SpawnUOGump(commands, GargoyleFlyingGraphic, Vector3.UnitZ, new Vector2(pos.X - 22, pos.Y - 22), z.Value)
-                .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.Gump, AssetId = GargoyleFlyingGraphic, Hue = Vector3.UnitZ, TooltipSerial = tip } })
-                .Insert(new RacialFlyingIcon { Floating = true });
-            fb.Observe((On<UiDoubleClick> _, Res<NetClient> net) => net.Value.Send_ToggleGargoyleFlying());
+            var fb = SpawnFloatingRacialButton(commands, builder.Value, z.Value, files.Value, opl.Value, new Vector2(pos.X - 22, pos.Y - 22));
 
             forced.Value.Owner = fb.Id;
             gate.Value.Mode = ActiveDrag.None;

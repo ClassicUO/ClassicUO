@@ -97,10 +97,9 @@
          in a directory that holds more than one (WSGEN001), so the cuo package's
          .wit lives in its own folder (the generic tinyecs.wit moved to the lib). -->
     <AdditionalFiles Include="Modding\wit\cuo\cuo-modding.wit" />
-    <!-- Deploy built mod folders next to the exe (output/ecs-mods/<mod>/{mod.json,*.wasm}),
-         preserving the per-mod folder structure the loader scans. -->
-    <None Include="..\..\ecs-mods\**\*.wasm" Link="ecs-mods\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="..\..\ecs-mods\**\mod.json" Link="ecs-mods\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Mod folders are NOT copied here. The Makefile deploys ecs-mods/ next to
+         the exe (run-debug / run-release / publish); a bare `dotnet build` ships
+         no mods by design. -->
   </ItemGroup>
 
   <!-- The native wasmtime.dll is a NuGet-style runtime asset of the fork; it

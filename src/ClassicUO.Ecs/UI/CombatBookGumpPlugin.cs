@@ -499,6 +499,21 @@ internal readonly struct CombatBookGumpPlugin : IPlugin
 
     private struct DragAnchor { public bool Active, Claimed, Spawned; public bool Primary; public byte Ability; public Vector2 Start; }
 
+    // Spawn a standalone floating combat-ability button (the icon dragged off the
+    // book, legacy UseAbilityButtonGump). Shared by the drag-out path and gumps.xml
+    // restore. Double-click uses the player's CURRENT primary/secondary ability —
+    // only the value-type `primary` flag is captured (safe, no entity id).
+    internal static EntityCommands SpawnFloatingAbilityButton(
+        Commands commands, GumpBuilder builder, UiZCounter z,
+        bool primary, ushort iconGfx, Vector2 topLeft)
+    {
+        var fb = builder.SpawnUOGump(commands, iconGfx, Vector3.UnitZ, topLeft, z)
+            .Insert(new CombatAbilityIcon { Primary = primary, Floating = true });
+        fb.Observe((On<UiDoubleClick> _, Res<NetClient> net, ResMut<PlayerAbilities> a, Res<GameContext> ctx) =>
+            Use(net.Value, a.Value, ctx.Value, primary));
+        return fb;
+    }
+
     // Drag a picker icon off the book to spawn a floating UseAbilityButton that
     // rides the cursor (legacy OnGumpicDragBegin* -> UseAbilityButtonGump). One
     // button per side; double-click it to use the move.
@@ -551,10 +566,7 @@ internal readonly struct CombatBookGumpPlugin : IPlugin
 
             var pos = mouse.Value.Position;
             ushort iconGfx = (ushort)(AbilityIconBase + (idx - 1));
-            var fb = builder.Value.SpawnUOGump(commands, iconGfx, Vector3.UnitZ, new Vector2(pos.X - 22, pos.Y - 22), z.Value)
-                .Insert(new CombatAbilityIcon { Primary = primary, Floating = true });
-            fb.Observe((On<UiDoubleClick> _, Res<NetClient> net, ResMut<PlayerAbilities> a, Res<GameContext> ctx) =>
-                Use(net.Value, a.Value, ctx.Value, primary));
+            var fb = SpawnFloatingAbilityButton(commands, builder.Value, z.Value, primary, iconGfx, new Vector2(pos.X - 22, pos.Y - 22));
 
             forced.Value.Owner = fb.Id;
             gate.Value.Mode = ActiveDrag.None;

@@ -1,11 +1,49 @@
 // SPDX-License-Identifier: BSD-2-Clause
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using ClassicUO.Configuration.Json;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 
 namespace ClassicUO.Configuration
 {
+    // Source-gen JSON context for profile.json / globalprofile.json. Mirrors the
+    // legacy ProfileJsonContext (src/ClassicUO.Client/Configuration/Profile.cs)
+    // EXACTLY — same snake_case naming policy, Metadata generation mode — so the
+    // files are cross-compatible with the legacy client (the source of truth).
+    [JsonSerializable(typeof(GlobalProfile), GenerationMode = JsonSourceGenerationMode.Metadata)]
+    [JsonSerializable(typeof(Profile), GenerationMode = JsonSourceGenerationMode.Metadata)]
+    sealed partial class ProfileJsonContext : JsonSerializerContext
+    {
+        sealed class SnakeCaseNamingPolicy : JsonNamingPolicy
+        {
+            public static SnakeCaseNamingPolicy Instance { get; } = new SnakeCaseNamingPolicy();
+
+            public override string ConvertName(string name)
+                => string.Concat(name.Select((x, i) => i > 0 && char.IsUpper(x) ? "_" + x.ToString() : x.ToString())).ToLower();
+        }
+
+        private static Lazy<JsonSerializerOptions> _jsonOptions { get; } = new Lazy<JsonSerializerOptions>(() =>
+        {
+            var options = new JsonSerializerOptions();
+            options.WriteIndented = true;
+            options.PropertyNamingPolicy = SnakeCaseNamingPolicy.Instance;
+            return options;
+        });
+
+        public static ProfileJsonContext DefaultToUse { get; } = new ProfileJsonContext(_jsonOptions.Value);
+    }
+
+    internal sealed class GlobalProfile
+    {
+        public int MaxJournalFiles { get; set; } = 100;
+        public bool JournalFileWithSerial { get; set; } = false;
+    }
+
     // Built-in hotkey actions the configurable Hotkeys section can bind. The
     // walk directions are continuous (held-key) and ignore the pressed/released
     // selector; the rest are edge actions.
@@ -72,6 +110,13 @@ namespace ClassicUO.Configuration
     // as int here (System.Text.Json writes enums as numbers in metadata mode).
     internal sealed class Profile
     {
+        // Account / server / character this profile belongs to. Set from the
+        // folder path on load (ProfileManager). Carried for cross-compat with the
+        // legacy profile.json, which writes them and requires them non-empty.
+        public string Username { get; set; } = string.Empty;
+        public string ServerName { get; set; } = string.Empty;
+        public string CharacterName { get; set; } = string.Empty;
+
         // --- sounds ---
         public bool EnableSound { get; set; } = true;
         public int SoundVolume { get; set; } = 100;
@@ -176,14 +221,14 @@ namespace ClassicUO.Configuration
         public bool HoldShiftToSplitStack { get; set; }
 
         // --- window geometry / general (positions carried for parity, not settings) ---
-        public Point WindowClientBounds { get; set; } = new Point(600, 480);
-        public Point ContainerDefaultPosition { get; set; } = new Point(24, 24);
-        public Point GameWindowPosition { get; set; } = new Point(10, 10);
+        [JsonConverter(typeof(Point2Converter))] public Point WindowClientBounds { get; set; } = new Point(600, 480);
+        [JsonConverter(typeof(Point2Converter))] public Point ContainerDefaultPosition { get; set; } = new Point(24, 24);
+        [JsonConverter(typeof(Point2Converter))] public Point GameWindowPosition { get; set; } = new Point(10, 10);
         public bool GameWindowLock { get; set; }
         public bool GameWindowFullSize { get; set; }
         public bool WindowBorderless { get; set; }
-        public Point GameWindowSize { get; set; } = new Point(600, 480);
-        public Point TopbarGumpPosition { get; set; } = new Point(0, 0);
+        [JsonConverter(typeof(Point2Converter))] public Point GameWindowSize { get; set; } = new Point(600, 480);
+        [JsonConverter(typeof(Point2Converter))] public Point TopbarGumpPosition { get; set; } = new Point(0, 0);
         public bool TopbarGumpIsMinimized { get; set; }
         public bool TopbarGumpIsDisabled { get; set; }
         public bool UseAlternativeLights { get; set; }
@@ -269,7 +314,7 @@ namespace ClassicUO.Configuration
         // --- containers ---
         public bool OverrideContainerLocation { get; set; }
         public int OverrideContainerLocationSetting { get; set; }         // 0=near, 1=top right, 2=last dragged, 3=remember each
-        public Point OverrideContainerLocationPosition { get; set; } = new Point(200, 200);
+        [JsonConverter(typeof(Point2Converter))] public Point OverrideContainerLocationPosition { get; set; } = new Point(200, 200);
         public bool HueContainerGumps { get; set; } = true;
         public byte ContainersScale { get; set; } = 100;
         public bool ScaleItemsInsideContainers { get; set; }

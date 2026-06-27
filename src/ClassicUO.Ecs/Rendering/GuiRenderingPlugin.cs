@@ -202,7 +202,10 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                         }
 
                         var camBounds = camera.Value.Bounds;
-                        b.ClipBegin(camBounds.X, camBounds.Y, camBounds.Width, camBounds.Height);
+                        // ClipBegin no-ops (no push) on a degenerate viewport, so
+                        // ClipEnd must be gated on it — an unconditional ClipEnd
+                        // pops an empty scissor stack and throws.
+                        var clipped = b.ClipBegin(camBounds.X, camBounds.Y, camBounds.Width, camBounds.Height);
                         // Mouse-target aura (cursor effect, on top). The feet
                         // aura is drawn inside the world pass (RenderBodies) so
                         // it sorts under the mobiles.
@@ -216,7 +219,8 @@ internal readonly struct GuiRenderingPlugin : IPlugin
                             overlay.Mouse.Value, overlay.Selected.Value, time.Value.Total, overlay.Profile.Value.TextFading,
                             nameplates.Value.PlateTops);
                         StaticNameOverheads.Render(b, assets.Value, gameCtx.Value, camera.Value, overlay.StaticLabels);
-                        b.ClipEnd();
+                        if (clipped)
+                            b.ClipEnd();
                     }
                     break;
 

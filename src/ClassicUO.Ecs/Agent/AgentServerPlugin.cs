@@ -130,7 +130,7 @@ internal readonly struct AgentServerPlugin : IPlugin
         // Auto-progress through ServerSelection / CharacterSelection after
         // agent.login when state.AutoLoginActive is set. Sends the same
         // Send_SelectServer / Send_SelectCharacter the UI clicks emit.
-        Action<Res<AgentServerState>, EventReader<ServerSelectionInfoEvent>, Res<NetClient>>
+        Action<Res<AgentServerState>, EventReader<ServerSelectionInfoEvent>, Res<NetClient>, ResMut<ProfileContext>>
             serverSelFn = AutoServerSelectSystem;
         app.AddSystem(serverSelFn)
             .InStage(Stage.Update)
@@ -139,7 +139,7 @@ internal readonly struct AgentServerPlugin : IPlugin
             .Build();
 
         Action<Res<AgentServerState>, EventReader<CharacterSelectionInfoEvent>,
-            Res<NetClient>, Res<GameContext>> charSelFn = AutoCharacterSelectSystem;
+            Res<NetClient>, Res<GameContext>, ResMut<ProfileContext>> charSelFn = AutoCharacterSelectSystem;
         app.AddSystem(charSelFn)
             .InStage(Stage.Update)
             .RunIf((EventReader<CharacterSelectionInfoEvent> r) => r.HasEvents)
@@ -228,7 +228,8 @@ internal readonly struct AgentServerPlugin : IPlugin
     private static void AutoServerSelectSystem(
         Res<AgentServerState> stateRes,
         EventReader<ServerSelectionInfoEvent> reader,
-        Res<NetClient> net)
+        Res<NetClient> net,
+        ResMut<ProfileContext> profileCtx)
     {
         var state = stateRes.Value!;
         foreach (var ev in reader.Read())
@@ -238,6 +239,9 @@ internal readonly struct AgentServerPlugin : IPlugin
             if (state.LastServerCount == 0) continue;
             var idx = state.AutoServerIndex;
             if (idx < 0 || idx >= state.LastServerCount) idx = 0;
+            // Capture for the profile folder — the auto path bypasses the UI
+            // SelectServer observer that names ProfileContext for real users.
+            profileCtx.Value.ServerName = ev.Servers![idx].Name;
             net.Value.Send_SelectServer((byte)idx);
         }
     }
@@ -246,7 +250,8 @@ internal readonly struct AgentServerPlugin : IPlugin
         Res<AgentServerState> stateRes,
         EventReader<CharacterSelectionInfoEvent> reader,
         Res<NetClient> net,
-        Res<GameContext> gameCtx)
+        Res<GameContext> gameCtx,
+        ResMut<ProfileContext> profileCtx)
     {
         var state = stateRes.Value!;
         foreach (var ev in reader.Read())
@@ -265,6 +270,8 @@ internal readonly struct AgentServerPlugin : IPlugin
             if (!state.AutoLoginActive) continue;
             var idx = state.AutoCharacterIndex;
             if (idx < 0 || idx >= chars.Count) idx = 0;
+            // Capture for the profile folder (auto path bypasses the UI observer).
+            profileCtx.Value.CharacterName = chars[idx].Name;
             net.Value.Send_SelectCharacter(
                 chars[idx].Index, chars[idx].Name,
                 net.Value.LocalIP, gameCtx.Value.Protocol);

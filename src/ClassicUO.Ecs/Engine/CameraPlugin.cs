@@ -139,11 +139,20 @@ internal readonly struct CameraPlugin : IPlugin
     {
         camera.Value.Zoom = profile.Value.DefaultScale;
         if (!profile.Value.GameWindowFullSize)
+        {
+            // Profiles written by the old buggy serializer stored game_window_size
+            // as "{}" → loads back as (0,0) → a 0-size viewport (blank world +
+            // empty-scissor crash). Clamp to the default so they self-heal on the
+            // next save.
+            var size = profile.Value.GameWindowSize;
+            if (size.X <= 0 || size.Y <= 0)
+                size = new Microsoft.Xna.Framework.Point(600, 480);
             camera.Value.Bounds = new(
                 profile.Value.GameWindowPosition.X,
                 profile.Value.GameWindowPosition.Y,
-                profile.Value.GameWindowSize.X,
-                profile.Value.GameWindowSize.Y);
+                size.X,
+                size.Y);
+        }
     }
 
     // Apply the borderless-window profile flag on change (Local sentinel: 0 =
