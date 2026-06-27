@@ -421,6 +421,7 @@ internal readonly struct HealthBarPlugin : IPlugin
         // the same reason (see the UO Gump contract).
         var root = builder.SpawnUOGump(commands, bgId, Vector3.UnitZ, spawnPos, zCounter)
             .Insert(new HealthBarWindow { Serial = serial, IsPlayer = isPlayer, InParty = inParty })
+            .Insert(new Anchorable { Kind = AnchorKind.Healthbar })
             .Insert<UiContainsByBounds>();
         var rootId = root.Id;
 

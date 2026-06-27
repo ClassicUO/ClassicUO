@@ -34,6 +34,7 @@ internal readonly struct WindowDragPlugin : IPlugin
     {
         app.AddResource(new UiZCounter());
         app.AddResource(new ForcedWindowDrag());
+        app.AddResource(new ActiveWindowDrag());
         var dragFn = Drag;
         var closeOnRightClickFn = CloseOnRightClick;
         var claimSelectionFn = ClaimSelectedFromMovable;
@@ -209,6 +210,7 @@ internal readonly struct WindowDragPlugin : IPlugin
         Res<DragGate> gate,
         Res<AssetsServer> assets,
         Res<ForcedWindowDrag> forced,
+        Res<ActiveWindowDrag> activeDrag,
         Res<Profile> profile,
         Res<KeyboardContext> keyboard,
         Local<DragAnchor> anchor,
@@ -221,10 +223,20 @@ internal readonly struct WindowDragPlugin : IPlugin
         // IsPressed is false on the press-once frame (oldState=Released), so
         // include IsPressedOnce in the "held" check or the latch attempt
         // below would be skipped on the very frame it needs to fire.
+        // One-shot signals consumed by AnchorPlugin this same frame (it runs in
+        // Stage.Last, after this). Reset every frame, set below.
+        activeDrag.Value.Owner = 0;
+        activeDrag.Value.FrameDelta = Vector2.Zero;
+        activeDrag.Value.JustReleased = 0;
+
         bool held = mouse.Value.IsPressed(MouseButtonType.Left)
                  || mouse.Value.IsPressedOnce(MouseButtonType.Left);
         if (!held)
         {
+            // Window let go this frame — hand the released root to AnchorPlugin
+            // so it can snap it to a neighbour.
+            if (anchor.Value.Active && anchor.Value.Owner != 0)
+                activeDrag.Value.JustReleased = anchor.Value.Owner;
             anchor.Value.Active = false;
             anchor.Value.Owner = 0;
             forced.Value.Owner = 0;
@@ -368,9 +380,31 @@ internal readonly struct WindowDragPlugin : IPlugin
         // at render (`(int)bb.X`). A fractional window origin makes each child
         // cross the integer boundary at a different sub-pixel offset, so the
         // relative gap between bg and text wobbles ±1px = flicker on drag.
-        ownerNode.Ref.Left = Val.Px(MathF.Round(anchor.Value.OriginX + delta.X));
-        ownerNode.Ref.Top = Val.Px(MathF.Round(anchor.Value.OriginY + delta.Y));
+        float prevLeft = ownerNode.Ref.Left.Type == ValType.Px ? ownerNode.Ref.Left.Value : 0f;
+        float prevTop = ownerNode.Ref.Top.Type == ValType.Px ? ownerNode.Ref.Top.Value : 0f;
+        float newLeft = MathF.Round(anchor.Value.OriginX + delta.X);
+        float newTop = MathF.Round(anchor.Value.OriginY + delta.Y);
+        ownerNode.Ref.Left = Val.Px(newLeft);
+        ownerNode.Ref.Top = Val.Px(newTop);
+
+        // Publish the EXACT whole-pixel move applied to the owner this frame so
+        // AnchorPlugin shifts anchored siblings by the same integer amount. Using
+        // the rounded owner delta (not the raw mouse delta) keeps the group rigid:
+        // a sub-0.5px raw delta re-rounds to 0 on a sibling's incremental add, so
+        // siblings would freeze while the owner (rounded from its absolute origin)
+        // still creeps — the group drifts apart.
+        activeDrag.Value.Owner = anchor.Value.Owner;
+        activeDrag.Value.FrameDelta = new Vector2(newLeft - prevLeft, newTop - prevTop);
     }
+}
+
+// Per-frame drag state published by WindowDragPlugin.Drag for AnchorPlugin.
+// A reference type so Res<T>.Value mutation persists (matches ForcedWindowDrag).
+internal sealed class ActiveWindowDrag
+{
+    public ulong Owner;        // window root being dragged this frame (0 = none)
+    public Vector2 FrameDelta; // movement applied to Owner this frame
+    public ulong JustReleased; // window root released THIS frame (one-shot)
 }
 
 // UiZCounter / ForcedWindowDrag / UiMovable / UiMovableNoDrag / UiNoWindowDrag

@@ -508,7 +508,8 @@ internal readonly struct CombatBookGumpPlugin : IPlugin
         bool primary, ushort iconGfx, Vector2 topLeft)
     {
         var fb = builder.SpawnUOGump(commands, iconGfx, Vector3.UnitZ, topLeft, z)
-            .Insert(new CombatAbilityIcon { Primary = primary, Floating = true });
+            .Insert(new CombatAbilityIcon { Primary = primary, Floating = true })
+            .Insert(new Anchorable { Kind = AnchorKind.Spell });
         fb.Observe((On<UiDoubleClick> _, Res<NetClient> net, ResMut<PlayerAbilities> a, Res<GameContext> ctx) =>
             Use(net.Value, a.Value, ctx.Value, primary));
         return fb;

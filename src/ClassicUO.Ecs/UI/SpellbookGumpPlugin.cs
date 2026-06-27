@@ -548,7 +548,8 @@ internal readonly struct SpellbookGumpPlugin : IPlugin
 
         var fb = builder.SpawnUOGump(commands, iconGfx, Vector3.UnitZ, topLeft, z)
             .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.Gump, AssetId = iconGfx, Hue = Vector3.UnitZ, TooltipSerial = tipSerial } })
-            .Insert(new SpellCastButton { CastId = castId, Icon = iconGfx });
+            .Insert(new SpellCastButton { CastId = castId, Icon = iconGfx })
+            .Insert(new Anchorable { Kind = AnchorKind.Spell });
         fb.Observe((On<UiDoubleClick> _, Res<NetClient> net, Res<GameContext> ctx) =>
             net.Value.Send_CastSpell(castId, ctx.Value.ClientVersion));
         return fb;

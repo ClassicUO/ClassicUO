@@ -11,6 +11,7 @@ internal readonly struct GumpPlugin : IPlugin
     public void Build(App app)
     {
         app.AddPlugin<WindowDragPlugin>();
+        app.AddPlugin<AnchorPlugin>();
         app.AddPlugin<ContainerGumpPlugin>();
         app.AddPlugin<PaperdollPlugin>();
         app.AddPlugin<ServerGumpPlugin>();

@@ -416,7 +416,8 @@ internal readonly struct RacialBookGumpPlugin : IPlugin
         uint tip = SeedTooltip(files, opl, GargoyleFlyingGraphic, 200);
         var fb = builder.SpawnUOGump(commands, GargoyleFlyingGraphic, Vector3.UnitZ, topLeft, z)
             .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.Gump, AssetId = GargoyleFlyingGraphic, Hue = Vector3.UnitZ, TooltipSerial = tip } })
-            .Insert(new RacialFlyingIcon { Floating = true });
+            .Insert(new RacialFlyingIcon { Floating = true })
+            .Insert(new Anchorable { Kind = AnchorKind.Spell });
         fb.Observe((On<UiDoubleClick> _, Res<NetClient> net) => net.Value.Send_ToggleGargoyleFlying());
         return fb;
     }

@@ -50,6 +50,29 @@ internal sealed class GumpRestoreQueue
     public float RemainingMs;
 }
 
+// Anchorable-window save queries bundled into one system param (the SaveGumps
+// param list is already near the 16 cap). Members is the entity->group lookup so
+// each anchorable's group id rides into gumps.xml as the `anchor_group` attr.
+internal sealed class AnchorSaveQueries : CompositeSystemParam
+{
+    public readonly Query<Data<Node, SpellCastButton>> Spell;
+    public readonly Query<Data<Node, HealthBarWindow>> Health;
+    public readonly Query<Data<Node, CombatAbilityIcon, UiCustom>, Filter<With<UiMovable>>> Ability;
+    public readonly Query<Data<Node>, Filter<With<RacialFlyingIcon>, With<UiMovable>>> Racial;
+    public readonly Query<Data<Node, SkillCastButton>> Skill;
+    public readonly Query<Data<AnchorMember>> Members;
+
+    public AnchorSaveQueries()
+    {
+        Spell = Add(new Query<Data<Node, SpellCastButton>>());
+        Health = Add(new Query<Data<Node, HealthBarWindow>>());
+        Ability = Add(new Query<Data<Node, CombatAbilityIcon, UiCustom>, Filter<With<UiMovable>>>());
+        Racial = Add(new Query<Data<Node>, Filter<With<RacialFlyingIcon>, With<UiMovable>>>());
+        Skill = Add(new Query<Data<Node, SkillCastButton>>());
+        Members = Add(new Query<Data<AnchorMember>>());
+    }
+}
+
 // Saves/restores open gump windows to <profile>/gumps.xml, matching the legacy
 // format. Save snapshots live window entities (deferred despawns keep them alive
 // during OnExit). Restore re-opens player-global windows via their OpenOrFocus
@@ -112,6 +135,7 @@ internal readonly struct GumpPersistencePlugin : IPlugin
         var worldmapFn = RestoreWorldMap;
         var containersFn = RestoreContainers;
         var spellButtonsFn = RestoreSpellButtons;
+        var skillButtonsFn = RestoreSkillButtons;
         var abilityButtonsFn = RestoreAbilityButtons;
         var racialButtonsFn = RestoreRacialButtons;
         var healthBarsFn = RestoreHealthBars;
@@ -133,6 +157,8 @@ internal readonly struct GumpPersistencePlugin : IPlugin
         app.AddSystem(containersFn).InStage(Stage.Update).RunIf((Res<State<GameState>> s, Res<GumpRestoreQueue> q)
             => s.Value.Current == GameState.GameScreen && q.Value.RemainingMs > 0f).Build();
         app.AddSystem(spellButtonsFn).InStage(Stage.Update).RunIf((Res<State<GameState>> s, Res<GumpRestoreQueue> q)
+            => s.Value.Current == GameState.GameScreen && q.Value.RemainingMs > 0f).Build();
+        app.AddSystem(skillButtonsFn).InStage(Stage.Update).RunIf((Res<State<GameState>> s, Res<GumpRestoreQueue> q)
             => s.Value.Current == GameState.GameScreen && q.Value.RemainingMs > 0f).Build();
         app.AddSystem(abilityButtonsFn).InStage(Stage.Update).RunIf((Res<State<GameState>> s, Res<GumpRestoreQueue> q)
             => s.Value.Current == GameState.GameScreen && q.Value.RemainingMs > 0f).Build();
@@ -196,11 +222,19 @@ internal readonly struct GumpPersistencePlugin : IPlugin
         Query<Data<Node, ContainerWindow, ContainerGumpTag>> containerQ,
         Query<Data<Node, GridContainerWindow, ContainerGumpTag>> gridQ,
         Query<Data<Node, SpellbookWindow>> spellbookQ,
-        Query<Data<Node, SpellCastButton>> spellButtonQ,
-        Query<Data<Node, HealthBarWindow>> healthBarQ,
-        Query<Data<Node, CombatAbilityIcon, UiCustom>, Filter<With<UiMovable>>> abilityQ,
-        Query<Data<Node>, Filter<With<RacialFlyingIcon>, With<UiMovable>>> racialQ)
+        AnchorSaveQueries anchorSave)
     {
+        // Append the entity's anchor group id (if any) so the restored windows
+        // re-form their group. GroupId is a runtime counter — its absolute value
+        // is irrelevant, only that co-grouped windows share it.
+        void AddAnchorGroup(List<(string, string)> attrs, ulong ent)
+        {
+            if (anchorSave.Members.TryGet(ent, out var r))
+            {
+                var (_, m) = r;
+                if (m.Ref.GroupId > 0) attrs.Add(("anchor_group", m.Ref.GroupId.ToString()));
+            }
+        }
         if (!ctx.Value.Loaded || string.IsNullOrEmpty(ctx.Value.ProfilePath))
             return;
 
@@ -263,30 +297,51 @@ internal readonly struct GumpPersistencePlugin : IPlugin
             // Spell icons dragged off the book onto the screen (legacy SpellButton).
             // serial=0; "id" = cast id (== legacy spell.ID), "graphic" = the icon so
             // restore needs no castId->icon reverse lookup.
-            foreach (var (_, node, btn) in spellButtonQ)
-                WriteGump(xml, LegacyGumpType.SpellButton, node, 0,
-                    ("id", btn.Ref.CastId.ToString()), ("graphic", btn.Ref.Icon.ToString()));
+            foreach (var (ent, node, btn) in anchorSave.Spell)
+            {
+                var a = new List<(string, string)> { ("id", btn.Ref.CastId.ToString()), ("graphic", btn.Ref.Icon.ToString()) };
+                AddAnchorGroup(a, ent.Ref);
+                WriteGump(xml, LegacyGumpType.SpellButton, node, 0, a.ToArray());
+            }
 
             // Per-mobile health bars (legacy HealthBar) — serial + position; the
             // bar resolves the mobile each frame and grays out when out of range,
             // so a serial whose mobile isn't loaded yet at login still restores.
-            foreach (var (_, node, hb) in healthBarQ)
-                WriteGump(xml, LegacyGumpType.HealthBar, node, hb.Ref.Serial);
+            foreach (var (ent, node, hb) in anchorSave.Health)
+            {
+                var a = new List<(string, string)>();
+                AddAnchorGroup(a, ent.Ref);
+                WriteGump(xml, LegacyGumpType.HealthBar, node, hb.Ref.Serial, a.ToArray());
+            }
 
             // Floating combat-ability buttons (legacy AbilityButton). UiMovable
             // filter keeps the in-book (docked) icons out. "primary" picks which
             // ability the double-click uses; "graphic" is the save-time icon.
-            foreach (var (_, node, ab, uic) in abilityQ)
+            foreach (var (ent, node, ab, uic) in anchorSave.Ability)
             {
                 if (!ab.Ref.Floating) continue;
-                WriteGump(xml, LegacyGumpType.AbilityButton, node, 0,
-                    ("primary", ab.Ref.Primary.ToString()), ("graphic", ((UOCustomRender)uic.Ref.Data).AssetId.ToString()));
+                var a = new List<(string, string)> { ("primary", ab.Ref.Primary.ToString()), ("graphic", ((UOCustomRender)uic.Ref.Data).AssetId.ToString()) };
+                AddAnchorGroup(a, ent.Ref);
+                WriteGump(xml, LegacyGumpType.AbilityButton, node, 0, a.ToArray());
             }
 
             // Floating gargoyle-flight toggle (legacy RacialButton) — fixed graphic,
             // position only. UiMovable filter excludes the docked book icon.
-            foreach (var (_, node) in racialQ)
-                WriteGump(xml, LegacyGumpType.RacialButton, node, 0);
+            foreach (var (ent, node) in anchorSave.Racial)
+            {
+                var a = new List<(string, string)>();
+                AddAnchorGroup(a, ent.Ref);
+                WriteGump(xml, LegacyGumpType.RacialButton, node, 0, a.ToArray());
+            }
+
+            // Floating skill buttons torn off the skills list (legacy SkillButton).
+            // "id" = skill index; restore re-resolves the name from assets.
+            foreach (var (ent, node, sk) in anchorSave.Skill)
+            {
+                var a = new List<(string, string)> { ("id", sk.Ref.SkillId.ToString()) };
+                AddAnchorGroup(a, ent.Ref);
+                WriteGump(xml, LegacyGumpType.SkillButton, node, 0, a.ToArray());
+            }
 
             xml.WriteEndElement();
             xml.WriteEndDocument();
@@ -555,6 +610,7 @@ internal readonly struct GumpPersistencePlugin : IPlugin
         Commands commands,
         Res<GumpBuilder> builder,
         ResMut<UiZCounter> z,
+        ResMut<AnchorCounter> counter,
         Res<UOFileManager> fileManager,
         ResMut<ObjectPropertyLists> opl)
     {
@@ -566,9 +622,35 @@ internal readonly struct GumpPersistencePlugin : IPlugin
             var castId = AttrInt(g, "id");
             var iconGfx = AttrUShort(g, "graphic");
             if (castId == 0 || iconGfx == 0) continue;
-            SpellbookGumpPlugin.SpawnFloatingSpellButton(
+            var ec = SpellbookGumpPlugin.SpawnFloatingSpellButton(
                 commands, builder.Value, z.Value, fileManager.Value, opl.Value,
                 castId, iconGfx, null, new Vector2(g.X, g.Y));
+            ApplyAnchorGroup(ec, g, counter.Value);
+        }
+    }
+
+    // Floating skill buttons — client-side, one pass. "id" is the skill index;
+    // re-resolve the name from assets to rebuild the button (legacy SkillButton).
+    private static void RestoreSkillButtons(
+        ResMut<GumpRestoreQueue> queue,
+        Commands commands,
+        Res<GumpBuilder> builder,
+        Res<AssetsServer> assets,
+        ResMut<UiZCounter> z,
+        ResMut<AnchorCounter> counter)
+    {
+        foreach (var g in queue.Value.Gumps)
+        {
+            if (g.Handled) continue;
+            if (g.Type != (int)LegacyGumpType.SkillButton) continue;
+            g.Handled = true;
+            if (!g.Attrs.ContainsKey("id")) continue;
+            int skillId = AttrInt(g, "id");
+            if (skillId < 0 || skillId >= assets.Value.Skills.SkillsCount) continue;
+            string nm = assets.Value.Skills.Skills[skillId].Name;
+            var ec = SkillsGumpPlugin.SpawnFloatingSkillButton(
+                commands, builder.Value, z.Value, skillId, nm, new Vector2(g.X, g.Y));
+            ApplyAnchorGroup(ec, g, counter.Value);
         }
     }
 
@@ -579,7 +661,8 @@ internal readonly struct GumpPersistencePlugin : IPlugin
         ResMut<GumpRestoreQueue> queue,
         Commands commands,
         Res<GumpBuilder> builder,
-        ResMut<UiZCounter> z)
+        ResMut<UiZCounter> z,
+        ResMut<AnchorCounter> counter)
     {
         foreach (var g in queue.Value.Gumps)
         {
@@ -588,8 +671,9 @@ internal readonly struct GumpPersistencePlugin : IPlugin
             g.Handled = true;
             var iconGfx = AttrUShort(g, "graphic");
             if (iconGfx == 0) continue;
-            CombatBookGumpPlugin.SpawnFloatingAbilityButton(
+            var ec = CombatBookGumpPlugin.SpawnFloatingAbilityButton(
                 commands, builder.Value, z.Value, AttrBool(g, "primary"), iconGfx, new Vector2(g.X, g.Y));
+            ApplyAnchorGroup(ec, g, counter.Value);
         }
     }
 
@@ -599,6 +683,7 @@ internal readonly struct GumpPersistencePlugin : IPlugin
         Commands commands,
         Res<GumpBuilder> builder,
         ResMut<UiZCounter> z,
+        ResMut<AnchorCounter> counter,
         Res<UOFileManager> fileManager,
         ResMut<ObjectPropertyLists> opl)
     {
@@ -607,8 +692,9 @@ internal readonly struct GumpPersistencePlugin : IPlugin
             if (g.Handled) continue;
             if (g.Type != (int)LegacyGumpType.RacialButton) continue;
             g.Handled = true;
-            RacialBookGumpPlugin.SpawnFloatingRacialButton(
+            var ec = RacialBookGumpPlugin.SpawnFloatingRacialButton(
                 commands, builder.Value, z.Value, fileManager.Value, opl.Value, new Vector2(g.X, g.Y));
+            ApplyAnchorGroup(ec, g, counter.Value);
         }
     }
 
@@ -622,6 +708,7 @@ internal readonly struct GumpPersistencePlugin : IPlugin
         Res<AssetsServer> assets,
         Res<GameContext> gameCtx,
         ResMut<UiZCounter> z,
+        ResMut<AnchorCounter> counter,
         Res<NetClient> net,
         Res<PartyState> party,
         Query<Data<HealthBarWindow>> existingQ)
@@ -632,9 +719,20 @@ internal readonly struct GumpPersistencePlugin : IPlugin
             if (g.Type != (int)LegacyGumpType.HealthBar) continue;
             g.Handled = true;
             if (g.Serial == 0) continue;
-            HealthBarPlugin.OpenForSerial(commands, builder.Value, assets.Value, gameCtx.Value, z.Value,
+            var id = HealthBarPlugin.OpenForSerial(commands, builder.Value, assets.Value, gameCtx.Value, z.Value,
                 net.Value, party.Value, g.Serial, new Vector2(g.X, g.Y), center: false, existingQ);
+            if (id != 0) ApplyAnchorGroup(commands.Entity(id), g, counter.Value);
         }
+    }
+
+    // Reattach a restored anchorable to its saved group and keep AnchorCounter
+    // ahead of every restored id so a new group minted this session can't collide.
+    private static void ApplyAnchorGroup(EntityCommands ec, SavedGump g, AnchorCounter counter)
+    {
+        int grp = AttrInt(g, "anchor_group");
+        if (grp <= 0) return;
+        ec.Insert(new AnchorMember { GroupId = grp });
+        counter.Next = Math.Max(counter.Next, grp + 1);
     }
 
     private static bool AttrBool(SavedGump g, string key)

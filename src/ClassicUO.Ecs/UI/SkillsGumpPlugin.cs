@@ -63,6 +63,8 @@ internal readonly struct SkillsGumpPlugin : IPlugin
     private const ushort NewGroupBtn = 0x083A;
     private const ushort FlagGump = 0x0828;   // scroll-position flag (Journal-style)
     private const ushort SkillHue = 0x0288;
+    internal const ushort SkillButtonBg = 0x24B8; // resizepic behind a torn-off skill button
+    internal const int SkillBtnW = 88, SkillBtnH = 44;
 
     private const int DiffY = 22;
     private const int ListTop = 40;
@@ -610,6 +612,43 @@ internal readonly struct SkillsGumpPlugin : IPlugin
         last.Value = cur;
     }
 
+    // Standalone floating skill button torn off the skills list (legacy
+    // SkillButtonGump): a 0x24B8 resizepic with the centered skill name; double-
+    // click uses the skill. Anchorable.Spell so it stacks with spell/ability icons.
+    internal static EntityCommands SpawnFloatingSkillButton(
+        Commands commands, GumpBuilder builder, UiZCounter z, int skillId, string name, Vector2 topLeft)
+    {
+        var root = commands.Spawn()
+            .Insert(new Node
+            {
+                Display = Display.Flex,
+                PositionType = PositionType.Absolute,
+                Left = Val.Px(topLeft.X), Top = Val.Px(topLeft.Y),
+                Width = Val.Px(SkillBtnW), Height = Val.Px(SkillBtnH),
+            })
+            .Insert(new UiCustom { Data = new UOCustomRender { Kind = UOCustomKind.GumpNinePatch, AssetId = SkillButtonBg, Hue = Vector3.UnitZ } })
+            .Insert(Interaction.None)
+            .Insert<UOGump>()
+            .Insert<UiMovable>()
+            // Nine-patch isn't pixel-hit-tested; bounds-hit keeps the whole button
+            // draggable / double-clickable (UiPick + Clay both honour this).
+            .Insert<UiContainsByBounds>()
+            .Insert(new GlobalZIndex(z.Bump()))
+            .Insert(new SkillCastButton { SkillId = skillId })
+            .Insert(new Anchorable { Kind = AnchorKind.Spell });
+        int sid = skillId;
+        root.Observe((On<UiDoubleClick> _, Res<NetClient> net) => net.Value.Send_UseSkill(sid));
+
+        // Centered name label — a bare Text node (no UiCustom / Interaction) so it
+        // isn't hit-tested and the root keeps the drag / double-click gesture.
+        int tw = UoFontRuntime.Fonts != null ? UoFontRuntime.Fonts.GetWidthASCII(9, name) : name.Length * 7;
+        var label = builder.AddLabel(commands, name, new Vector2(MathF.Max(2, (SkillBtnW - tw) / 2f), (SkillBtnH - 14) / 2f))
+            .Insert(new TextFont { FontId = (ushort)(9 | UoFontRuntime.AsciiFlag), Size = 12 })
+            .Insert(new TextColor(UoFontRuntime.AsciiHue(SkillHue)));
+        commands.AddChild(root.Id, label.Id);
+        return root;
+    }
+
     private struct SkillDragAnchor { public bool Active, Claimed; public ulong Window; public int SrcGroup, SkillId; public ulong Preview; public int LastTarget; }
 
     // Dirty-white drop-target highlight + the group-name edit background.
@@ -633,12 +672,15 @@ internal readonly struct SkillsGumpPlugin : IPlugin
         Res<MouseContext> mouse,
         Res<DragGate> gate,
         Res<AssetsServer> assets,
+        Res<GumpBuilder> builder,
+        Res<UiZCounter> zCounter,
         Commands commands,
         Local<SkillDragAnchor> anchor,
         Res<PlayerSkills> skills,
         Query<Data<ComputedNode, SkillRowDrag>> dragQ,
         Query<Data<ComputedNode, SkillNameEdit>> groupNameQ,
         Query<Data<SkillGroupToggle>> headerEntsQ,
+        Query<Data<ComputedNode>> compQ,
         Query<Data<Node>> nodeQ,
         Query<Data<SkillsWindow>> windowsQ)
     {
@@ -659,6 +701,25 @@ internal readonly struct SkillsGumpPlugin : IPlugin
                     {
                         var (_, w) = winRow;
                         w.Ref.Dirty = true;
+                    }
+                }
+                else if (tgt < 0)
+                {
+                    // Dropped off every group: if released outside the window,
+                    // tear off a standalone floating skill button (legacy
+                    // SkillButtonGump) — anchorable like the spell/ability icons.
+                    var pos = mouse.Value.Position;
+                    bool outside = true;
+                    if (compQ.TryGet(anchor.Value.Window, out var wbbRow))
+                    {
+                        var (_, wbb) = wbbRow;
+                        outside = !UiHitTest.Contains(wbb.Ref, pos);
+                    }
+                    if (outside && anchor.Value.SkillId < assets.Value.Skills.SkillsCount)
+                    {
+                        string nm = assets.Value.Skills.Skills[anchor.Value.SkillId].Name;
+                        SpawnFloatingSkillButton(commands, builder.Value, zCounter.Value, anchor.Value.SkillId, nm,
+                            new Vector2(pos.X - SkillBtnW / 2f, pos.Y - SkillBtnH / 2f));
                     }
                 }
 
@@ -961,5 +1022,6 @@ internal struct SkillsCheck { public ulong Window; public bool Cap; }
 internal struct SkillsResetButton { public ulong Window; }
 internal struct SkillNameEdit { public ulong Window; public int GroupIndex; }
 internal struct SkillRowDrag { public ulong Window; public int GroupIndex; public int SkillId; }
+internal struct SkillCastButton { public int SkillId; }
 internal struct SkillsRealLabel;
 internal struct SkillsCapLabel;
