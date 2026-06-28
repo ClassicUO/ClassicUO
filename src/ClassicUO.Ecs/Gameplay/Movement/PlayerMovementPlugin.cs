@@ -384,6 +384,12 @@ readonly struct PlayerMovementPlugin : IPlugin
         Single<Data<WorldPosition, Facing, MobileSteps, MobAnimation, ServerFlags>, With<Player>> playerQuery
     )
     {
+        // Legacy PlayerMobile.Walk: a paralyzed (Frozen) player can't walk or
+        // turn. The pathfinder already bails on IsParalyzed; mirror it here so
+        // manual mouse/keyboard walking is frozen too.
+        if (moveState.IsParalyzed)
+            return false;
+
         Span<sbyte> diag = [1, -1];
 
         (var worldPos, var dir, var mobSteps, var animation, var flags) = playerQuery.Get();

@@ -18,8 +18,10 @@
 //     state capture deferred until the corresponding Bevy.UI widget lands.
 //   * tooltip, itemproperty, noresize, mastergump, togglelimitgumpscale —
 //     no-op for now.
-//   * noclose / nodispose / nomove — flag the root (nomove tags UiMovableNoDrag, which
-//     suppresses drag only; the gump stays a window for close / click-capture).
+//   * nomove / noclose — flag the root (nomove tags UiMovableNoDrag, which
+//     suppresses drag only; noclose tags UiNoRightClickClose, which blocks
+//     right-click-close; either way the gump stays a window for click-capture).
+//     nodispose (ESC-close) is a no-op — ECS has no ESC-close path.
 
 using System;
 using System.Collections.Generic;
@@ -429,6 +431,7 @@ internal readonly struct ServerGumpPlugin : IPlugin
         int page = 0;
         int group = 0;
         bool nomove = false;
+        bool noclose = false;
         float maxRight = 0f;
         float maxBottom = 0f;
 
@@ -452,7 +455,8 @@ internal readonly struct ServerGumpPlugin : IPlugin
             }
             if (Eq(entry, "group") || Eq(entry, "endgroup")) { group++; continue; }
             if (Eq(entry, "nomove")) { nomove = true; continue; }
-            if (Eq(entry, "noclose") || Eq(entry, "nodispose")) continue;
+            if (Eq(entry, "noclose")) { noclose = true; continue; }
+            if (Eq(entry, "nodispose")) continue;
             if (Eq(entry, "noresize") || Eq(entry, "mastergump") || Eq(entry, "togglelimitgumpscale")) continue;
             if (Eq(entry, "tooltip") || Eq(entry, "itemproperty")) continue;
             if (entry == "\0") break;
@@ -784,6 +788,12 @@ internal readonly struct ServerGumpPlugin : IPlugin
         // would make the whole gump fall through to the world (clicks ignored).
         if (nomove)
             commands.Entity(rootId).Insert<UiMovableNoDrag>();
+
+        // noclose (legacy CanCloseWithRightClick = false): the right-click is
+        // still consumed (no walk-under) but the window stays open — gated in
+        // WindowDragPlugin.CloseOnRightClick via this marker.
+        if (noclose)
+            commands.Entity(rootId).Insert<UiNoRightClickClose>();
     }
 
     // Wrapped text. Clay.NET (the .NET port shipped with TinyEcs.Bevy.UI)
