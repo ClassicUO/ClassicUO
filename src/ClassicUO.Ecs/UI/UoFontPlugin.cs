@@ -117,6 +117,42 @@ internal static class UoFontRuntime
 
 internal sealed class UoFontTextMeasurer : Clay.ITextMeasurer
 {
+    // Clay is immediate-mode: it calls MeasureText for EVERY text node EVERY
+    // frame. The actual GetWidth/GetHeight*/GetInfo* layout is expensive and
+    // allocates (MultilinesFontInfo + List<MultilinesFontData> + array). The
+    // render path (UoFontRenderer.GetLayout) caches it; this measure path used
+    // to re-run it per node per frame (~7.5 MB/s of garbage in profiling, even
+    // standing still). Cache the measured Dimensions keyed by (params, text).
+    //
+    // Hit path is alloc-free: a value-struct param key selects a per-param
+    // bucket whose string->Dimensions map is keyed with StringComparer.Ordinal,
+    // so a ReadOnlySpan<char> alternate-lookup matches WITHOUT materialising a
+    // string. The key string is built (text.ToString()) only on a miss. Bounded
+    // + FIFO-evicted per bucket so dynamic text (coords, buff timers, skill
+    // totals) can't grow the cache without limit — mirrors GetLayout's policy.
+    private const int CapPerBucket = 512;
+
+    private readonly struct ParamKey : IEquatable<ParamKey>
+    {
+        public readonly ushort FontId, FontSize, LetterSpacing;
+        public readonly int MaxWidth;
+        public ParamKey(ushort fontId, ushort fontSize, ushort letterSpacing, int maxWidth)
+        { FontId = fontId; FontSize = fontSize; LetterSpacing = letterSpacing; MaxWidth = maxWidth; }
+        public bool Equals(ParamKey o) =>
+            FontId == o.FontId && FontSize == o.FontSize && LetterSpacing == o.LetterSpacing && MaxWidth == o.MaxWidth;
+        public override bool Equals(object? o) => o is ParamKey k && Equals(k);
+        public override int GetHashCode() => HashCode.Combine(FontId, FontSize, LetterSpacing, MaxWidth);
+    }
+
+    private sealed class Bucket
+    {
+        // Ordinal comparer is required for the ReadOnlySpan<char> alternate lookup.
+        public readonly Dictionary<string, Clay.Dimensions> Map = new(StringComparer.Ordinal);
+        public readonly Queue<string> Order = new();
+    }
+
+    private readonly Dictionary<ParamKey, Bucket> _byParams = new();
+
     // maxWidth > 0 wraps via MeasureFont (widest wrapped line + total height) and
     // caches the layout so the matching UoFontRenderer.Draw at the same width hits
     // (Draw re-wraps identically). maxWidth <= 0 measures the run as-is — wrap
@@ -128,6 +164,26 @@ internal sealed class UoFontTextMeasurer : Clay.ITextMeasurer
         if (fonts == null || text.IsEmpty)
             return new Clay.Dimensions(0, fontSize);
 
+        var pkey = new ParamKey(fontId, fontSize, letterSpacing, (int)maxWidth);
+        if (!_byParams.TryGetValue(pkey, out var bucket))
+            _byParams[pkey] = bucket = new Bucket();
+
+        var alt = bucket.Map.GetAlternateLookup<ReadOnlySpan<char>>();
+        if (alt.TryGetValue(text, out var hit))
+            return hit;
+
+        var dim = Compute(fonts, text, fontId, fontSize, maxWidth);
+
+        var key = text.ToString(); // materialise once, on miss only
+        bucket.Map[key] = dim;
+        bucket.Order.Enqueue(key);
+        if (bucket.Order.Count > CapPerBucket)
+            bucket.Map.Remove(bucket.Order.Dequeue());
+        return dim;
+    }
+
+    private static Clay.Dimensions Compute(FontsLoader fonts, ReadOnlySpan<char> text, ushort fontId, ushort fontSize, float maxWidth)
+    {
         if (maxWidth > 0)
         {
             var (ww, hh) = UoFontRenderer.MeasureFont(text.ToString(), fontId, (int)maxWidth);
