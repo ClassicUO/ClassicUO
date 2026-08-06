@@ -21,6 +21,7 @@ using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -1613,21 +1614,32 @@ namespace ClassicUO.Game.UI.Gumps
                                     {
                                         if (reader.Name.Equals("Marker"))
                                         {
+                                            if
+                                            (
+                                                !TryParseInt(reader.GetAttribute("X"), out int markerX)
+                                                || !TryParseInt(reader.GetAttribute("Y"), out int markerY)
+                                                || !TryParseInt(reader.GetAttribute("Facet"), out int markerFacet)
+                                            )
+                                            {
+                                                continue;
+                                            }
+
+                                            string iconName = reader.GetAttribute("Icon")?.ToLowerInvariant() ?? string.Empty;
+
                                             WMapMarker marker = new WMapMarker
                                             {
-                                                X = int.Parse(reader.GetAttribute("X")),
-                                                Y = int.Parse(reader.GetAttribute("Y")),
-                                                Name = reader.GetAttribute("Name"),
-                                                MapId = int.Parse(reader.GetAttribute("Facet")),
+                                                X = markerX,
+                                                Y = markerY,
+                                                Name = reader.GetAttribute("Name") ?? string.Empty,
+                                                MapId = markerFacet,
                                                 Color = Color.White,
                                                 ZoomIndex = 3
                                             };
 
-                                            if (_markerIcons.TryGetValue(reader.GetAttribute("Icon").ToLower(), out Texture2D value))
+                                            if (!string.IsNullOrWhiteSpace(iconName) && _markerIcons.TryGetValue(iconName, out Texture2D value))
                                             {
                                                 marker.MarkerIcon = value;
-
-                                                marker.MarkerIconName = reader.GetAttribute("Icon").ToLower();
+                                                marker.MarkerIconName = iconName;
                                             }
 
                                             markerFile.Markers.Add(marker);
@@ -1651,34 +1663,45 @@ namespace ClassicUO.Game.UI.Gumps
                                         }
 
                                         // Check for UOAM file
-                                        if (line.Substring(0, 1).Equals("+") || line.Substring(0, 1).Equals("-"))
+                                        if (line.Length > 1 && (line[0] == '+' || line[0] == '-'))
                                         {
-                                            string icon = line.Substring(1, line.IndexOf(':') - 1);
+                                            int iconSeparatorIndex = line.IndexOf(':');
 
-                                            line = line.Substring(line.IndexOf(':') + 2);
-
-                                            string[] splits = line.Split(' ');
-
-                                            if (splits.Length <= 1)
+                                            if (iconSeparatorIndex <= 1 || iconSeparatorIndex + 2 > line.Length)
                                             {
                                                 continue;
                                             }
 
+                                            string icon = line.Substring(1, iconSeparatorIndex - 1);
+                                            line = line.Substring(iconSeparatorIndex + 2);
+
+                                            string[] splits = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                                            if
+                                            (
+                                                splits.Length < 4
+                                                || !TryParseInt(splits[0], out int markerX)
+                                                || !TryParseInt(splits[1], out int markerY)
+                                                || !TryParseInt(splits[2], out int markerMapId)
+                                            )
+                                            {
+                                                continue;
+                                            }
+
+                                            string markerIconName = icon.Split(' ', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()?.ToLowerInvariant() ?? string.Empty;
+
                                             WMapMarker marker = new WMapMarker
                                             {
-                                                X = int.Parse(splits[0]),
-                                                Y = int.Parse(splits[1]),
-                                                MapId = int.Parse(splits[2]),
+                                                X = markerX,
+                                                Y = markerY,
+                                                MapId = markerMapId,
                                                 Name = string.Join(" ", splits, 3, splits.Length - 3),
+                                                MarkerIconName = markerIconName,
                                                 Color = Color.White,
                                                 ZoomIndex = 3
                                             };
 
-                                            string[] iconSplits = icon.Split(' ');
-
-                                            marker.MarkerIconName = iconSplits[0].ToLower();
-
-                                            if (_markerIcons.TryGetValue(iconSplits[0].ToLower(), out Texture2D value))
+                                            if (!string.IsNullOrWhiteSpace(markerIconName) && _markerIcons.TryGetValue(markerIconName, out Texture2D value))
                                             {
                                                 marker.MarkerIcon = value;
                                             }
@@ -1703,30 +1726,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                                         if (string.IsNullOrEmpty(line))
                                         {
-                                            return;
+                                            continue;
                                         }
 
                                         string[] splits = line.Split(',');
 
-                                        if (splits.Length <= 1)
+                                        if (!TryParseMarker(splits, out WMapMarker marker))
                                         {
                                             continue;
-                                        }
-
-                                        WMapMarker marker = new WMapMarker
-                                        {
-                                            X = int.Parse(splits[0]),
-                                            Y = int.Parse(splits[1]),
-                                            MapId = int.Parse(splits[2]),
-                                            Name = splits[3],
-                                            MarkerIconName = splits[4].ToLower(),
-                                            Color = GetColor(splits[5]),
-                                            ZoomIndex = splits.Length == 7 ? int.Parse(splits[6]) : 3
-                                        };
-
-                                        if (_markerIcons.TryGetValue(splits[4].ToLower(), out Texture2D value))
-                                        {
-                                            marker.MarkerIcon = value;
                                         }
 
                                         markerFile.Markers.Add(marker);
@@ -1862,7 +1869,11 @@ namespace ClassicUO.Game.UI.Gumps
                     {
                         continue;
                     }
-                    tempList.Add(ParseMarker(splits));
+
+                    if (TryParseMarker(splits, out WMapMarker marker))
+                    {
+                        tempList.Add(marker);
+                    }
                 }
             }
 
@@ -3237,24 +3248,55 @@ namespace ClassicUO.Game.UI.Gumps
         /// <returns>Marker</returns>
         internal static WMapMarker ParseMarker(string[] splits)
         {
-            WMapMarker marker = new WMapMarker
+            return TryParseMarker(splits, out WMapMarker marker) ? marker : null;
+        }
+
+        internal static bool TryParseMarker(string[] splits, out WMapMarker marker)
+        {
+            marker = null;
+
+            if (splits == null || splits.Length < 6)
             {
-                X = int.Parse(Truncate(splits[0], 4)),
-                Y = int.Parse(Truncate(splits[1], 4)),
-                MapId = int.Parse(splits[2]),
-                Name = Truncate(splits[3], 25),
-                MarkerIconName = splits[4].ToLower(),
-                Color = GetColor(Truncate(splits[5], 10)),
-                ColorName = Truncate(splits[5], 10),
-                ZoomIndex = splits.Length == 7 ? int.Parse(splits[6]) : 3
+                return false;
+            }
+
+            string markerIconName = splits[4]?.Trim().ToLowerInvariant() ?? string.Empty;
+            string colorName = Truncate((splits[5] ?? string.Empty).Trim().ToLowerInvariant(), 10);
+            int zoomIndex = 3;
+
+            if (splits.Length >= 7 && !string.IsNullOrWhiteSpace(splits[6]) && !TryParseInt(splits[6], out zoomIndex))
+            {
+                return false;
+            }
+
+            if
+            (
+                !TryParseInt(Truncate((splits[0] ?? string.Empty).Trim(), 4), out int markerX)
+                || !TryParseInt(Truncate((splits[1] ?? string.Empty).Trim(), 4), out int markerY)
+                || !TryParseInt((splits[2] ?? string.Empty).Trim(), out int markerMapId)
+            )
+            {
+                return false;
+            }
+
+            marker = new WMapMarker
+            {
+                X = markerX,
+                Y = markerY,
+                MapId = markerMapId,
+                Name = Truncate((splits[3] ?? string.Empty).Trim(), 25),
+                MarkerIconName = markerIconName,
+                Color = GetColor(colorName),
+                ColorName = colorName,
+                ZoomIndex = zoomIndex
             };
 
-            if (_markerIcons.TryGetValue(splits[4].ToLower(), out Texture2D value))
+            if (!string.IsNullOrWhiteSpace(markerIconName) && _markerIcons.TryGetValue(markerIconName, out Texture2D value))
             {
                 marker.MarkerIcon = value;
             }
 
-            return marker;
+            return true;
         }
 
         /// <summary>
@@ -3291,6 +3333,11 @@ namespace ClassicUO.Game.UI.Gumps
         public static Color GetColor(string name)
         {
             return _colorMap.TryGetValue(name, out var color) ? color : Color.White;
+        }
+
+        private static bool TryParseInt(string value, out int parsedValue)
+        {
+            return int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out parsedValue);
         }
     }
 

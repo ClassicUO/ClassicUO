@@ -273,17 +273,25 @@ namespace ClassicUO
                 return;
 
             var mem = NativeMemory.AllocZeroed((nuint)sizeof(ClientBindings));
-            ref var cuoHost = ref Unsafe.AsRef<ClientBindings>(mem);
-            cuoHost.PacketLengthFn = Marshal.GetFunctionPointerForDelegate(_packetLength);
-            cuoHost.CastSpellFn = Marshal.GetFunctionPointerForDelegate(_castSpell);
-            cuoHost.SetWindowTitleFn = Marshal.GetFunctionPointerForDelegate(_setWindowTitle);
-            cuoHost.PluginRecvFn = Marshal.GetFunctionPointerForDelegate(_sendToClient);
-            cuoHost.PluginSendFn = Marshal.GetFunctionPointerForDelegate(_sendToServer);
-            cuoHost.RequestMoveFn = Marshal.GetFunctionPointerForDelegate(_requestMove);
-            cuoHost.GetPlayerPositionFn = Marshal.GetFunctionPointerForDelegate(_getPlayerPosition);
-            cuoHost.ReflectionCmdFn = Marshal.GetFunctionPointerForDelegate(_reflectionCmd);
 
-            _initialize((IntPtr)mem);
+            try
+            {
+                ref var cuoHost = ref Unsafe.AsRef<ClientBindings>(mem);
+                cuoHost.PacketLengthFn = Marshal.GetFunctionPointerForDelegate(_packetLength);
+                cuoHost.CastSpellFn = Marshal.GetFunctionPointerForDelegate(_castSpell);
+                cuoHost.SetWindowTitleFn = Marshal.GetFunctionPointerForDelegate(_setWindowTitle);
+                cuoHost.PluginRecvFn = Marshal.GetFunctionPointerForDelegate(_sendToClient);
+                cuoHost.PluginSendFn = Marshal.GetFunctionPointerForDelegate(_sendToServer);
+                cuoHost.RequestMoveFn = Marshal.GetFunctionPointerForDelegate(_requestMove);
+                cuoHost.GetPlayerPositionFn = Marshal.GetFunctionPointerForDelegate(_getPlayerPosition);
+                cuoHost.ReflectionCmdFn = Marshal.GetFunctionPointerForDelegate(_reflectionCmd);
+
+                _initialize((IntPtr)mem);
+            }
+            finally
+            {
+                NativeMemory.Free(mem);
+            }
         }
 
         public void LoadPlugin(string pluginPath)

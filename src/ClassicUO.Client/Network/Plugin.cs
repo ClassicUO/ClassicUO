@@ -123,9 +123,14 @@ namespace ClassicUO.Network
 
         public static Plugin Create(string path)
         {
-            path = Path.GetFullPath(
-                Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Plugins", path)
-            );
+            string configuredPath = path;
+
+            if (!TryGetSafePluginPath(configuredPath, out path))
+            {
+                Log.Error($"Plugin '{configuredPath}' is outside the allowed plugin directory.");
+
+                return null;
+            }
 
             if (!File.Exists(path))
             {
@@ -150,6 +155,37 @@ namespace ClassicUO.Network
             Plugins.Add(p);
 
             return p;
+        }
+
+        private static bool TryGetSafePluginPath(string configuredPath, out string safePath)
+        {
+            safePath = null;
+
+            if (string.IsNullOrWhiteSpace(configuredPath))
+            {
+                return false;
+            }
+
+            string pluginRoot = Path.GetFullPath(Path.Combine(CUOEnviroment.ExecutablePath, "Data", "Plugins"));
+            string candidatePath = Path.GetFullPath(Path.Combine(pluginRoot, configuredPath));
+
+            if (!IsPathUnderRoot(candidatePath, pluginRoot))
+            {
+                return false;
+            }
+
+            safePath = candidatePath;
+
+            return true;
+        }
+
+        private static bool IsPathUnderRoot(string path, string rootPath)
+        {
+            string normalizedRoot = Path.TrimEndingDirectorySeparator(Path.GetFullPath(rootPath));
+            string normalizedPath = Path.GetFullPath(path);
+            StringComparison comparison = CUOEnviroment.IsUnix ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+
+            return normalizedPath.StartsWith(normalizedRoot + Path.DirectorySeparatorChar, comparison);
         }
 
         public void Load()
@@ -511,6 +547,7 @@ namespace ClassicUO.Network
 
         internal static bool ProcessRecvPacket(byte[] data, ref int length)
         {
+            length = ClampPacketLength(length, data?.Length ?? 0, "plugin host", "recv");
             bool result = Client.Game.PluginHost?.PacketIn(new ArraySegment<byte>(data, 0, length)) ?? true;
 
             foreach (Plugin plugin in Plugins)
@@ -519,24 +556,53 @@ namespace ClassicUO.Network
                 {
                     byte[] tmp = new byte[length];
                     Array.Copy(data, tmp, length);
+                    int pluginLength = length;
 
-                    if (!plugin._onRecv_new(tmp, ref length))
+                    if (!plugin._onRecv_new(tmp, ref pluginLength))
                     {
                         result = false;
                     }
 
+                    pluginLength = ClampPacketLength
+                    (
+                        pluginLength,
+                        Math.Min(tmp.Length, data.Length),
+                        plugin.PluginPath,
+                        "recv"
+                    );
+
+                    length = pluginLength;
                     Array.Copy(tmp, data, length);
                 }
                 else if (plugin._onRecv != null)
                 {
                     byte[] tmp = new byte[length];
                     Array.Copy(data, tmp, length);
+                    int pluginLength = length;
 
-                    if (!plugin._onRecv(ref tmp, ref length))
+                    if (!plugin._onRecv(ref tmp, ref pluginLength))
                     {
                         result = false;
                     }
 
+                    if (tmp == null)
+                    {
+                        Log.Warn($"Plugin '{plugin.PluginPath}' returned null recv buffer. Dropping packet.");
+                        length = 0;
+                        result = false;
+
+                        continue;
+                    }
+
+                    pluginLength = ClampPacketLength
+                    (
+                        pluginLength,
+                        Math.Min(tmp.Length, data.Length),
+                        plugin.PluginPath,
+                        "recv"
+                    );
+
+                    length = pluginLength;
                     Array.Copy(tmp, data, length);
                 }
             }
@@ -553,32 +619,60 @@ namespace ClassicUO.Network
                 if (plugin._onSend_new != null)
                 {
                     var tmp = message.ToArray();
-                    var length = tmp.Length;
+                    int length = tmp.Length;
 
                     if (!plugin._onSend_new(tmp, ref length))
                     {
                         result = false;
                     }
 
+                    length = ClampPacketLength(length, Math.Min(tmp.Length, message.Length), plugin.PluginPath, "send");
                     message = message.Slice(0, length);
                     tmp.AsSpan(0, length).CopyTo(message);
                 }
                 else if (plugin._onSend != null)
                 {
                     var tmp = message.ToArray();
-                    var length = tmp.Length;
+                    int length = tmp.Length;
 
                     if (!plugin._onSend(ref tmp, ref length))
                     {
                         result = false;
                     }
 
+                    if (tmp == null)
+                    {
+                        Log.Warn($"Plugin '{plugin.PluginPath}' returned null send buffer. Dropping packet.");
+                        message = message[..0];
+                        result = false;
+
+                        continue;
+                    }
+
+                    length = ClampPacketLength(length, Math.Min(tmp.Length, message.Length), plugin.PluginPath, "send");
                     message = message.Slice(0, length);
                     tmp.AsSpan(0, length).CopyTo(message);
                 }
             }
 
             return result;
+        }
+
+        private static int ClampPacketLength(int length, int maxLength, string pluginPath, string direction)
+        {
+            if ((uint) length <= (uint) maxLength)
+            {
+                return length;
+            }
+
+            int clamped = Math.Clamp(length, 0, maxLength);
+
+            Log.Warn
+            (
+                $"Invalid {direction} packet length {length} from '{pluginPath}'. Clamped to {clamped} (max {maxLength})."
+            );
+
+            return clamped;
         }
 
         internal static void OnClosing()

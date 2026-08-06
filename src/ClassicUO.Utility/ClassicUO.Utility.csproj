@@ -7,6 +7,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\external\FNA\FNA.Core.csproj" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.1.11" />
+    <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="10.0.0" />
   </ItemGroup>
 
 </Project>

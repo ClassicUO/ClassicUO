@@ -23,10 +23,12 @@ namespace ClassicUO.Game
         private const int STATICS_MEMORY_SIZE = 200000000;
         private const int CRC_LENGTH = 25;
         private const int LAND_BLOCK_LENGTH = 192;
+        private const int MAX_SHARD_NAME_LENGTH = 64;
 
         private static UltimaLive _UL;
 
         private static readonly char[] _pathSeparatorChars = { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar };
+        private static readonly char[] _allowedShardNamePunctuation = { '.', '_', '-' };
         private uint[] _EOF;
         private ULFileMul[] _filesIdxStatics;
         private ULFileMul[] _filesMap;
@@ -425,12 +427,10 @@ namespace ClassicUO.Game
                         return;
                     }
 
-                    string[] split = name.Split(_pathSeparatorChars, StringSplitOptions.RemoveEmptyEntries);
-
                     _UL = new UltimaLive
                     {
                         ShardName = name,
-                        RealShardName = split[split.Length - 1]
+                        RealShardName = Path.GetFileName(name)
                     };
 
                     //TODO: create shard directory, copy map and statics to that directory, use that files instead of the original ones
@@ -609,14 +609,13 @@ namespace ClassicUO.Game
         {
             try
             {
-                //we cannot allow directory separator inside our name
-                if (!string.IsNullOrEmpty(shardName) && shardName.IndexOfAny(_pathSeparatorChars) == -1)
+                if (IsValidShardName(shardName))
                 {
-                    string folderPath = Environment.GetFolderPath(CUOEnviroment.IsUnix ? Environment.SpecialFolder.LocalApplicationData : Environment.SpecialFolder.CommonApplicationData);
+                    string basePath = GetStorageRootPath();
+                    string normalizedBasePath = Path.GetFullPath(basePath);
+                    string fullPath = Path.GetFullPath(Path.Combine(normalizedBasePath, shardName));
 
-                    string fullPath = Path.GetFullPath(Path.Combine(folderPath, shardName));
-
-                    if (!string.IsNullOrEmpty(fullPath))
+                    if (!string.IsNullOrEmpty(fullPath) && IsPathUnderRoot(fullPath, normalizedBasePath))
                     {
                         return fullPath;
                     }
@@ -629,6 +628,57 @@ namespace ClassicUO.Game
             //if invalid 'path', we get an exception, if uncorrectly formatted, we'll be here also, maybe wrong characters are sent?
             //since we are using only ascii (8bit) charset, send only normal letters! in this case we return null and invalidate ultimalive request
             return null;
+        }
+
+        private static bool IsValidShardName(string shardName)
+        {
+            if (string.IsNullOrWhiteSpace(shardName) || shardName.Length > MAX_SHARD_NAME_LENGTH)
+            {
+                return false;
+            }
+
+            if (shardName == "." || shardName == "..")
+            {
+                return false;
+            }
+
+            if (Path.IsPathRooted(shardName) || shardName.IndexOfAny(_pathSeparatorChars) != -1)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < shardName.Length; i++)
+            {
+                char c = shardName[i];
+
+                if (char.IsLetterOrDigit(c) || Array.IndexOf(_allowedShardNamePunctuation, c) >= 0)
+                {
+                    continue;
+                }
+
+                return false;
+            }
+
+            return true;
+        }
+
+        private static string GetStorageRootPath()
+        {
+            string baseFolder = Environment.GetFolderPath
+            (
+                CUOEnviroment.IsUnix ? Environment.SpecialFolder.LocalApplicationData : Environment.SpecialFolder.CommonApplicationData
+            );
+
+            return Path.Combine(baseFolder, "ClassicUO", "UltimaLive");
+        }
+
+        private static bool IsPathUnderRoot(string fullPath, string rootPath)
+        {
+            string normalizedRoot = Path.TrimEndingDirectorySeparator(Path.GetFullPath(rootPath));
+            string normalizedPath = Path.GetFullPath(fullPath);
+            StringComparison comparison = CUOEnviroment.IsUnix ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+
+            return normalizedPath.StartsWith(normalizedRoot + Path.DirectorySeparatorChar, comparison);
         }
 
         private class ULFileMul : FileReader
