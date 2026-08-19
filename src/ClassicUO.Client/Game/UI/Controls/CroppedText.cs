@@ -36,15 +36,7 @@ namespace ClassicUO.Game.UI.Controls
 
         public override bool AddToRenderLists(RenderLists renderLists, int x, int y, ref float layerDepthRef)
         {
-            float layerDepth = layerDepthRef;
-            renderLists.AddGumpNoAtlas
-            (
-                (batcher) =>
-                {
-                    _gameText.Draw(batcher, x, y, layerDepth);
-                    return true;
-                }
-            );
+            renderLists.AddGumpNoAtlas(_gameText, x, y, layerDepthRef);
 
             return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
         }

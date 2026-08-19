@@ -13,11 +13,6 @@ namespace ClassicUO.IO
             Entries = Array.Empty<UOFileIndex>();
 
             Log.Trace($"Loading file:\t\t{filepath}");
-
-            if (!File.Exists(filepath))
-            {
-                Log.Error($"{filepath} not exists.");
-            }
         }
 
 

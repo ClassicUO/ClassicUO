@@ -475,11 +475,21 @@ namespace ClassicUO.Game.UI.Gumps
                         }
                         else if (uint.TryParse(entry.Text.Replace(",", ""), out uint value))
                         {
+                            // the server converts between currencies (1 platinum == 1,000,000,000 gold)
+                            // and validates the combined offer against the combined balance, so cap the
+                            // edited field by total wealth minus what the other field already offers
+                            const ulong PLATINUM_VALUE = 1_000_000_000;
+                            ulong totalWealth = Gold + Platinum * PLATINUM_VALUE;
+
                             if ((int)entry.Tag == 0) // gold
                             {
-                                if (value > Gold)
+                                ulong platOffered = my_plat_entry * PLATINUM_VALUE;
+                                ulong remaining = totalWealth > platOffered ? totalWealth - platOffered : 0;
+                                uint maxGold = (uint)Math.Min(uint.MaxValue, remaining);
+
+                                if (value > maxGold)
                                 {
-                                    value = Gold;
+                                    value = maxGold;
                                     send = true;
                                 }
 
@@ -492,9 +502,12 @@ namespace ClassicUO.Game.UI.Gumps
                             }
                             else // platinum
                             {
-                                if (value > Platinum)
+                                ulong remaining = totalWealth > my_gold_entry ? totalWealth - my_gold_entry : 0;
+                                uint maxPlatinum = (uint)Math.Min(uint.MaxValue, remaining / PLATINUM_VALUE);
+
+                                if (value > maxPlatinum)
                                 {
-                                    value = Platinum;
+                                    value = maxPlatinum;
                                     send = true;
                                 }
 

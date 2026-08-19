@@ -137,7 +137,7 @@ namespace ClassicUO.Assets
                                 continue;
                             }
 
-                            uint number = uint.Parse(parts[2], NumberStyles.HexNumber);
+                            uint number = uint.Parse(parts[2].Trim(), NumberStyles.HexNumber);
 
                             for (int i = 0; i < 5; i++)
                             {

@@ -52,6 +52,19 @@ namespace ClassicUO.Game.GameObjects
         public readonly HashSet<uint> AutoOpenedCorpses = new HashSet<uint>();
         public readonly HashSet<uint> ManualOpenedCorpses = new HashSet<uint>();
 
+        // Tracks the last direction actually sent to the server via a walk packet.
+        private Direction _serverDirection;
+        private bool _serverDirectionInitialized;
+
+        /// <summary>
+        /// Resyncs the server-tracked direction with the current visual Direction.
+        /// Called after DenyWalk/resync when the server resets the player's state.
+        /// </summary>
+        internal void SyncServerDirection()
+        {
+            _serverDirection = Direction;
+        }
+
         public short ColdResistance;
         public short DamageIncrease;
         public short DamageMax;
@@ -524,7 +537,16 @@ namespace ClassicUO.Game.GameObjects
             int x = X;
             int y = Y;
             sbyte z = Z;
-            Direction oldDirection = Direction;
+
+            if (!_serverDirectionInitialized)
+            {
+                _serverDirection = Direction;
+                _serverDirectionInitialized = true;
+            }
+
+            // Use the server-synced direction for walk calculations, not the visual Direction,
+            // which may have been updated by coalescing without sending a packet.
+            Direction oldDirection = _serverDirection;
 
             bool emptyStack = Steps.Count == 0;
 
@@ -538,7 +560,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             sbyte oldZ = z;
-            ushort walkTime = Constants.TURN_DELAY;
+            ushort walkTime = (ushort)MovementSpeed.TurnDelay;
 
             if ((oldDirection & Direction.Mask) == (direction & Direction.Mask))
             {
@@ -593,6 +615,17 @@ namespace ClassicUO.Game.GameObjects
                 direction = newDir;
             }
 
+            // Adaptive coalescing: only suppress direction-only packets when the server
+            // is falling behind (3+ unconfirmed packets). This allows full-speed spinning
+            // when the connection is healthy and automatically backs off under congestion.
+            if (walkTime == (ushort)MovementSpeed.TurnDelay && Walker.UnacceptedPacketsCount >= 3)
+            {
+                Direction = direction;
+                Walker.LastStepRequestTime = Time.Ticks + walkTime;
+
+                return true;
+            }
+
             CloseBank();
 
             if (emptyStack)
@@ -634,6 +667,8 @@ namespace ClassicUO.Game.GameObjects
 
             NetClient.Socket.Send_WalkRequest(direction, Walker.WalkSequence, run, Walker.FastWalkStack.GetValue());
 
+            _serverDirection = direction;
+
 
             if (Walker.WalkSequence == 0xFF)
             {
@@ -648,26 +683,7 @@ namespace ClassicUO.Game.GameObjects
 
             AddToTile();
 
-            int nowDelta = 0;
-
-            //if (_lastDir == (int) direction && _lastMount == IsMounted && _lastRun == run)
-            //{
-            //    nowDelta = (int) (Time.Ticks - _lastStepTime - walkTime + _lastDelta);
-
-            //    if (Math.Abs(nowDelta) > 70)
-            //        nowDelta = 0;
-            //    _lastDelta = nowDelta;
-            //}
-            //else
-            //    _lastDelta = 0;
-
-            //_lastStepTime = (int) Time.Ticks;
-            //_lastRun = run;
-            //_lastMount = IsMounted;
-            //_lastDir = (int) direction;
-
-
-            Walker.LastStepRequestTime = Time.Ticks + walkTime - nowDelta;
+            Walker.LastStepRequestTime = Time.Ticks + walkTime;
             GetGroupForAnimation(this, 0, true);
 
             return true;

@@ -11,6 +11,9 @@ namespace ClassicUO.Game.Data
         public const int STEP_DELAY_RUN = 200;
         public const int STEP_DELAY_WALK = 400;
 
+        public static bool FastRotation;
+        public static int TurnDelay => FastRotation ? Constants.TURN_DELAY_FAST : Constants.TURN_DELAY;
+
         public static int TimeToCompleteMovement(bool run, bool mounted)
         {
             if (mounted)

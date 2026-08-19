@@ -9,4 +9,8 @@
     <ProjectReference Include="..\ClassicUO.Utility\ClassicUO.Utility.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <InternalsVisibleTo Include="ClassicUO.UnitTests" />
+  </ItemGroup>
+
 </Project>

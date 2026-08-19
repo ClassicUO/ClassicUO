@@ -10,6 +10,7 @@ using ClassicUO.Renderer;
 using ClassicUO.Resources;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using SDL3;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -18,11 +19,11 @@ namespace ClassicUO.Game.UI.Gumps
 {
     internal class ModernBookGump : Gump
     {
-        internal const int MAX_BOOK_LINES = 8;
+        internal const int MAX_BOOK_LINES = 10;
         private const int MAX_BOOK_CHARS_PER_LINE = 53;
         private const int LEFT_X = 38;
         private const int RIGHT_X = 223;
-        private const int UPPER_MARGIN = 34;
+        private const int UPPER_MARGIN = 26;
         private const int PAGE_HEIGHT = 166;
         private StbPageTextBox _bookPage;
 
@@ -162,7 +163,7 @@ namespace ClassicUO.Game.UI.Gumps
                 156,
                 IsNewBook,
                 FontStyle.ExtraHeight,
-                2
+                0x01B5
             )
             {
                 X = 0,
@@ -179,7 +180,7 @@ namespace ClassicUO.Game.UI.Gumps
                 {
                     X = 40,
                     Y = 60,
-                    Height = 25,
+                    Height = 25 * 2,
                     Width = 155,
                     IsEditable = IsEditable
                 },
@@ -225,7 +226,7 @@ namespace ClassicUO.Game.UI.Gumps
                 }
 
                 page >>= 1;
-                Add(new Label(k.ToString(), true, 1) { X = x + 80, Y = 200 }, page);
+                Add(new Label(k.ToString(), true, 1) { X = x + 80, Y = 220 }, page);
             }
 
             ActivePage = 1;
@@ -258,7 +259,7 @@ namespace ClassicUO.Game.UI.Gumps
             }
         }
 
-        public void SetTile(string title, bool editable)
+        public void SetTitle(string title, bool editable)
         {
             _titleTextBox.SetText(title);
             _titleTextBox.IsEditable = editable;
@@ -319,9 +320,25 @@ namespace ClassicUO.Game.UI.Gumps
                         {
                             string[] text = new string[MAX_BOOK_LINES];
 
-                            for (int x = (i - 1) * MAX_BOOK_LINES, l = 0; x < (i - 1) * MAX_BOOK_LINES + 8; x++, l++)
+                            for (int x = (i - 1) * MAX_BOOK_LINES, l = 0; x < (i - 1) * MAX_BOOK_LINES + MAX_BOOK_LINES; x++, l++)
                             {
                                 text[l] = BookLines[x];
+                            }
+
+                            // Most servers expect at most 8 lines per page: send lines
+                            // 9-10 only when they actually contain text. Empty lines are
+                            // stored as "\n", so strip newlines before testing. Only
+                            // trailing lines are trimmed: empty lines between text stay.
+                            int lineCount = MAX_BOOK_LINES;
+
+                            while (lineCount > 8 && IsEmptyBookLine(text[lineCount - 1]))
+                            {
+                                lineCount--;
+                            }
+
+                            if (lineCount < text.Length)
+                            {
+                                Array.Resize(ref text, lineCount);
                             }
 
                             NetClient.Socket.Send_BookPageData(LocalSerial, text, i);
@@ -337,6 +354,24 @@ namespace ClassicUO.Game.UI.Gumps
             {
                 UIManager.SystemChat.TextBoxControl.SetKeyboardFocus();
             }
+        }
+
+        private static bool IsEmptyBookLine(string line)
+        {
+            if (string.IsNullOrEmpty(line))
+            {
+                return true;
+            }
+
+            for (int i = 0; i < line.Length; i++)
+            {
+                if (line[i] != '\n')
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public override void OnButtonClick(int buttonID)
@@ -355,150 +390,96 @@ namespace ClassicUO.Game.UI.Gumps
             base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
             float layerDepth = layerDepthRef;
 
+            // Render path is intentionally PURE — no state mutation, no SetActivePage,
+            // no _caretPage/_focusPage writes. Caret/page realignment runs from input
+            // handlers via _bookPage.RealignCaretAndActivePage(), so a single mismatch
+            // between _caretScreenPosition and _pageCoords cannot spin SetActivePage
+            // every frame.
             renderLists.AddGumpNoAtlas
             (
                 batcher =>
                 {
-                    if (batcher.ClipBegin(x, y, Width, Height))
+                    if (!batcher.ClipBegin(x, y, Width, Height))
                     {
-                        RenderedText t = _bookPage.renderedText;
-                        int startpage = (ActivePage - 1) * 2;
-
-                        if (startpage < BookPageCount)
-                        {
-                            int poy = _bookPage._pageCoords[startpage, 0], phy = _bookPage._pageCoords[startpage, 1];
-
-                            _bookPage.DrawSelection
-                            (
-                                batcher,
-                                x + RIGHT_X,
-                                y + UPPER_MARGIN,
-                                poy,
-                                poy + phy,
-                                layerDepth
-                            );
-
-                            t.Draw
-                            (
-                                batcher,
-                                x + RIGHT_X,
-                                y + UPPER_MARGIN,
-                                0,
-                                poy,
-                                t.Width,
-                                phy,
-                                layerDepth
-                            );
-
-                            if (startpage == _bookPage._caretPage)
-                            {
-                                if (_bookPage._caretPos.Y < poy + phy)
-                                {
-                                    if (_bookPage._caretPos.Y >= poy)
-                                    {
-                                        if (_bookPage.HasKeyboardFocus)
-                                        {
-                                            _bookPage.renderedCaret.Draw
-                                            (
-                                                batcher,
-                                                _bookPage._caretPos.X + x + RIGHT_X,
-                                                _bookPage._caretPos.Y + y + UPPER_MARGIN - poy,
-                                                0,
-                                                0,
-                                                _bookPage.renderedCaret.Width,
-                                                _bookPage.renderedCaret.Height,
-                                                layerDepth
-                                            );
-                                        }
-                                    }
-                                    else
-                                    {
-                                        _bookPage._caretPage = _bookPage.GetCaretPage();
-                                    }
-                                }
-                                else if (_bookPage._caretPos.Y <= _bookPage.Height)
-                                {
-                                    if (_bookPage._caretPage + 2 < _bookPage._pagesChanged.Length)
-                                    {
-                                        _bookPage._focusPage = _bookPage._caretPage++;
-                                        SetActivePage(_bookPage._caretPage / 2 + 2);
-                                    }
-                                }
-                            }
-                        }
-
-                        startpage--;
-
-                        if (startpage > 0)
-                        {
-                            int poy = _bookPage._pageCoords[startpage, 0], phy = _bookPage._pageCoords[startpage, 1];
-
-                            _bookPage.DrawSelection
-                            (
-                                batcher,
-                                x + LEFT_X,
-                                y + UPPER_MARGIN,
-                                poy,
-                                poy + phy,
-                                layerDepth
-                            );
-
-                            t.Draw
-                            (
-                                batcher,
-                                x + LEFT_X,
-                                y + UPPER_MARGIN,
-                                0,
-                                poy,
-                                t.Width,
-                                phy,
-                                layerDepth
-                            );
-
-                            if (startpage == _bookPage._caretPage)
-                            {
-                                if (_bookPage._caretPos.Y < poy + phy)
-                                {
-                                    if (_bookPage._caretPos.Y >= poy)
-                                    {
-                                        if (_bookPage.HasKeyboardFocus)
-                                        {
-                                            _bookPage.renderedCaret.Draw
-                                            (
-                                                batcher,
-                                                _bookPage._caretPos.X + x + LEFT_X,
-                                                _bookPage._caretPos.Y + y + UPPER_MARGIN - poy,
-                                                0,
-                                                0,
-                                                _bookPage.renderedCaret.Width,
-                                                _bookPage.renderedCaret.Height,
-                                                layerDepth
-                                            );
-                                        }
-                                    }
-                                    else if (_bookPage._caretPage > 0)
-                                    {
-                                        _bookPage._focusPage = _bookPage._caretPage--;
-                                        SetActivePage(_bookPage._caretPage / 2 + 1);
-                                    }
-                                }
-                                else if (_bookPage._caretPos.Y <= _bookPage.Height)
-                                {
-                                    if (_bookPage._caretPage + 2 < _bookPage._pagesChanged.Length)
-                                    {
-                                        _bookPage._caretPage++;
-                                    }
-                                }
-                            }
-                        }
-
-                        batcher.ClipEnd();
+                        return true;
                     }
+
+                    DrawBookPage(batcher, x, y, layerDepth, (ActivePage - 1) * 2, RIGHT_X);
+                    DrawBookPage(batcher, x, y, layerDepth, (ActivePage - 1) * 2 - 1, LEFT_X);
+
+                    batcher.ClipEnd();
                     return true;
                 }
             );
 
             return true;
+        }
+
+        private void DrawBookPage(UltimaBatcher2D batcher, int x, int y, float layerDepth, int pageIndex, int pageX)
+        {
+            if (pageIndex < 0 || pageIndex >= BookPageCount)
+            {
+                return;
+            }
+
+            int poy = _bookPage._pageCoords[pageIndex, 0];
+            int phy = _bookPage._pageCoords[pageIndex, 1];
+            RenderedText t = _bookPage.renderedText;
+
+            _bookPage.DrawSelection(batcher, x + pageX, y + UPPER_MARGIN, poy, poy + phy, layerDepth);
+            t.Draw(batcher, x + pageX, y + UPPER_MARGIN, 0, poy, t.Width, phy, layerDepth);
+
+            if (pageIndex == _bookPage._caretPage
+                && _bookPage.HasKeyboardFocus
+                && _bookPage._caretPos.Y >= poy
+                && _bookPage._caretPos.Y < poy + phy)
+            {
+                _bookPage.renderedCaret.Draw(
+                    batcher,
+                    _bookPage._caretPos.X + x + pageX,
+                    _bookPage._caretPos.Y + y + UPPER_MARGIN - poy,
+                    0, 0,
+                    _bookPage.renderedCaret.Width,
+                    _bookPage.renderedCaret.Height,
+                    layerDepth
+                );
+            }
+        }
+
+        // Re-snap ActivePage to whichever page the caret is actually on. Called from
+        // _bookPage's input handlers (mouse click, key, text change) — never from the
+        // render path. If the caret didn't move into a different page, this is a no-op.
+        internal void RealignCaretAndActivePage()
+        {
+            if (_bookPage == null || IsDisposed)
+            {
+                return;
+            }
+
+            int newCaretPage = _bookPage.GetCaretPage();
+
+            if (newCaretPage != _bookPage._caretPage)
+            {
+                _bookPage._focusPage = _bookPage._caretPage;
+                _bookPage._caretPage = newCaretPage;
+            }
+
+            // Page-to-ActivePage mapping: page 0 is the right page of AP 1, then
+            // each subsequent ActivePage shows {left=odd, right=even} pairs.
+            //   page 0           → ActivePage 1
+            //   pages 1,2        → ActivePage 2
+            //   pages 3,4        → ActivePage 3
+            //   pages 2k-1, 2k   → ActivePage k+1
+            // So target = (page + 1) / 2 + 1 with integer division.
+            int targetActivePage = (newCaretPage + 1) / 2 + 1;
+            int maxActivePage = MaxPage;
+
+            if (targetActivePage != ActivePage
+                && targetActivePage >= 1
+                && targetActivePage <= maxActivePage)
+            {
+                SetActivePage(targetActivePage);
+            }
         }
 
         public override void Dispose()
@@ -619,8 +600,14 @@ namespace ClassicUO.Game.UI.Gumps
 
                     Stb.Click(x, y);
                     UpdateCaretScreenPosition();
-                    _caretPage = GetCaretPage();
+                    _gump.RealignCaretAndActivePage();
                 }
+            }
+
+            protected override void OnKeyDown(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
+            {
+                base.OnKeyDown(key, mod);
+                _gump.RealignCaretAndActivePage();
             }
 
             protected override void OnMouseOver(int x, int y)
@@ -840,9 +827,9 @@ namespace ClassicUO.Game.UI.Gumps
 
                     for (int i = 0; i < _pageLines.Length; i++)
                     {
-                        if (!_pagesChanged[(i >> 3) + 1] && _handler[i] != _pageLines[i])
+                        if (!_pagesChanged[i / MAX_BOOK_LINES + 1] && _handler[i] != _pageLines[i])
                         {
-                            _pagesChanged[(i >> 3) + 1] = true;
+                            _pagesChanged[i / MAX_BOOK_LINES + 1] = true;
                         }
 
                         _sb.Append(_pageLines[i] = _handler[i]);
@@ -855,6 +842,11 @@ namespace ClassicUO.Game.UI.Gumps
 
                 base.OnTextChanged(previousText);
                 _is_writing = false;
+
+                if (!_ServerUpdate)
+                {
+                    _gump.RealignCaretAndActivePage();
+                }
             }
 
             protected override void CloseWithRightClick()

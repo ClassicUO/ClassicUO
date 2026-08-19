@@ -90,15 +90,8 @@ namespace ClassicUO.Game.UI.Controls
             {
                 return false;
             }
-            float layerDepth = layerDepthRef;
-            renderLists.AddGumpNoAtlas(
-                batcher =>
-                {
-                    _gText.Draw(batcher, x, y, layerDepth, Alpha);
 
-                    return true;
-                }
-            );
+            renderLists.AddGumpNoAtlas(_gText, x, y, layerDepthRef, Alpha);
 
             return base.AddToRenderLists(renderLists, x, y, ref layerDepthRef);
         }

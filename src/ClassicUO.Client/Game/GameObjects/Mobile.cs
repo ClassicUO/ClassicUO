@@ -97,6 +97,13 @@ namespace ClassicUO.Game.GameObjects
 
         private bool _isDead;
         private bool _isSA_Poisoned;
+
+        //
+        internal bool _surfaceOverheadCache;
+        internal ushort _surfaceOverheadCacheX = ushort.MaxValue;
+        internal ushort _surfaceOverheadCacheY = ushort.MaxValue;
+        internal int _surfaceOverheadCacheMaxZ = int.MinValue;
+
         private long _lastAnimationIdleDelay;
         private bool _isAnimationForwardDirection;
         private byte _animationGroup = 0xFF;
@@ -829,12 +836,6 @@ namespace ClassicUO.Game.GameObjects
                         X = (ushort)step.X;
                         Y = (ushort)step.Y;
                         Z = step.Z;
-                        UpdateScreenPosition();
-
-                        if (World.InGame && Serial == World.Player)
-                        {
-                            World.Player.CloseRangedGumps();
-                        }
 
                         Direction = (Direction)step.Direction;
                         IsRunning = step.Run;
@@ -849,6 +850,13 @@ namespace ClassicUO.Game.GameObjects
                             ProcessSteps(out dir, evalutate);
 
                             return;
+                        }
+
+                        UpdateScreenPosition();
+
+                        if (World.InGame && Serial == World.Player)
+                        {
+                            World.Player.CloseRangedGumps();
                         }
 
                         if (TNext != null || TPrevious != null)
@@ -961,7 +969,9 @@ namespace ClassicUO.Game.GameObjects
 
             if (ObjectHandlesStatus == ObjectHandlesStatus.DISPLAYING)
             {
-                p.Y -= Constants.OBJECT_HANDLES_GUMP_HEIGHT;
+                p.Y -= Constants.OBJECT_HANDLES_GUMP_HEIGHT
+                    + (ProfileManager.CurrentProfile.NameOverheadShowHpBar
+                        ? Constants.OBJECT_HANDLES_HP_BAR_HEIGHT + 1 : 0);
             }
 
             if (

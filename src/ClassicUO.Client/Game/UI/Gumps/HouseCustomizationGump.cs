@@ -1873,8 +1873,9 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_STATE_ERASE:
+                    bool wasErasing = _customHouseManager.Erasing;
                     _customHouseManager.SetTargetMulti();
-                    _customHouseManager.Erasing = !_customHouseManager.Erasing;
+                    _customHouseManager.Erasing = !wasErasing;
                     _customHouseManager.SelectedGraphic = 0;
                     _customHouseManager.CombinedStair = false;
                     Update();
@@ -2032,7 +2033,15 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_COMMIT:
-                    NetClient.Socket.Send_CustomHouseCommit(World);
+                    // Refuse to commit a design that contains illegal pieces.
+                    if (_customHouseManager.ValidateHouseForCommit())
+                    {
+                        NetClient.Socket.Send_CustomHouseCommit(World);
+                    }
+                    else
+                    {
+                        GameActions.Print(World, "House not legal, not committing!", 0x0021);
+                    }
 
                     break;
 

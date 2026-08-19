@@ -12,8 +12,8 @@ namespace ClassicUO.Game.UI.Gumps
         private readonly Button _button;
         private bool _clicked;
         private Point _lastSize, _savedSize, _beforeResizeSize;
-        private readonly int _minH;
-        private readonly int _minW;
+        private int _minH;
+        private int _minW;
 
         public class ResizeCompletedEventArgs(Point beforeResize)
         {
@@ -85,6 +85,32 @@ namespace ClassicUO.Game.UI.Gumps
         public int BoderSize
         {
             get => _borderControl.BorderSize;
+        }
+
+        protected int MinH
+        {
+            get
+            {
+                return _minH;
+            }
+            set
+            {
+                _minH = value;
+                Update();
+            }
+        }
+
+        protected int MinW
+        {
+            get
+            {
+                return _minW;
+            }
+            set
+            {
+                _minW = value;
+                Update();
+            }
         }
 
         public Point ResizeWindow(Point newSize)

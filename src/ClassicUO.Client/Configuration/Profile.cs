@@ -148,6 +148,7 @@ namespace ClassicUO.Configuration
         public bool UseShiftToPathfind { get; set; }
         public bool AlwaysRun { get; set; }
         public bool AlwaysRunUnlessHidden { get; set; }
+        public bool FastRotation { get; set; }
         public bool SmoothMovements { get; set; } = true;
         public bool HoldDownKeyTab { get; set; } = true;
         public bool HoldShiftForContext { get; set; } = false;
@@ -211,6 +212,8 @@ namespace ClassicUO.Configuration
         public bool DragSelectAsAnchor { get; set; } = false;
         public NameOverheadTypeAllowed NameOverheadTypeAllowed { get; set; } = NameOverheadTypeAllowed.All;
         public bool NameOverheadToggled { get; set; } = false;
+        public bool NameOverheadShowGump { get; set; } = true;
+        public bool NameOverheadShowHpBar { get; set; } = true;
         public bool ShowTargetRangeIndicator { get; set; }
         public bool PartyInviteGump { get; set; }
         public bool CustomBarsToggled { get; set; }

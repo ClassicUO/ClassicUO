@@ -272,11 +272,12 @@ namespace ClassicUO.Game.UI.Controls
 
                         bool inbounds = link.Bounds.Contains(x, (_scrollBar == null ? 0 : _scrollBar.Value) + y);
 
-                        if (inbounds && Client.Game.UO.FileManager.Fonts.GetWebLink(link.LinkID, out WebLink result))
+                        if (inbounds && !string.IsNullOrEmpty(link.Url))
                         {
-                            Log.Info("LINK CLICKED: " + result.Link);
+                            Log.Info("LINK CLICKED: " + link.Url);
 
-                            PlatformHelper.LaunchBrowser(result.Link);
+                            Client.Game.UO.FileManager.Fonts.MarkVisited(link.Url);
+                            PlatformHelper.LaunchBrowser(link.Url);
 
                             _gameText.CreateTexture();
 

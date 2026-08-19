@@ -14,15 +14,7 @@ namespace ClassicUO.Game.Map
 {
     internal sealed class Chunk
     {
-        //private static readonly QueuedPool<Chunk> _pool = new QueuedPool<Chunk>
-        //(
-        //    Constants.PREDICTABLE_CHUNKS,
-        //    c =>
-        //    {
-        //        c.LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
-        //        c.IsDestroyed = false;
-        //    }
-        //);
+        private static readonly Queue<Chunk> _pool = new Queue<Chunk>();
 
         private readonly World _world;
 
@@ -35,7 +27,7 @@ namespace ClassicUO.Game.Map
         public bool IsDestroyed;
         public long LastAccessTime;
         public LinkedListNode<int> Node;
-
+        public readonly ChunkMesh Mesh = new ChunkMesh();
 
         public int X;
         public int Y;
@@ -43,12 +35,31 @@ namespace ClassicUO.Game.Map
 
         public static Chunk Create(World world, int x, int y)
         {
-            Chunk c = new Chunk(world); // _pool.GetOne();
+            Chunk c;
+            if (_pool.Count > 0)
+            {
+                c = _pool.Dequeue();
+                c.IsDestroyed = false;
+            }
+            else
+            {
+                c = new Chunk(world);
+            }
+
             c.LastAccessTime = Time.Ticks + Constants.CLEAR_TEXTURES_DELAY;
             c.X = x;
             c.Y = y;
 
             return c;
+        }
+
+        public static void ClearPool()
+        {
+            while (_pool.Count > 0)
+            {
+                var chunk = _pool.Dequeue();
+                chunk.Mesh.Clear();
+            }
         }
 
 
@@ -152,6 +163,7 @@ namespace ClassicUO.Game.Map
 
         public void AddGameObject(GameObject obj, int x, int y)
         {
+            Mesh.MarkDirtyIfNeeded(obj);
             obj.RemoveFromTile();
 
             short priorityZ = obj.Z;
@@ -330,6 +342,7 @@ namespace ClassicUO.Game.Map
 
         public void RemoveGameObject(GameObject obj, int x, int y)
         {
+            Mesh.MarkDirtyIfNeeded(obj);
             ref GameObject firstNode = ref Tiles[x, y];
 
             if (firstNode == null || obj == null)
@@ -390,29 +403,52 @@ namespace ClassicUO.Game.Map
                 }
             }
 
-            if (Node.Next != null || Node.Previous != null)
+            if (Node != null)
             {
-                Node.List?.Remove(Node);
+                if (Node.Next != null || Node.Previous != null)
+                {
+                    Node.List?.Remove(Node);
+                }
+
+                Node = null;
             }
 
             IsDestroyed = true;
-            //_pool.ReturnOne(this);
+
+            if (_pool.Count < Constants.PREDICTABLE_CHUNKS)
+            {
+                Mesh.SoftClear();
+                _pool.Enqueue(this);
+            }
+            else
+            {
+                Mesh.Clear();
+            }
         }
 
         public void Clear()
+        {
+            Destroy();
+        }
+
+        /// <summary>
+        /// Clears the chunk's tile objects for an in-place reload (UltimaLive block
+        /// update) and marks the mesh dirty so it rebuilds — WITHOUT destroying or
+        /// pooling the chunk itself. The chunk stays owned by the map: its
+        /// <see cref="_terrainChunks"/> slot and <see cref="Node"/> are left intact.
+        /// Using <see cref="Destroy"/>/<see cref="Clear"/> here would enqueue this
+        /// chunk to the shared pool while it is still referenced by the map, so it
+        /// would later be handed out by <see cref="Create"/> for a different block
+        /// (double ownership) — the original block then renders a stale/empty mesh
+        /// (black, world-locked, permanent).
+        /// </summary>
+        public void ClearForReload()
         {
             for (int i = 0; i < 8; i++)
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    GameObject obj = Tiles[i, j];
-
-                    if (obj == null)
-                    {
-                        continue;
-                    }
-
-                    GameObject first = GetHeadObject(x: i, j);
+                    GameObject first = GetHeadObject(i, j);
 
                     while (first != null)
                     {
@@ -432,12 +468,7 @@ namespace ClassicUO.Game.Map
                 }
             }
 
-            if (Node.Next != null || Node.Previous != null)
-            {
-                Node.List?.Remove(Node);
-            }
-
-            IsDestroyed = true;
+            Mesh.SoftClear();
         }
 
         public bool HasNoExternalData()

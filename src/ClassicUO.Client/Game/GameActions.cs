@@ -304,12 +304,16 @@ namespace ClassicUO.Game
                 Attack(world, serial);
             }
             else
-            {
+            {   
                 Socket.Send_DoubleClick(serial);
             }
 
             if (SerialHelper.IsItem(serial) || (SerialHelper.IsMobile(serial) && (world.Mobiles.Get(serial)?.IsHuman ?? false)))
             {
+                if (SerialHelper.IsMobile(serial))
+                {
+                    world.TargetManager.NewTargetSystemSerial = serial;
+                }
                 world.LastObject = serial;
             }
             else

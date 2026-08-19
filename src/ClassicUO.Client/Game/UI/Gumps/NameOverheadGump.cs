@@ -25,6 +25,7 @@ namespace ClassicUO.Game.UI.Gumps
             _leftMouseIsDown;
         private readonly RenderedText _renderedText;
         private Texture2D _borderColor = SolidColorTextureCache.GetTexture(Color.Black);
+        private bool _showHpBar;
 
         public NameOverheadGump(World world, uint serial) : base(world, serial, 0)
         {
@@ -121,7 +122,8 @@ namespace ClassicUO.Game.UI.Gumps
                 Client.Game.UO.FileManager.Fonts.RecalculateWidthByInfo = false;
                 Client.Game.UO.FileManager.Fonts.SetUseHTML(false);
 
-                Width = _background.Width = Math.Max(60, _renderedText.Width) + 4;
+                Width = _background.Width = Constants.OBJECT_HANDLES_GUMP_WIDTH + 4;
+                _showHpBar = false;
                 Height = _background.Height = Constants.OBJECT_HANDLES_GUMP_HEIGHT + 4;
 
                 WantUpdateSize = false;
@@ -153,8 +155,10 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _renderedText.Text = t;
 
-                Width = _background.Width = Math.Max(60, _renderedText.Width) + 4;
-                Height = _background.Height = Constants.OBJECT_HANDLES_GUMP_HEIGHT + 4;
+                Width = _background.Width = Constants.OBJECT_HANDLES_GUMP_WIDTH + 4;
+                _showHpBar = entity is Mobile && ProfileManager.CurrentProfile.NameOverheadShowHpBar;
+                int hpBarExtra = _showHpBar ? Constants.OBJECT_HANDLES_HP_BAR_HEIGHT + 1 : 0;
+                Height = _background.Height = Constants.OBJECT_HANDLES_GUMP_HEIGHT + 4 + hpBarExtra;
 
                 WantUpdateSize = false;
 
@@ -493,7 +497,7 @@ namespace ClassicUO.Game.UI.Gumps
                 _lockedPosition.Y = (int)(
                     m.RealScreenPosition.Y
                     + (m.Offset.Y - m.Offset.Z)
-                    - (height + centerY + 8)
+                    - (height + centerY + 8 + 10)
                     + (
                         m.IsGargoyle && m.IsFlying
                             ? -22
@@ -592,7 +596,7 @@ namespace ClassicUO.Game.UI.Gumps
                     y = (int)(
                         m.RealScreenPosition.Y
                         + (m.Offset.Y - m.Offset.Z)
-                        - (height + centerY + 8)
+                        - (height + centerY + 8 + 10)
                         + (
                             m.IsGargoyle && m.IsFlying
                                 ? -22
@@ -673,6 +677,31 @@ namespace ClassicUO.Game.UI.Gumps
                     );
                 }
             );
+
+            if (_showHpBar && World.Get(LocalSerial) is Mobile mob)
+            {
+                int barX = x;
+                int barY = y + Height - Constants.OBJECT_HANDLES_HP_BAR_HEIGHT;
+                int barWidth = Width;
+                int barHeight = Constants.OBJECT_HANDLES_HP_BAR_HEIGHT;
+                int filledWidth = barWidth * mob.HitsPercentage / 100;
+                Color hpColor = mob.HitsPercentage >= 80 ? Color.Green
+                              : mob.HitsPercentage >= 50 ? Color.YellowGreen
+                              : mob.HitsPercentage >= 30 ? Color.Yellow
+                              : Color.Red;
+                float barDepth = layerDepth + CHILD_LAYER_INCREMENT * 3;
+
+                renderLists.AddGumpNoAtlas(batcher =>
+                {
+                    batcher.Draw(SolidColorTextureCache.GetTexture(Color.Black),
+                        new Rectangle(barX, barY, barWidth, barHeight), hueVector, barDepth);
+                    if (filledWidth > 0)
+                        batcher.Draw(SolidColorTextureCache.GetTexture(hpColor),
+                            new Rectangle(barX, barY, filledWidth, barHeight), hueVector, barDepth + CHILD_LAYER_INCREMENT);
+                    return true;
+                });
+            }
+
             return true;
         }
 

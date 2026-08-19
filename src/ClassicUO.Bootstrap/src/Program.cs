@@ -236,7 +236,7 @@ sealed class ClassicUOHost : IPluginHandler
             fixed (IntPtr* argvPtr = argv)
                 initializeMethod(argvPtr, args.Length, mem);
 
-            if (mem != null)
+            if (mem != IntPtr.Zero)
                 Marshal.FreeHGlobal(mem);
         }
     }

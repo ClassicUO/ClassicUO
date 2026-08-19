@@ -45,7 +45,6 @@ namespace ClassicUO.Game.Scenes
 
         private const float MAX_LAYER_DEPTH = 0x8000;
         private uint _time_cleanup = Time.Ticks + 5000;
-        private static XBREffect _xbr;
         private bool _alphaChanged;
         private long _alphaTimer;
         private bool _forceStopScene;
@@ -67,6 +66,9 @@ namespace ClassicUO.Game.Scenes
         private AnimatedStaticsManager _animatedStaticsManager;
 
         private readonly World _world;
+
+        // Track the previously highlighted mesh sprite so we can restore its hue
+        private GameObject _prevMeshHighlight;
 
         public GameScene(World world)
         {
@@ -124,6 +126,7 @@ namespace ClassicUO.Game.Scenes
             NetClient.Socket.Disconnected += SocketOnDisconnected;
             _world.MessageManager.MessageReceived += ChatOnMessageReceived;
             UIManager.ContainerScale = ProfileManager.CurrentProfile.ContainersScale / 100f;
+            Data.MovementSpeed.FastRotation = ProfileManager.CurrentProfile.FastRotation;
 
             SDL.SDL_SetWindowMinimumSize(Client.Game.Window.Handle, Client.Game.ScaleWithDpi(640), Client.Game.ScaleWithDpi(480));
 
@@ -180,6 +183,7 @@ namespace ClassicUO.Game.Scenes
                     break;
 
                 case MessageType.System:
+                case MessageType.GmChat:
                     name =
                         string.IsNullOrEmpty(e.Name)
                         || string.Equals(
@@ -544,6 +548,7 @@ namespace ClassicUO.Game.Scenes
         private void FillGameObjectList()
         {
             _renderLists.Clear();
+            _visibleChunks.Clear();
 
             _foliageCount = 0;
 
@@ -559,6 +564,19 @@ namespace ClassicUO.Game.Scenes
                 _alphaTimer = Time.Ticks + Constants.ALPHA_TIME;
             }
 
+            if (ProfileManager.CurrentProfile.UseCircleOfTransparency)
+            {
+                float r = ProfileManager.CurrentProfile.CircleOfTransparencyRadius;
+                _cotRadiusSq = r * r;
+                _cotPlayerScreenPos = _world.Player.GetScreenPosition();
+                _cotGradientMode = ProfileManager.CurrentProfile.CircleOfTransparencyType == 1;
+            }
+            else
+            {
+                _cotRadiusSq = 0;
+                _cotGradientMode = false;
+            }
+
             FoliageIndex++;
 
             if (FoliageIndex >= 100)
@@ -568,18 +586,27 @@ namespace ClassicUO.Game.Scenes
 
             GetViewPort();
 
-            var useObjectHandles = _world.NameOverHeadManager.IsToggled || Keyboard.Ctrl && Keyboard.Shift;
+            var ctrlShiftHeld = Keyboard.Ctrl && Keyboard.Shift;
+            var useObjectHandles = _world.NameOverHeadManager.IsToggled || ctrlShiftHeld;
             if (useObjectHandles != _useObjectHandles)
             {
                 _useObjectHandles = useObjectHandles;
                 if (_useObjectHandles)
                 {
                     _world.NameOverHeadManager.Open();
+                    if (_world.NameOverHeadManager.IsToggled && !ctrlShiftHeld)
+                    {
+                        _world.NameOverHeadManager.SetMenuVisible(false);
+                    }
                 }
                 else
                 {
                     _world.NameOverHeadManager.Close();
                 }
+            }
+            else if (_useObjectHandles && _world.NameOverHeadManager.IsToggled)
+            {
+                _world.NameOverHeadManager.SetMenuVisible(ctrlShiftHeld);
             }
 
             _rectanglePlayer.X = (int)(
@@ -603,10 +630,6 @@ namespace ClassicUO.Game.Scenes
             int maxY = _maxTile.Y;
             Map.Map map = _world.Map;
             bool use_handles = _useObjectHandles;
-            int maxCotZ = _world.Player.Z + 5;
-            Vector2 playerPos = _world.Player.GetScreenPosition();
-
-
             (var minChunkX, var minChunkY) = (minX >> 3, minY >> 3);
             (var maxChunkX, var maxChunkY) = (maxX >> 3, maxY >> 3);
 
@@ -617,6 +640,20 @@ namespace ClassicUO.Game.Scenes
                     var chunk = map.GetChunk2(chunkX, chunkY, true);
                     if (chunk == null || chunk.IsDestroyed)
                         continue;
+
+                    // Build chunk mesh if dirty
+                    if (chunk.Mesh.IsDirty)
+                    {
+                        chunk.Mesh.Build(chunk, _world, Client.Game.GraphicsDevice);
+                    }
+
+                    // Reset visibility and alpha for this frame
+                    chunk.Mesh.Land.ResetVisibility();
+                    chunk.Mesh.Land.ResetAlpha();
+                    chunk.Mesh.Statics.ResetVisibility();
+                    chunk.Mesh.Statics.ResetAlpha();
+
+                    _visibleChunks.Add(chunk);
 
                     for (var x = 0; x < 8; x++)
                     {
@@ -630,8 +667,7 @@ namespace ClassicUO.Game.Scenes
                                 firstObj,
                                 use_handles,
                                 150,
-                                maxCotZ,
-                                ref playerPos
+                                chunk
                             );
                         }
                     }
@@ -920,6 +956,44 @@ namespace ClassicUO.Game.Scenes
             SelectedObject.Object = null;
             Profiler.EnterContext(Profiler.ProfilerContext.RENDER_FRAME_WORLD_PREPARE);
             FillGameObjectList();
+
+            // Restore previous highlight's original hue before applying new one
+            if (_prevMeshHighlight != null
+                && !_prevMeshHighlight.IsDestroyed
+                && _prevMeshHighlight.InChunkMesh
+                && _prevMeshHighlight.MeshSpriteIndex >= 0)
+            {
+                var prevChunk = _world.Map.GetChunk(_prevMeshHighlight.X, _prevMeshHighlight.Y);
+                if (prevChunk?.Mesh != null)
+                {
+                    var prevLayer = _prevMeshHighlight is Land ? prevChunk.Mesh.Land : prevChunk.Mesh.Statics;
+                    ApplyMeshHue(_prevMeshHighlight, prevLayer);
+                }
+            }
+            _prevMeshHighlight = null;
+
+            // Apply highlight hue to mesh vertex for selected meshed object
+            // (instead of redrawing it on top, which breaks z-order for overlapping objects)
+            if (ProfileManager.CurrentProfile.HighlightGameObjects
+                && SelectedObject.Object is GameObject selObj
+                && selObj.InChunkMesh && selObj.MeshSpriteIndex >= 0)
+            {
+                var chunk = _world.Map.GetChunk(selObj.X, selObj.Y);
+                if (chunk?.Mesh != null)
+                {
+                    var layer = selObj is Land ? chunk.Mesh.Land : chunk.Mesh.Statics;
+                    float shaderType = selObj is Land land && land.IsStretched
+                        ? ShaderHueTranslator.SHADER_LAND_HUED
+                        : ShaderHueTranslator.SHADER_HUED;
+                    layer.SetHue(
+                        selObj.MeshSpriteIndex,
+                        Constants.HIGHLIGHT_CURRENT_OBJECT_HUE - 1,
+                        shaderType
+                    );
+                    _prevMeshHighlight = selObj;
+                }
+            }
+
             Profiler.ExitContext(Profiler.ProfilerContext.RENDER_FRAME_WORLD_PREPARE);
             Profiler.EnterContext(Profiler.ProfilerContext.RENDER_FRAME_WORLD);
             batcher.SetSampler(SamplerState.PointClamp);
@@ -927,12 +1001,27 @@ namespace ClassicUO.Game.Scenes
             batcher.Begin(null, matrix);
             batcher.SetBrightlight(ProfileManager.CurrentProfile.TerrainShadowsLevel * 0.1f);
 
+            if (ProfileManager.CurrentProfile.UseCircleOfTransparency
+                && ProfileManager.CurrentProfile.CircleOfTransparencyType != 1) // gradient mode uses CPU alpha, not shader
+            {
+                batcher.SetCircleOfTransparencyRadius(
+                    (float)ProfileManager.CurrentProfile.CircleOfTransparencyRadius / Camera.Zoom
+                );
+            }
+            else
+            {
+                batcher.SetCircleOfTransparencyRadius(0f);
+            }
+
             // https://shawnhargreaves.com/blog/depth-sorting-alpha-blended-objects.html
             batcher.SetStencil(DepthStencilState.Default);
 
             RenderedObjectsCount = _renderLists.DrawRenderLists(
                 batcher,
-                _maxGroundZ
+                _maxGroundZ,
+                _visibleChunks,
+                _offset.X,
+                _offset.Y
             );
 
 
@@ -957,6 +1046,7 @@ namespace ClassicUO.Game.Scenes
 
             batcher.SetSampler(null);
             batcher.SetStencil(null);
+            batcher.SetCircleOfTransparencyRadius(0f);
             batcher.End();
 
             int flushes = batcher.FlushesDone;

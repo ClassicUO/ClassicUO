@@ -33,7 +33,7 @@ namespace ClassicUO.Renderer
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 GetHueVector(int hue, bool partial, float alpha, bool gump = false, bool effect = false)
+        public static Vector3 GetHueVector(int hue, bool partial, float alpha, bool gump = false, bool effect = false, bool circletrans = false)
         {
             Vector3 hueVector;
             byte type;
@@ -73,6 +73,11 @@ namespace ClassicUO.Renderer
             hueVector.X = hue;
             hueVector.Y = type;
             hueVector.Z = alpha;
+
+            if (circletrans)
+            {
+                hueVector.Z += 1f;
+            }
 
             return hueVector;
         }

@@ -25,6 +25,7 @@ namespace ClassicUO
         public Renderer.Lights.Light Lights { get; private set; }
         public Renderer.MultiMaps.MultiMap MultiMaps { get; private set; }
         public Renderer.Sounds.Sound Sounds { get; private set; }
+        public Renderer.FontGlyphAtlas FontGlyphAtlas { get; private set; }
         public World World { get; private set; }
         public GameCursor GameCursor { get; private set; }
 
@@ -87,6 +88,7 @@ namespace ClassicUO
             Lights = new Renderer.Lights.Light(FileManager.Lights, game.GraphicsDevice);
             MultiMaps = new Renderer.MultiMaps.MultiMap(FileManager.MultiMaps, game.GraphicsDevice);
             Sounds = new Renderer.Sounds.Sound(FileManager.Sounds);
+            FontGlyphAtlas = new Renderer.FontGlyphAtlas(FileManager.Fonts, game.GraphicsDevice);
 
             LightColors.LoadLights();
 

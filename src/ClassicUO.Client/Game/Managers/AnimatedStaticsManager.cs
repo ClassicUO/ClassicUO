@@ -4,15 +4,17 @@ using ClassicUO.Configuration;
 using ClassicUO.Game.Data;
 using ClassicUO.IO;
 using ClassicUO.Assets;
-using ClassicUO.Utility.Collections;
 using System;
-using System.Runtime.InteropServices;
+using System.Collections.Generic;
 
 namespace ClassicUO.Game.Managers
 {
     sealed class AnimatedStaticsManager
     {
-        private readonly FastList<StaticAnimationInfo> _staticInfos = new FastList<StaticAnimationInfo>();
+        // Built once during Initialize from the static-data table and never mutated again.
+        // Array (not List<T>) keeps the iteration tight: indexer returns ref via Span and
+        // there's no spare-capacity overhead.
+        private StaticAnimationInfo[] _staticInfos = Array.Empty<StaticAnimationInfo>();
         private uint _processTime;
 
 
@@ -27,6 +29,7 @@ namespace ClassicUO.Game.Managers
 
             uint lastaddr = (uint)(file.Length - sizeof(AnimDataFrame));
 
+            var infos = new List<StaticAnimationInfo>();
             for (int i = 0; i < Client.Game.UO.FileManager.TileData.StaticData.Length; i++)
             {
                 if (Client.Game.UO.FileManager.TileData.StaticData[i].IsAnimated)
@@ -35,7 +38,7 @@ namespace ClassicUO.Game.Managers
 
                     if (addr <= lastaddr)
                     {
-                        _staticInfos.Add
+                        infos.Add
                         (
                             new StaticAnimationInfo
                             {
@@ -46,11 +49,13 @@ namespace ClassicUO.Game.Managers
                     }
                 }
             }
+
+            _staticInfos = infos.ToArray();
         }
 
         public unsafe void Process()
         {
-            if (_staticInfos == null || _staticInfos.Length == 0 || _processTime >= Time.Ticks)
+            if (_staticInfos.Length == 0 || _processTime >= Time.Ticks)
             {
                 return;
             }
@@ -71,7 +76,7 @@ namespace ClassicUO.Game.Managers
 
             for (int i = 0; i < _staticInfos.Length; i++)
             {
-                ref StaticAnimationInfo o = ref _staticInfos.Buffer[i];
+                ref StaticAnimationInfo o = ref _staticInfos[i];
 
                 if (no_animated_field && o.IsField)
                 {

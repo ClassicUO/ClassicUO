@@ -224,18 +224,15 @@ namespace ClassicUO.Game.UI.Controls
                     int yoffset = IsClicked ? 1 : 0;
 
                     renderLists.AddGumpNoAtlas(
-                        batcher => textTexture.Draw(
-                        batcher,
+                        textTexture,
                         x + ((Width - textTexture.Width) >> 1),
                         y + yoffset + ((Height - textTexture.Height) >> 1),
-                        depth: layerDepth
-                    ));
+                        layerDepth
+                    );
                 }
                 else
                 {
-                    renderLists.AddGumpNoAtlas(
-                        batcher => textTexture.Draw(batcher, x, y, depth: layerDepth)
-                    );
+                    renderLists.AddGumpNoAtlas(textTexture, x, y, layerDepth);
                 }
             }
 
