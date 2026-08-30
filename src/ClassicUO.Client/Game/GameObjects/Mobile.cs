@@ -121,6 +121,11 @@ namespace ClassicUO.Game.GameObjects
         public Mobile(World world) : base(world, 0) { }
 
         public Deque<Step> Steps { get; } = new Deque<Step>(Constants.MAX_STEP_COUNT);
+
+        // Interval between the last two step packets from the server (ms); 0 = unknown.
+        // Lets queued steps drain at the server's cadence instead of the nominal step time.
+        public int StepInterval { get; private set; }
+        private uint _lastStepArrival;
         public bool IsParalyzed => (Flags & Flags.Frozen) != 0;
         public bool IsYellowHits => (Flags & Flags.YellowBar) != 0;
         public bool IsPoisoned =>
@@ -297,6 +302,18 @@ namespace ClassicUO.Game.GameObjects
 
             if (moveDir != Direction.NONE)
             {
+                // Only packets that move the mobile define its cadence; a turn packet
+                // followed by a step would otherwise read as a near-zero interval.
+                if (Serial != World.Player)
+                {
+                    if (_lastStepArrival != 0)
+                    {
+                        StepInterval = (int)(Time.Ticks - _lastStepArrival);
+                    }
+
+                    _lastStepArrival = Time.Ticks;
+                }
+
                 if (moveDir != endDir)
                 {
                     step.X = endX;
@@ -693,6 +710,27 @@ namespace ClassicUO.Game.GameObjects
             LastAnimationChangeTime = Time.Ticks + currentDelay;
         }
 
+        // True when any entry queued behind the in-flight front step is an actual move.
+        // Facing-turns share their predecessor's tile and occupy depth without one.
+        private bool HasMoveBacklog()
+        {
+            Step prev = Steps[0];
+
+            for (int i = 1; i < Steps.Count; i++)
+            {
+                Step s = Steps[i];
+
+                if (s.X != prev.X || s.Y != prev.Y)
+                {
+                    return true;
+                }
+
+                prev = s;
+            }
+
+            return false;
+        }
+
         public void ProcessSteps(out byte dir, bool evalutate = false)
         {
             dir = (byte)Direction;
@@ -716,18 +754,21 @@ namespace ClassicUO.Game.GameObjects
                     }
 
                     int delay = (int)Time.Ticks - (int)LastStepTime;
-                    bool mounted =
+                    bool actuallyMounted =
                         IsMounted
                         || SpeedMode == CharacterSpeedType.FastUnmount
                         || SpeedMode == CharacterSpeedType.FastUnmountAndCantRun
                         || IsFlying;
+                    bool mounted = actuallyMounted;
                     bool run = step.Run;
 
                     // Client auto movements sync.
                     // When server sends more than 1 packet in an amount of time less than 100ms if mounted (or 200ms if walking mount)
                     // we need to remove the "teleport" effect.
                     // When delay == 0 means that we received multiple movement packets in a single frame, so the patch becomes quite useless.
-                    if (!mounted && Serial != World.Player && Steps.Count > 1 && delay > 0)
+                    // Only a genuine movement backlog may compress; a queued facing-turn
+                    // occupies depth without one.
+                    if (!mounted && Serial != World.Player && Steps.Count > 1 && delay > 0 && HasMoveBacklog())
                     {
                         mounted =
                             delay
@@ -738,9 +779,23 @@ namespace ClassicUO.Game.GameObjects
                             );
                     }
 
-                    int maxDelay =
-                        MovementSpeed.TimeToCompleteMovement(run, mounted)
-                        - (int)Client.Game.FrameDelay[1];
+                    int stepTime = MovementSpeed.TimeToCompleteMovement(run, mounted);
+
+                    // Animate at the server's cadence while it is renderable (a mounted run
+                    // up to a walk): faster than nominal backs the queue up until steps drop
+                    // and the mobile snaps; slower than nominal stalls between steps. Beyond
+                    // a walk, keep the usual step-then-stand look. Bounded by the real
+                    // mounted state so the measured cadence outranks the backlog heuristic.
+                    if (
+                        Serial != World.Player
+                        && StepInterval > 0
+                        && StepInterval <= MovementSpeed.TimeToCompleteMovement(false, actuallyMounted)
+                    )
+                    {
+                        stepTime = Math.Max(StepInterval, MovementSpeed.STEP_DELAY_MOUNT_RUN);
+                    }
+
+                    int maxDelay = Math.Max(stepTime - (int)Client.Game.FrameDelay[1], 1);
 
                     bool removeStep = delay >= maxDelay;
                     bool directionChange = false;
