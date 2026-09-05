@@ -1079,7 +1079,7 @@ namespace ClassicUO.Game.GameObjects
                             }
                             else
                             {
-                                // A body without a run group keeps walking rather than sliding on its stand frames.
+                                // No run group: walk rather than slide on the stand frames.
                                 result = animations.AnimationExists(graphic, 1)
                                     ? (byte)(LowAnimationGroup.Run)
                                     : (byte)(LowAnimationGroup.Walk);

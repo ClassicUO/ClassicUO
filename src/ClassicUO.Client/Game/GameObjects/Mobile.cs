@@ -123,7 +123,6 @@ namespace ClassicUO.Game.GameObjects
         public Deque<Step> Steps { get; } = new Deque<Step>(Constants.MAX_STEP_COUNT);
 
         // Interval between the last two step packets from the server (ms); 0 = unknown.
-        // Lets queued steps drain at the server's cadence instead of the nominal step time.
         public int StepInterval { get; private set; }
         private uint _lastStepArrival;
         private bool _turnSinceLastStep;
@@ -305,8 +304,7 @@ namespace ClassicUO.Game.GameObjects
             {
                 if (moveDir == Direction.NONE)
                 {
-                    // A facing-turn is not a step: it neither defines the cadence nor
-                    // resets the clock the next step is measured against.
+                    // A facing-turn neither defines the cadence nor restarts the clock.
                     _turnSinceLastStep = true;
                 }
                 else
@@ -315,11 +313,8 @@ namespace ClassicUO.Game.GameObjects
                     {
                         int elapsed = (int)(Time.Ticks - _lastStepArrival);
 
-                        // Servers that emit turns as their own packet pace the step after a
-                        // turn by the turn latency, not the step period (the client itself
-                        // steps 80 ms after a turn; some emulators charge a full period), so a
-                        // pair that spans a turn keeps the last estimate while it is still
-                        // renderable. Beyond a walk, measure: the mobile actually paused.
+                        // A pair spanning a turn includes the turn latency, not just the
+                        // period: keep the last estimate unless the mobile actually paused.
                         if (!_turnSinceLastStep || elapsed > MovementSpeed.STEP_DELAY_WALK)
                         {
                             StepInterval = elapsed;
@@ -729,10 +724,8 @@ namespace ClassicUO.Game.GameObjects
             LastAnimationChangeTime = Time.Ticks + currentDelay;
         }
 
-        // Milliseconds the first real move queued behind the in-flight step has waited,
-        // or -1 when there is no movement backlog. Counted from the tile the mobile
-        // stands on: the in-flight step plus a real move behind it. Facing-turns share
-        // their predecessor's tile and occupy depth without one.
+        // Wait (ms) of the first real move queued behind the in-flight step, or -1 when
+        // there is no movement backlog. Facing-turns share a tile and do not count.
         private int QueuedMoveWait()
         {
             int moves = 0;
@@ -795,8 +788,7 @@ namespace ClassicUO.Game.GameObjects
                     // When server sends more than 1 packet in an amount of time less than 100ms if mounted (or 200ms if walking mount)
                     // we need to remove the "teleport" effect.
                     // When delay == 0 means that we received multiple movement packets in a single frame, so the patch becomes quite useless.
-                    // Only a genuine movement backlog may compress; a queued facing-turn
-                    // occupies depth without one.
+                    // Only a genuine movement backlog may compress.
                     if (!mounted && delay > 0 && backlogWait >= 0)
                     {
                         mounted =
@@ -810,22 +802,17 @@ namespace ClassicUO.Game.GameObjects
 
                     int stepTime = MovementSpeed.TimeToCompleteMovement(run, mounted);
 
-                    // Animate at the server's cadence while it is renderable (the fastest
-                    // tuned creatures up to a walk): faster than nominal backs the queue up
-                    // until steps drop and the mobile snaps; slower than nominal stalls
-                    // between steps. Beyond a walk, keep the usual step-then-stand look.
-                    // Bounded by the real mounted state so the measured cadence outranks
-                    // the backlog heuristic.
+                    // Drain at the server's cadence while it is renderable (up to a walk);
+                    // beyond that keep the step-then-stand look. Bounded by the real mounted
+                    // state so the measurement outranks the backlog heuristic.
                     if (
                         Serial != World.Player
                         && StepInterval > 0
                         && StepInterval <= MovementSpeed.TimeToCompleteMovement(false, actuallyMounted)
                     )
                     {
-                        // A move waiting behind this step is a tile the server has that we have
-                        // not shown yet. Shorten the step by the wait so the queued move starts
-                        // on time: a packet a few ms early costs a few ms, a full packet of lag
-                        // runs the tail at double speed and halves the deficit every step.
+                        // Shorten by the queued move's wait so it starts on time; a full
+                        // packet of lag halves every step.
                         stepTime = Math.Max(StepInterval - Math.Max(backlogWait, 0), MovementSpeed.STEP_DELAY_MIN);
                     }
 
