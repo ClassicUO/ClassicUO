@@ -17,6 +17,21 @@ namespace ClassicUO.Assets
         private static readonly char[] _configFileDelimiters = { ' ', ',', '\t' };
         private static readonly Dictionary<int, (string, bool)> _musicData = new Dictionary<int, (string, bool)>();
 
+        /// <summary>
+        /// Sounds of the shard's own, as loose files, looked at before the archive.
+        ///
+        /// There is no patch file for sounds the way there is for maps, and Sound.def cannot help:
+        /// it remaps an id to another id and skips any id that already holds data, so it can add
+        /// an alias and can never replace a sound. Rewriting soundLegacyMUL.uop would work and
+        /// means shipping a two hundred megabyte archive to change one clang.
+        ///
+        /// A folder does the same job for the price of a directory listing. Anything in
+        /// Sounds/&lt;id&gt;.wav wins over the archive, and any id the archive does not have becomes
+        /// a sound the shard can ask for - the client already allows ids up to 0xFFFF and the
+        /// archive stops at 1666, so there are sixty-three thousand free.
+        /// </summary>
+        private readonly Dictionary<int, string> _ours = new Dictionary<int, string>();
+
 
         public const int MAX_SOUND_DATA_INDEX_COUNT = 0xFFFF;
 
@@ -50,6 +65,8 @@ namespace ClassicUO.Assets
             }
 
             _file.FillEntries();
+
+            LoadOurs();
 
             string def = FileManager.GetUOFilePath("Sound.def");
 
@@ -193,6 +210,113 @@ namespace ClassicUO.Assets
             }
         }
 
+        /// <summary>
+        /// Index Sounds/&lt;id&gt;.wav, if the folder is there at all. One listing, at load.
+        ///
+        /// A File.Exists per sound played would be a disk hit every time somebody swings a sword.
+        /// </summary>
+        private void LoadOurs()
+        {
+            _ours.Clear();
+
+            string folder = Path.Combine(FileManager.BasePath, "Sounds");
+
+            if (!Directory.Exists(folder))
+            {
+                return;
+            }
+
+            foreach (string path in Directory.EnumerateFiles(folder, "*.wav"))
+            {
+                if (int.TryParse(Path.GetFileNameWithoutExtension(path), out int id)
+                    && id >= 0 && id < MAX_SOUND_DATA_INDEX_COUNT)
+                {
+                    _ours[id] = path;
+                }
+            }
+
+            if (_ours.Count > 0)
+            {
+                Log.Trace($"{_ours.Count} sound(s) of our own in {folder}");
+            }
+        }
+
+        /// <summary>
+        /// The samples out of a WAV, if it is one this can play.
+        ///
+        /// The stream these end up in is fixed at 22,050 Hz, mono, 16-bit - Sound.cs hard-codes
+        /// all three - so anything else is refused rather than played. Handing it a 44,100 stereo
+        /// file plays it at half speed an octave down, which sounds like a broken file rather
+        /// than like a wrong header, and nobody would know where to look.
+        /// </summary>
+        private static byte[] ReadWave(string path)
+        {
+            byte[] raw;
+
+            try
+            {
+                raw = File.ReadAllBytes(path);
+            }
+            catch (IOException e)
+            {
+                Log.Warn($"could not read {path}: {e.Message}");
+                return null;
+            }
+
+            if (raw.Length < 44
+                || raw[0] != 'R' || raw[1] != 'I' || raw[2] != 'F' || raw[3] != 'F'
+                || raw[8] != 'W' || raw[9] != 'A' || raw[10] != 'V' || raw[11] != 'E')
+            {
+                Log.Warn($"{Path.GetFileName(path)} is not a WAV");
+                return null;
+            }
+
+            // Walk the chunks rather than assuming the layout. A WAV written by anything but the
+            // simplest encoder carries LIST and fact chunks before its data.
+            int at = 12;
+            int channels = 0, rate = 0, bits = 0;
+
+            while (at + 8 <= raw.Length)
+            {
+                string kind = Encoding.ASCII.GetString(raw, at, 4);
+                int size = BitConverter.ToInt32(raw, at + 4);
+
+                if (size < 0 || at + 8 + size > raw.Length)
+                {
+                    size = raw.Length - at - 8;
+                }
+
+                if (kind == "fmt " && size >= 16)
+                {
+                    channels = BitConverter.ToInt16(raw, at + 10);
+                    rate = BitConverter.ToInt32(raw, at + 12);
+                    bits = BitConverter.ToInt16(raw, at + 22);
+                }
+                else if (kind == "data")
+                {
+                    if (channels != 1 || rate != 22050 || bits != 16)
+                    {
+                        Log.Warn(
+                            $"{Path.GetFileName(path)} is {rate}Hz {channels}ch {bits}-bit; " +
+                            "it has to be 22050 mono 16-bit, so it is being ignored");
+
+                        return null;
+                    }
+
+                    byte[] body = new byte[size];
+                    Buffer.BlockCopy(raw, at + 8, body, 0, size);
+
+                    return body;
+                }
+
+                at += 8 + size + (size & 1);         // chunks are padded to an even length
+            }
+
+            Log.Warn($"{Path.GetFileName(path)} has no data chunk");
+
+            return null;
+        }
+
         public unsafe bool TryGetSound(int sound, out byte[] data, out string name)
         {
             data = null;
@@ -201,6 +325,19 @@ namespace ClassicUO.Assets
             if (sound < 0)
             {
                 return false;
+            }
+
+            // Ours first, so a replacement replaces and a new id works at all.
+            if (_ours.TryGetValue(sound, out string mine))
+            {
+                data = ReadWave(mine);
+
+                if (data != null)
+                {
+                    name = Path.GetFileNameWithoutExtension(mine);
+
+                    return true;
+                }
             }
 
             ref var entry = ref _file.GetValidRefEntry(sound);
