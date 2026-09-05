@@ -461,10 +461,23 @@ namespace ClassicUO.Assets
                     continue;
                 }
 
-                int mapPatchesCount = (int)reader.ReadUInt32BE();
-                MapPatchCount[i] = mapPatchesCount;
+                // Statics first, then land.
+                //
+                // This was the other way round, and it silently disabled land patching against
+                // every server that sends this packet. RunUO, ServUO and ModernUO all write the
+                // statics count first - ModernUO in OutgoingMapPackets.SendMapPatches - so
+                // reading land first takes the statics count as the land count and the land count
+                // as the statics count.
+                //
+                // The failure is invisible rather than loud: a shard that patches land and not
+                // statics sends (0, n), which reads as "no land patches" and n statics patches
+                // that then clamp to zero against an empty stadifl. Nothing throws, nothing logs,
+                // and the ground simply stays as it was while the server believes it changed. It
+                // has probably gone unnoticed because almost nothing ships map patches any more.
                 int staticPatchesCount = (int)reader.ReadUInt32BE();
                 StaticPatchCount[i] = staticPatchesCount;
+                int mapPatchesCount = (int)reader.ReadUInt32BE();
+                MapPatchCount[i] = mapPatchesCount;
 
                 int w = MapBlocksSize[i, 0];
                 int h = MapBlocksSize[i, 1];
