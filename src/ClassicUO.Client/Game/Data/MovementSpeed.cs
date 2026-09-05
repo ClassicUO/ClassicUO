@@ -11,6 +11,12 @@ namespace ClassicUO.Game.Data
         public const int STEP_DELAY_RUN = 200;
         public const int STEP_DELAY_WALK = 400;
 
+        // Floor for a measured server cadence. Below this a step is a teleport, and a
+        // jitter burst (two packets a frame apart) must not collapse the steps it touches
+        // into one; above it every legitimate creature pace we know of fits (ModernUO
+        // floors creatures at 50 ms, UOX3 tunes to 80 ms, POL to 125 ms, Sphere to 100 ms).
+        public const int STEP_DELAY_MIN = 50;
+
         public static bool FastRotation;
         public static int TurnDelay => FastRotation ? Constants.TURN_DELAY_FAST : Constants.TURN_DELAY;
 
