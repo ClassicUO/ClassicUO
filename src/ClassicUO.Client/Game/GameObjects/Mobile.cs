@@ -299,7 +299,7 @@ namespace ClassicUO.Game.GameObjects
             }
 
             Direction moveDir = DirectionHelper.CalculateDirection(endX, endY, x, y);
-            Step step = new Step();
+            Step step = new Step { Arrival = Time.Ticks };
 
             if (Serial != World.Player)
             {
@@ -729,10 +729,11 @@ namespace ClassicUO.Game.GameObjects
             LastAnimationChangeTime = Time.Ticks + currentDelay;
         }
 
-        // True when at least two position-changing steps are queued, counted from the
-        // tile the mobile stands on: the in-flight step plus a real move behind it.
-        // Facing-turns share their predecessor's tile and occupy depth without one.
-        private bool HasMoveBacklog()
+        // Milliseconds the first real move queued behind the in-flight step has waited,
+        // or -1 when there is no movement backlog. Counted from the tile the mobile
+        // stands on: the in-flight step plus a real move behind it. Facing-turns share
+        // their predecessor's tile and occupy depth without one.
+        private int QueuedMoveWait()
         {
             int moves = 0;
             int prevX = X;
@@ -746,7 +747,7 @@ namespace ClassicUO.Game.GameObjects
                 {
                     if (++moves > 1)
                     {
-                        return true;
+                        return (int)(Time.Ticks - s.Arrival);
                     }
 
                     prevX = s.X;
@@ -754,7 +755,7 @@ namespace ClassicUO.Game.GameObjects
                 }
             }
 
-            return false;
+            return -1;
         }
 
         public void ProcessSteps(out byte dir, bool evalutate = false)
@@ -788,13 +789,15 @@ namespace ClassicUO.Game.GameObjects
                     bool mounted = actuallyMounted;
                     bool run = step.Run;
 
+                    int backlogWait = Serial != World.Player && Steps.Count > 1 ? QueuedMoveWait() : -1;
+
                     // Client auto movements sync.
                     // When server sends more than 1 packet in an amount of time less than 100ms if mounted (or 200ms if walking mount)
                     // we need to remove the "teleport" effect.
                     // When delay == 0 means that we received multiple movement packets in a single frame, so the patch becomes quite useless.
                     // Only a genuine movement backlog may compress; a queued facing-turn
                     // occupies depth without one.
-                    if (!mounted && Serial != World.Player && Steps.Count > 1 && delay > 0 && HasMoveBacklog())
+                    if (!mounted && delay > 0 && backlogWait >= 0)
                     {
                         mounted =
                             delay
@@ -819,7 +822,11 @@ namespace ClassicUO.Game.GameObjects
                         && StepInterval <= MovementSpeed.TimeToCompleteMovement(false, actuallyMounted)
                     )
                     {
-                        stepTime = Math.Max(StepInterval, MovementSpeed.STEP_DELAY_MIN);
+                        // A move waiting behind this step is a tile the server has that we have
+                        // not shown yet. Shorten the step by the wait so the queued move starts
+                        // on time: a packet a few ms early costs a few ms, a full packet of lag
+                        // runs the tail at double speed and halves the deficit every step.
+                        stepTime = Math.Max(StepInterval - Math.Max(backlogWait, 0), MovementSpeed.STEP_DELAY_MIN);
                     }
 
                     int maxDelay = Math.Max(stepTime - (int)Client.Game.FrameDelay[1], 1);
@@ -1165,6 +1172,7 @@ namespace ClassicUO.Game.GameObjects
             public sbyte Z;
             public byte Direction;
             public bool Run;
+            public uint Arrival;
         }
     }
 }
