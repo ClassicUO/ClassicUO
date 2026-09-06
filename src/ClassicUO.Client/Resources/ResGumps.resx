@@ -396,6 +396,9 @@
   <data name="PlayFootsteps" xml:space="preserve">
     <value>Play Footsteps</value>
   </data>
+  <data name="PlayRainSound" xml:space="preserve">
+    <value>Play Rain Sound</value>
+  </data>
   <data name="CombatMusic" xml:space="preserve">
     <value>Combat music</value>
   </data>
@@ -485,6 +488,9 @@
   </data>
   <data name="AnimatedWaterEffect" xml:space="preserve">
     <value>Animated water effect</value>
+  </data>
+  <data name="WeatherEffects" xml:space="preserve">
+    <value>Weather effects (Splash &amp; Ripples)</value>
   </data>
   <data name="UseXBREffectBETA" xml:space="preserve">
     <value>Use xBR effect [BETA]</value>
