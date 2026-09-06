@@ -4,6 +4,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Controls
@@ -70,13 +71,27 @@ namespace ClassicUO.Game.UI.Controls
             {
                 var texture = artInfo.Texture;
                 var sourceRectangle = artInfo.UV;
+
+                // Centred in the button, not offset by its size.
+                //
+                // This drew at x + _tileX, y + _tileY - which places the item a whole button
+                // down and to the right of the button it belongs to. In a grid of cells that
+                // puts every item in the next cell along and one row down, and the last column's
+                // items outside the panel entirely, which is exactly what it looked like.
+                //
+                // The two numbers are the button's size. An item drawn *at* its size is drawn
+                // past its far corner, so this cannot have been meant: nothing is placed by
+                // adding its container's whole extent to its origin.
+                var atX = x + Math.Max(0, (_tileX - sourceRectangle.Width) / 2);
+                var atY = y + Math.Max(0, (_tileY - sourceRectangle.Height) / 2);
+
                 renderLists.AddGumpWithAtlas
                 (
                     (batcher) =>
                     {
                         batcher.Draw(
                             texture,
-                            new Vector2(x + _tileX, y + _tileY),
+                            new Vector2(atX, atY),
                             sourceRectangle,
                             hueVector,
                             layerDepth
