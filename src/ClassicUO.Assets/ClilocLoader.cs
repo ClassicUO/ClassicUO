@@ -62,6 +62,81 @@ namespace ClassicUO.Assets
             }
 
             ReadCliloc(path);
+
+            ReadOurs();
+        }
+
+        /// <summary>
+        /// Strings of the shard's own, from a plain text file, read last so they win.
+        ///
+        /// A context menu entry, a gump caption and an item's name are all cliloc numbers, and a
+        /// shard is limited to whatever the client already happens to say. There is no number for
+        /// "Send to kennel" because Origin never needed one, so anything a shard adds is either
+        /// approximated with a string that nearly fits or shown as a raw number.
+        ///
+        /// The file is read after Cliloc.enu and after the language file, and this dictionary is
+        /// last-write-wins - which is how the language file already overrides the English one. So
+        /// the same mechanism adds new numbers and corrects existing ones, and neither needs the
+        /// compressed original touched.
+        ///
+        /// Plain text rather than the client's own format on purpose: a line somebody can read,
+        /// diff and edit beats a BWT-compressed blob for a file that will hold a few dozen
+        /// entries. Anything above 3,100,000 is free - the client's own stop at 3,011,032.
+        ///
+        ///     # Clilocs.txt, in the client folder
+        ///     3100001    Breed
+        ///     3100002    Send to kennel
+        /// </summary>
+        private void ReadOurs()
+        {
+            string path = FileManager.GetUOFilePath("Clilocs.txt");
+
+            if (!File.Exists(path))
+            {
+                return;
+            }
+
+            var added = 0;
+
+            try
+            {
+                foreach (string line in File.ReadLines(path))
+                {
+                    string trimmed = line.Trim();
+
+                    if (trimmed.Length == 0 || trimmed[0] == '#')
+                    {
+                        continue;
+                    }
+
+                    // A tab or the first run of spaces separates the number from the text, so the
+                    // text itself may contain anything including tabs after that point.
+                    int at = trimmed.IndexOfAny(new[] { '\t', ' ' });
+
+                    if (at <= 0)
+                    {
+                        continue;
+                    }
+
+                    if (!int.TryParse(trimmed.AsSpan(0, at), out int number))
+                    {
+                        continue;
+                    }
+
+                    _entries[number] = string.Intern(trimmed[(at + 1)..].TrimStart());
+                    added++;
+                }
+            }
+            catch (IOException e)
+            {
+                Log.Warn($"could not read {path}: {e.Message}");
+                return;
+            }
+
+            if (added > 0)
+            {
+                Log.Trace($"{added} cliloc string(s) of our own from {Path.GetFileName(path)}");
+            }
         }
 
         void ReadCliloc(string path)
