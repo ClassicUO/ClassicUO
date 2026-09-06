@@ -27,6 +27,24 @@ namespace ClassicUO.Game.UI.Controls
             ContainsByBounds = true;
             IsFromServer = true;
 
+            // The control is as big as the area it tiles, not as big as the tile.
+            //
+            // Button's constructor sizes itself from its gump art, which is right for a button
+            // whose art *is* its face and wrong for this one: the whole point of buttontileart is
+            // that a small piece of art covers a large region, and the last two arguments say how
+            // large. Left at the art's size, ContainsByBounds tests a box the size of one tile,
+            // so a row two hundred pixels wide made of an eight pixel strip is clickable for
+            // eight pixels of it.
+            //
+            // The rest is not merely dead - it falls through to the gump behind, and a gump is
+            // draggable, so pressing the middle of a list row or a slider picks the window up and
+            // moves it. That is how this was found.
+            if (_tileX > 0 && _tileY > 0)
+            {
+                Width = _tileX;
+                Height = _tileY;
+            }
+
             ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(_graphic);
 
             if (artInfo.Texture == null)
