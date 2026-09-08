@@ -4,6 +4,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Renderer;
 using ClassicUO.Utility;
 using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 
 namespace ClassicUO.Game.UI.Controls
@@ -26,6 +27,24 @@ namespace ClassicUO.Game.UI.Controls
             _tileY = int.Parse(gparams[11]);
             ContainsByBounds = true;
             IsFromServer = true;
+
+            // The control is as big as the area it tiles, not as big as the tile.
+            //
+            // Button's constructor sizes itself from its gump art, which is right for a button
+            // whose art *is* its face and wrong for this one: the whole point of buttontileart is
+            // that a small piece of art covers a large region, and the last two arguments say how
+            // large. Left at the art's size, ContainsByBounds tests a box the size of one tile,
+            // so a row two hundred pixels wide made of an eight pixel strip is clickable for
+            // eight pixels of it.
+            //
+            // The rest is not merely dead - it falls through to the gump behind, and a gump is
+            // draggable, so pressing the middle of a list row or a slider picks the window up and
+            // moves it. That is how this was found.
+            if (_tileX > 0 && _tileY > 0)
+            {
+                Width = _tileX;
+                Height = _tileY;
+            }
 
             ref readonly var artInfo = ref Client.Game.UO.Arts.GetArt(_graphic);
 
@@ -52,13 +71,27 @@ namespace ClassicUO.Game.UI.Controls
             {
                 var texture = artInfo.Texture;
                 var sourceRectangle = artInfo.UV;
+
+                // Centred in the button, not offset by its size.
+                //
+                // This drew at x + _tileX, y + _tileY - which places the item a whole button
+                // down and to the right of the button it belongs to. In a grid of cells that
+                // puts every item in the next cell along and one row down, and the last column's
+                // items outside the panel entirely, which is exactly what it looked like.
+                //
+                // The two numbers are the button's size. An item drawn *at* its size is drawn
+                // past its far corner, so this cannot have been meant: nothing is placed by
+                // adding its container's whole extent to its origin.
+                var atX = x + Math.Max(0, (_tileX - sourceRectangle.Width) / 2);
+                var atY = y + Math.Max(0, (_tileY - sourceRectangle.Height) / 2);
+
                 renderLists.AddGumpWithAtlas
                 (
                     (batcher) =>
                     {
                         batcher.Draw(
                             texture,
-                            new Vector2(x + _tileX, y + _tileY),
+                            new Vector2(atX, atY),
                             sourceRectangle,
                             hueVector,
                             layerDepth
