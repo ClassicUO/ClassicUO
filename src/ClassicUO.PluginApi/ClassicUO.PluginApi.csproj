@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>ClassicUO.PluginApi</RootNamespace>
+    <AssemblyName>ClassicUO.PluginApi</AssemblyName>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IsPackable>true</IsPackable>
+    <PackageId>ClassicUO.PluginApi</PackageId>
+    <Description>Public contract for ClassicUO Plugin v2 hosts. Plugin authors reference this package; the v2 apphost (ClassicUO.BootstrapHost) provides the implementation.</Description>
+    <Authors>ClassicUO contributors</Authors>
+    <PackageLicenseExpression>BSD-2-Clause</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/ClassicUO/ClassicUO</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ClassicUO/ClassicUO</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+  </PropertyGroup>
+
+</Project>
