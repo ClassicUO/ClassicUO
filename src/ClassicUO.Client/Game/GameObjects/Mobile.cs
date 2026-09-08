@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BSD-2-Clause
+﻿// SPDX-License-Identifier: BSD-2-Clause
 
 using ClassicUO.Assets;
 using ClassicUO.Configuration;
@@ -121,6 +121,11 @@ namespace ClassicUO.Game.GameObjects
         public Mobile(World world) : base(world, 0) { }
 
         public Deque<Step> Steps { get; } = new Deque<Step>(Constants.MAX_STEP_COUNT);
+
+        // Interval between the last two step packets from the server (ms); 0 = unknown.
+        public int StepInterval { get; private set; }
+        private uint _lastStepArrival;
+        private bool _turnSinceLastStep;
         public bool IsParalyzed => (Flags & Flags.Frozen) != 0;
         public bool IsYellowHits => (Flags & Flags.YellowBar) != 0;
         public bool IsPoisoned =>
@@ -293,7 +298,33 @@ namespace ClassicUO.Game.GameObjects
             }
 
             Direction moveDir = DirectionHelper.CalculateDirection(endX, endY, x, y);
-            Step step = new Step();
+            Step step = new Step { Arrival = Time.Ticks };
+
+            if (Serial != World.Player)
+            {
+                if (moveDir == Direction.NONE)
+                {
+                    // A facing-turn neither defines the cadence nor restarts the clock.
+                    _turnSinceLastStep = true;
+                }
+                else
+                {
+                    if (_lastStepArrival != 0)
+                    {
+                        int elapsed = (int)(Time.Ticks - _lastStepArrival);
+
+                        // A pair spanning a turn includes the turn latency, not just the
+                        // period: keep the last estimate unless the mobile actually paused.
+                        if (!_turnSinceLastStep || elapsed > MovementSpeed.STEP_DELAY_WALK)
+                        {
+                            StepInterval = elapsed;
+                        }
+                    }
+
+                    _lastStepArrival = Time.Ticks;
+                    _turnSinceLastStep = false;
+                }
+            }
 
             if (moveDir != Direction.NONE)
             {
@@ -693,6 +724,33 @@ namespace ClassicUO.Game.GameObjects
             LastAnimationChangeTime = Time.Ticks + currentDelay;
         }
 
+        // Wait (ms) of the first real move queued behind the in-flight step, or -1 when
+        // there is no movement backlog. Facing-turns share a tile and do not count.
+        private int QueuedMoveWait()
+        {
+            int moves = 0;
+            int prevX = X;
+            int prevY = Y;
+
+            for (int i = 0; i < Steps.Count; i++)
+            {
+                Step s = Steps[i];
+
+                if (s.X != prevX || s.Y != prevY)
+                {
+                    if (++moves > 1)
+                    {
+                        return (int)(Time.Ticks - s.Arrival);
+                    }
+
+                    prevX = s.X;
+                    prevY = s.Y;
+                }
+            }
+
+            return -1;
+        }
+
         public void ProcessSteps(out byte dir, bool evalutate = false)
         {
             dir = (byte)Direction;
@@ -716,18 +774,22 @@ namespace ClassicUO.Game.GameObjects
                     }
 
                     int delay = (int)Time.Ticks - (int)LastStepTime;
-                    bool mounted =
+                    bool actuallyMounted =
                         IsMounted
                         || SpeedMode == CharacterSpeedType.FastUnmount
                         || SpeedMode == CharacterSpeedType.FastUnmountAndCantRun
                         || IsFlying;
+                    bool mounted = actuallyMounted;
                     bool run = step.Run;
+
+                    int backlogWait = Serial != World.Player && Steps.Count > 1 ? QueuedMoveWait() : -1;
 
                     // Client auto movements sync.
                     // When server sends more than 1 packet in an amount of time less than 100ms if mounted (or 200ms if walking mount)
                     // we need to remove the "teleport" effect.
                     // When delay == 0 means that we received multiple movement packets in a single frame, so the patch becomes quite useless.
-                    if (!mounted && Serial != World.Player && Steps.Count > 1 && delay > 0)
+                    // Only a genuine movement backlog may compress.
+                    if (!mounted && delay > 0 && backlogWait >= 0)
                     {
                         mounted =
                             delay
@@ -738,9 +800,23 @@ namespace ClassicUO.Game.GameObjects
                             );
                     }
 
-                    int maxDelay =
-                        MovementSpeed.TimeToCompleteMovement(run, mounted)
-                        - (int)Client.Game.FrameDelay[1];
+                    int stepTime = MovementSpeed.TimeToCompleteMovement(run, mounted);
+
+                    // Drain at the server's cadence while it is renderable (up to a walk);
+                    // beyond that keep the step-then-stand look. Bounded by the real mounted
+                    // state so the measurement outranks the backlog heuristic.
+                    if (
+                        Serial != World.Player
+                        && StepInterval > 0
+                        && StepInterval <= MovementSpeed.TimeToCompleteMovement(false, actuallyMounted)
+                    )
+                    {
+                        // Shorten by the queued move's wait so it starts on time; a full
+                        // packet of lag halves every step.
+                        stepTime = Math.Max(StepInterval - Math.Max(backlogWait, 0), MovementSpeed.STEP_DELAY_MIN);
+                    }
+
+                    int maxDelay = Math.Max(stepTime - (int)Client.Game.FrameDelay[1], 1);
 
                     bool removeStep = delay >= maxDelay;
                     bool directionChange = false;
@@ -1083,6 +1159,7 @@ namespace ClassicUO.Game.GameObjects
             public sbyte Z;
             public byte Direction;
             public bool Run;
+            public uint Arrival;
         }
     }
 }
