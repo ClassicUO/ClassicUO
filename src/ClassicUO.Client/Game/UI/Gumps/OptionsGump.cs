@@ -128,6 +128,9 @@ namespace ClassicUO.Game.UI.Gumps
         private Checkbox _showInfoBar;
         private Checkbox _ignoreAllianceMessages;
         private Checkbox _ignoreGuildMessages, _useAlternateJournal, _partyMessagesOverhead;
+        private ClickableColorBox _AlternateJournalHue;
+        private Checkbox _AlternateJournalTransparencyToggle;
+        private HSliderBar _AlternateJournalTransparency;
 
         // general
         private HSliderBar _sliderFPS, _circleOfTranspRadius;
@@ -2487,7 +2490,7 @@ namespace ClassicUO.Game.UI.Gumps
 
             startY += _saveJournalCheckBox.Height + 2;
 
-            if (!_currentProfile.SaveJournalToFile)
+                        if (!_currentProfile.SaveJournalToFile)
             {
                 World.Journal.CloseWriter();
             }
@@ -2543,6 +2546,46 @@ namespace ClassicUO.Game.UI.Gumps
                 startX,
                 startY
             );
+
+            startX = 5;
+            startY += _journalFileWithSerial.Height + 10;
+
+            _AlternateJournalHue = AddColorBox
+            (
+                rightArea,
+                startX,
+                startY,
+                _currentProfile.AlternateJournalHue,
+                ResGumps.AlternateJournalHue
+            );
+
+            startY += _AlternateJournalHue.Height + 2;
+
+            _AlternateJournalTransparencyToggle = AddCheckBox
+            (
+                rightArea,
+                ResGumps.AlternateJournalTransparency,
+                _currentProfile.AlternateJournalTransparencyToggle,
+                startX,
+                startY
+            );
+
+            startX += _AlternateJournalTransparencyToggle.Width + 5;
+
+            _AlternateJournalTransparency = AddHSlider
+            (
+                rightArea,
+                1,
+                10,
+                _currentProfile.AlternateJournalTransparency,
+                startX,
+                startY,
+                180
+            );
+
+            startY += _AlternateJournalHue.Height + 15;
+
+
 
             startX = 5;
             startY += _journalFileWithSerial.Height + 2 + 5;
@@ -3743,6 +3786,9 @@ namespace ClassicUO.Game.UI.Gumps
                     _ignoreGuildMessages.IsChecked = false;
                     _ignoreAllianceMessages.IsChecked = false;
                     _useAlternateJournal.IsChecked = false;
+                    _AlternateJournalHue.Hue = 0x0000;
+                    _AlternateJournalTransparency.Value = 7;
+                    _AlternateJournalTransparencyToggle.IsChecked = true;
                     _partyMessagesOverhead.IsChecked = false;
 
                     break;
@@ -4146,6 +4192,9 @@ namespace ClassicUO.Game.UI.Gumps
             _currentProfile.IgnoreGuildMessages = _ignoreGuildMessages.IsChecked;
             _currentProfile.IgnoreAllianceMessages = _ignoreAllianceMessages.IsChecked;
             _currentProfile.UseAlternateJournal = _useAlternateJournal.IsChecked;
+            _currentProfile.AlternateJournalHue = _AlternateJournalHue.Hue;
+            _currentProfile.AlternateJournalTransparencyToggle = _AlternateJournalTransparencyToggle.IsChecked; 
+            _currentProfile.AlternateJournalTransparency = _AlternateJournalTransparency.Value;
 
             // fonts
             _currentProfile.ForceUnicodeJournal = _forceUnicodeJournal.IsChecked;

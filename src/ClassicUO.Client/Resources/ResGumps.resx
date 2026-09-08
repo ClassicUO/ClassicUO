@@ -1667,4 +1667,10 @@ start your first counter</value>
   <data name="JournalFileWithSerial" xml:space="preserve">
     <value>Add speaker serial to journal entries</value>
   </data>
+  <data name="AlternateJournalHue" xml:space="preserve">
+    <value>Alternative Journal Hue</value>
+  </data>
+  <data name="AlternateJournalTransparency" xml:space="preserve">
+    <value>Alternative journal Transparency</value>
+  </data>
 </root>

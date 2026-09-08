@@ -322,6 +322,9 @@ namespace ClassicUO.Configuration
 
         //Alternate Journal
         public bool UseAlternateJournal { get; set; }
+        public ushort AlternateJournalHue { get; set; }
+        public int AlternateJournalTransparency { get; set; }
+        public bool AlternateJournalTransparencyToggle { get; set; }
         public Dictionary<string, MessageType[]> JournalTabs { get; } = new Dictionary<string, MessageType[]>()
         {
             { "All", new MessageType[] {
