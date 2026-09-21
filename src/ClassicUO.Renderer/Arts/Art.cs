@@ -27,6 +27,14 @@ namespace ClassicUO.Renderer.Arts
             _realArtBounds = new Rectangle[_spriteInfos.Length];
         }
 
+        public void Reload()
+        {
+            _artLoader.LoadOurs();
+            Array.Clear(_spriteInfos);
+            Array.Clear(_realArtBounds);
+            _picker.Clear();
+        }
+
         public ref readonly SpriteInfo GetLand(uint idx)
             => ref Get((uint)(idx & ~0x4000));
 

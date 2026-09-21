@@ -4687,5 +4687,23 @@ namespace ClassicUO.Resources {
                 return ResourceManager.GetString("YourCurrentChannel", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your current channel:.
+        /// </summary>
+        public static string ReloadOurAssets {
+            get {
+                return ResourceManager.GetString("ReloadOurAssets", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your current channel:.
+        /// </summary>
+        public static string OurAssetsReloaded {
+            get {
+                return ResourceManager.GetString("OurAssetsReloaded", resourceCulture);
+            }
+        }
     }
 }
