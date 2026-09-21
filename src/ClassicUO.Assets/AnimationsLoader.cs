@@ -53,6 +53,9 @@ namespace ClassicUO.Assets
 
         public override void Load()
         {
+            // the verdata.mul patch map (FileID 6) is rebuilt on every file load
+            _verdataAnimationBlocks = null;
+
             for (int i = 0; i < _files.Length; i++)
             {
                 var pathmul = FileManager.GetUOFilePath("anim" + (i == 0 ? string.Empty : (i + 1).ToString()) + ".mul");
@@ -368,7 +371,101 @@ namespace ClassicUO.Assets
             }
 
             ArrayPool<AnimIdxBlock>.Shared.Return(indicesBuf);
+
+            // verdata.mul patches (FileID 6) are applied to anim.mul only: the other
+            // animation files have their own block numbering.
+            if (fileIndex == 0)
+            {
+                ApplyVerdataPatches(directions, offsetAddress / sizeof(AnimIdxBlock));
+            }
+
             return directions;
+        }
+
+        private Dictionary<uint, UOFileIndex5D> _verdataAnimationBlocks;
+
+        /// <summary>
+        /// Patches of verdata.mul for anim.mul (FileID 6), indexed by block number.
+        /// Built lazily on first use.
+        /// </summary>
+        private Dictionary<uint, UOFileIndex5D> VerdataAnimationBlocks
+        {
+            get
+            {
+                if (_verdataAnimationBlocks == null)
+                {
+                    _verdataAnimationBlocks = new Dictionary<uint, UOFileIndex5D>();
+
+                    var verdata = FileManager.Verdata;
+
+                    if (verdata?.File != null)
+                    {
+                        for (var i = 0; i < verdata.Patches.Length; ++i)
+                        {
+                            ref readonly var patch = ref verdata.Patches[i];
+
+                            if (patch.FileID == 6)
+                            {
+                                _verdataAnimationBlocks[patch.BlockID] = patch;
+                            }
+                        }
+                    }
+                }
+
+                return _verdataAnimationBlocks;
+            }
+        }
+
+        /// <summary>
+        /// Applies verdata.mul patches to animation indices.
+        /// FileID 6 is anim.mul: a patch replaces one block (body + action + direction)
+        /// with data stored in verdata.mul. Without this, any animation that lives only
+        /// in verdata (custom mounts, creatures and similar on free shards) is not drawn,
+        /// because anim*.mul simply has no bytes for those blocks.
+        /// FileID 5 (patches of anim.idx itself) is not handled here.
+        /// </summary>
+        private void ApplyVerdataPatches(AnimationDirection[] directions, long firstBlockIndex)
+        {
+            var patches = VerdataAnimationBlocks;
+
+            if (patches.Count == 0)
+            {
+                return;
+            }
+
+            for (var i = 0; i < directions.Length; ++i)
+            {
+                var blockIndex = firstBlockIndex + i;
+
+                if (blockIndex < 0 || blockIndex > uint.MaxValue)
+                {
+                    continue;
+                }
+
+                if (!patches.TryGetValue((uint)blockIndex, out var patch))
+                {
+                    continue;
+                }
+
+                ref var dir = ref directions[i];
+
+                if (patch.Length == 0)
+                {
+                    // "delete block" marker: no data at all
+                    dir.Position = 0;
+                    dir.Size = 0;
+                    dir.UncompressedSize = 0;
+                }
+                else
+                {
+                    dir.Position = patch.Position;
+                    dir.Size = patch.Length;
+                    dir.UncompressedSize = 0;
+                }
+
+                dir.CompressionType = CompressionType.None;
+                dir.IsVerdata = true;
+            }
         }
 
         private long CalculateOffset(
@@ -1357,9 +1454,9 @@ namespace ClassicUO.Assets
             }
         }
 
-        public Span<FrameInfo> ReadMULAnimationFrames(int fileIndex, AnimationDirection index)
+        public Span<FrameInfo> ReadMULAnimationFrames(int fileIndex, AnimationDirection index, bool isVerdata = false)
         {
-            if (fileIndex < 0 || fileIndex >= _files.Length)
+            if (!isVerdata && (fileIndex < 0 || fileIndex >= _files.Length))
             {
                 return Span<FrameInfo>.Empty;
             }
@@ -1374,9 +1471,11 @@ namespace ClassicUO.Assets
                 return Span<FrameInfo>.Empty;
             }
 
-            var file = _files[fileIndex];
+            // Blocks that came from a verdata.mul patch are read from verdata.mul itself:
+            // anim*.mul contains no bytes for them at all.
+            var file = isVerdata ? FileManager.Verdata?.File : _files[fileIndex];
 
-            if (index.Position + index.Size > file.Length)
+            if (file == null || index.Position + index.Size > file.Length)
             {
                 return Span<FrameInfo>.Empty;
             }
@@ -1544,6 +1643,11 @@ namespace ClassicUO.Assets
             public uint Size;
             public uint UncompressedSize;
             public CompressionType CompressionType;
+
+            /// <summary>
+            /// The block comes from a verdata.mul patch (FileID 6) and is not inside anim*.mul.
+            /// </summary>
+            public bool IsVerdata;
         }
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]

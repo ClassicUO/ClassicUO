@@ -201,6 +201,7 @@ namespace ClassicUO.Renderer.Animations
                                 ref readonly var animIdx = ref indices[i * AnimationsLoader.MAX_DIRECTIONS + d];
                                 index.Groups[i].Direction[d].Address = animIdx.Position;
                                 index.Groups[i].Direction[d].Size = /*index.FileIndex > 0 ? Math.Max(1, animIdx.Size) :*/ animIdx.Size;
+                                index.Groups[i].Direction[d].IsVerdata = animIdx.IsVerdata;
                             }
                         }
 
@@ -338,7 +339,7 @@ namespace ClassicUO.Renderer.Animations
                         Size = groupObj.Direction[dir].Size,
                     };
 
-                    frames = _animationLoader.ReadMULAnimationFrames(index.FileIndex, ff);
+                    frames = _animationLoader.ReadMULAnimationFrames(index.FileIndex, ff, groupObj.Direction[dir].IsVerdata);
                 }
 
                 if (frames.IsEmpty)
