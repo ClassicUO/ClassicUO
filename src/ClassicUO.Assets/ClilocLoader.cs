@@ -40,6 +40,12 @@ namespace ClassicUO.Assets
             Load();
         }
 
+        public void Reload()
+        {
+            _entries.Clear();
+            Load();
+        }
+
         public override void Load()
         {
             if (string.IsNullOrEmpty(_cliloc))

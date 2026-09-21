@@ -215,7 +215,7 @@ namespace ClassicUO.Assets
         ///
         /// A File.Exists per sound played would be a disk hit every time somebody swings a sword.
         /// </summary>
-        private void LoadOurs()
+        public void LoadOurs()
         {
             _ours.Clear();
 

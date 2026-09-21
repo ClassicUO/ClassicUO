@@ -1667,4 +1667,10 @@ start your first counter</value>
   <data name="JournalFileWithSerial" xml:space="preserve">
     <value>Add speaker serial to journal entries</value>
   </data>
+  <data name="ReloadOurAssets" xml:space="preserve">
+    <value>Reload our art, gumps, sounds and strings</value>
+  </data>
+  <data name="OurAssetsReloaded" xml:space="preserve">
+    <value>Our assets reloaded.</value>
+  </data>
 </root>

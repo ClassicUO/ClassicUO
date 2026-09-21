@@ -71,7 +71,7 @@ namespace ClassicUO.Assets
         /// A File.Exists per tile would be a disk hit for every square of ground on the screen,
         /// which is several hundred of them, sixty times a second.
         /// </summary>
-        private void LoadOurs()
+        public void LoadOurs()
         {
             _ourStatics.Clear();
             _ourLand.Clear();
