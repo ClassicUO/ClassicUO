@@ -480,12 +480,18 @@ namespace ClassicUO.Game.UI.Gumps
 
                 _textbox.FocusLost += (s, e) =>
                 {
+                    bool wasBeingEdited = _textbox.IsEditable;
                     _status = 0;
                     _gumpPic.IsVisible = true;
                     _textbox.IsEditable = false;
                     _textbox.AllowSelection = false;
                     UIManager.KeyboardFocusControl = null;
                     UIManager.SystemChat.SetFocus();
+
+                    if (wasBeingEdited)
+                    {
+                        OnGroupNameEditingFinished(_textbox.Text);
+                    }
                 };
             }
 
@@ -616,7 +622,7 @@ namespace ClassicUO.Game.UI.Gumps
                 base.OnMouseOver(x, y);
             }
 
-            public override void OnKeyboardReturn(int textID, string text)
+            public void OnGroupNameEditingFinished(string text)
             {
                 if (string.IsNullOrWhiteSpace(text))
                 {
@@ -642,8 +648,6 @@ namespace ClassicUO.Game.UI.Gumps
                 UIManager.SystemChat.SetFocus();
 
                 _group.Name = text;
-
-                base.OnKeyboardReturn(textID, text);
             }
 
             protected override void OnKeyUp(SDL.SDL_Keycode key, SDL.SDL_Keymod mod)
