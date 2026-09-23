@@ -52,7 +52,8 @@ namespace ClassicUO.Game.Managers
             bool fixedDir,
             bool doesExplode,
             bool hasparticles,
-            GraphicEffectBlendMode blendmode
+            GraphicEffectBlendMode blendmode,
+            byte layer = 0xFF
         )
         {
             if (hasparticles)
@@ -99,7 +100,8 @@ namespace ClassicUO.Game.Managers
                         hue,
                         fixedDir,
                         duration,
-                        speed
+                        speed,
+                        layer
                     )
                     {
                         Blend = blendmode,

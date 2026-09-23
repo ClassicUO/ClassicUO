@@ -7,6 +7,7 @@ using ClassicUO.Game.Scenes;
 using ClassicUO.Game.UI.Gumps;
 using Microsoft.Xna.Framework;
 using System;
+using ClassicUO.Renderer.Animations;
 
 namespace ClassicUO.Game.GameObjects
 {
@@ -498,7 +499,7 @@ namespace ClassicUO.Game.GameObjects
                 bool mirror = false;
 
                 var animations = Client.Game.UO.Animations;
-                animations.GetAnimDirection(ref dir, ref mirror);
+                Animations.GetAnimDirection(ref dir, ref mirror);
 
                 if (id < animations.MaxAnimationCount && dir < 5)
                 {
