@@ -8,6 +8,7 @@ namespace ClassicUO.UnitTests.Game.SerialHelper
         [Theory]
         [InlineData(1)]
         [InlineData(0x1FFFFFFF)]
+        [InlineData(0x40000000)]
         [InlineData(0x7FFFFFFF)]
         public void IsValid_Serial_Should_Be_Legal(uint serial)
         {
