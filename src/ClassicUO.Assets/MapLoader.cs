@@ -22,6 +22,8 @@ namespace ClassicUO.Assets
         // cannot be a const, due to UOLive implementation
         public static int MAPS_COUNT = 6;
 
+        public static (int width, int height)[] ServerMapDefinitions { get; private set; }
+
         public MapLoader(UOFileManager fileManager) : base(fileManager)
         {
         }
@@ -253,6 +255,93 @@ namespace ClassicUO.Assets
             _filesMap.CopyTo(_currentMapFiles, 0);
             _filesIdxStatics.CopyTo(_currentIdxStaticsFiles, 0);
             _filesStatics.CopyTo(_currentStaticsFiles, 0);
+        }
+
+        protected static int GetMapCount((int index, int width, int height)[] defs)
+        {
+            int maxIndex = -1;
+
+            foreach (var d in defs)
+            {
+                if (d.index > maxIndex)
+                {
+                    maxIndex = d.index;
+                }
+            }
+
+            return maxIndex + 1;
+        }
+
+        protected static void StoreServerMapDefinitions((int index, int width, int height)[] defs, int count)
+        {
+            var store = new (int width, int height)[count];
+
+            foreach ((int index, int width, int height) in defs)
+            {
+                if (index < 0 || index >= count || width <= 0 || height <= 0)
+                {
+                    continue;
+                }
+
+                store[index] = (width, height);
+            }
+
+            ServerMapDefinitions = store;
+        }
+
+        public virtual void ApplyServerMapDefinitions((int index, int width, int height)[] defs)
+        {
+            if (defs == null)
+            {
+                return;
+            }
+
+            int count = GetMapCount(defs);
+
+            if (count <= 0)
+            {
+                return;
+            }
+
+            count = Math.Max(count, MAPS_COUNT);
+
+            StoreServerMapDefinitions(defs, count);
+
+            int[] widths = new int[count];
+            int[] heights = new int[count];
+
+            int existing = MapsDefaultSize.GetLength(0);
+
+            for (int i = 0; i < count; i++)
+            {
+                int src = i < existing ? i : 0;
+                widths[i] = MapsDefaultSize[src, 0];
+                heights[i] = MapsDefaultSize[src, 1];
+            }
+
+            foreach ((int index, int width, int height) in defs)
+            {
+                if (index < 0 || index >= count || width <= 0 || height <= 0)
+                {
+                    continue;
+                }
+
+                widths[index] = width;
+                heights[index] = height;
+            }
+
+            string[] parts = new string[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                parts[i] = $"{widths[i]},{heights[i]}";
+            }
+
+            MapsLayouts = string.Join(";", parts);
+
+            Log.Trace($"Applying server map definitions [count: {count}] -> {MapsLayouts}");
+
+            Load();
         }
 
         public unsafe void LoadMap(int i, bool useXFiles = false)
