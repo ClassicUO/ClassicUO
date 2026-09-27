@@ -319,6 +319,7 @@ namespace ClassicUO.Game.UI.Controls
         protected static ushort GetAnimID(ushort mobileGraphic, ushort itemGraphic, ushort animID, bool isfemale)
         {
             int offset = isfemale ? Constants.FEMALE_GUMP_OFFSET : Constants.MALE_GUMP_OFFSET;
+            bool useSarongFallback = (itemGraphic == 0x230B || itemGraphic == 0x230C) && animID == 0x01E4;
 
             if (
                     Client.Game.UO.Version >= ClientVersion.CV_7000
@@ -340,6 +341,8 @@ namespace ClassicUO.Game.UI.Controls
             {
                 if (dict.TryGetValue(animID, out EquipConvData data))
                 {
+                    useSarongFallback = false;
+
                     if (data.Gump > Constants.MALE_GUMP_OFFSET)
                     {
                         animID = (ushort)(
@@ -366,6 +369,12 @@ namespace ClassicUO.Game.UI.Controls
                         return gumpId;
                     }
                 }
+            }
+
+            // Fur sarongs use kilt paperdoll art in the 2D client.
+            if (useSarongFallback)
+            {
+                animID = 0x01C7;
             }
 
             _ = IsAnimExistsInGump(animID, ref offset, isfemale);
