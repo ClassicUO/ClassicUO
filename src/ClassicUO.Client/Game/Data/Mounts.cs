@@ -74,7 +74,7 @@ internal static class Mounts
         _mounts[0x3ED9] = new(0x0610, 0x3ED9, 0); // a doberman?
         _mounts[0x3EDA] = new(0x0590, 0x3EDA, 9); // Frostmites Beetles
         _mounts[0x3EDB] = new(0x0611, 0x3EDB, 12); // Manticore
-        _mounts[0x3EDC] = new(0x0666, 0x3EDC, 0); // Bear Zombie
+        _mounts[0x3EDC] = new(0x0666, 0x3EDC, 12); // Bear Zombie
         _mounts[0x3EDD] = new(0x0581, 0x3EDD, 0); // Dragon_Hildebrandt
         _mounts[0x3EDE] = new(0x0673, 0x3EDE, -10); // Horse_Clydesdale
         _mounts[0x3EDF] = new(0x0674, 0x3EDF, -10); // Horse_Elemental_Earth
