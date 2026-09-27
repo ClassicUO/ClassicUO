@@ -2033,7 +2033,15 @@ namespace ClassicUO.Game.UI.Gumps
                     break;
 
                 case ID_GUMP_CUSTOM_HOUSE.ID_GCH_MENU_COMMIT:
-                    NetClient.Socket.Send_CustomHouseCommit(World);
+                    // Refuse to commit a design that contains illegal pieces.
+                    if (_customHouseManager.ValidateHouseForCommit())
+                    {
+                        NetClient.Socket.Send_CustomHouseCommit(World);
+                    }
+                    else
+                    {
+                        GameActions.Print(World, "House not legal, not committing!", 0x0021);
+                    }
 
                     break;
 

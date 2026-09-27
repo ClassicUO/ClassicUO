@@ -214,9 +214,15 @@ namespace ClassicUO.Game.GameObjects
                 depth
             );
 
-            for (int i = 0; i < Constants.USED_LAYER_COUNT; i++)
+            // draw order built from the layer algorithm (PaperdollOrder), keyed on
+            // equipped item graphics; cloak repositioned by facing direction to match
+            // the in-world tables. Stack-allocated, no GC churn.
+            Span<Layer> layers = stackalloc Layer[PaperdollOrder.N];
+            int layerCount = PaperdollOrder.BuildInWorld(this, altTorsoTable: false, direction, layers);
+
+            for (int i = 0; i < layerCount; i++)
             {
-                Layer layer = LayerOrder.UsedLayers[direction, i];
+                Layer layer = layers[i];
 
                 DrawLayer(
                     batcher,
@@ -547,10 +553,13 @@ namespace ClassicUO.Game.GameObjects
                     || Amount == 0x02E8
                     || Amount == 0x02E9;
 
-                for (int i = -1; i < Constants.USED_LAYER_COUNT; i++)
+                Span<Layer> layers = stackalloc Layer[PaperdollOrder.N];
+                int layerCount = PaperdollOrder.BuildInWorld(this, altTorsoTable: false, direction, layers);
+
+                for (int i = -1; i < layerCount; i++)
                 {
-                    // yes im lazy
-                    Layer layer = i == -1 ? Layer.Invalid : LayerOrder.UsedLayers[direction, i];
+                    // i == -1 draws the base body first, then each equipped layer
+                    Layer layer = i == -1 ? Layer.Invalid : layers[i];
 
                     ushort graphic;
 

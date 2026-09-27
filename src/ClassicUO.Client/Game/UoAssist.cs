@@ -262,6 +262,11 @@ namespace ClassicUO.Utility.Platforms
 
                         if (_world.Player != null)
                         {
+                            if (wParam == 1)
+                            {
+                                return _world.Player.Z;
+                            }
+
                             return (_world.Player.X & 0xFFFF) | ((_world.Player.Y & 0xFFFF) << 16);
                         }
 

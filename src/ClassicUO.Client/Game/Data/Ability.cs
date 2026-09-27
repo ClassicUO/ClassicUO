@@ -311,6 +311,7 @@ namespace ClassicUO.Game.Data
             { 0xA28B, new (0xA28B, Ability.BleedAttack, Ability.WhirlwindAttack) },    // Bladed Whip
             { 0xA293, new (0xA293, Ability.BleedAttack, Ability.WhirlwindAttack) },    // Bladed Whip (Flipped ID)
             { 0x08FF, new (0x08FF, Ability.MysticArc, Ability.ConcussionBlow) },       // Boomerang
+            { 0x4071, new (0x4071, Ability.ArmorIgnore, Ability.ParalyzingBlow) },     // stone war sword
             { 0x0900, new (0x0900, Ability.ArmorIgnore, Ability.ParalyzingBlow) },     // Stone War Sword
             { 0x090A, new (0x090A, Ability.ArmorIgnore, Ability.MortalStrike) },       // Soul Glaive
             { 0xAEA5, new (0xAEA5, Ability.DoubleStrike, Ability.ArmorIgnore) },

@@ -22,6 +22,32 @@ namespace ClassicUO.Game.Data
 
         public static readonly string SpellBookName = SpellBookType.Mastery.ToString();
 
+        // Property-list cliloc identifying the active mastery -> the abilities shown on the
+        // book's right "Abilities" page, in display order (passive first when present).
+        private static readonly Dictionary<int, int[]> _activeMasteryAbilities =
+            new Dictionary<int, int[]>
+            {
+                { 0x1193CA, new[] { 1, 2 } },
+                { 0x1193CB, new[] { 3, 4 } },
+                { 0x1193C9, new[] { 5, 6 } },
+                { 0x11A2BB, new[] { 15, 7, 8 } },
+                { 0x11A2BC, new[] { 15, 9, 10 } },
+                { 0x11A2BD, new[] { 15, 11, 12 } },
+                { 0x11A2BE, new[] { 15, 13, 14 } },
+                { 0x11A2BF, new[] { 18, 16, 17 } },
+                { 0x11A2C0, new[] { 18, 19, 20 } },
+                { 0x11A2C1, new[] { 18, 21, 22 } },
+                { 0x11A2C2, new[] { 33, 25, 26 } },
+                { 0x11A2C3, new[] { 33, 27, 28 } },
+                { 0x11A2C4, new[] { 33, 29, 30 } },
+                { 0x11A2C5, new[] { 33, 31, 32 } },
+                { 0x11A2C6, new[] { 36, 34, 35 } },
+                { 0x11A2C7, new[] { 39, 37, 38 } },
+                { 0x11A2C8, new[] { 42, 40, 41 } },
+                { 0x11A2C9, new[] { 45, 43, 44 } },
+                { 0x11A2CA, new[] { 33, 23, 24 } }
+            };
+
 
         static SpellsMastery()
         {
@@ -745,6 +771,22 @@ namespace ClassicUO.Game.Data
             }
 
             return "Discordance";
+        }
+
+        public static int[] GetActiveMasteryAbilities(int[] propertyClilocs)
+        {
+            if (propertyClilocs != null)
+            {
+                for (int i = 0; i < propertyClilocs.Length; i++)
+                {
+                    if (_activeMasteryAbilities.TryGetValue(propertyClilocs[i], out int[] ids))
+                    {
+                        return ids;
+                    }
+                }
+            }
+
+            return null;
         }
 
         public static SpellDefinition GetSpell(int spellIndex)

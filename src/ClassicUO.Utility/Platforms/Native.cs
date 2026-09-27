@@ -76,35 +76,30 @@ namespace ClassicUO.Utility.Platforms
 
         private class UnixNativeLoader : NativeLoader
         {
-            private const string LibName = "libdl";
-
-            public const int RTLD_NOW = 0x002;
-
-            [DllImport(LibName)]
-            private static extern IntPtr dlopen(string fileName, int flags);
-
-            [DllImport(LibName)]
-            private static extern IntPtr dlsym(IntPtr handle, string name);
-
-            [DllImport(LibName)]
-            private static extern int dlclose(IntPtr handle);
-
-            [DllImport(LibName)]
-            private static extern string dlerror();
-
             public override IntPtr LoadLibrary(string name)
             {
-                return dlopen(name, RTLD_NOW);
+                if (NativeLibrary.TryLoad(name, out IntPtr handle))
+                {
+                    return handle;
+                }
+
+                return IntPtr.Zero;
             }
 
             public override IntPtr GetProcessAddress(IntPtr module, string name)
             {
-                return dlsym(module, name);
+                if (NativeLibrary.TryGetExport(module, name, out IntPtr address))
+                {
+                    return address;
+                }
+
+                return IntPtr.Zero;
             }
 
             public override int FreeLibrary(IntPtr module)
             {
-                return dlclose(module);
+                NativeLibrary.Free(module);
+                return 0;
             }
         }
     }
