@@ -210,7 +210,10 @@ namespace ClassicUO.Game.UI.Controls
             }
             else
             {
-                if (Client.Game.UO.Arts.PixelCheck(Graphic, x, y))
+                // 3-pixel forgiveness radius so items with sparse opaque pixels (robes, hats,
+                // small icons) are still clickable when the click lands a couple of pixels
+                // off the visible content.
+                if (Client.Game.UO.Arts.PixelCheck(Graphic, x, y, extraRange: 3))
                 {
                     return true;
                 }
@@ -219,7 +222,7 @@ namespace ClassicUO.Game.UI.Controls
 
                 if (item != null && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
                 {
-                    if (Client.Game.UO.Arts.PixelCheck(Graphic, x - 5, y - 5))
+                    if (Client.Game.UO.Arts.PixelCheck(Graphic, x - 5, y - 5, extraRange: 3))
                     {
                         return true;
                     }
