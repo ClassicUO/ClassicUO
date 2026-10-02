@@ -18,6 +18,9 @@ namespace ClassicUO.Game.UI.Controls
         private ushort _graphic;
         private readonly bool _is_gump;
         private readonly Gump _gump;
+        private int _cachedMinX, _cachedMinY, _cachedMaxX, _cachedMaxY;
+        private bool _cachedHasVisiblePixels;
+        private bool _cachedBoundsValid;
 
         public ItemGump(Gump gump, uint serial, ushort graphic, ushort hue, int x, int y, bool is_gump = false)
         {
@@ -61,6 +64,20 @@ namespace ClassicUO.Game.UI.Controls
                 Height = spriteInfo.UV.Height;
 
                 IsPartialHue = !_is_gump && Client.Game.UO.FileManager.TileData.StaticData[value].IsPartialHue;
+
+                // Calculate visible pixel bounds immediately when feature is enabled
+                // This distributes the cost during container loading rather than causing
+                // frame hitches on first hover
+                if (ProfileManager.CurrentProfile != null && ProfileManager.CurrentProfile.UseItemBoxesInContainers)
+                {
+                    (_cachedMinX, _cachedMinY, _cachedMaxX, _cachedMaxY, _cachedHasVisiblePixels) =
+                        GetVisiblePixelBounds(spriteInfo.UV.Width, spriteInfo.UV.Height);
+                    _cachedBoundsValid = true;
+                }
+                else
+                {
+                    _cachedBoundsValid = false;
+                }
             }
         }
 
@@ -133,13 +150,12 @@ namespace ClassicUO.Game.UI.Controls
             {
                 Rectangle rect = new Rectangle(x, y, Width, Height);
 
-
                 var sourceRectangle = spriteInfo.UV;
+
                 renderLists.AddGumpWithAtlas
                 (
                     batcher =>
                     {
-
                         batcher.Draw(texture, rect, sourceRectangle, hueVector, layerDepth);
 
                         Item item = _gump.World.Items.Get(LocalSerial);
@@ -186,47 +202,91 @@ namespace ClassicUO.Game.UI.Controls
             )
             {
                 float scale = UIManager.ContainerScale;
-
                 x = (int)(x / scale);
                 y = (int)(y / scale);
             }
 
-            if (_is_gump)
+            Item item = _gump.World.Items.Get(LocalSerial);
+
+            // If UseItemBoxesInContainers is disabled, use pixel-perfect hit detection
+            if (ProfileManager.CurrentProfile == null || !ProfileManager.CurrentProfile.UseItemBoxesInContainers)
             {
-                if (Client.Game.UO.Gumps.PixelCheck(Graphic, x, y))
+                if (x >= 0 && x < spriteInfo.UV.Width && y >= 0 && y < spriteInfo.UV.Height &&
+                    (_is_gump ? Client.Game.UO.Gumps.PixelCheck(Graphic, x, y) : Client.Game.UO.Arts.PixelCheck(Graphic, x, y)))
                 {
                     return true;
                 }
 
-                Item item = _gump.World.Items.Get(LocalSerial);
-
-                if (item != null && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
+                // Check stackable item offset (+5, +5)
+                if (item != null && !item.IsMulti && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
                 {
-                    if (Client.Game.UO.Gumps.PixelCheck(Graphic, x - 5, y - 5))
+                    int offsetX = x - 5;
+                    int offsetY = y - 5;
+
+                    if (offsetX >= 0 && offsetX < spriteInfo.UV.Width && offsetY >= 0 && offsetY < spriteInfo.UV.Height &&
+                        (_is_gump ? Client.Game.UO.Gumps.PixelCheck(Graphic, offsetX, offsetY) : Client.Game.UO.Arts.PixelCheck(Graphic, offsetX, offsetY)))
                     {
                         return true;
                     }
                 }
+
+                return false;
             }
-            else
+
+            // Ensure bounds are calculated if not already done
+            // This handles edge cases where profile settings might have changed
+            if (!_cachedBoundsValid)
             {
-                if (Client.Game.UO.Arts.PixelCheck(Graphic, x, y))
-                {
-                    return true;
-                }
-
-                Item item = _gump.World.Items.Get(LocalSerial);
-
-                if (item != null && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
-                {
-                    if (Client.Game.UO.Arts.PixelCheck(Graphic, x - 5, y - 5))
-                    {
-                        return true;
-                    }
-                }
+                (_cachedMinX, _cachedMinY, _cachedMaxX, _cachedMaxY, _cachedHasVisiblePixels) =
+                    GetVisiblePixelBounds(spriteInfo.UV.Width, spriteInfo.UV.Height);
+                _cachedBoundsValid = true;
             }
 
-            return false;
+            int spriteWidth = spriteInfo.UV.Width;
+            int spriteHeight = spriteInfo.UV.Height;
+            int minX = _cachedMinX;
+            int minY = _cachedMinY;
+            int maxX = _cachedMaxX;
+            int maxY = _cachedMaxY;
+            bool hasVisiblePixels = _cachedHasVisiblePixels;
+
+            // If no visible pixels found, fallback to full sprite
+            if (!hasVisiblePixels)
+            {
+                return x >= 0 && x < spriteWidth && y >= 0 && y < spriteHeight;
+            }
+
+            // Calculate the visible content size
+            int visibleWidth = maxX - minX + 1;
+            int visibleHeight = maxY - minY + 1;
+
+            // Add padding to the visible content
+            int boxPadding = ProfileManager.CurrentProfile.ItemBoxPadding;
+            int boxWidth = visibleWidth + (boxPadding * 2);
+            int boxHeight = visibleHeight + (boxPadding * 2);
+
+            // Calculate offsets to center the box on the visible content
+            int contentCenterX = (minX + maxX) / 2;
+            int contentCenterY = (minY + maxY) / 2;
+            
+            int boxOffsetX = contentCenterX - boxWidth / 2;
+            int boxOffsetY = contentCenterY - boxHeight / 2;
+
+            // Check if point is within the base box
+            bool inBaseBox = x >= boxOffsetX && x < boxOffsetX + boxWidth &&
+                             y >= boxOffsetY && y < boxOffsetY + boxHeight;
+
+            // For stackable items with amount > 1, also check the +5,+5 offset position
+            // This matches the rendering behavior in AddToRenderLists
+            if (item != null && !item.IsMulti && !item.IsCoin && item.Amount > 1 && item.ItemData.IsStackable)
+            {
+                const int STACK_OFFSET = 5;
+                bool inStackOffsetBox = x >= boxOffsetX + STACK_OFFSET && x < boxOffsetX + STACK_OFFSET + boxWidth &&
+                                        y >= boxOffsetY + STACK_OFFSET && y < boxOffsetY + STACK_OFFSET + boxHeight;
+                return inBaseBox || inStackOffsetBox;
+            }
+
+            return inBaseBox;
         }
 
         protected override void OnMouseUp(int x, int y, MouseButtonType button)
@@ -238,6 +298,104 @@ namespace ClassicUO.Game.UI.Controls
         protected override void OnMouseOver(int x, int y)
         {
             SelectedObject.Object = _gump.World.Get(LocalSerial);
+        }
+
+        private (int minX, int minY, int maxX, int maxY, bool hasVisiblePixels) GetVisiblePixelBounds(int spriteWidth, int spriteHeight)
+        {
+            int minX = spriteWidth;
+            int minY = spriteHeight;
+            int maxX = -1;
+            int maxY = -1;
+
+            // Scan from top to find minY
+            bool foundTop = false;
+            for (int py = 0; py < spriteHeight && !foundTop; py++)
+            {
+                for (int px = 0; px < spriteWidth; px++)
+                {
+                    if ((_is_gump && Client.Game.UO.Gumps.PixelCheck(Graphic, px, py)) ||
+                        (!_is_gump && Client.Game.UO.Arts.PixelCheck(Graphic, px, py)))
+                    {
+                        minY = py;
+                        foundTop = true;
+                        break;
+                    }
+                }
+            }
+
+            // If no visible pixels found at all, return early
+            if (!foundTop)
+            {
+                return (0, 0, 0, 0, false);
+            }
+
+            // Scan from bottom to find maxY
+            bool foundBottom = false;
+            for (int py = spriteHeight - 1; py >= minY && !foundBottom; py--)
+            {
+                for (int px = 0; px < spriteWidth; px++)
+                {
+                    if ((_is_gump && Client.Game.UO.Gumps.PixelCheck(Graphic, px, py)) ||
+                        (!_is_gump && Client.Game.UO.Arts.PixelCheck(Graphic, px, py)))
+                    {
+                        maxY = py;
+                        foundBottom = true;
+                        break;
+                    }
+                }
+            }
+
+            // Ensure maxY is valid; if bottom scan found nothing, fall back to minY
+            if (maxY < minY)
+            {
+                maxY = minY;
+            }
+
+            // Scan from left to find minX
+            bool foundLeft = false;
+            for (int px = 0; px < spriteWidth && !foundLeft; px++)
+            {
+                for (int py = minY; py <= maxY; py++)
+                {
+                    if ((_is_gump && Client.Game.UO.Gumps.PixelCheck(Graphic, px, py)) ||
+                        (!_is_gump && Client.Game.UO.Arts.PixelCheck(Graphic, px, py)))
+                    {
+                        minX = px;
+                        foundLeft = true;
+                        break;
+                    }
+                }
+            }
+
+            // Fallback if left scan failed
+            if (minX == spriteWidth)
+            {
+                minX = 0;
+            }
+
+            // Scan from right to find maxX
+            bool foundRight = false;
+            for (int px = spriteWidth - 1; px >= minX && !foundRight; px--)
+            {
+                for (int py = minY; py <= maxY; py++)
+                {
+                    if ((_is_gump && Client.Game.UO.Gumps.PixelCheck(Graphic, px, py)) ||
+                        (!_is_gump && Client.Game.UO.Arts.PixelCheck(Graphic, px, py)))
+                    {
+                        maxX = px;
+                        foundRight = true;
+                        break;
+                    }
+                }
+            }
+
+            // Fallback if right scan failed
+            if (maxX == -1)
+            {
+                maxX = spriteWidth - 1;
+            }
+
+            return (minX, minY, maxX, maxY, true);
         }
 
         private bool CanPickup()
