@@ -314,6 +314,37 @@ namespace ClassicUO.Game
                     break;
                 }
 
+                case 0x10: //dynamic map definitions
+                {
+                    if (p.Length < 15)
+                    {
+                        return;
+                    }
+
+                    p.Seek(14);
+                    byte mapCount = p.ReadUInt8();
+
+                    var defs = new (int index, int width, int height)[mapCount];
+
+                    for (int i = 0; i < mapCount; i++)
+                    {
+                        int index = p.ReadUInt8();
+                        int width = p.ReadUInt16BE();
+                        int height = p.ReadUInt16BE();
+
+                        defs[i] = (index, width, height);
+                    }
+
+                    Client.Game.UO.FileManager.Maps.ApplyServerMapDefinitions(defs);
+
+                    if (world != null && world.InGame)
+                    {
+                        world.ReloadCurrentMap();
+                    }
+
+                    break;
+                }
+
                 case 0x01: //map definition update
                 {
                     if (_UL == null)
@@ -697,13 +728,37 @@ namespace ClassicUO.Game
                 _feedCancel = new CancellationTokenSource();
                 NumMaps = maps;
                 var old = _UL.MapSizeWrapSize;
+
+                int[,] previous = fileManager.Maps?.MapsDefaultSize;
+                int previousLen = previous?.GetLength(0) ?? 0;
+                var serverDefs = ServerMapDefinitions;
+                int serverLen = serverDefs?.Length ?? 0;
+
                 MapsDefaultSize = new int[NumMaps, 2];
 
                 for (int i = 0; i < NumMaps; i++)
                 {
                     for (int x = 0; x < 2; x++)
                     {
-                        MapsDefaultSize[i, x] = i < old.GetLength(0) ? old[i, x] : old[0, x];
+                        int ulSize = i < old.GetLength(0) ? old[i, x] : 0;
+                        int serverSize = i < serverLen ? (x == 0 ? serverDefs[i].width : serverDefs[i].height) : 0;
+
+                        if (ulSize > 0)
+                        {
+                            MapsDefaultSize[i, x] = ulSize;
+                        }
+                        else if (serverSize > 0)
+                        {
+                            MapsDefaultSize[i, x] = serverSize;
+                        }
+                        else if (i < previousLen && previous[i, x] > 0)
+                        {
+                            MapsDefaultSize[i, x] = previous[i, x];
+                        }
+                        else
+                        {
+                            MapsDefaultSize[i, x] = old.GetLength(0) > 0 ? old[0, x] : 0;
+                        }
                     }
 
                     MapBlocksSize[i, 0] = MapsDefaultSize[i, 0] >> 3;
@@ -807,6 +862,16 @@ namespace ClassicUO.Game
                     throw new FileNotFoundException($"No maps, staidx or statics found on {_UL.ShardName}.");
                 }
 
+                for (int i = 0; i < NumMaps; i++)
+                {
+                    if (_filesMap[i] != null || _UL._ValidMaps.Contains(i))
+                    {
+                        continue;
+                    }
+
+                    LoadVanillaMapFiles(i);
+                }
+
                 _filesMap.CopyTo(_currentMapFiles, 0);
                 _filesIdxStatics.CopyTo(_currentIdxStaticsFiles, 0);
                 _filesStatics.CopyTo(_currentStaticsFiles, 0);
@@ -818,6 +883,89 @@ namespace ClassicUO.Game
                     MapBlocksSize[i, 1] = MapsDefaultSize[i, 1] >> 3;
                     //on ultimalive map always preload
                     LoadMap(i);
+                }
+            }
+
+            public override void ApplyServerMapDefinitions((int index, int width, int height)[] defs)
+            {
+                if (defs == null)
+                {
+                    return;
+                }
+
+                int count = GetMapCount(defs);
+
+                if (count <= 0)
+                {
+                    return;
+                }
+
+                count = Math.Max(count, (int)NumMaps);
+
+                StoreServerMapDefinitions(defs, count);
+
+                foreach ((int index, int width, int height) in defs)
+                {
+                    if (index < 0 || index >= MapsDefaultSize.GetLength(0) || width <= 0 || height <= 0)
+                    {
+                        continue;
+                    }
+
+                    if (_UL._ValidMaps.Contains(index))
+                    {
+                        continue;
+                    }
+
+                    MapsDefaultSize[index, 0] = width;
+                    MapsDefaultSize[index, 1] = height;
+                    MapBlocksSize[index, 0] = width >> 3;
+                    MapBlocksSize[index, 1] = height >> 3;
+
+                    if (_filesMap[index] == null)
+                    {
+                        LoadVanillaMapFiles(index);
+                    }
+
+                    _currentMapFiles[index] = _filesMap[index];
+                    _currentStaticsFiles[index] = _filesStatics[index];
+                    _currentIdxStaticsFiles[index] = _filesIdxStatics[index];
+
+                    BlockData[index] = null;
+                }
+            }
+
+            private void LoadVanillaMapFiles(int i)
+            {
+                string path = FileManager.GetUOFilePath($"map{i}LegacyMUL.uop");
+
+                if (FileManager.IsUOPInstallation && File.Exists(path))
+                {
+                    var uop = new UOFileUop(path, $"build/map{i}legacymul/{{0:D8}}.dat");
+                    uop.FillEntries();
+                    _filesMap[i] = uop;
+                }
+                else
+                {
+                    path = FileManager.GetUOFilePath($"map{i}.mul");
+
+                    if (File.Exists(path))
+                    {
+                        _filesMap[i] = new UOFileMul(path);
+                    }
+                }
+
+                path = FileManager.GetUOFilePath($"statics{i}.mul");
+
+                if (File.Exists(path))
+                {
+                    _filesStatics[i] = new UOFileMul(path);
+                }
+
+                path = FileManager.GetUOFilePath($"staidx{i}.mul");
+
+                if (File.Exists(path))
+                {
+                    _filesIdxStatics[i] = new UOFileMul(path);
                 }
             }
 

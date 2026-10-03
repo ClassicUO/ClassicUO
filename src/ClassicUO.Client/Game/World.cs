@@ -180,6 +180,37 @@ namespace ClassicUO.Game
 
         public bool InGame => Player != null && Map != null;
 
+        public void ReloadCurrentMap()
+        {
+            if (Map == null)
+                return;
+
+            int index = Map.Index;
+
+            InternalMapChangeClear(true);
+
+            ushort x = Player.X;
+            ushort y = Player.Y;
+            sbyte z = Player.Z;
+
+            Map.Destroy();
+            Map = null;
+
+            if (index < 0 || index >= MapLoader.MAPS_COUNT)
+                index = 0;
+
+            Client.Game.UO.FileManager.Maps.LoadMap(index, ClientFeatures.Flags.HasFlag(CharacterListFlags.CLF_UNLOCK_FELUCCA_AREAS));
+            Map = new Map.Map(this, index);
+
+            Player.SetInWorldTile(x, y, z);
+            Player.ClearSteps();
+
+            if (Client.Game.UO.GameCursor != null)
+            {
+                Client.Game.UO.GameCursor.Graphic = 0xFFFF;
+            }
+        }
+
         public IsometricLight Light { get; } = new IsometricLight
         {
             Overall = 0,
