@@ -8,6 +8,24 @@
     <PublishAot>true</PublishAot>
   </PropertyGroup>
 
+  <!--
+    BootstrapHostMode publishes cuo as a NativeAOT shared library
+    (cuo.dll / cuo.so / cuo.dylib) with the [UnmanagedCallersOnly]
+    Initialize entry exposed as a native DLL export. This is the
+    artifact that ClassicUO.Bootstrap (legacy net472 apphost) and
+    ClassicUO.BootstrapHost (new net10 apphost) load via LoadLibrary/dlopen.
+
+    The default Exe publish remains the right choice for users who run
+    cuo directly without a plugin host.
+
+    Usage:
+      dotnet publish src/ClassicUO.Client -c Release -r win-x64 -p:BootstrapHostMode=true
+  -->
+  <PropertyGroup Condition="'$(BootstrapHostMode)' == 'true'">
+    <OutputType>Library</OutputType>
+    <NativeLib>Shared</NativeLib>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(Configuration)'=='Release'">
     <OutputPath>$(ProjectDir)..\..\bin\Release\</OutputPath>
     <PublishDir>$(ProjectDir)..\..\bin\dist\</PublishDir>
