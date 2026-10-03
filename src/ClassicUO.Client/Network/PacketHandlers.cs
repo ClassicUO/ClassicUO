@@ -2475,6 +2475,7 @@ namespace ClassicUO.Network
             bool doesExplode = p.ReadBool();
             uint hue = 0;
             GraphicEffectBlendMode blendmode = 0;
+            byte effectLayer = 0xFF;
 
             if (p[0] == 0x70) { }
             else
@@ -2488,7 +2489,7 @@ namespace ClassicUO.Network
                     var explodeEffect = p.ReadUInt16BE();
                     var explodeSound = p.ReadUInt16BE();
                     var serial = p.ReadUInt32BE();
-                    var layer = p.ReadUInt8();
+                    effectLayer = p.ReadUInt8();
                     p.Skip(2);
                 }
             }
@@ -2510,7 +2511,8 @@ namespace ClassicUO.Network
                 fixedDirection,
                 doesExplode,
                 false,
-                blendmode
+                blendmode,
+                effectLayer
             );
         }
 

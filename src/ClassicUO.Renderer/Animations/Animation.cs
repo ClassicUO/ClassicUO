@@ -73,7 +73,7 @@ namespace ClassicUO.Renderer.Animations
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void GetAnimDirection(ref byte dir, ref bool mirror)
+        public static void GetAnimDirection(ref byte dir, ref bool mirror)
         {
             switch (dir)
             {
@@ -99,11 +99,13 @@ namespace ClassicUO.Renderer.Animations
                     break;
 
                 case 3:
+                    mirror = false;
                     dir = 0;
 
                     break;
 
                 case 7:
+                    mirror = false;
                     dir = 4;
 
                     break;
