@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using ClassicUO.UnitTests.Helpers;
+using FluentAssertions;
 using Xunit;
 
 namespace ClassicUO.UnitTests.Utility.QueuedPool

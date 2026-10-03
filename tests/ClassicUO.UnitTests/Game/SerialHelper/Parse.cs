@@ -26,5 +26,33 @@ namespace ClassicUO.UnitTests.Game.SerialHelper
 
             act.Should().Throw<FormatException>();
         }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData(null)]
+        public void Parse_Should_Throw_On_NullOrEmpty(string input)
+        {
+            Action act = () => ClassicUO.Game.SerialHelper.Parse(input);
+
+            act.Should().Throw<Exception>();
+        }
+
+        [Theory]
+        [InlineData("   ")]
+        public void Parse_Should_Throw_On_Whitespace(string input)
+        {
+            Action act = () => ClassicUO.Game.SerialHelper.Parse(input);
+
+            act.Should().Throw<FormatException>();
+        }
+
+        [Theory]
+        [InlineData("99999999999999999")]
+        public void Parse_Should_Throw_On_Overflow(string input)
+        {
+            Action act = () => ClassicUO.Game.SerialHelper.Parse(input);
+
+            act.Should().Throw<OverflowException>();
+        }
     }
 }
