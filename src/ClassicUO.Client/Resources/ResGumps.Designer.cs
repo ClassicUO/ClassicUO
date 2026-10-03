@@ -284,7 +284,16 @@ namespace ClassicUO.Resources {
                 return ResourceManager.GetString("AnimatedWaterEffect", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Weather effects (Splash & Ripples).
+        /// </summary>
+        public static string WeatherEffects {
+            get {
+                return ResourceManager.GetString("WeatherEffects", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Anisotropic Clamp.
         /// </summary>
@@ -3187,7 +3196,16 @@ namespace ClassicUO.Resources {
                 return ResourceManager.GetString("PlayFootsteps", resourceCulture);
             }
         }
-        
+
+        /// <summary>
+        ///   Looks up a localized string similar to Play Rain Sound.
+        /// </summary>
+        public static string PlayRainSound {
+            get {
+                return ResourceManager.GetString("PlayRainSound", resourceCulture);
+            }
+        }
+
         /// <summary>
         ///   Looks up a localized string similar to Poisoned Color.
         /// </summary>

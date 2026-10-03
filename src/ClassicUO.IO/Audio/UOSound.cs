@@ -15,6 +15,7 @@ namespace ClassicUO.IO.Audio
         }
 
         public bool CalculateByDistance { get; set; }
+        public bool IsLooping { get; set; }
         public int X, Y;
 
         protected override void OnBufferNeeded(object sender, EventArgs e)
@@ -55,12 +56,22 @@ namespace ClassicUO.IO.Audio
 
             //    VolumeFactor = distanceFactor;
             //    Volume = volume;
-            //}
+            //}            
+
+            // If looping is enabled, resubmit the buffer to create seamless loop
+            if (IsLooping && SoundInstance != null && !SoundInstance.IsDisposed)
+            {
+                var buffer = GetBuffer();
+                if (buffer.Count > 0)
+                {
+                    SoundInstance.SubmitBuffer(buffer.Array, buffer.Offset, buffer.Count);
+                }
+            }
         }
 
         protected override ArraySegment<byte> GetBuffer()
         {
-            return _waveBuffer;
+            return new ArraySegment<byte>(_waveBuffer);
         }
     }
 }
