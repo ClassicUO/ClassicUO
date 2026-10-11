@@ -53,8 +53,14 @@ namespace ClassicUO.Game.Managers
 
             if (SerialHelper.IsItem(entity.Serial))
             {
-                if (entity is Item item && item.IsCorpse)
-                    return TypeAllowed.HasFlag(NameOverheadTypeAllowed.Corpses);
+                if (entity is Item item)
+                {
+                    if (item.IsCorpse)
+                        return TypeAllowed.HasFlag(NameOverheadTypeAllowed.Corpses);
+
+                    if (!GameObject.CanBeDrawn(entity.World, item.DisplayedGraphic))
+                        return false;
+                }
 
                 return TypeAllowed.HasFlag(NameOverheadTypeAllowed.Items);
             }

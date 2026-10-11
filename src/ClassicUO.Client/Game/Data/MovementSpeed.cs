@@ -11,6 +11,18 @@ namespace ClassicUO.Game.Data
         public const int STEP_DELAY_RUN = 200;
         public const int STEP_DELAY_WALK = 400;
 
+        // Floor for a rendered step; below this a step reads as a teleport.
+        public const int STEP_DELAY_MIN = 50;
+
+        // Arrival gaps outside this band are bursts or pauses, not strides.
+        public const int STEP_SAMPLE_MIN = 25;
+        public const int STEP_PAUSE_MAX = 1000;
+
+        // A measured cadence slower than this multiple of the walk time renders as
+        // step-then-stand: the walk animation runs at a fixed frame rate, so a slower glide
+        // slides the feet.
+        public const float RENDER_CAP_WALK_MULTIPLIER = 1.5f;
+
         public static bool FastRotation;
         public static int TurnDelay => FastRotation ? Constants.TURN_DELAY_FAST : Constants.TURN_DELAY;
 

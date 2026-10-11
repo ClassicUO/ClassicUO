@@ -58,14 +58,16 @@ namespace ClassicUO.Assets
             file.Read(buf);
 
             var reader = new StackDataReader(buf);
-            if (entry.CompressionFlag >= CompressionType.Zlib)
+            if (file is UOFileUop)
             {
-                var dbuf = new byte[entry.DecompressedLength];
-                var result = ZLib.Decompress(buf, dbuf);
-                reader = new StackDataReader(dbuf);
+                if (entry.CompressionFlag >= CompressionType.Zlib)
+                {
+                    var dbuf = new byte[entry.DecompressedLength];
+                    var result = ZLib.Decompress(buf, dbuf);
+                    reader = new StackDataReader(dbuf);
+                }
 
                 reader.Skip(sizeof(uint));
-
                 var count = reader.ReadInt32LE();
 
                 for (var i = 0; i < count; ++i)

@@ -1,5 +1,6 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
+using System;
 using System.Collections.Generic;
 using ClassicUO.Network;
 
@@ -10,7 +11,7 @@ namespace ClassicUO.Game.Managers
         private readonly Dictionary<uint, ItemProperty> _itemsProperties = new Dictionary<uint, ItemProperty>();
 
 
-        public void Add(uint serial, uint revision, string name, string data, int namecliloc)
+        public void Add(uint serial, uint revision, string name, string data, int namecliloc, int[] clilocs = null)
         {
             if (!_itemsProperties.TryGetValue(serial, out ItemProperty prop))
             {
@@ -27,6 +28,7 @@ namespace ClassicUO.Game.Managers
             prop.Name = name;
             prop.Data = data;
             prop.NameCliloc = namecliloc;
+            prop.Clilocs = clilocs;
         }
 
 
@@ -95,6 +97,16 @@ namespace ClassicUO.Game.Managers
             return 0;
         }
 
+        public int[] GetClilocs(uint serial)
+        {
+            if (_itemsProperties.TryGetValue(serial, out ItemProperty p) && p.Clilocs != null)
+            {
+                return p.Clilocs;
+            }
+
+            return Array.Empty<int>();
+        }
+
         public void Remove(uint serial)
         {
             _itemsProperties.Remove(serial);
@@ -114,6 +126,7 @@ namespace ClassicUO.Game.Managers
         public uint Revision;
         public uint Serial;
         public int NameCliloc;
+        public int[] Clilocs;
 
         public string CreateData(bool extended)
         {
