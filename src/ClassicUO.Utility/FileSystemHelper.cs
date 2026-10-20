@@ -45,6 +45,30 @@ namespace ClassicUO.Utility
             return path;
         }
 
+        /// <summary>
+        ///     Returns the path of <paramref name="fileName"/> inside <paramref name="directory"/>.
+        ///     On case-sensitive file systems the file name is matched ignoring case, so "tiledata.mul" finds "Tiledata.mul".
+        /// </summary>
+        public static string GetFilePathIgnoreCase(string directory, string fileName)
+        {
+            string path = Path.Combine(directory, fileName);
+
+            if (File.Exists(path) || !Directory.Exists(directory))
+            {
+                return path;
+            }
+
+            foreach (string f in Directory.EnumerateFiles(directory))
+            {
+                if (string.Equals(Path.GetFileName(f), fileName, StringComparison.OrdinalIgnoreCase))
+                {
+                    return f;
+                }
+            }
+
+            return path;
+        }
+
         public static void EnsureFileExists(string path)
         {
             if (!File.Exists(path))

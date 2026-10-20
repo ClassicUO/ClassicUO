@@ -133,7 +133,7 @@ namespace ClassicUO
                 Log.Warn($"Client version [{clientVersionText}] is invalid, let's try to read the client.exe");
 
                 // mmm something bad happened, try to load from client.exe
-                if (!ClientVersionHelper.TryParseFromFile(Path.Combine(clientPath, "client.exe"), out clientVersionText) || !ClientVersionHelper.IsClientVersionValid(clientVersionText, out clientVersion))
+                if (!ClientVersionHelper.TryParseFromFile(FileSystemHelper.GetFilePathIgnoreCase(clientPath, "client.exe"), out clientVersionText) || !ClientVersionHelper.IsClientVersionValid(clientVersionText, out clientVersion))
                 {
                     Log.Error("Invalid client version: " + clientVersionText);
                     Client.ShowErrorMessage(string.Format(ResGumps.ImpossibleToDefineTheClientVersion0, clientVersionText));
