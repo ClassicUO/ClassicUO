@@ -132,7 +132,7 @@ namespace ClassicUO
                 Log.Trace("language is not set. Trying to get the OS language.");
                 try
                 {
-                    Settings.GlobalSettings.Language = CultureInfo.InstalledUICulture.ThreeLetterWindowsLanguageName;
+                    Settings.GlobalSettings.Language = GetOSLanguage();
 
                     if (string.IsNullOrWhiteSpace(Settings.GlobalSettings.Language))
                     {
@@ -220,6 +220,57 @@ namespace ClassicUO
             }
 
             Log.Trace("Closing...");
+        }
+
+        // InvariantGlobalization is enabled, so CultureInfo reports the invariant culture ("IVL") everywhere.
+        // On Unix the user's language comes from the locale environment variables instead.
+        private static string GetOSLanguage()
+        {
+            string lang = CultureInfo.InstalledUICulture.ThreeLetterWindowsLanguageName;
+
+            if (!string.IsNullOrWhiteSpace(lang) && lang != "IVL")
+            {
+                return lang;
+            }
+
+            if (PlatformHelper.IsWindows)
+            {
+                return "ENU";
+            }
+
+            string locale = Environment.GetEnvironmentVariable("LC_ALL");
+
+            if (string.IsNullOrWhiteSpace(locale))
+            {
+                locale = Environment.GetEnvironmentVariable("LC_MESSAGES");
+            }
+
+            if (string.IsNullOrWhiteSpace(locale))
+            {
+                locale = Environment.GetEnvironmentVariable("LANG");
+            }
+
+            if (string.IsNullOrWhiteSpace(locale))
+            {
+                return "ENU";
+            }
+
+            // e.g. "de_DE.UTF-8", "pt_BR", "zh_TW.UTF-8@euro"
+            locale = locale.Split('.', '@')[0].Replace('-', '_').ToLowerInvariant();
+
+            switch (locale.Split('_')[0])
+            {
+                case "de": return "DEU";
+                case "fr": return "FRA";
+                case "es": return "ESP";
+                case "ja": return "JPN";
+                case "ko": return "KOR";
+                case "ru": return "RUS";
+                case "pt": return "PTB";
+                case "it": return "ITA";
+                case "zh": return locale == "zh_tw" || locale == "zh_hk" ? "CHT" : "CHS";
+                default: return "ENU";
+            }
         }
 
         private static void ReadSettingsFromArgs(string[] args)
