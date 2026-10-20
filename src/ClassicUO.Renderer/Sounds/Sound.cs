@@ -21,7 +21,7 @@ namespace ClassicUO.Renderer.Sounds
         public Sound(SoundsLoader soundsLoader)
         {
             _soundsLoader = soundsLoader;
-            _useDigitalMusicFolder = Directory.Exists(Path.Combine(soundsLoader.FileManager.BasePath, "Music", "Digital"));
+            _useDigitalMusicFolder = Directory.Exists(soundsLoader.FileManager.GetUOFilePath("Music/Digital"));
         }
 
         public void Reload()

@@ -390,7 +390,7 @@ namespace ClassicUO.Assets
         private string GetTrueFileName(string name)
         {
             // don't worry about subdirectories, we'll recursively search them all
-            string dir = FileManager.BasePath + $"/Music";
+            string dir = FileManager.GetUOFilePath("Music");
 
             // Enumerate all files in the directory, using the file name as a pattern
             // This will list all case variants of the filename even on file systems that

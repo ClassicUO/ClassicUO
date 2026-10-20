@@ -1,5 +1,6 @@
 ﻿// SPDX-License-Identifier: BSD-2-Clause
 
+using ClassicUO.Utility.Logging;
 using System;
 using System.IO;
 using System.Text;
@@ -46,27 +47,62 @@ namespace ClassicUO.Utility
         }
 
         /// <summary>
-        ///     Returns the path of <paramref name="fileName"/> inside <paramref name="directory"/>.
-        ///     On case-sensitive file systems the file name is matched ignoring case, so "tiledata.mul" finds "Tiledata.mul".
+        ///     Returns the path of <paramref name="relativePath"/> inside <paramref name="directory"/>.
+        ///     On case-sensitive file systems every part of the path is matched ignoring case,
+        ///     so "Music/Digital/Config.txt" finds "music/digital/Config.txt".
+        ///     If nothing matches, the path is returned unchanged.
         /// </summary>
-        public static string GetFilePathIgnoreCase(string directory, string fileName)
+        public static string GetPathIgnoreCase(string directory, string relativePath)
         {
-            string path = Path.Combine(directory, fileName);
+            string path = Path.Combine(directory, relativePath);
 
-            if (File.Exists(path) || !Directory.Exists(directory))
+            if (File.Exists(path) || Directory.Exists(path) || !Directory.Exists(directory))
             {
                 return path;
             }
 
-            foreach (string f in Directory.EnumerateFiles(directory))
+            string current = directory;
+
+            foreach (string part in relativePath.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries))
             {
-                if (string.Equals(Path.GetFileName(f), fileName, StringComparison.OrdinalIgnoreCase))
+                string next = Path.Combine(current, part);
+
+                if (!File.Exists(next) && !Directory.Exists(next))
                 {
-                    return f;
+                    if (!Directory.Exists(current))
+                    {
+                        return path;
+                    }
+
+                    string match = null;
+                    int matches = 0;
+
+                    foreach (string entry in Directory.EnumerateFileSystemEntries(current))
+                    {
+                        if (string.Equals(Path.GetFileName(entry), part, StringComparison.OrdinalIgnoreCase))
+                        {
+                            match ??= entry;
+                            matches++;
+                        }
+                    }
+
+                    if (match == null)
+                    {
+                        return path;
+                    }
+
+                    if (matches > 1)
+                    {
+                        Log.Warn($"Multiple files with ambiguous case found for {part}, using {Path.GetFileName(match)}. Check your data directory for duplicate files.");
+                    }
+
+                    next = match;
                 }
+
+                current = next;
             }
 
-            return path;
+            return current;
         }
 
         public static void EnsureFileExists(string path)

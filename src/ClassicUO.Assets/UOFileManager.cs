@@ -103,39 +103,19 @@ namespace ClassicUO.Assets
 
         public string GetUOFilePath(string file)
         {
-            if (!_overrideMap.TryGetValue(file.ToLowerInvariant(), out string uoFilePath))
+            if (_overrideMap.TryGetValue(file.ToLowerInvariant(), out string uoFilePath))
             {
-                uoFilePath = Path.Combine(BasePath, file);
-            }
-
-            //If the file with the given name doesn't exist, check for it with alternative casing if not on windows
-            if (!PlatformHelper.IsWindows && !File.Exists(uoFilePath))
-            {
-                FileInfo finfo = new FileInfo(uoFilePath);
-                var dir = Path.GetFullPath(finfo.DirectoryName ?? BasePath);
-
-                if (Directory.Exists(dir))
+                //If the file with the given name doesn't exist, check for it with alternative casing if not on windows
+                if (!PlatformHelper.IsWindows && !File.Exists(uoFilePath))
                 {
-                    var files = Directory.GetFiles(dir);
-                    var matches = 0;
-
-                    foreach (var f in files)
-                    {
-                        if (string.Equals(f, uoFilePath, StringComparison.OrdinalIgnoreCase))
-                        {
-                            matches++;
-                            uoFilePath = f;
-                        }
-                    }
-
-                    if (matches > 1)
-                    {
-                        Log.Warn($"Multiple files with ambiguous case found for {file}, using {Path.GetFileName(uoFilePath)}. Check your data directory for duplicate files.");
-                    }
+                    uoFilePath = FileSystemHelper.GetPathIgnoreCase(Path.GetDirectoryName(uoFilePath) ?? BasePath, Path.GetFileName(uoFilePath));
                 }
+
+                return uoFilePath;
             }
 
-            return uoFilePath;
+            //Not on windows, also check the folders in the path with alternative casing
+            return PlatformHelper.IsWindows ? Path.Combine(BasePath, file) : FileSystemHelper.GetPathIgnoreCase(BasePath, file);
         }
 
         public void Load(bool useVerdata, string lang, string mapsLayouts = "")
