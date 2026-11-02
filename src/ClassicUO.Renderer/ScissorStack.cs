@@ -15,29 +15,18 @@ namespace ClassicUO.Renderer
 
         public static bool PushScissors(GraphicsDevice device, Rectangle scissor)
         {
+            if (!TryIntersect(ref scissor, device.Viewport.Bounds))
+            {
+                return false;
+            }
+
             if (_scissors.Count > 0)
             {
                 Rectangle parent = _scissors.Peek();
-                int minX = Math.Max(parent.X, scissor.X);
-                int maxX = Math.Min(parent.X + parent.Width, scissor.X + scissor.Width);
-
-                if (maxX - minX < 1)
+                if (!TryIntersect(ref scissor, parent))
                 {
                     return false;
                 }
-
-                int minY = Math.Max(parent.Y, scissor.Y);
-                int maxY = Math.Min(parent.Y + parent.Height, scissor.Y + scissor.Height);
-
-                if (maxY - minY < 1)
-                {
-                    return false;
-                }
-
-                scissor.X = minX;
-                scissor.Y = minY;
-                scissor.Width = maxX - minX;
-                scissor.Height = Math.Max(1, maxY - minY);
             }
 
             _scissors.Push(scissor);
@@ -56,10 +45,30 @@ namespace ClassicUO.Renderer
             }
             else
             {
-                device.ScissorRectangle = _scissors.Peek();
+                Rectangle parent = _scissors.Peek();
+                device.ScissorRectangle = TryIntersect(ref parent, device.Viewport.Bounds)
+                    ? parent
+                    : device.Viewport.Bounds;
             }
 
             return scissors;
+        }
+
+        private static bool TryIntersect(ref Rectangle rectangle, Rectangle bounds)
+        {
+            int minX = Math.Max(rectangle.X, bounds.X);
+            int maxX = Math.Min(rectangle.Right, bounds.Right);
+            int minY = Math.Max(rectangle.Y, bounds.Y);
+            int maxY = Math.Min(rectangle.Bottom, bounds.Bottom);
+
+            if (maxX <= minX || maxY <= minY)
+            {
+                return false;
+            }
+
+            rectangle = new Rectangle(minX, minY, maxX - minX, maxY - minY);
+
+            return true;
         }
 
         public static Rectangle CalculateScissors(Matrix batchTransform, int sx, int sy, int sw, int sh)
