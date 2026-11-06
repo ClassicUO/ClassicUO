@@ -15,29 +15,18 @@ namespace ClassicUO.Renderer
 
         public static bool PushScissors(GraphicsDevice device, Rectangle scissor)
         {
+            if (!TryIntersect(ref scissor, device.Viewport.Bounds))
+            {
+                return false;
+            }
+
             if (_scissors.Count > 0)
             {
                 Rectangle parent = _scissors.Peek();
-                int minX = Math.Max(parent.X, scissor.X);
-                int maxX = Math.Min(parent.X + parent.Width, scissor.X + scissor.Width);
-
-                if (maxX - minX < 1)
+                if (!TryIntersect(ref scissor, parent))
                 {
                     return false;
                 }
-
-                int minY = Math.Max(parent.Y, scissor.Y);
-                int maxY = Math.Min(parent.Y + parent.Height, scissor.Y + scissor.Height);
-
-                if (maxY - minY < 1)
-                {
-                    return false;
-                }
-
-                scissor.X = minX;
-                scissor.Y = minY;
-                scissor.Width = maxX - minX;
-                scissor.Height = Math.Max(1, maxY - minY);
             }
 
             _scissors.Push(scissor);
@@ -46,9 +35,39 @@ namespace ClassicUO.Renderer
             return true;
         }
 
+        /// <summary>
+        ///     Pushes an empty scissor (nothing gets drawn) when the requested one does not intersect the viewport or
+        ///     its parent. Keeps the stack balanced for callers that call ClipEnd regardless of ClipBegin's result
+        ///     (ScissorControl).
+        /// </summary>
+        public static void PushEmptyScissors(GraphicsDevice device)
+        {
+            Rectangle viewport = device.Viewport.Bounds;
+            Rectangle empty = new Rectangle(viewport.X, viewport.Y, 0, 0);
+
+            _scissors.Push(empty);
+            device.ScissorRectangle = empty;
+        }
+
+        private static uint _lastUnderflowLog;
+
         public static Rectangle PopScissors(GraphicsDevice device)
         {
-            Rectangle scissors = _scissors.Pop();
+            if (!_scissors.TryPop(out Rectangle scissors))
+            {
+                // Unbalanced ClipEnd: log (at most every 5 s) instead of crashing on an empty stack.
+                uint now = (uint)Environment.TickCount;
+
+                if (now - _lastUnderflowLog >= 5000)
+                {
+                    _lastUnderflowLog = now;
+                    ClassicUO.Utility.Logging.Log.Warn("ScissorStack: PopScissors without a matching push; ignored.");
+                }
+
+                device.ScissorRectangle = device.Viewport.Bounds;
+
+                return device.Viewport.Bounds;
+            }
 
             if (_scissors.Count == 0)
             {
@@ -56,10 +75,30 @@ namespace ClassicUO.Renderer
             }
             else
             {
-                device.ScissorRectangle = _scissors.Peek();
+                Rectangle parent = _scissors.Peek();
+                device.ScissorRectangle = TryIntersect(ref parent, device.Viewport.Bounds)
+                    ? parent
+                    : device.Viewport.Bounds;
             }
 
             return scissors;
+        }
+
+        private static bool TryIntersect(ref Rectangle rectangle, Rectangle bounds)
+        {
+            int minX = Math.Max(rectangle.X, bounds.X);
+            int maxX = Math.Min(rectangle.Right, bounds.Right);
+            int minY = Math.Max(rectangle.Y, bounds.Y);
+            int maxY = Math.Min(rectangle.Bottom, bounds.Bottom);
+
+            if (maxX <= minX || maxY <= minY)
+            {
+                return false;
+            }
+
+            rectangle = new Rectangle(minX, minY, maxX - minX, maxY - minY);
+
+            return true;
         }
 
         public static Rectangle CalculateScissors(Matrix batchTransform, int sx, int sy, int sw, int sh)
