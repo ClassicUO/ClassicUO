@@ -1391,6 +1391,25 @@ namespace ClassicUO.Renderer
             Flush();
         }
 
+        /// <summary>
+        ///     ClipBegin for callers that always call ClipEnd afterwards: when the clip does not intersect anything
+        ///     (off-screen, zero size, outside the parent) it pushes an empty scissor, so nothing is drawn and the
+        ///     stack stays balanced.
+        /// </summary>
+        public bool ClipBeginBalanced(int x, int y, int width, int height)
+        {
+            if (ClipBegin(x, y, width, height))
+            {
+                return true;
+            }
+
+            Flush();
+            ScissorStack.PushEmptyScissors(GraphicsDevice);
+            EnableScissorTest(true);
+
+            return false;
+        }
+
         public void EnableScissorTest(bool enable)
         {
             bool rasterize = GraphicsDevice.RasterizerState.ScissorTestEnable;

@@ -35,9 +35,39 @@ namespace ClassicUO.Renderer
             return true;
         }
 
+        /// <summary>
+        ///     Pushes an empty scissor (nothing gets drawn) when the requested one does not intersect the viewport or
+        ///     its parent. Keeps the stack balanced for callers that call ClipEnd regardless of ClipBegin's result
+        ///     (ScissorControl).
+        /// </summary>
+        public static void PushEmptyScissors(GraphicsDevice device)
+        {
+            Rectangle viewport = device.Viewport.Bounds;
+            Rectangle empty = new Rectangle(viewport.X, viewport.Y, 0, 0);
+
+            _scissors.Push(empty);
+            device.ScissorRectangle = empty;
+        }
+
+        private static uint _lastUnderflowLog;
+
         public static Rectangle PopScissors(GraphicsDevice device)
         {
-            Rectangle scissors = _scissors.Pop();
+            if (!_scissors.TryPop(out Rectangle scissors))
+            {
+                // Unbalanced ClipEnd: log (at most every 5 s) instead of crashing on an empty stack.
+                uint now = (uint)Environment.TickCount;
+
+                if (now - _lastUnderflowLog >= 5000)
+                {
+                    _lastUnderflowLog = now;
+                    ClassicUO.Utility.Logging.Log.Warn("ScissorStack: PopScissors without a matching push; ignored.");
+                }
+
+                device.ScissorRectangle = device.Viewport.Bounds;
+
+                return device.Viewport.Bounds;
+            }
 
             if (_scissors.Count == 0)
             {
