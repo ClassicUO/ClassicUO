@@ -140,13 +140,29 @@ namespace ClassicUO.Game.Scenes
             }
             else if (Settings.GlobalSettings.WindowSize.HasValue)
             {
-                int w = Settings.GlobalSettings.WindowSize.Value.X;
-                int h = Settings.GlobalSettings.WindowSize.Value.Y;
+                // WindowSize is saved in logical units (ClientBounds divided by DpiScale, see Unload), so scale it
+                // exactly once here and keep it within the usable area of the current display.
+                Point windowSize = Settings.GlobalSettings.WindowSize.Value;
+                int logicalWidth = Math.Max(640, windowSize.X);
+                int logicalHeight = Math.Max(480, windowSize.Y);
+                float dpiScale = Client.Game.DpiScale;
+                uint displayId = SDL.SDL_GetDisplayForWindow(Client.Game.Window.Handle);
 
-                w = Math.Max(Client.Game.ScaleWithDpi(640), w);
-                h = Math.Max(Client.Game.ScaleWithDpi(480), h);
+                if (displayId != 0 && SDL.SDL_GetDisplayUsableBounds(displayId, out SDL.SDL_Rect displayBounds))
+                {
+                    logicalWidth = Math.Min(logicalWidth, (int)(displayBounds.w / dpiScale));
+                    logicalHeight = Math.Min(logicalHeight, (int)(displayBounds.h / dpiScale));
+                }
+                else
+                {
+                    Log.Warn("Unable to read display bounds while restoring the client window size.");
+                }
 
-                Client.Game.SetWindowSize(w, h);
+                Settings.GlobalSettings.WindowSize = new Point(logicalWidth, logicalHeight);
+                Client.Game.SetWindowSize(
+                    Math.Max(Client.Game.ScaleWithDpi(640), Client.Game.ScaleWithDpi(logicalWidth)),
+                    Math.Max(Client.Game.ScaleWithDpi(480), Client.Game.ScaleWithDpi(logicalHeight))
+                );
             }
 
             Plugin.OnConnected();
